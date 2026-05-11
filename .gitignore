@@ -1,0 +1,17 @@
+﻿bin/
+obj/
+*.user
+*.suo
+*.vs/
+*.log
+*.db
+*.DS_Store
+.vscode/
+[Tt]est[Rr]esult*/
+*.tlog
+*.csproj.user
+*.pdb
+*.cache
+*.ide/
+.ReSharper*/
+*/.vs/*
