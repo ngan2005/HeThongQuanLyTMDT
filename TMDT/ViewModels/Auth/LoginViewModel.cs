@@ -5,7 +5,7 @@ using TMDT.Services.Interfaces;
 using TMDT.Models;
 using TMDT.Services;
 
-namespace TMDT.ViewModels
+namespace TMDT.ViewModels.Auth
 {
     public class LoginViewModel : ViewModelBase
     {

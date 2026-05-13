@@ -6,7 +6,7 @@ using TMDT.Services.Interfaces;
 using TMDT.Models;
 using TMDT.Services;
 
-namespace TMDT.ViewModels
+namespace TMDT.ViewModels.Auth
 {
     public class RegisterViewModel : ViewModelBase
     {
@@ -14,6 +14,7 @@ namespace TMDT.ViewModels
         private string _email;
         private string _username;
         private string _password;
+        private string _phone;
         private readonly IAuthService _authService;
 
         public string FullName
@@ -38,6 +39,12 @@ namespace TMDT.ViewModels
         {
             get => _password;
             set => SetProperty(ref _password, value);
+        }
+
+        public string Phone
+        {
+            get => _phone;
+            set => SetProperty(ref _phone, value);
         }
 
         // Commands
@@ -68,24 +75,36 @@ namespace TMDT.ViewModels
                 Email = Email,
                 Password = Password,
                 FullName = FullName,
-                Phone = "" // Có thể thêm trường Phone vào UI sau
+                Phone = Phone ?? ""
             };
 
             var success = await _authService.RegisterAsync(request);
             if (success)
             {
-                MessageBox.Show("Đăng ký thành công!");
+                MessageBox.Show("Đăng ký thành công! Vui lòng đăng nhập.", "Thành công",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
                 ExecuteShowLogin(null);
             }
             else
             {
-                MessageBox.Show("Đăng ký thất bại. Email có thể đã tồn tại.");
+                MessageBox.Show("Đăng ký thất bại. Email có thể đã tồn tại.", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void ExecuteShowLogin(object parameter)
         {
-            // Chuyển sang màn hình đăng nhập
+            var login = new Views.Auth.LoginView();
+            login.Show();
+
+            foreach (System.Windows.Window w in Application.Current.Windows)
+            {
+                if (w is Views.Auth.RegisterView)
+                {
+                    w.Close();
+                    break;
+                }
+            }
         }
 
         private void ExecuteExit(object parameter)
