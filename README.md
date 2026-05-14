@@ -1,1 +1,2 @@
-Ngân, Thùy , Trực, Nhi, Quý
+
+Hệ thống quản lý thương mại điện tử.
