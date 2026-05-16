@@ -82,7 +82,7 @@
         </Ellipse>
 
         <!-- Main Card -->
-        <Border Margin="1" CornerRadius="20" BorderBrush="#20FFFFFF" BorderThickness="1" Background="#10FFFFFF">
+        <Border Margin="1,1,48,10" CornerRadius="20" BorderBrush="#20FFFFFF" BorderThickness="1" Background="#10FFFFFF">
             <StackPanel Margin="45,60">
                 
                 <!-- Logo & Title -->

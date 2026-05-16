@@ -4,9 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TMDT.Views"
+        xmlns:local_buyer="clr-namespace:TMDT.Views.Buyer"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-
+        <local_buyer:BuyerHomeView/>
     </Grid>
 </Window>

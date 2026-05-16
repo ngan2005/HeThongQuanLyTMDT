@@ -1,11 +1,13 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     
-    <!-- Primary Colors -->
-    <Color x:Key="PrimaryColor">#6366F1</Color>
-    <Color x:Key="PrimaryDarkColor">#4F46E5</Color>
-    <Color x:Key="PrimaryLightColor">#818CF8</Color>
-    
+    <!-- Brand Colors (MyShop) -->
+    <Color x:Key="BrandPrimaryColor">#4F46E5</Color>
+    <Color x:Key="BrandSecondaryColor">#6366F1</Color>
+    <Color x:Key="BrandAccentColor">#8B5CF6</Color>
+    <Color x:Key="PriceColor">#EF4444</Color>
+    <Color x:Key="RatingColor">#F59E0B</Color>
+
     <!-- Neutral Colors -->
     <Color x:Key="BackgroundColor">#F8FAFC</Color>
     <Color x:Key="CardBackgroundColor">#FFFFFF</Color>
@@ -18,12 +20,25 @@
     <Color x:Key="ErrorColor">#EF4444</Color>
 
     <!-- Solid Color Brushes -->
-    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
-    <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{StaticResource PrimaryDarkColor}"/>
+    <SolidColorBrush x:Key="BrandPrimaryBrush" Color="{StaticResource BrandPrimaryColor}"/>
+    <SolidColorBrush x:Key="BrandSecondaryBrush" Color="{StaticResource BrandSecondaryColor}"/>
+    <SolidColorBrush x:Key="BrandAccentBrush" Color="{StaticResource BrandAccentColor}"/>
+    <SolidColorBrush x:Key="PriceBrush" Color="{StaticResource PriceColor}"/>
+    <SolidColorBrush x:Key="RatingBrush" Color="{StaticResource RatingColor}"/>
     <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
     <SolidColorBrush x:Key="CardBackgroundBrush" Color="{StaticResource CardBackgroundColor}"/>
     <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}"/>
     <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMutedColor}"/>
     <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+
+    <!-- Gradients -->
+    <LinearGradientBrush x:Key="HeroGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#6366F1" Offset="0"/>
+        <GradientStop Color="#8B5CF6" Offset="1"/>
+    </LinearGradientBrush>
+
+    <!-- Shadows -->
+    <DropShadowEffect x:Key="CardShadow" BlurRadius="15" ShadowDepth="2" Opacity="0.1" Color="Black"/>
+    <DropShadowEffect x:Key="ButtonShadow" BlurRadius="8" ShadowDepth="1" Opacity="0.2" Color="#4F46E5"/>
     
 </ResourceDictionary>

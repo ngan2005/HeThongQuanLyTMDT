@@ -1,0 +1,228 @@
+<UserControl x:Class="TMDT.Views.Buyer.BuyerHomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:components="clr-namespace:TMDT.Views.Components"
+             xmlns:vm="clr-namespace:TMDT.ViewModels.Buyer"
+             mc:Ignorable="d" 
+             d:DesignHeight="1080" d:DesignWidth="1920"
+             Background="{StaticResource BackgroundBrush}">
+    
+    <UserControl.DataContext>
+        <vm:HomeViewModel/>
+    </UserControl.DataContext>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <!-- 1. Header Section -->
+            <Border Background="White" Padding="20,10" Effect="{StaticResource CardShadow}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/> <!-- Logo -->
+                        <ColumnDefinition Width="*"/>    <!-- Search -->
+                        <ColumnDefinition Width="Auto"/> <!-- Actions -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Logo -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <materialDesign:PackIcon Kind="Shopping" Foreground="{StaticResource BrandPrimaryBrush}" Width="40" Height="40"/>
+                        <StackPanel Margin="10,0">
+                            <TextBlock Text="MyShop" FontSize="24" FontWeight="Bold" Foreground="{StaticResource BrandPrimaryBrush}"/>
+                            <TextBlock Text="Mua sắm thông minh, sống tiện ích" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Search Box -->
+                    <Grid Grid.Column="1" MaxWidth="600" HorizontalAlignment="Center">
+                        <TextBox Style="{StaticResource SearchBoxStyle}" Width="500" 
+                                 Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                HorizontalAlignment="Right" Margin="0,0,5,0"
+                                Background="{StaticResource BrandSecondaryBrush}" BorderThickness="0"
+                                Width="32" Height="32">
+                            <materialDesign:PackIcon Kind="Search" Width="18" Height="18"/>
+                        </Button>
+                    </Grid>
+
+                    <!-- Header Actions -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Style="{StaticResource MaterialDesignFlatButton}" Foreground="{StaticResource TextBrush}" Command="{Binding LoginCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="AccountOutline" Margin="0,0,5,0"/>
+                                <TextBlock Text="Đăng nhập"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource MaterialDesignFlatButton}" Foreground="{StaticResource TextBrush}" Margin="10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="HeartOutline" Margin="0,0,5,0"/>
+                                <TextBlock Text="Yêu thích"/>
+                            </StackPanel>
+                        </Button>
+                        <Grid>
+                            <Button Style="{StaticResource MaterialDesignFlatButton}" Foreground="{StaticResource TextBrush}">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="CartOutline" Margin="0,0,5,0"/>
+                                    <TextBlock Text="Giỏ hàng"/>
+                                </StackPanel>
+                            </Button>
+                            <Border Background="Red" CornerRadius="10" Width="18" Height="18" 
+                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,-5,0">
+                                <TextBlock Text="0" Foreground="White" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- 2. Navigation Menu -->
+            <Border Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,1" Padding="20,5">
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton Style="{StaticResource NavItemStyle}" Content="Trang chủ" IsChecked="True"/>
+                    <RadioButton Style="{StaticResource NavItemStyle}" Content="Sản phẩm" Margin="10,0"/>
+                    <RadioButton Style="{StaticResource NavItemStyle}" Content="Khuyến mãi" Margin="10,0"/>
+                    <RadioButton Style="{StaticResource NavItemStyle}" Content="Tin tức" Margin="10,0"/>
+                    <RadioButton Style="{StaticResource NavItemStyle}" Content="Liên hệ" Margin="10,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- 3. Main Content Grid -->
+            <Grid Margin="20,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="280"/> <!-- Sidebar Categories -->
+                    <ColumnDefinition Width="*"/>   <!-- Main Area -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Sidebar -->
+                <Border Background="White" CornerRadius="12" Effect="{StaticResource CardShadow}" Padding="15" VerticalAlignment="Top">
+                    <StackPanel>
+                        <TextBlock Text="DANH MỤC SẢN PHẨM" FontWeight="Bold" Margin="0,0,0,15" Foreground="{StaticResource BrandPrimaryBrush}"/>
+                        <ItemsControl ItemsSource="{Binding Categories}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource MaterialDesignFlatButton}" 
+                                            HorizontalContentAlignment="Left" 
+                                            Padding="5,10"
+                                            Foreground="{StaticResource TextBrush}">
+                                        <Grid Width="230">
+                                            <StackPanel Orientation="Horizontal">
+                                                <materialDesign:PackIcon Kind="ChevronRight" Margin="0,0,10,0" Width="18" Height="18" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding CategoryName}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                            <materialDesign:PackIcon Kind="ChevronRight" HorizontalAlignment="Right" VerticalAlignment="Center" Width="16" Height="16"/>
+                                        </Grid>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        
+                        <!-- Promo Banner in Sidebar -->
+                        <Border Margin="0,20,0,0" CornerRadius="12" Background="{StaticResource HeroGradient}" Height="150">
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10">
+                                <TextBlock Text="GIẢM 10%" Foreground="White" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Cho đơn hàng đầu tiên" Foreground="White" HorizontalAlignment="Center" Margin="0,5"/>
+                                <Button Content="NHẬN NGAY" Background="White" Foreground="{StaticResource BrandPrimaryBrush}" 
+                                        Style="{StaticResource ModernButtonStyle}" Height="30" Padding="10,0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Main Area -->
+                <StackPanel Grid.Column="1" Margin="20,0,0,0">
+                    <!-- Hero Banner -->
+                    <Border CornerRadius="20" Height="400" Background="{StaticResource HeroGradient}">
+                        <Grid>
+                            <StackPanel VerticalAlignment="Center" Margin="60,0">
+                                <Border Background="#FFD700" HorizontalAlignment="Left" Padding="15,5" CornerRadius="15" Margin="0,0,0,20">
+                                    <TextBlock Text="SIÊU SALE HÈ 2025" Foreground="Black" FontWeight="Bold"/>
+                                </Border>
+                                <TextBlock Text="RỰC RỠ MÙA HÈ" Foreground="White" FontSize="48" FontWeight="Bold"/>
+                                <TextBlock Text="SALE ĐẾN 50%" Foreground="White" FontSize="72" FontWeight="Black" Margin="0,-10,0,10"/>
+                                <TextBlock Text="Hàng ngàn sản phẩm chính hãng" Foreground="White" FontSize="18"/>
+                                <TextBlock Text="Giá tốt - Giao nhanh - Bảo hành uy tín" Foreground="White" FontSize="18" Opacity="0.8"/>
+                                <Button Style="{StaticResource ModernButtonStyle}" 
+                                        Content="MUA NGAY →" Background="White" Foreground="{StaticResource BrandPrimaryBrush}"
+                                        Width="180" Height="50" Margin="0,30,0,0" FontSize="18"/>
+                            </StackPanel>
+                            
+                            <!-- Arrow Buttons -->
+                            <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}" 
+                                    HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20"
+                                    Background="#33000000" BorderThickness="0">
+                                <materialDesign:PackIcon Kind="ChevronLeft" />
+                            </Button>
+                            <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}" 
+                                    HorizontalAlignment="Right" VerticalAlignment="Center" Margin="20"
+                                    Background="#33000000" BorderThickness="0">
+                                <materialDesign:PackIcon Kind="ChevronRight" />
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- Featured Products Section -->
+                    <Grid Margin="0,40,0,20">
+                        <TextBlock Text="✧ SẢN PHẨM NỔI BẬT" FontSize="20" FontWeight="Bold" Foreground="{StaticResource BrandPrimaryBrush}"/>
+                        <Button Style="{StaticResource MaterialDesignFlatButton}" Content="Xem tất cả →" 
+                                HorizontalAlignment="Right" Foreground="{StaticResource BrandSecondaryBrush}"/>
+                    </Grid>
+
+                    <ItemsControl ItemsSource="{Binding FeaturedProducts}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="5"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <components:ProductCard/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Trust Badges Footer -->
+                    <Border Background="White" CornerRadius="12" Margin="0,40,0,20" Padding="30" Effect="{StaticResource CardShadow}">
+                        <UniformGrid Columns="5">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <materialDesign:PackIcon Kind="TruckFastOutline" Foreground="{StaticResource BrandPrimaryBrush}" Width="40" Height="40"/>
+                                <StackPanel Margin="10,0">
+                                    <TextBlock Text="Giao hàng nhanh" FontWeight="Bold"/>
+                                    <TextBlock Text="Toàn quốc, nhanh chóng" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <materialDesign:PackIcon Kind="ShieldCheckOutline" Foreground="{StaticResource BrandPrimaryBrush}" Width="40" Height="40"/>
+                                <StackPanel Margin="10,0">
+                                    <TextBlock Text="Hàng chính hãng" FontWeight="Bold"/>
+                                    <TextBlock Text="Cam kết 100% chính hãng" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <materialDesign:PackIcon Kind="Cached" Foreground="{StaticResource BrandPrimaryBrush}" Width="40" Height="40"/>
+                                <StackPanel Margin="10,0">
+                                    <TextBlock Text="Đổi trả dễ dàng" FontWeight="Bold"/>
+                                    <TextBlock Text="Đổi trả trong 7 ngày" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <materialDesign:PackIcon Kind="LockOutline" Foreground="{StaticResource BrandPrimaryBrush}" Width="40" Height="40"/>
+                                <StackPanel Margin="10,0">
+                                    <TextBlock Text="Thanh toán an toàn" FontWeight="Bold"/>
+                                    <TextBlock Text="Nhiều phương thức" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <materialDesign:PackIcon Kind="Headset" Foreground="{StaticResource BrandPrimaryBrush}" Width="40" Height="40"/>
+                                <StackPanel Margin="10,0">
+                                    <TextBlock Text="Hỗ trợ 24/7" FontWeight="Bold"/>
+                                    <TextBlock Text="Tư vấn tận tình" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </UniformGrid>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

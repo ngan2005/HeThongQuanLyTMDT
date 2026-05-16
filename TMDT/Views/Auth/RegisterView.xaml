@@ -89,7 +89,7 @@
 
     <Grid>
         <!-- Background Layer -->
-        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="20">
+        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="20" Margin="0,0,0,221">
             <Border.Effect>
                 <DropShadowEffect BlurRadius="40" Color="Black" Opacity="0.5" ShadowDepth="0"/>
             </Border.Effect>
@@ -103,7 +103,7 @@
         </Ellipse>
 
         <!-- Main Card -->
-        <Border Margin="1" CornerRadius="20" BorderBrush="#20FFFFFF" BorderThickness="1" Background="#10FFFFFF">
+        <Border Margin="1,1,1,221" CornerRadius="20" BorderBrush="#20FFFFFF" BorderThickness="1" Background="#10FFFFFF">
             <StackPanel Margin="45,40">
 
                 <!-- Logo & Title -->
@@ -125,7 +125,7 @@
                                  Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}"/>
                         <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                    Foreground="{StaticResource OnSurfaceVariantBrush}"
-                                   VerticalAlignment="Center" Margin="15,0,0,0" IsHitTestVisible="False"/>
+                                   VerticalAlignment="Center" Margin="15,0,0,0" IsHitTestVisible="False" Height="0"/>
                     </Grid>
 
                     <TextBlock Text="Email" Foreground="{StaticResource OnSurfaceVariantBrush}" FontSize="12" FontWeight="SemiBold" Margin="5,0,0,8"/>
@@ -160,10 +160,10 @@
                     <!-- Register Button -->
                     <Button Content="Đăng ký tài khoản"
                             Command="{Binding RegisterCommand}"
-                            Height="55"
+                            Height="27"
                             Background="{StaticResource PrimaryBrush}"
                             Foreground="{StaticResource OnPrimaryBrush}"
-                            FontWeight="Bold" FontSize="16" Cursor="Hand">
+                            FontWeight="Bold" FontSize="16" Cursor="Hand" Width="343">
                         <Button.Resources>
                             <Style TargetType="Button">
                                 <Setter Property="Template">
