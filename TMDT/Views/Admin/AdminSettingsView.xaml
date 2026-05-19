@@ -1,0 +1,218 @@
+<UserControl x:Class="TMDT.Views.Admin.AdminSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TMDT.Views.Admin"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="850">
+
+    <UserControl.Resources>
+        <!-- Style tokens -->
+        <SolidColorBrush x:Key="TextPrimary" Color="#121C2A"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#64748B"/>
+        <SolidColorBrush x:Key="BrandPurple" Color="#593AD8"/>
+
+        <Style x:Key="SettingsCard" TargetType="Border">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#F1F5F9"/>
+            <Setter Property="Padding" Value="24"/>
+            <Setter Property="Margin" Value="0,0,0,20"/>
+        </Style>
+
+        <Style x:Key="SettingsLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+        </Style>
+
+        <Style x:Key="SettingsDesc" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11.5"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+        </Style>
+
+        <Style x:Key="InputTextBox" TargetType="TextBox">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="BorderBrush" Value="#DFE9FD"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,8,0,0"/>
+            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="FontSize" Value="13.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="0,0,8,0">
+        <Grid.RowDefinitions>
+            <!-- Title -->
+            <RowDefinition Height="Auto"/>
+            <!-- Settings Forms scroll -->
+            <RowDefinition Height="*"/>
+            <!-- Sticky Action bar -->
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 1. TITLE -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="Cấu hình Hệ thống &amp; Vận hành" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+            <TextBlock Text="Thiết lập các thông số tài chính, quản trị rủi ro, chính sách bán hàng và chế độ bảo trì sàn thương mại điện tử" FontSize="12.5" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+        </StackPanel>
+
+        <!-- 2. SETTINGS LIST -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="0,0,8,0">
+                
+                <!-- CARD 1: FINANCIAL CONFIGURATION -->
+                <Border Style="{StaticResource SettingsCard}">
+                    <StackPanel>
+                        <TextBlock Text="Cấu hình Tài chính &amp; Chiết khấu" FontSize="14.5" FontWeight="Bold" Foreground="{StaticResource BrandPurple}" Margin="0,0,0,16" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="24"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Left: Commission rate -->
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Tỷ lệ phí dịch vụ sàn (Hoa hồng %)" Style="{StaticResource SettingsLabel}"/>
+                                <TextBlock Text="Phần trăm trích xuất trên tổng giá trị đơn hàng khi đơn hàng thành công, dùng để tài trợ vận hành hệ thống." Style="{StaticResource SettingsDesc}"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Text="{Binding PlatformCommissionRate, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}"/>
+                                    <Border Grid.Column="1" Background="#F1F5F9" Width="36" BorderBrush="#DFE9FD" BorderThickness="0,1,1,1" CornerRadius="0,4,4,0">
+                                        <TextBlock Text="%" FontSize="13" Foreground="{StaticResource TextSecondary}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+
+                            <!-- Right: Minimum Withdrawal -->
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Hạn mức rút tiền tối thiểu của Shop" Style="{StaticResource SettingsLabel}"/>
+                                <TextBlock Text="Số tiền tối thiểu mà đối tác Cửa hàng phải đạt được trong ví tích lũy trước khi yêu cầu thanh khoản ngân hàng." Style="{StaticResource SettingsDesc}"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Text="{Binding MinWithdrawAmount, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}"/>
+                                    <Border Grid.Column="1" Background="#F1F5F9" Width="42" BorderBrush="#DFE9FD" BorderThickness="0,1,1,1" CornerRadius="0,4,4,0">
+                                        <TextBlock Text="VNĐ" FontSize="11" Foreground="{StaticResource TextSecondary}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- CARD 2: RISK CONTROL & AUDITING POLICY -->
+                <Border Style="{StaticResource SettingsCard}">
+                    <StackPanel>
+                        <TextBlock Text="Kiểm soát rủi ro &amp; Chính sách bán hàng" FontSize="14.5" FontWeight="Bold" Foreground="{StaticResource BrandPurple}" Margin="0,0,0,16" FontFamily="Be Vietnam Pro, Segoe UI"/>
+
+                        <!-- Toggle 1: Require Product approval -->
+                        <Grid Margin="0,0,0,18">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Text="Yêu cầu Admin kiểm duyệt sản phẩm mới đăng" Style="{StaticResource SettingsLabel}"/>
+                                <TextBlock Text="Khi kích hoạt, mọi sản phẩm được Shop đăng lên sẽ ở trạng thái 'Chờ duyệt' và chỉ hiển thị ở trang chủ sau khi Admin phê duyệt thủ công." Style="{StaticResource SettingsDesc}"/>
+                            </StackPanel>
+                            <CheckBox Grid.Column="1" IsChecked="{Binding RequireProductApproval}" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                                <CheckBox.RenderTransform>
+                                    <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
+                                </CheckBox.RenderTransform>
+                            </CheckBox>
+                        </Grid>
+
+                        <Separator Background="#F1F5F9" Margin="0,0,0,16"/>
+
+                        <!-- Technical support email -->
+                        <StackPanel>
+                            <TextBlock Text="Hòm thư liên hệ hỗ trợ kỹ thuật sàn" Style="{StaticResource SettingsLabel}"/>
+                            <TextBlock Text="Email mặc định xuất hiện trên chân trang và các thông báo hỗ trợ để Shop và Người mua liên lạc khi gặp sự cố." Style="{StaticResource SettingsDesc}"/>
+                            <TextBox Text="{Binding SupportEmail, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" Width="350" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- CARD 3: MAINTENANCE SYSTEM (CRITICAL CONTROL) -->
+                <Border Style="{StaticResource SettingsCard}" BorderBrush="#FCA5A5" Background="#FEF2F2">
+                    <StackPanel>
+                        <TextBlock Text="Chế độ bảo trì hệ thống (Maintenance Mode)" FontSize="14.5" FontWeight="Bold" Foreground="#DC2626" Margin="0,0,0,6" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text="⚠️ CẢNH BÁO: KHI KÍCH HOẠT CHẾ ĐỘ NÀY, TOÀN BỘ SÀN THƯƠNG MẠI SẼ TẠM DỪNG HOẠT ĐỘNG MUA BÁN. NGƯỜI MUA CHỈ NHÌN THẤY TRANG THÔNG BÁO BẢO TRÌ ĐỂ HỆ THỐNG NÂNG CẤP DỮ LIỆU." 
+                                   Foreground="#EF4444" FontWeight="SemiBold" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,16" FontFamily="Be Vietnam Pro, Segoe UI"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Bật / Tắt trạng thái Bảo Trì Sàn" Style="{StaticResource SettingsLabel}"/>
+                                <TextBlock Text="Đảm bảo bạn đã thông báo trước cho các đối tác Shop trước khi bật chế độ bảo trì hệ thống." Style="{StaticResource SettingsDesc}" Foreground="#991B1B"/>
+                            </StackPanel>
+
+                            <!-- Custom styled switch logic -->
+                            <CheckBox Grid.Column="1" IsChecked="{Binding MaintenanceMode}" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                                <CheckBox.RenderTransform>
+                                    <ScaleTransform ScaleX="1.5" ScaleY="1.5"/>
+                                </CheckBox.RenderTransform>
+                            </CheckBox>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- 3. STICKY ACTION BAR -->
+        <Border Grid.Row="2" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="0,16,0,0" Margin="0,8,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Reset button -->
+                <Button Grid.Column="0" Content="Khôi phục mặc định" Command="{Binding ResetSettingsCommand}" Background="#E2E8F0" Foreground="#475569" Style="{StaticResource ActionButton}" Width="180"/>
+
+                <!-- Save settings -->
+                <Button Grid.Column="2" Content="Lưu cấu hình hệ thống" Command="{Binding SaveSettingsCommand}" Background="{StaticResource BrandPurple}" Foreground="#FFFFFF" Style="{StaticResource ActionButton}" Width="200"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

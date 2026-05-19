@@ -4,5 +4,7 @@
     
     <conv:BooleanToVisibilityConverter x:Key="BoolToVis"/>
     <conv:InverseBooleanConverter x:Key="InverseBool"/>
+    <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+    <conv:HexToCharConverter x:Key="HexToCharConverter"/>
     
 </ResourceDictionary>

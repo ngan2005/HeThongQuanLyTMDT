@@ -17,31 +17,82 @@ namespace TMDT.Views.Auth
         {
             if (e.LeftButton != MouseButtonState.Pressed) return;
 
-            // Chỉ kéo cửa sổ khi click vào vùng nền, không phải vào các control
+            // Cho phép kéo thả cửa sổ từ bất kỳ vị trí trống nào (không click vào control)
             var source = e.OriginalSource as DependencyObject;
             while (source != null)
             {
                 if (source is System.Windows.Controls.TextBox ||
                     source is System.Windows.Controls.PasswordBox ||
                     source is System.Windows.Controls.Button ||
-                    source is System.Windows.Controls.ComboBox ||
-                    source is System.Windows.Controls.CheckBox)
+                    source is System.Windows.Controls.CheckBox ||
+                    source is System.Windows.Controls.ScrollViewer)
                     return;
                 source = System.Windows.Media.VisualTreeHelper.GetParent(source);
             }
             DragMove();
         }
 
-        private void BackToLogin_Click(object sender, RoutedEventArgs e)
+        private void ExitButton_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void BackToLogin_Click(object sender, MouseButtonEventArgs e)
         {
             LoginView login = new LoginView();
             login.Show();
             this.Close();
         }
 
-        private void Exit_Click(object sender, RoutedEventArgs e)
+        private void txtPassword_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            Application.Current.Shutdown();
+            if (txtPasswordPlaceholder != null && txtPassword != null)
+            {
+                txtPasswordPlaceholder.Visibility = string.IsNullOrEmpty(txtPassword.Password) 
+                    ? Visibility.Visible 
+                    : Visibility.Collapsed;
+            }
+        }
+
+        private void TogglePassword_Click(object sender, RoutedEventArgs e)
+        {
+            if (txtPassword.Visibility == Visibility.Visible)
+            {
+                // Chuyển sang hiển thị mật khẩu bằng TextBox thông thường
+                txtPassword.Visibility = Visibility.Collapsed;
+                txtPasswordPlaceholder.Visibility = Visibility.Collapsed;
+                txtPasswordPlain.Visibility = Visibility.Visible;
+                
+                // Đồng bộ giá trị từ PasswordBox sang TextBox
+                txtPasswordPlain.Text = txtPassword.Password;
+                txtPasswordPlain.Focus();
+                
+                // Thay đổi icon mắt thành icon ẩn mật khẩu (icon mắt có gạch chéo \uF270)
+                tbEyeIcon.Text = "\uF270";
+            }
+            else
+            {
+                // Chuyển về ẩn mật khẩu bằng PasswordBox
+                txtPasswordPlain.Visibility = Visibility.Collapsed;
+                txtPassword.Visibility = Visibility.Visible;
+                
+                // Đồng bộ giá trị từ TextBox sang PasswordBox
+                txtPassword.Password = txtPasswordPlain.Text;
+                txtPassword.Focus();
+                
+                // Điều khiển hiển thị placeholder của PasswordBox
+                txtPasswordPlaceholder.Visibility = string.IsNullOrEmpty(txtPassword.Password) 
+                    ? Visibility.Visible 
+                    : Visibility.Collapsed;
+                
+                // Thay đổi icon mắt về bình thường (\uE7B3)
+                tbEyeIcon.Text = "\uE7B3";
+            }
         }
     }
 }

@@ -39,4 +39,46 @@ namespace TMDT.Converters
             return value;
         }
     }
+
+    public class NullToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (parameter?.ToString() == "Inverse")
+            {
+                return value == null ? Visibility.Visible : Visibility.Collapsed;
+            }
+            return value != null ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class HexToCharConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string hex && !string.IsNullOrWhiteSpace(hex))
+            {
+                try
+                {
+                    int code = int.Parse(hex, System.Globalization.NumberStyles.HexNumber);
+                    return ((char)code).ToString();
+                }
+                catch
+                {
+                    return ""; 
+                }
+            }
+            return "";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

@@ -1,0 +1,293 @@
+<UserControl x:Class="TMDT.Views.Admin.AdminCategoriesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TMDT.Views.Admin"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="850">
+
+    <UserControl.Resources>
+        <!-- Style tokens -->
+        <SolidColorBrush x:Key="TextPrimary" Color="#121C2A"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#64748B"/>
+        <SolidColorBrush x:Key="BrandPurple" Color="#593AD8"/>
+
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="0,0,8,0">
+        <Grid.RowDefinitions>
+            <!-- Title & Description -->
+            <RowDefinition Height="Auto"/>
+            <!-- Main Content Area: Table + Editor Inspector -->
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 1. TITLE ROW -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="Quản lý Danh mục Ngành hàng" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+            <TextBlock Text="Cấu hình hệ thống danh mục sản phẩm, thứ tự hiển thị và icon nhận diện thương hiệu trên sàn" FontSize="12.5" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+        </StackPanel>
+
+        <!-- 2. MAIN CONTENT: TABLE + EDITOR -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <!-- Categories list DataGrid -->
+                <ColumnDefinition Width="2.2*"/>
+                <ColumnDefinition Width="20"/>
+                <!-- Category Detail / Editor Card -->
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- LEFT: Category List Board -->
+            <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="16">
+                <Border.Effect>
+                    <DropShadowEffect Color="#2D3282" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
+                </Border.Effect>
+
+                <DataGrid ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" AutoGenerateColumns="False" 
+                          Background="Transparent" BorderThickness="0" GridLinesVisibility="None"
+                          CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True"
+                          RowBackground="#FFFFFF" AlternatingRowBackground="#F8FAFC"
+                          HeadersVisibility="Column" RowHeight="46" FontFamily="Be Vietnam Pro, Segoe UI">
+                    <DataGrid.Resources>
+                        <!-- Header Style -->
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#F8FAFC"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="FontSize" Value="11.5"/>
+                            <Setter Property="Padding" Value="10,8"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+                        </Style>
+                        <!-- Cell Style -->
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="10,0"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridCell">
+                                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </DataGrid.Resources>
+
+                    <DataGrid.Columns>
+                        <!-- ID -->
+                        <DataGridTextColumn Header="MÃ DM" Binding="{Binding CategoryId}" Width="65">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Icon Column -->
+                        <DataGridTemplateColumn Header="ICON" Width="60">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Icon, Converter={StaticResource HexToCharConverter}}" 
+                                               FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{StaticResource BrandPurple}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Name -->
+                        <DataGridTextColumn Header="TÊN DANH MỤC NGÀNH HÀNG" Binding="{Binding CategoryName}" Width="1.5*">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Sort order -->
+                        <DataGridTextColumn Header="THỨ TỰ" Binding="{Binding SortOrder}" Width="80">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Product count -->
+                        <DataGridTextColumn Header="SẢN PHẨM" Binding="{Binding Products.Count}" Width="90">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Status badge -->
+                        <DataGridTemplateColumn Header="TRẠNG THÁI" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="6" Padding="8,4" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                        <Setter Property="Background" Value="#E6FDF4"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                        <Setter Property="Background" Value="#FEF2F2"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        
+                                        <TextBlock FontSize="11" FontWeight="Bold" HorizontalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                            <Setter Property="Text" Value="Hoạt động"/>
+                                                            <Setter Property="Foreground" Value="#10B981"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                            <Setter Property="Text" Value="Tạm ẩn"/>
+                                                            <Setter Property="Foreground" Value="#EF4444"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <!-- RIGHT: Category Editor Card -->
+            <Border Grid.Column="2" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
+                <Border.Effect>
+                    <DropShadowEffect Color="#2D3282" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
+                </Border.Effect>
+
+                <StackPanel>
+                    <!-- Form Title changes based on editing state -->
+                    <TextBlock FontSize="14" FontWeight="Bold" Foreground="{StaticResource BrandPurple}" Margin="0,0,0,18">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                                        <Setter Property="Text" Value="CẬP NHẬT DANH MỤC"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsEditing}" Value="False">
+                                        <Setter Property="Text" Value="THÊM NGÀNH HÀNG MỚI"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <!-- Preview Icon Badge -->
+                    <Border Width="60" Height="60" Background="#F5F3FF" CornerRadius="30" HorizontalAlignment="Center" Margin="0,0,0,16">
+                        <TextBlock Text="{Binding CategoryIcon, Converter={StaticResource HexToCharConverter}}" 
+                                   FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="{StaticResource BrandPurple}" 
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+
+                    <!-- Input: Name -->
+                    <TextBlock Text="Tên ngành hàng" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,6"/>
+                    <TextBox Text="{Binding CategoryName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,16" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+
+                    <!-- Input: Icon Hex -->
+                    <TextBlock Text="Mã Icon Segoe MDL2 (Ví dụ: E13A)" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,6"/>
+                    <TextBox Text="{Binding CategoryIcon, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,16" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+
+                    <!-- Input: Sort Order -->
+                    <TextBlock Text="Thứ tự sắp xếp hiển thị" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,6"/>
+                    <TextBox Text="{Binding CategorySortOrder, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,24" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+
+                    <!-- Action buttons -->
+                    <Button Command="{Binding SaveCategoryCommand}" Background="{StaticResource BrandPurple}" Foreground="#FFFFFF" Margin="0,0,0,10">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource ActionButton}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                                        <Setter Property="Content" Value="Lưu thay đổi ngành hàng"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsEditing}" Value="False">
+                                        <Setter Property="Content" Value="Kích hoạt ngành hàng mới"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <!-- Secondary context buttons for editing state -->
+                    <StackPanel>
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </Style>
+                        </StackPanel.Style>
+
+                        <!-- Toggle Active/Disable -->
+                        <Button Command="{Binding DeleteCategoryCommand}" Foreground="#FFFFFF" Margin="0,0,0,10">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource ActionButton}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedCategory.IsActive}" Value="True">
+                                            <Setter Property="Content" Value="Tạm ẩn ngành hàng này"/>
+                                            <Setter Property="Background" Value="#EF4444"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SelectedCategory.IsActive}" Value="False">
+                                            <Setter Property="Content" Value="Hiện lại ngành hàng này"/>
+                                            <Setter Property="Background" Value="#10B981"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <!-- Cancel editing -->
+                        <Button Content="Hủy bỏ chọn" Command="{Binding CancelEditCommand}" Background="#E2E8F0" Foreground="{StaticResource TextSecondary}" Style="{StaticResource ActionButton}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

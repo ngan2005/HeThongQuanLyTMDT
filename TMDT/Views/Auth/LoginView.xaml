@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:TMDT.ViewModels.Auth"
+        xmlns:helpers="clr-namespace:TMDT.Helpers"
         mc:Ignorable="d"
-        Title="LogisticsPro Manager - Đăng nhập" Height="750" Width="480"
+        Title="Đăng nhập | MyShop" Height="480" Width="760"
         WindowStartupLocation="CenterScreen"
         Background="Transparent"
         WindowStyle="None"
@@ -17,31 +18,39 @@
     </Window.DataContext>
 
     <Window.Resources>
-        <!-- Color Palette -->
-        <SolidColorBrush x:Key="PrimaryBrush" Color="#C0C1FF"/>
-        <SolidColorBrush x:Key="OnPrimaryBrush" Color="#1000A9"/>
-        <SolidColorBrush x:Key="SecondaryBrush" Color="#B9C7DF"/>
-        <SolidColorBrush x:Key="SurfaceBrush" Color="#0B1326"/>
-        <SolidColorBrush x:Key="OnSurfaceVariantBrush" Color="#C7C4D7"/>
-        <SolidColorBrush x:Key="OutlineBrush" Color="#464554"/>
+        <!-- Modern Color Palette -->
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#593AD8"/>
+        <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#451EC5"/>
+        <SolidColorBrush x:Key="BackgroundBrush" Color="#F8F9FF"/>
+        <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#121C2A"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#484555"/>
+        
+        <SolidColorBrush x:Key="InputBackgroundBrush" Color="#EFF3FF"/>
+        <SolidColorBrush x:Key="InputBorderBrush" Color="#DFE9FD"/>
+        <SolidColorBrush x:Key="InputFocusedBorderBrush" Color="#593AD8"/>
 
-        <!-- Custom TextBox Style -->
+        <!-- Modern TextBox Style -->
         <Style x:Key="ModernTextBox" TargetType="TextBox">
-            <Setter Property="Background" Value="#0DFFFFFF"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#20FFFFFF"/>
-            <Setter Property="Padding" Value="45,15,15,15"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Background" Value="{StaticResource InputBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Padding" Value="45,10,15,10"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
                         <Border x:Name="border" Background="{TemplateBinding Background}" 
                                 BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="1" CornerRadius="10">
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
                             <Grid>
                                 <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                                <TextBlock x:Name="placeholder" Text="Nhập dữ liệu..." 
-                                           Foreground="#40FFFFFF" Padding="45,0,0,0"
+                                <TextBlock x:Name="placeholder" Text="{TemplateBinding Tag}" 
+                                           Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.5"
+                                           Padding="0"
                                            VerticalAlignment="Center" IsHitTestVisible="False"
                                            Visibility="Collapsed"/>
                             </Grid>
@@ -51,8 +60,146 @@
                                 <Setter TargetName="placeholder" Property="Visibility" Value="Visible"/>
                             </Trigger>
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#C0C1FF"/>
-                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource InputFocusedBorderBrush}"/>
+                                <Setter TargetName="border" Property="Background" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modern PasswordBox Style -->
+        <Style x:Key="ModernPasswordBox" TargetType="PasswordBox">
+            <Setter Property="Background" Value="{StaticResource InputBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Padding" Value="45,10,45,10"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="PasswordBox">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource InputFocusedBorderBrush}"/>
+                                <Setter TargetName="border" Property="Background" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Accent Primary Button Style -->
+        <Style x:Key="AccentButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98" CenterX="160" CenterY="20"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Custom Window Close/Minimize Style -->
+        <Style x:Key="WindowNavButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#E2E8F0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="WindowCloseButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#FEE2E2"/>
+                                <Setter Property="Foreground" Value="#EF4444"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Social Login Button Style -->
+        <Style x:Key="SocialButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="{StaticResource InputBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#EFF3FF"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#C9C4D7"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -61,95 +208,242 @@
         </Style>
     </Window.Resources>
 
+    <!-- Entry Fade-In-Up Animation on Load -->
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="MainContainer"
+                                     Storyboard.TargetProperty="Opacity"
+                                     From="0.0" To="1.0" Duration="0:0:0.6" DecelerationRatio="0.9"/>
+                    <DoubleAnimation Storyboard.TargetName="MainTransform"
+                                     Storyboard.TargetProperty="Y"
+                                     From="30" To="0" Duration="0:0:0.6" DecelerationRatio="0.9"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+
     <Grid>
-        <!-- Background Layer -->
-        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="20">
-             <Border.Effect>
-                <DropShadowEffect BlurRadius="40" Color="Black" Opacity="0.5" ShadowDepth="0"/>
+        <!-- Main Outer Border -->
+        <Border Background="{StaticResource BackgroundBrush}" CornerRadius="16" BorderBrush="{StaticResource InputBorderBrush}" BorderThickness="1">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="25" Color="#2D3282" Opacity="0.08" ShadowDepth="3"/>
             </Border.Effect>
         </Border>
-        
-        <!-- Glow effects (Light Leaks) -->
-        <Ellipse Fill="#C0C1FF" Opacity="0.1" Width="400" Height="400" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-200,-200,0,0">
+
+        <!-- Mesh Background Glow effects -->
+        <Ellipse Fill="{StaticResource PrimaryBrush}" Opacity="0.04" Width="400" Height="400" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-150,-150,0,0">
             <Ellipse.Effect>
                 <BlurEffect Radius="120"/>
             </Ellipse.Effect>
         </Ellipse>
-        <Ellipse Fill="#BDC2FF" Opacity="0.1" Width="300" Height="300" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-150,-150">
+        <Ellipse Fill="{StaticResource PrimaryBrush}" Opacity="0.04" Width="400" Height="400" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-150,-150">
             <Ellipse.Effect>
-                <BlurEffect Radius="100"/>
+                <BlurEffect Radius="120"/>
             </Ellipse.Effect>
         </Ellipse>
 
-        <!-- Main Card -->
-        <Border Margin="1,1,48,10" CornerRadius="20" BorderBrush="#20FFFFFF" BorderThickness="1" Background="#10FFFFFF">
-            <StackPanel Margin="45,60">
-                
-                <!-- Logo & Title -->
-                <StackPanel HorizontalAlignment="Center" Margin="0,0,0,40">
-                    <Border Width="70" Height="70" Background="{StaticResource PrimaryBrush}" CornerRadius="15" Margin="0,0,0,20">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#C0C1FF" BlurRadius="20" ShadowDepth="0" Opacity="0.4"/>
-                        </Border.Effect>
-                        <TextBlock Text="" FontFamily="Segoe MDL2 Assets" FontSize="36" Foreground="{StaticResource OnPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <TextBlock Text="Đăng nhập Hệ thống" FontSize="32" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Quản lý Logistics chuyên nghiệp" FontSize="14" Foreground="{StaticResource OnSurfaceVariantBrush}" HorizontalAlignment="Center" Margin="0,5,0,0"/>
-                </StackPanel>
+        <!-- Custom Window Drag Layer & Header -->
+        <Grid Height="48" VerticalAlignment="Top" Panel.ZIndex="100">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-                <!-- Input Fields -->
-                <StackPanel>
-                    <TextBlock Text="Tên đăng nhập" Foreground="{StaticResource OnSurfaceVariantBrush}" FontSize="12" FontWeight="SemiBold" Margin="5,0,0,8"/>
-                    <Grid Margin="0,0,0,20">
-                        <TextBox Style="{StaticResource ModernTextBox}" x:Name="txtUsername"/>
-                        <TextBlock Text="" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="{StaticResource OnSurfaceVariantBrush}" VerticalAlignment="Center" Margin="15,0,0,0"/>
-                    </Grid>
+            <!-- Title Drag Space (Empty Area) -->
+            <Border Background="Transparent" Grid.Column="0"/>
 
-                    <TextBlock Text="Mật khẩu" Foreground="{StaticResource OnSurfaceVariantBrush}" FontSize="12" FontWeight="SemiBold" Margin="5,0,0,8"/>
-                    <Grid Margin="0,0,0,20">
-                        <PasswordBox x:Name="txtPassword" Background="#0DFFFFFF" BorderBrush="#20FFFFFF" BorderThickness="1" Foreground="White" Padding="45,15,45,15"/>
-                        <TextBlock Text="" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="{StaticResource OnSurfaceVariantBrush}" VerticalAlignment="Center" Margin="15,0,0,0"/>
-                        <Button HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Margin="0,0,15,0" Cursor="Hand">
-                            <TextBlock Text="" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource OnSurfaceVariantBrush}"/>
-                        </Button>
-                    </Grid>
-
-                    <TextBlock Text="Vai trò" Foreground="{StaticResource OnSurfaceVariantBrush}" FontSize="12" FontWeight="SemiBold" Margin="5,0,0,8"/>
-                    <ComboBox Height="50" Background="#0D976161" Foreground="White" BorderBrush="#20FFFFFF" VerticalContentAlignment="Center" Padding="10,0" IsDropDownOpen="True">
-                        <ComboBoxItem Content="Admin" IsSelected="True"/>
-                        <ComboBoxItem Content="Nhân viên"/>
-                    </ComboBox>
-
-                    <DockPanel Margin="0,20,0,30">
-                        <CheckBox Content="Ghi nhớ mật khẩu" Foreground="{StaticResource OnSurfaceVariantBrush}" VerticalContentAlignment="Center"/>
-                        <TextBlock Text="Quên mật khẩu?" Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Right" Cursor="Hand" VerticalAlignment="Center"/>
-                    </DockPanel>
-
-                    <Button Content="Đăng nhập hệ thống" Command="{Binding LoginCommand}" Height="55" Background="{StaticResource PrimaryBrush}" Foreground="{StaticResource OnPrimaryBrush}" FontWeight="Bold" FontSize="18" Cursor="Hand">
-                        <Button.Resources>
-                            <Style TargetType="Button">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" CornerRadius="12">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </Button.Resources>
-                        <Button.Effect>
-                            <DropShadowEffect Color="#C0C1FF" BlurRadius="25" ShadowDepth="0" Opacity="0.3"/>
-                        </Button.Effect>
-                    </Button>
-
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
-                        <TextBlock Text="Chưa có tài khoản?" Foreground="{StaticResource OnSurfaceVariantBrush}"/>
-                        <Button Content="Đăng ký tại đây" Click="GoToRegister_Click" Background="Transparent" Foreground="{StaticResource PrimaryBrush}" BorderThickness="0" Cursor="Hand" Margin="5,0,0,0"/>
-                    </StackPanel>
-                </StackPanel>
+            <!-- Window Controls -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
+                <Button Style="{StaticResource WindowNavButton}" Click="MinimizeButton_Click" Margin="0,0,4,0">
+                    <TextBlock Text="&#xE921;" FontFamily="Segoe MDL2 Assets" FontSize="10" FontWeight="Bold"/>
+                </Button>
+                <Button Style="{StaticResource WindowCloseButton}" Click="ExitButton_Click">
+                    <TextBlock Text="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="10" FontWeight="Bold"/>
+                </Button>
             </StackPanel>
-        </Border>
+        </Grid>
+
+        <!-- Main Content Area Grid (Contains landscape split card) -->
+        <Grid x:Name="MainContainer" Margin="0,48,0,0">
+            <Grid.RenderTransform>
+                <TranslateTransform x:Name="MainTransform" Y="0"/>
+            </Grid.RenderTransform>
+            
+            <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0,10,15">
+                <!-- Landscape Card Container -->
+                <Border Width="680" Height="370" Background="{StaticResource CardBackgroundBrush}" CornerRadius="16" BorderThickness="1" BorderBrush="#DFE9FD">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="30" Color="#2D3282" Direction="270" ShadowDepth="4" Opacity="0.05"/>
+                    </Border.Effect>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <!-- Left Column: Purple Branding Banner -->
+                            <ColumnDefinition Width="260"/>
+                            <!-- Right Column: Form Area -->
+                            <ColumnDefinition Width="418"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- LEFT COLUMN: BRANDING SPLIT -->
+                        <Border Grid.Column="0" CornerRadius="15,0,0,15">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#6366F1" Offset="0"/>
+                                    <GradientStop Color="#593AD8" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            
+                            <Grid Margin="24">
+                                <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left">
+                                    <TextBlock Text="MyShop" FontSize="22" FontWeight="ExtraBold" Foreground="#FFFFFF" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Retail Ecosystem" FontSize="11" Foreground="#C9BFFF" Opacity="0.8" FontWeight="Medium" Margin="2,2,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                </StackPanel>
+
+                                <StackPanel VerticalAlignment="Center" Margin="0,30,0,0">
+                                    <TextBlock Text="Chào mừng quay trở lại!" FontSize="20" FontWeight="Bold" Foreground="#FFFFFF" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Đăng nhập tài khoản của bạn để quản lý và trải nghiệm mua sắm không giới hạn cùng MyShop." FontSize="11.5" Foreground="#E2E8F0" Opacity="0.9" TextWrapping="Wrap" Margin="0,8,0,0" LineHeight="17" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                </StackPanel>
+
+                                <!-- SSL Trust tag at bottom of purple band -->
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" Opacity="0.8">
+                                    <TextBlock Text="&#xE727;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Bảo mật SSL 256-bit" FontSize="10.5" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="5,0,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- RIGHT COLUMN: FORM AREA -->
+                        <Grid Grid.Column="1" Margin="32,24">
+                            <StackPanel VerticalAlignment="Center">
+                                <!-- Title -->
+                                <StackPanel Margin="0,0,0,18">
+                                    <TextBlock Text="Đăng nhập" FontSize="22" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Quản lý hệ thống bán hàng của bạn" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.75" Margin="0,3,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                </StackPanel>
+
+                                <!-- Username -->
+                                <Grid Margin="0,0,0,10">
+                                    <TextBox x:Name="txtUsername" Style="{StaticResource ModernTextBox}" Tag="Tên đăng nhập hoặc Email"
+                                             Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" Height="38"/>
+                                    <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.6" Margin="15,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                                </Grid>
+
+                                <!-- Password -->
+                                <Grid Margin="0,0,0,10">
+                                    <PasswordBox x:Name="txtPassword" Style="{StaticResource ModernPasswordBox}"
+                                                 helpers:PasswordBoxHelper.BindPassword="True"
+                                                 helpers:PasswordBoxHelper.BoundPassword="{Binding Password, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                 PasswordChanged="txtPassword_PasswordChanged"
+                                                 Height="38"/>
+                                    
+                                    <TextBlock x:Name="txtPasswordPlaceholder" Text="Mật khẩu" 
+                                               Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.4"
+                                               Padding="45,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                                    
+                                    <TextBlock Text="&#xE72E;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.6" Margin="15,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                                    
+                                    <Button x:Name="btnToggleShowPassword" HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Margin="0,0,12,0" Cursor="Hand" Click="TogglePassword_Click" Width="28" Height="28">
+                                        <TextBlock x:Name="tbEyeIcon" Text="&#xE7B3;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.6" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Button>
+                                    
+                                    <TextBox x:Name="txtPasswordPlain" Style="{StaticResource ModernTextBox}" Tag="Mật khẩu"
+                                             Text="{Binding Password, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                             Height="38" Visibility="Collapsed" Padding="45,10,45,10"/>
+                                </Grid>
+
+                                <!-- Remember & Forgot -->
+                                <Grid Margin="4,0,4,14">
+                                    <CheckBox Content="Ghi nhớ đăng nhập" Foreground="{StaticResource TextSecondaryBrush}" 
+                                              FontSize="11.5" FontWeight="Medium" VerticalContentAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI">
+                                        <CheckBox.Resources>
+                                            <Style TargetType="CheckBox">
+                                                <Setter Property="Cursor" Value="Hand"/>
+                                            </Style>
+                                        </CheckBox.Resources>
+                                    </CheckBox>
+                                    <TextBlock Text="Quên mật khẩu?" Foreground="{StaticResource PrimaryBrush}" 
+                                               FontSize="11.5" FontWeight="SemiBold" HorizontalAlignment="Right" Cursor="Hand" FontFamily="Be Vietnam Pro, Segoe UI">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="TextDecorations" Value="Underline"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+
+                                <!-- Buttons grid: Submit & Socials -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="160"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Submit Button -->
+                                    <Button Grid.Column="0" Content="Đăng nhập" Style="{StaticResource AccentButtonStyle}" Height="38"
+                                            Command="{Binding LoginCommand}">
+                                        <Button.Effect>
+                                            <DropShadowEffect Color="#593AD8" BlurRadius="10" ShadowDepth="1" Opacity="0.2"/>
+                                        </Button.Effect>
+                                    </Button>
+
+                                    <!-- Social Logins (Google & Facebook) -->
+                                    <Grid Grid.Column="2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="8"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Google -->
+                                        <Button Style="{StaticResource SocialButtonStyle}" Height="38">
+                                            <Viewbox Width="15" Height="15">
+                                                <Canvas Width="24" Height="24">
+                                                    <Path Fill="#EA4335" Data="M12 5.04c1.67 0 3.17.58 4.35 1.71l3.25-3.25C17.65 1.58 15.01 1 12 1 7.37 1 3.4 3.63 1.48 7.48l3.79 2.94C6.21 7.15 8.87 5.04 12 5.04z"/>
+                                                    <Path Fill="#4285F4" Data="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.29 1.48-1.14 2.73-2.42 3.58v2.98h3.91c2.28-2.1 3.54-5.19 3.54-8.71z"/>
+                                                    <Path Fill="#FBBC05" Data="M5.27 14.58c-.24-.71-.37-1.47-.37-2.26s.13-1.55.37-2.26L1.48 7.12C.67 8.74.2 10.56.2 12.5s.47 3.76 1.28 5.38l3.79-2.94C5.14 16.13 5.14 15.22 5.27 14.58z"/>
+                                                    <Path Fill="#34A853" Data="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.91-2.98c-1.08.72-2.48 1.15-4.05 1.15-3.13 0-5.79-2.11-6.73-4.94l-3.79 2.94C3.4 20.37 7.37 23 12 23z"/>
+                                                </Canvas>
+                                            </Viewbox>
+                                        </Button>
+
+                                        <!-- Facebook -->
+                                        <Button Grid.Column="2" Style="{StaticResource SocialButtonStyle}" Height="38">
+                                            <Viewbox Width="15" Height="15">
+                                                <Canvas Width="24" Height="24">
+                                                    <Path Fill="#1877F2" Data="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                                </Canvas>
+                                            </Viewbox>
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+
+                                <!-- Navigation Switch -->
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,18,0,0">
+                                    <TextBlock Text="Bạn chưa có tài khoản MyShop?" FontSize="11.5" Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.8" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Đăng ký ngay" FontSize="11.5" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" Margin="5,0,0,0" Cursor="Hand" MouseLeftButtonDown="GoToRegister_Click" FontFamily="Be Vietnam Pro, Segoe UI">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="TextDecorations" Value="Underline"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>

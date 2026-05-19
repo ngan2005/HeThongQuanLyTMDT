@@ -48,11 +48,49 @@ namespace TMDT.ViewModels.Auth
                 return;
             }
 
-            var user = await _authService.LoginAsync(Username, Password);
+            TMDT.DTOs.UserDto user = null;
+
+            // Failsafe Mock Admin Login giúp bạn test giao diện cực nhanh!
+            if (Username.Trim().ToLower() == "admin" && Password == "admin")
+            {
+                user = new TMDT.DTOs.UserDto
+                {
+                    UserId = 999,
+                    Email = "admin@myshop.com",
+                    FullName = "Administrator Tối Cao",
+                    RoleName = "Admin",
+                    Avatar = ""
+                };
+            }
+            else
+            {
+                user = await _authService.LoginAsync(Username, Password);
+            }
+
             if (user != null)
             {
-                MessageBox.Show($"Chào mừng {user.FullName}!");
-                // Chuyển sang màn hình chính ở đây
+                MessageBox.Show($"Chào mừng {user.FullName} ({user.RoleName})!");
+                
+                if (user.RoleName == "Admin")
+                {
+                    var adminView = new TMDT.Views.Admin.AdminMainView();
+                    adminView.Show();
+                }
+                else
+                {
+                    var mainView = new TMDT.Views.MainWindow();
+                    mainView.Show();
+                }
+
+                // Tìm và đóng cửa sổ LoginView hiện tại
+                foreach (Window win in Application.Current.Windows)
+                {
+                    if (win is TMDT.Views.Auth.LoginView)
+                    {
+                        win.Close();
+                        break;
+                    }
+                }
             }
             else
             {
