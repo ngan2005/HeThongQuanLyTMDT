@@ -38,8 +38,20 @@ namespace TMDT.ViewModels.Admin
             }
         }
 
+        private bool _isSidebarExpanded = true;
+        public bool IsSidebarExpanded
+        {
+            get => _isSidebarExpanded;
+            set
+            {
+                _isSidebarExpanded = value;
+                OnPropertyChanged();
+            }
+        }
+
         // Navigation Commands
         public ICommand ShowDashboardCommand { get; }
+        public ICommand ShowOrdersCommand { get; }
         public ICommand ShowShopsCommand { get; }
         public ICommand ShowProductsCommand { get; }
         public ICommand ShowWithdrawsCommand { get; }
@@ -49,11 +61,14 @@ namespace TMDT.ViewModels.Admin
         public ICommand ShowReportsCommand { get; }
         public ICommand ShowUsersCommand { get; }
         public ICommand ShowSettingsCommand { get; }
+        public ICommand ShowAuditLogsCommand { get; }
+        public ICommand ShowProfileCommand { get; }
 
         public AdminMainViewModel()
         {
             // Initialize Commands
             ShowDashboardCommand = new RelayCommand(o => { CurrentView = new AdminDashboardViewModel(); ActiveMenu = "Dashboard"; });
+            ShowOrdersCommand = new RelayCommand(o => { CurrentView = new AdminOrdersViewModel(); ActiveMenu = "Orders"; });
             ShowShopsCommand = new RelayCommand(o => { CurrentView = new AdminShopsViewModel(); ActiveMenu = "Shops"; });
             ShowProductsCommand = new RelayCommand(o => { CurrentView = new AdminProductsViewModel(); ActiveMenu = "Products"; });
             ShowWithdrawsCommand = new RelayCommand(o => { CurrentView = new AdminWithdrawsViewModel(); ActiveMenu = "Withdraws"; });
@@ -63,6 +78,8 @@ namespace TMDT.ViewModels.Admin
             ShowReportsCommand = new RelayCommand(o => { CurrentView = new AdminReportsViewModel(); ActiveMenu = "Reports"; });
             ShowUsersCommand = new RelayCommand(o => { CurrentView = new AdminUsersViewModel(); ActiveMenu = "Users"; });
             ShowSettingsCommand = new RelayCommand(o => { CurrentView = new AdminSettingsViewModel(); ActiveMenu = "Settings"; });
+            ShowAuditLogsCommand = new RelayCommand(o => { CurrentView = new AdminAuditLogsViewModel(); ActiveMenu = "AuditLogs"; });
+            ShowProfileCommand = new RelayCommand(o => { CurrentView = new AdminProfileViewModel(); ActiveMenu = "Profile"; });
 
             // Set default view
             CurrentView = new AdminDashboardViewModel();

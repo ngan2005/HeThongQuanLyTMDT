@@ -646,6 +646,9 @@ public partial class TmdtContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false);
             entity.Property(e => e.FullName).HasMaxLength(100);
+            entity.Property(e => e.UserCode)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.LoyaltyPoints).HasDefaultValue(0);
             entity.Property(e => e.Password)

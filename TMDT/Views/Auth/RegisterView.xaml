@@ -18,50 +18,77 @@
     </Window.DataContext>
 
     <Window.Resources>
-        <!-- Modern Color Palette -->
-        <SolidColorBrush x:Key="PrimaryBrush" Color="#593AD8"/>
-        <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#451EC5"/>
-        <SolidColorBrush x:Key="BackgroundBrush" Color="#F8F9FF"/>
-        <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FFFFFF"/>
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#121C2A"/>
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#484555"/>
+        <!-- Fluent Design Color Palette -->
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#6366F1"/>
+        <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#4F46E5"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F8F9FF"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#94A3B8"/>
         
-        <SolidColorBrush x:Key="InputBackgroundBrush" Color="#EFF3FF"/>
-        <SolidColorBrush x:Key="InputBorderBrush" Color="#DFE9FD"/>
-        <SolidColorBrush x:Key="InputFocusedBorderBrush" Color="#593AD8"/>
-
-        <!-- Modern TextBox Style -->
+        <!-- Modern TextBox Style with Focus Glow -->
         <Style x:Key="ModernTextBox" TargetType="TextBox">
-            <Setter Property="Background" Value="{StaticResource InputBackgroundBrush}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="Padding" Value="45,10,15,10"/>
+            <Setter Property="Background" Value="#131130"/>
+            <Setter Property="Foreground" Value="#F8F9FF"/>
+            <Setter Property="BorderBrush" Value="#FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Height" Value="38"/>
             <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8"
-                                Padding="{TemplateBinding Padding}">
-                            <Grid>
-                                <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                        <Grid>
+                            <!-- Glow border for focus -->
+                            <Border x:Name="glow" CornerRadius="8" Opacity="0" Background="Transparent" BorderThickness="0">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#6366F1" BlurRadius="12" ShadowDepth="0" Opacity="0.4"/>
+                                </Border.Effect>
+                                <Border BorderBrush="#6366F1" BorderThickness="1.5" CornerRadius="8"/>
+                            </Border>
+
+                            <!-- Main Border -->
+                            <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                    BorderBrush="#FFFFFF" Opacity="0.1"
+                                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8"/>
+
+                            <!-- Content Grid -->
+                            <Grid Margin="1">
+                                <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center" Margin="40,0,15,0"/>
+                                
+                                <!-- Placeholder (Hidden by default, shown via triggers) -->
                                 <TextBlock x:Name="placeholder" Text="{TemplateBinding Tag}" 
-                                           Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.5"
-                                           Padding="0"
-                                           VerticalAlignment="Center" IsHitTestVisible="False"
-                                           Visibility="Collapsed"/>
+                                           Foreground="#94A3B8" Opacity="0.5" Visibility="Collapsed"
+                                           Margin="40,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
                             </Grid>
-                        </Border>
+                        </Grid>
+                        
                         <ControlTemplate.Triggers>
-                            <Trigger Property="Text" Value="">
+                            <!-- Placeholder display logic -->
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="Text" Value=""/>
+                                    <Condition Property="IsFocused" Value="False"/>
+                                </MultiTrigger.Conditions>
                                 <Setter TargetName="placeholder" Property="Visibility" Value="Visible"/>
-                            </Trigger>
+                            </MultiTrigger>
+
+                            <!-- Focus Glow Animation -->
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource InputFocusedBorderBrush}"/>
-                                <Setter TargetName="border" Property="Background" Value="#FFFFFF"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#6366F1"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.3"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="1.0" Duration="0:0:0.15"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="0.0" Duration="0:0:0.15"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -71,26 +98,69 @@
 
         <!-- Modern PasswordBox Style -->
         <Style x:Key="ModernPasswordBox" TargetType="PasswordBox">
-            <Setter Property="Background" Value="{StaticResource InputBackgroundBrush}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="Padding" Value="45,10,45,10"/>
+            <Setter Property="Background" Value="#131130"/>
+            <Setter Property="Foreground" Value="#F8F9FF"/>
+            <Setter Property="BorderBrush" Value="#FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Height" Value="38"/>
             <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="PasswordBox">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8"
-                                Padding="{TemplateBinding Padding}">
-                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                        </Border>
+                        <Grid>
+                            <!-- Glow border for focus -->
+                            <Border x:Name="glow" CornerRadius="8" Opacity="0" Background="Transparent" BorderThickness="0">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#6366F1" BlurRadius="12" ShadowDepth="0" Opacity="0.4"/>
+                                </Border.Effect>
+                                <Border BorderBrush="#6366F1" BorderThickness="1.5" CornerRadius="8"/>
+                            </Border>
+
+                            <!-- Main Border -->
+                            <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                    BorderBrush="#FFFFFF" Opacity="0.1"
+                                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8"/>
+
+                            <!-- Content Grid -->
+                            <Grid Margin="1">
+                                <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center" Margin="40,0,40,0"/>
+                                
+                                <!-- Placeholder (Hidden by default) -->
+                                <TextBlock x:Name="placeholder" Text="{TemplateBinding Tag}" 
+                                           Foreground="#94A3B8" Opacity="0.5" Visibility="Collapsed"
+                                           Margin="40,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                            </Grid>
+                        </Grid>
+                        
                         <ControlTemplate.Triggers>
+                            <!-- Placeholder display logic via PasswordBoxHelper.BoundPassword -->
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=(helpers:PasswordBoxHelper.BoundPassword)}" Value=""/>
+                                    <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsFocused}" Value="False"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter TargetName="placeholder" Property="Visibility" Value="Visible"/>
+                            </MultiDataTrigger>
+
+                            <!-- Focus Glow Animation -->
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource InputFocusedBorderBrush}"/>
-                                <Setter TargetName="border" Property="Background" Value="#FFFFFF"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#6366F1"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.3"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="1.0" Duration="0:0:0.15"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="0.0" Duration="0:0:0.15"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -98,11 +168,11 @@
             </Setter>
         </Style>
 
-        <!-- Accent Primary Button Style -->
+        <!-- Accent Primary Button Style with Magnetic Hover -->
         <Style x:Key="AccentButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
             <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -110,19 +180,66 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
+                        <Grid x:Name="buttonGrid" HorizontalAlignment="Stretch">
+                            <Grid.RenderTransform>
+                                <TranslateTransform Y="0"/>
+                            </Grid.RenderTransform>
+                            <!-- Background Border -->
+                            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="19" Height="38">
+                                <Border.RenderTransform>
+                                    <ScaleTransform ScaleX="1.0" ScaleY="1.0"/>
+                                </Border.RenderTransform>
+                                <Border.Effect>
+                                    <DropShadowEffect x:Name="buttonShadow" Color="#6366F1" BlurRadius="8" ShadowDepth="1" Opacity="0.2"/>
+                                </Border.Effect>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                        
                         <ControlTemplate.Triggers>
+                            <!-- Magnetic Hover Effect -->
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryHoverBrush}"/>
+                                <Setter Property="Background" Value="{StaticResource PrimaryHoverBrush}"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="1.015" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="1.015" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetName="buttonGrid" Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)" To="-2" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetName="buttonShadow" Storyboard.TargetProperty="BlurRadius" To="14" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetName="buttonShadow" Storyboard.TargetProperty="Opacity" To="0.4" Duration="0:0:0.15"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="1.0" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="1.0" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetName="buttonGrid" Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)" To="0" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetName="buttonShadow" Storyboard.TargetProperty="BlurRadius" To="8" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetName="buttonShadow" Storyboard.TargetProperty="Opacity" To="0.2" Duration="0:0:0.15"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="RenderTransform">
-                                    <Setter.Value>
-                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98" CenterX="220" CenterY="20"/>
-                                    </Setter.Value>
-                                </Setter>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="0.98" Duration="0:0:0.08"/>
+                                            <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="0.98" Duration="0:0:0.08"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="1.0" Duration="0:0:0.08"/>
+                                            <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="1.0" Duration="0:0:0.08"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -130,10 +247,10 @@
             </Setter>
         </Style>
 
-        <!-- Custom Window Close/Minimize Style -->
+        <!-- Window Action Buttons (Minimize/Exit) -->
         <Style x:Key="WindowNavButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="Foreground" Value="#94A3B8"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Width" Value="32"/>
             <Setter Property="Height" Value="32"/>
@@ -146,7 +263,9 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#E2E8F0"/>
+                                <Setter TargetName="border" Property="Background" Value="#FFFFFF"/>
+                                <Setter Property="Opacity" Value="0.1"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -156,7 +275,7 @@
 
         <Style x:Key="WindowCloseButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="Foreground" Value="#94A3B8"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Width" Value="32"/>
             <Setter Property="Height" Value="32"/>
@@ -169,63 +288,135 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#FEE2E2"/>
-                                <Setter Property="Foreground" Value="#EF4444"/>
+                                <Setter TargetName="border" Property="Background" Value="#EF4444"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- Cover and Uncover Eyes Storyboards for Mascot Password Cover -->
+        <Storyboard x:Key="CoverEyesStoryboard">
+            <DoubleAnimation Storyboard.TargetName="leftHand" Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)" To="-80" Duration="0:0:0.22" DecelerationRatio="0.9"/>
+            <DoubleAnimation Storyboard.TargetName="leftHand" Storyboard.TargetProperty="RenderTransform.(TranslateTransform.X)" To="16" Duration="0:0:0.22" DecelerationRatio="0.9"/>
+            <DoubleAnimation Storyboard.TargetName="leftHand" Storyboard.TargetProperty="Opacity" To="1.0" Duration="0:0:0.18"/>
+            
+            <DoubleAnimation Storyboard.TargetName="rightHand" Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)" To="-80" Duration="0:0:0.22" DecelerationRatio="0.9"/>
+            <DoubleAnimation Storyboard.TargetName="rightHand" Storyboard.TargetProperty="RenderTransform.(TranslateTransform.X)" To="-16" Duration="0:0:0.22" DecelerationRatio="0.9"/>
+            <DoubleAnimation Storyboard.TargetName="rightHand" Storyboard.TargetProperty="Opacity" To="1.0" Duration="0:0:0.18"/>
+
+            <DoubleAnimation Storyboard.TargetName="leftPupil" Storyboard.TargetProperty="Opacity" To="0.0" Duration="0:0:0.15"/>
+            <DoubleAnimation Storyboard.TargetName="rightPupil" Storyboard.TargetProperty="Opacity" To="0.0" Duration="0:0:0.15"/>
+            
+            <DoubleAnimation Storyboard.TargetName="leftEyeClosed" Storyboard.TargetProperty="Opacity" To="1.0" Duration="0:0:0.18"/>
+            <DoubleAnimation Storyboard.TargetName="rightEyeClosed" Storyboard.TargetProperty="Opacity" To="1.0" Duration="0:0:0.18"/>
+        </Storyboard>
+
+        <Storyboard x:Key="UncoverEyesStoryboard">
+            <DoubleAnimation Storyboard.TargetName="leftHand" Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)" To="0" Duration="0:0:0.22" DecelerationRatio="0.9"/>
+            <DoubleAnimation Storyboard.TargetName="leftHand" Storyboard.TargetProperty="RenderTransform.(TranslateTransform.X)" To="0" Duration="0:0:0.22" DecelerationRatio="0.9"/>
+            <DoubleAnimation Storyboard.TargetName="leftHand" Storyboard.TargetProperty="Opacity" To="0.0" Duration="0:0:0.18"/>
+            
+            <DoubleAnimation Storyboard.TargetName="rightHand" Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)" To="0" Duration="0:0:0.22" DecelerationRatio="0.9"/>
+            <DoubleAnimation Storyboard.TargetName="rightHand" Storyboard.TargetProperty="RenderTransform.(TranslateTransform.X)" To="0" Duration="0:0:0.22" DecelerationRatio="0.9"/>
+            <DoubleAnimation Storyboard.TargetName="rightHand" Storyboard.TargetProperty="Opacity" To="0.0" Duration="0:0:0.18"/>
+
+            <DoubleAnimation Storyboard.TargetName="leftPupil" Storyboard.TargetProperty="Opacity" To="1.0" Duration="0:0:0.15"/>
+            <DoubleAnimation Storyboard.TargetName="rightPupil" Storyboard.TargetProperty="Opacity" To="1.0" Duration="0:0:0.15"/>
+            
+            <DoubleAnimation Storyboard.TargetName="leftEyeClosed" Storyboard.TargetProperty="Opacity" To="0.0" Duration="0:0:0.18"/>
+            <DoubleAnimation Storyboard.TargetName="rightEyeClosed" Storyboard.TargetProperty="Opacity" To="0.0" Duration="0:0:0.18"/>
+        </Storyboard>
     </Window.Resources>
 
-    <!-- Entry Fade-In-Up Animation on Load -->
     <Window.Triggers>
         <EventTrigger RoutedEvent="Window.Loaded">
             <BeginStoryboard>
                 <Storyboard>
-                    <DoubleAnimation Storyboard.TargetName="MainContainer"
-                                     Storyboard.TargetProperty="Opacity"
-                                     From="0.0" To="1.0" Duration="0:0:0.6" DecelerationRatio="0.9"/>
-                    <DoubleAnimation Storyboard.TargetName="MainTransform"
-                                     Storyboard.TargetProperty="Y"
-                                     From="30" To="0" Duration="0:0:0.6" DecelerationRatio="0.9"/>
+                    <!-- Mascot Floating & Blinking Animations -->
+                    <DoubleAnimation Storyboard.TargetName="MascotFloatTransform" Storyboard.TargetProperty="Y"
+                                     From="0" To="-6" Duration="0:0:2.2" AutoReverse="True" RepeatBehavior="Forever" DecelerationRatio="0.5" AccelerationRatio="0.5"/>
+                    <DoubleAnimation Storyboard.TargetName="leftPupil" Storyboard.TargetProperty="RenderTransform.(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" From="1.0" To="0.0" Duration="0:0:0.1" BeginTime="0:0:4.0" AutoReverse="True"/>
+                    <DoubleAnimation Storyboard.TargetName="rightPupil" Storyboard.TargetProperty="RenderTransform.(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" From="1.0" To="0.0" Duration="0:0:0.1" BeginTime="0:0:4.0" AutoReverse="True"/>
+                    <DoubleAnimation Storyboard.TargetName="leftPupil" Storyboard.TargetProperty="RenderTransform.(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" From="1.0" To="0.0" Duration="0:0:0.1" BeginTime="0:0:8.5" AutoReverse="True"/>
+                    <DoubleAnimation Storyboard.TargetName="rightPupil" Storyboard.TargetProperty="RenderTransform.(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" From="1.0" To="0.0" Duration="0:0:0.1" BeginTime="0:0:8.5" AutoReverse="True"/>
+
+                    <!-- Background Shapes Animations -->
+                    <DoubleAnimation Storyboard.TargetName="BlurShape1Transform" Storyboard.TargetProperty="X"
+                                     From="-80" To="180" Duration="0:0:22" AutoReverse="True" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="BlurShape1Transform" Storyboard.TargetProperty="Y"
+                                     From="-40" To="100" Duration="0:0:18" AutoReverse="True" RepeatBehavior="Forever"/>
+                    
+                    <DoubleAnimation Storyboard.TargetName="BlurShape2Transform" Storyboard.TargetProperty="X"
+                                     From="80" To="-180" Duration="0:0:25" AutoReverse="True" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="BlurShape2Transform" Storyboard.TargetProperty="Y"
+                                     From="40" To="-120" Duration="0:0:20" AutoReverse="True" RepeatBehavior="Forever"/>
+                    
+                    <!-- Soft Entrance Fade & Scale -->
+                    <DoubleAnimation Storyboard.TargetName="MainContainer" Storyboard.TargetProperty="Opacity"
+                                     From="0.0" To="1.0" Duration="0:0:0.75" DecelerationRatio="0.9"/>
+                    <DoubleAnimation Storyboard.TargetName="MainScaleTransform" Storyboard.TargetProperty="ScaleX"
+                                     From="0.95" To="1.0" Duration="0:0:0.75" DecelerationRatio="0.9"/>
+                    <DoubleAnimation Storyboard.TargetName="MainScaleTransform" Storyboard.TargetProperty="ScaleY"
+                                     From="0.95" To="1.0" Duration="0:0:0.75" DecelerationRatio="0.9"/>
+
+                    <!-- Staggered Reveal Animations -->
+                    <DoubleAnimation Storyboard.TargetName="RevealTitleTransform" Storyboard.TargetProperty="Y" From="15" To="0" BeginTime="0:0:0.12" Duration="0:0:0.5" DecelerationRatio="0.95"/>
+                    <DoubleAnimation Storyboard.TargetName="RevealTitle" Storyboard.TargetProperty="Opacity" From="0" To="1" BeginTime="0:0:0.12" Duration="0:0:0.5"/>
+
+                    <DoubleAnimation Storyboard.TargetName="RevealGridTransform" Storyboard.TargetProperty="Y" From="15" To="0" BeginTime="0:0:0.25" Duration="0:0:0.5" DecelerationRatio="0.95"/>
+                    <DoubleAnimation Storyboard.TargetName="RevealGrid" Storyboard.TargetProperty="Opacity" From="0" To="1" BeginTime="0:0:0.25" Duration="0:0:0.5"/>
+
+                    <DoubleAnimation Storyboard.TargetName="RevealButtonTransform" Storyboard.TargetProperty="Y" From="15" To="0" BeginTime="0:0:0.38" Duration="0:0:0.5" DecelerationRatio="0.95"/>
+                    <DoubleAnimation Storyboard.TargetName="RevealButton" Storyboard.TargetProperty="Opacity" From="0" To="1" BeginTime="0:0:0.38" Duration="0:0:0.5"/>
+
+                    <DoubleAnimation Storyboard.TargetName="RevealLinkTransform" Storyboard.TargetProperty="Y" From="15" To="0" BeginTime="0:0:0.48" Duration="0:0:0.5" DecelerationRatio="0.95"/>
+                    <DoubleAnimation Storyboard.TargetName="RevealLink" Storyboard.TargetProperty="Opacity" From="0" To="1" BeginTime="0:0:0.48" Duration="0:0:0.5"/>
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>
     </Window.Triggers>
 
     <Grid>
-        <!-- Main Outer Border -->
-        <Border Background="{StaticResource BackgroundBrush}" CornerRadius="16" BorderBrush="{StaticResource InputBorderBrush}" BorderThickness="1">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="25" Color="#2D3282" Opacity="0.08" ShadowDepth="3"/>
-            </Border.Effect>
-        </Border>
+        <!-- ANIMATED GRADIENT BACKGROUND WITH BLUR SHAPES -->
+        <Grid Panel.ZIndex="0">
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#0A091A" Offset="0"/>
+                    <GradientStop Color="#14112E" Offset="1"/>
+                </LinearGradientBrush>
+            </Grid.Background>
+            
+            <!-- Shape 1 (Indigo blur) -->
+            <Ellipse Width="350" Height="350" Fill="#4F46E5" Opacity="0.16" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-50,-50,0,0">
+                <Ellipse.Effect>
+                    <BlurEffect Radius="120"/>
+                </Ellipse.Effect>
+                <Ellipse.RenderTransform>
+                    <TranslateTransform x:Name="BlurShape1Transform"/>
+                </Ellipse.RenderTransform>
+            </Ellipse>
+            
+            <!-- Shape 2 (Pink/Purple blur) -->
+            <Ellipse Width="400" Height="400" Fill="#D946EF" Opacity="0.08" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-80,-80">
+                <Ellipse.Effect>
+                    <BlurEffect Radius="140"/>
+                </Ellipse.Effect>
+                <Ellipse.RenderTransform>
+                    <TranslateTransform x:Name="BlurShape2Transform"/>
+                </Ellipse.RenderTransform>
+            </Ellipse>
+        </Grid>
 
-        <!-- Mesh Background Glow effects -->
-        <Ellipse Fill="{StaticResource PrimaryBrush}" Opacity="0.04" Width="400" Height="400" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-150,-150,0,0">
-            <Ellipse.Effect>
-                <BlurEffect Radius="120"/>
-            </Ellipse.Effect>
-        </Ellipse>
-        <Ellipse Fill="{StaticResource PrimaryBrush}" Opacity="0.04" Width="400" Height="400" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-150,-150">
-            <Ellipse.Effect>
-                <BlurEffect Radius="120"/>
-            </Ellipse.Effect>
-        </Ellipse>
-
-        <!-- Custom Window Drag Layer & Header -->
+        <!-- Drag Layer & Window Header Control -->
         <Grid Height="48" VerticalAlignment="Top" Panel.ZIndex="100">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-
-            <!-- Title Drag Space (Empty Area) -->
             <Border Background="Transparent" Grid.Column="0"/>
-
-            <!-- Window Controls -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
                 <Button Style="{StaticResource WindowNavButton}" Click="MinimizeButton_Click" Margin="0,0,4,0">
                     <TextBlock Text="&#xE921;" FontFamily="Segoe MDL2 Assets" FontSize="10" FontWeight="Bold"/>
@@ -236,66 +427,202 @@
             </StackPanel>
         </Grid>
 
-        <!-- Main Content Area Grid (Contains landscape split card) -->
-        <Grid x:Name="MainContainer" Margin="0,48,0,0">
+        <!-- Main Entrance Animated Grid -->
+        <Grid x:Name="MainContainer" Margin="0,48,0,0" Opacity="0">
             <Grid.RenderTransform>
-                <TranslateTransform x:Name="MainTransform" Y="0"/>
+                <ScaleTransform x:Name="MainScaleTransform" ScaleX="0.96" ScaleY="0.96" CenterX="410" CenterY="210"/>
             </Grid.RenderTransform>
             
             <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0,10,15">
-                <!-- Landscape Card Container -->
-                <Border Width="740" Height="370" Background="{StaticResource CardBackgroundBrush}" CornerRadius="16" BorderThickness="1" BorderBrush="#DFE9FD">
+                <!-- GLASSMORPHISM CONTAINER (CARD REDESIGN) -->
+                <Border Width="740" Height="370" CornerRadius="20" BorderThickness="1.2">
+                    <Border.Background>
+                        <SolidColorBrush Color="#171536" Opacity="0.65"/>
+                    </Border.Background>
+                    <Border.BorderBrush>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#FFFFFF" Offset="0" />
+                            <GradientStop Color="#FFFFFF" Offset="1" />
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
                     <Border.Effect>
-                        <DropShadowEffect BlurRadius="30" Color="#2D3282" Direction="270" ShadowDepth="4" Opacity="0.05"/>
+                        <DropShadowEffect BlurRadius="40" Color="#000000" Direction="270" ShadowDepth="8" Opacity="0.45"/>
                     </Border.Effect>
 
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <!-- Left Column: Purple Branding Banner -->
+                            <!-- Left: Branding Side -->
                             <ColumnDefinition Width="260"/>
-                            <!-- Right Column: Form Area -->
+                            <!-- Right: Register Form -->
                             <ColumnDefinition Width="478"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- LEFT COLUMN: BRANDING SPLIT -->
-                        <Border Grid.Column="0" CornerRadius="15,0,0,15">
+                        <!-- LEFT COLUMN: MASCOT & BRANDING -->
+                        <Border Grid.Column="0" CornerRadius="19,0,0,19" BorderThickness="0,0,1.2,0" BorderBrush="#20FFFFFF">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="#6366F1" Offset="0"/>
-                                    <GradientStop Color="#593AD8" Offset="1"/>
+                                    <GradientStop Color="#0B0A1E" Offset="0"/>
+                                    <GradientStop Color="#151336" Offset="1"/>
                                 </LinearGradientBrush>
                             </Border.Background>
                             
-                            <Grid Margin="24">
-                                <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left">
-                                    <TextBlock Text="MyShop" FontSize="22" FontWeight="ExtraBold" Foreground="#FFFFFF" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    <TextBlock Text="Retail Ecosystem" FontSize="11" Foreground="#C9BFFF" Opacity="0.8" FontWeight="Medium" Margin="2,2,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <Grid Margin="16">
+                                <!-- Top Branding -->
+                                <StackPanel VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,8,0,0">
+                                    <TextBlock Text="MyShop AI" FontSize="16" FontWeight="ExtraBold" Foreground="#6366F1" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI">
+                                        <TextBlock.Effect>
+                                            <DropShadowEffect Color="#6366F1" BlurRadius="12" Opacity="0.5" ShadowDepth="0"/>
+                                        </TextBlock.Effect>
+                                    </TextBlock>
+                                    <TextBlock Text="Trợ lý đăng ký thông minh" FontSize="9.5" Foreground="#94A3B8" Opacity="0.75" FontWeight="Medium" Margin="0,2,0,0" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                 </StackPanel>
 
-                                <StackPanel VerticalAlignment="Center" Margin="0,30,0,0">
-                                    <TextBlock Text="Tạo tài khoản mới!" FontSize="20" FontWeight="Bold" Foreground="#FFFFFF" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    <TextBlock Text="Đăng ký tài khoản MyShop để khám phá tính năng mua sắm toàn diện và nhận nhiều ưu đãi đặc biệt." FontSize="11.5" Foreground="#E2E8F0" Opacity="0.9" TextWrapping="Wrap" Margin="0,8,0,0" LineHeight="17" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                </StackPanel>
+                                <!-- Mascot Container (Floating) -->
+                                <Grid x:Name="MascotContainer" VerticalAlignment="Center" HorizontalAlignment="Center" Width="180" Height="180" Margin="0,0,0,10">
+                                    <Grid.RenderTransform>
+                                        <TranslateTransform x:Name="MascotFloatTransform" Y="0"/>
+                                    </Grid.RenderTransform>
+                                    
+                                    <!-- Neon Glow behind Mascot -->
+                                    <Ellipse Width="120" Height="120" Fill="#6366F1" Opacity="0.12" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Ellipse.Effect>
+                                            <BlurEffect Radius="45"/>
+                                        </Ellipse.Effect>
+                                    </Ellipse>
 
-                                <!-- SSL Trust tag at bottom of purple band -->
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" Opacity="0.8">
-                                    <TextBlock Text="&#xE727;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="#FFFFFF" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Bảo mật SSL 256-bit" FontSize="10.5" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="5,0,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                </StackPanel>
+                                    <!-- Robot Body Outer Border (Cyber Capsule) -->
+                                    <Border x:Name="RobotBody" Width="110" Height="130" CornerRadius="55" BorderThickness="1.5" BorderBrush="#6366F1" Background="#1A183C" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Border.RenderTransform>
+                                            <TransformGroup x:Name="RobotBodyTransform">
+                                                <RotateTransform Angle="0" CenterX="55" CenterY="65"/>
+                                                <ScaleTransform ScaleX="1.0" ScaleY="1.0" CenterX="55" CenterY="65"/>
+                                            </TransformGroup>
+                                        </Border.RenderTransform>
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="#6366F1" BlurRadius="15" ShadowDepth="1" Opacity="0.25"/>
+                                        </Border.Effect>
+                                        
+                                        <Grid>
+                                            <!-- Visor (Kính Led) -->
+                                            <Border x:Name="RobotVisor" Width="86" Height="48" CornerRadius="24" Background="#0C0A21" BorderThickness="1" BorderBrush="#312E81" VerticalAlignment="Top" Margin="0,22,0,0">
+                                                <Grid x:Name="MascotCenter">
+                                                    <!-- Eye Lights (Sclera) -->
+                                                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="66">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        
+                                                        <!-- Left Eye -->
+                                                        <Grid Grid.Column="0" HorizontalAlignment="Center">
+                                                            <Ellipse Width="18" Height="18" Fill="#1E1B4B" Stroke="#4338CA" StrokeThickness="1"/>
+                                                            <!-- Pupil with glow -->
+                                                            <Ellipse x:Name="leftPupil" Width="8" Height="8" Fill="#67E8F9" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                <Ellipse.RenderTransform>
+                                                                    <TransformGroup>
+                                                                        <ScaleTransform ScaleX="1.0" ScaleY="1.0" CenterX="4" CenterY="4"/>
+                                                                        <TranslateTransform x:Name="leftPupilTransform"/>
+                                                                    </TransformGroup>
+                                                                </Ellipse.RenderTransform>
+                                                                <Ellipse.Effect>
+                                                                    <DropShadowEffect Color="#22D3EE" BlurRadius="6" ShadowDepth="0" Opacity="0.9"/>
+                                                                </Ellipse.Effect>
+                                                            </Ellipse>
+                                                            
+                                                            <!-- Eye Close Line -->
+                                                            <Line x:Name="leftEyeClosed" X1="2" Y1="9" X2="16" Y2="9" Stroke="#67E8F9" StrokeThickness="2" Opacity="0" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
+                                                                <Line.Effect>
+                                                                    <DropShadowEffect Color="#22D3EE" BlurRadius="6" ShadowDepth="0" Opacity="0.9"/>
+                                                                </Line.Effect>
+                                                            </Line>
+                                                        </Grid>
+                                                        
+                                                        <!-- Right Eye -->
+                                                        <Grid Grid.Column="1" HorizontalAlignment="Center">
+                                                            <Ellipse Width="18" Height="18" Fill="#1E1B4B" Stroke="#4338CA" StrokeThickness="1"/>
+                                                            <!-- Pupil with glow -->
+                                                            <Ellipse x:Name="rightPupil" Width="8" Height="8" Fill="#67E8F9" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                <Ellipse.RenderTransform>
+                                                                    <TransformGroup>
+                                                                        <ScaleTransform ScaleX="1.0" ScaleY="1.0" CenterX="4" CenterY="4"/>
+                                                                        <TranslateTransform x:Name="rightPupilTransform"/>
+                                                                    </TransformGroup>
+                                                                </Ellipse.RenderTransform>
+                                                                <Ellipse.Effect>
+                                                                    <DropShadowEffect Color="#22D3EE" BlurRadius="6" ShadowDepth="0" Opacity="0.9"/>
+                                                                </Ellipse.Effect>
+                                                            </Ellipse>
+
+                                                            <!-- Eye Close Line -->
+                                                            <Line x:Name="rightEyeClosed" X1="2" Y1="9" X2="16" Y2="9" Stroke="#67E8F9" StrokeThickness="2" Opacity="0" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
+                                                                <Line.Effect>
+                                                                    <DropShadowEffect Color="#22D3EE" BlurRadius="6" ShadowDepth="0" Opacity="0.9"/>
+                                                                </Line.Effect>
+                                                            </Line>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Grid>
+                                            </Border>
+                                            
+                                            <!-- Mouth Area -->
+                                            <Grid VerticalAlignment="Bottom" Margin="0,0,0,26" Height="16">
+                                                <Path x:Name="mouthSmile" Data="M 0,0 Q 8,8 16,0" Stroke="#6366F1" StrokeThickness="2.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" HorizontalAlignment="Center">
+                                                    <Path.Effect>
+                                                        <DropShadowEffect Color="#6366F1" BlurRadius="8" ShadowDepth="0" Opacity="0.8"/>
+                                                    </Path.Effect>
+                                                </Path>
+                                            </Grid>
+
+                                            <!-- Inner Chest LED Indicator -->
+                                            <Ellipse Width="8" Height="8" Fill="#22D3EE" VerticalAlignment="Bottom" Margin="0,0,0,10">
+                                                <Ellipse.Effect>
+                                                    <DropShadowEffect Color="#22D3EE" BlurRadius="8" ShadowDepth="0" Opacity="0.8"/>
+                                                </Ellipse.Effect>
+                                            </Ellipse>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Hands / Visor cover (Password cover animation) -->
+                                    <Canvas Width="180" Height="180" IsHitTestVisible="False">
+                                        <!-- Left Hand -->
+                                        <Border x:Name="leftHand" Width="18" Height="18" CornerRadius="9" Background="#1E1B4B" BorderThickness="1.5" BorderBrush="#6366F1" Canvas.Left="34" Canvas.Top="115" Opacity="0">
+                                            <Border.RenderTransform>
+                                                <TranslateTransform Y="0" X="0"/>
+                                            </Border.RenderTransform>
+                                        </Border>
+                                        <!-- Right Hand -->
+                                        <Border x:Name="rightHand" Width="18" Height="18" CornerRadius="9" Background="#1E1B4B" BorderThickness="1.5" BorderBrush="#6366F1" Canvas.Left="128" Canvas.Top="115" Opacity="0">
+                                            <Border.RenderTransform>
+                                                <TranslateTransform Y="0" X="0"/>
+                                            </Border.RenderTransform>
+                                        </Border>
+                                    </Canvas>
+                                </Grid>
+
+                                <!-- Bottom Status / Footer info -->
+                                <TextBlock Text="Mascot v1.0 • Chờ đăng ký" VerticalAlignment="Bottom" FontSize="9.5" Foreground="#94A3B8" Opacity="0.5" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
                             </Grid>
                         </Border>
 
-                        <!-- RIGHT COLUMN: FORM AREA (GRID 2x2) -->
+                        <!-- RIGHT COLUMN: REGISTER FORM -->
                         <Grid Grid.Column="1" Margin="32,24">
                             <StackPanel VerticalAlignment="Center">
-                                <!-- Title -->
-                                <StackPanel Margin="0,0,0,15">
-                                    <TextBlock Text="Đăng ký tài khoản" FontSize="22" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    <TextBlock Text="Tham gia hệ thống phân phối thông minh MyShop" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.75" Margin="0,3,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                
+                                <!-- Stagger 1: Title -->
+                                <StackPanel x:Name="RevealTitle" Margin="0,0,0,16" Opacity="0">
+                                    <StackPanel.RenderTransform>
+                                        <TranslateTransform x:Name="RevealTitleTransform" Y="15"/>
+                                    </StackPanel.RenderTransform>
+                                    <TextBlock Text="Đăng ký tài khoản" FontSize="22" FontWeight="Bold" Foreground="#F8F9FF" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Tham gia hệ thống phân phối thông minh MyShop" FontSize="12" Foreground="#94A3B8" Margin="0,3,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                 </StackPanel>
 
-                                <!-- 2x2 Fields Grid -->
-                                <Grid Margin="0,0,0,15">
+                                <!-- Stagger 2: Fields Grid -->
+                                <Grid x:Name="RevealGrid" Margin="0,0,0,16" Opacity="0">
+                                    <Grid.RenderTransform>
+                                        <TranslateTransform x:Name="RevealGridTransform" Y="15"/>
+                                    </Grid.RenderTransform>
+                                    
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="12"/>
@@ -307,75 +634,73 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <!-- Row 0, Column 0: Họ và tên -->
+                                    <!-- Họ và tên -->
                                     <StackPanel Grid.Row="0" Grid.Column="0">
-                                        <TextBlock Text="Họ và tên" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="4,0,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        <TextBlock Text="Họ và tên" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="4,0,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                         <Grid>
                                             <TextBox x:Name="txtName" Style="{StaticResource ModernTextBox}" Tag="Nguyễn Văn A"
-                                                     Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" Height="38"/>
-                                            <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.6" Margin="15,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                                                     Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#94A3B8" Opacity="0.5" Margin="15,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
                                         </Grid>
                                     </StackPanel>
 
-                                    <!-- Row 0, Column 2: Email -->
+                                    <!-- Email -->
                                     <StackPanel Grid.Row="0" Grid.Column="2">
-                                        <TextBlock Text="Email" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="4,0,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        <TextBlock Text="Email" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="4,0,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                         <Grid>
                                             <TextBox x:Name="txtEmail" Style="{StaticResource ModernTextBox}" Tag="username@email.com"
-                                                     Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Height="38"/>
-                                            <TextBlock Text="&#xE715;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.6" Margin="15,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                                                     Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <TextBlock Text="&#xE715;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#94A3B8" Opacity="0.5" Margin="15,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
                                         </Grid>
                                     </StackPanel>
 
-                                    <!-- Row 2, Column 0: Số điện thoại -->
+                                    <!-- Số điện thoại -->
                                     <StackPanel Grid.Row="2" Grid.Column="0">
-                                        <TextBlock Text="Số điện thoại" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="4,0,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        <TextBlock Text="Số điện thoại" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="4,0,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                         <Grid>
                                             <TextBox x:Name="txtPhone" Style="{StaticResource ModernTextBox}" Tag="0901234567"
-                                                     Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}" Height="38"/>
-                                            <TextBlock Text="&#xE717;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.6" Margin="15,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                                                     Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <TextBlock Text="&#xE717;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#94A3B8" Opacity="0.5" Margin="15,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
                                         </Grid>
                                     </StackPanel>
 
-                                    <!-- Row 2, Column 2: Mật khẩu -->
+                                    <!-- Mật khẩu -->
                                     <StackPanel Grid.Row="2" Grid.Column="2">
-                                        <TextBlock Text="Mật khẩu" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="4,0,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        <TextBlock Text="Mật khẩu" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="4,0,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                         <Grid>
                                             <PasswordBox x:Name="txtPassword" Style="{StaticResource ModernPasswordBox}"
                                                          helpers:PasswordBoxHelper.BindPassword="True"
                                                          helpers:PasswordBoxHelper.BoundPassword="{Binding Password, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                         PasswordChanged="txtPassword_PasswordChanged"
-                                                         Height="38"/>
-                                            
-                                            <TextBlock x:Name="txtPasswordPlaceholder" Text="Mật khẩu" 
-                                                       Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.4"
-                                                       Padding="45,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
-                                            
-                                            <TextBlock Text="&#xE72E;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.6" Margin="15,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                                                         PasswordChanged="txtPassword_PasswordChanged" Tag="Mật khẩu"/>
+                                            <TextBlock Text="&#xE72E;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#94A3B8" Opacity="0.5" Margin="15,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
                                             
                                             <Button x:Name="btnToggleShowPassword" HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Margin="0,0,12,0" Cursor="Hand" Click="TogglePassword_Click" Width="28" Height="28">
-                                                <TextBlock x:Name="tbEyeIcon" Text="&#xE7B3;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.6" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <TextBlock x:Name="tbEyeIcon" Text="&#xE7B3;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#94A3B8" Opacity="0.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Button>
                                             
                                             <TextBox x:Name="txtPasswordPlain" Style="{StaticResource ModernTextBox}" Tag="Mật khẩu"
                                                      Text="{Binding Password, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                     Height="38" Visibility="Collapsed" Padding="45,10,45,10"/>
+                                                     Visibility="Collapsed"/>
                                         </Grid>
                                     </StackPanel>
                                 </Grid>
 
-                                <!-- Submit Button (Full Width of Form) -->
-                                <Button Content="Đăng ký tài khoản" Style="{StaticResource AccentButtonStyle}" Height="40"
-                                        Command="{Binding RegisterCommand}">
-                                    <Button.Effect>
-                                        <DropShadowEffect Color="#593AD8" BlurRadius="12" ShadowDepth="1" Opacity="0.2"/>
-                                    </Button.Effect>
-                                </Button>
+                                <!-- Stagger 3: Submit Button -->
+                                <Grid x:Name="RevealButton" Opacity="0">
+                                    <Grid.RenderTransform>
+                                        <TranslateTransform x:Name="RevealButtonTransform" Y="15"/>
+                                    </Grid.RenderTransform>
+                                    <Button Content="Đăng ký tài khoản" Style="{StaticResource AccentButtonStyle}" Height="38"
+                                            Command="{Binding RegisterCommand}"/>
+                                </Grid>
 
-                                <!-- Navigation Switch -->
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,18,0,0">
-                                    <TextBlock Text="Bạn đã có tài khoản MyShop?" FontSize="11.5" Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.8" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    <TextBlock Text="Đăng nhập ngay" FontSize="11.5" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" Margin="5,0,0,0" Cursor="Hand" MouseLeftButtonDown="BackToLogin_Click" FontFamily="Be Vietnam Pro, Segoe UI">
+                                <!-- Stagger 4: Navigation Link -->
+                                <StackPanel x:Name="RevealLink" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,18,0,0" Opacity="0">
+                                    <StackPanel.RenderTransform>
+                                        <TranslateTransform x:Name="RevealLinkTransform" Y="15"/>
+                                    </StackPanel.RenderTransform>
+                                    <TextBlock Text="Bạn đã có tài khoản MyShop?" FontSize="11.5" Foreground="#94A3B8" Opacity="0.8" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Đăng nhập ngay" FontSize="11.5" FontWeight="Bold" Foreground="#6366F1" Margin="5,0,0,0" Cursor="Hand" MouseLeftButtonDown="BackToLogin_Click" FontFamily="Be Vietnam Pro, Segoe UI">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
                                                 <Style.Triggers>

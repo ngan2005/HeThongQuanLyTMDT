@@ -262,6 +262,7 @@ namespace TMDT.ViewModels.Admin
                 System.Diagnostics.Debug.WriteLine("Database update failed: " + ex.Message);
             }
 
+            AuditLogHelper.Log("APPROVE_SHOP", $"Duyệt cửa hàng '{SelectedShop.ShopName}' (ID: {SelectedShop.ShopId}) — Chủ shop: {SelectedShop.User?.FullName}", "Shop", "Normal");
             MessageBox.Show($"Đã duyệt thành công! Shop '{SelectedShop.ShopName}' hiện đã có thể đăng bán sản phẩm.", 
                             "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             
@@ -296,6 +297,7 @@ namespace TMDT.ViewModels.Admin
                 System.Diagnostics.Debug.WriteLine("Database update failed: " + ex.Message);
             }
 
+            AuditLogHelper.Log("SUSPEND_SHOP", $"Tạm khóa cửa hàng '{SelectedShop.ShopName}' (ID: {SelectedShop.ShopId})", "Shop", "Warning");
             MessageBox.Show($"Đã khóa tạm thời Shop '{SelectedShop.ShopName}'.", 
                             "Đã thực hiện", MessageBoxButton.OK, MessageBoxImage.Information);
 
@@ -330,6 +332,7 @@ namespace TMDT.ViewModels.Admin
                 System.Diagnostics.Debug.WriteLine("Database update failed: " + ex.Message);
             }
 
+            AuditLogHelper.Log("ACTIVATE_SHOP", $"Kích hoạt lại cửa hàng '{SelectedShop.ShopName}' (ID: {SelectedShop.ShopId})", "Shop", "Normal");
             MessageBox.Show($"Shop '{SelectedShop.ShopName}' đã được kích hoạt hoạt động trở lại.", 
                             "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
 

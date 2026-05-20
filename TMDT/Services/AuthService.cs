@@ -29,7 +29,7 @@ namespace TMDT.Services
 
             return new UserDto
             {
-                UserId = user.UserId,
+                UserCode = user.UserCode ?? $"USR-{user.UserId}",
                 Email = user.Email,
                 FullName = user.FullName,
                 RoleName = user.Role?.RoleName,
@@ -50,6 +50,7 @@ namespace TMDT.Services
 
             var user = new User
             {
+                UserCode = "USR-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
                 FullName = request.FullName,
                 Email = request.Email,
                 Password = PasswordHelper.HashPassword(request.Password), // Đã mã hóa

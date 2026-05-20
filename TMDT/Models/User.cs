@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace TMDT.Models;
@@ -18,6 +18,8 @@ public partial class User
     public string? FullName { get; set; }
 
     public string? Avatar { get; set; }
+    
+    public string? UserCode { get; set; }
 
     public int? LoyaltyPoints { get; set; }
 
