@@ -94,6 +94,7 @@ namespace TMDT.ViewModels.Admin
                     if (!string.IsNullOrEmpty(SearchText))
                     {
                         query = query.Where(p => p.ProductName.Contains(SearchText) || 
+                                                 (p.ProductCode != null && p.ProductCode.Contains(SearchText)) ||
                                                  (p.Shop != null && p.Shop.ShopName.Contains(SearchText)));
                     }
 
@@ -138,6 +139,7 @@ namespace TMDT.ViewModels.Admin
             mockProds.Add(new Product
             {
                 ProductId = 501,
+                ProductCode = "TEFAL-5.6L",
                 ProductName = "Nồi Chiên Không Dầu Tefal XXL 5.6L",
                 CategoryId = 1,
                 Price = 2490000,
@@ -156,6 +158,7 @@ namespace TMDT.ViewModels.Admin
             mockProds.Add(new Product
             {
                 ProductId = 502,
+                ProductCode = "ROBO-QREVO",
                 ProductName = "Robot Hút Bụi Lau Nhà Roborock Q Revo",
                 CategoryId = 1,
                 Price = 14500000,
@@ -174,6 +177,7 @@ namespace TMDT.ViewModels.Admin
             mockProds.Add(new Product
             {
                 ProductId = 503,
+                ProductCode = "TEE-ORGANIC",
                 ProductName = "Áo Thun Unisex Cotton Organic Cao Cấp",
                 CategoryId = 2,
                 Price = 189000,
@@ -193,6 +197,7 @@ namespace TMDT.ViewModels.Admin
             mockProds.Add(new Product
             {
                 ProductId = 504,
+                ProductCode = "SONY-WH1000XM5",
                 ProductName = "Tai nghe Chống Ồn Chủ Động Sony WH-1000XM5",
                 CategoryId = 3,
                 Price = 6490000,
@@ -212,6 +217,7 @@ namespace TMDT.ViewModels.Admin
             mockProds.Add(new Product
             {
                 ProductId = 505,
+                ProductCode = "DETOX-VIP",
                 ProductName = "Thực phẩm giảm cân thảo mộc Detox Vip",
                 CategoryId = 4,
                 Price = 850000,
@@ -231,6 +237,7 @@ namespace TMDT.ViewModels.Admin
             if (!string.IsNullOrEmpty(SearchText))
             {
                 filtered = filtered.Where(p => p.ProductName.ToLower().Contains(SearchText.ToLower()) || 
+                                               (p.ProductCode != null && p.ProductCode.ToLower().Contains(SearchText.ToLower())) ||
                                                p.Shop.ShopName.ToLower().Contains(SearchText.ToLower()));
             }
 

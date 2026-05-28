@@ -9,9 +9,9 @@
 
     <UserControl.Resources>
         <!-- Custom colors for Dashboard -->
-        <SolidColorBrush x:Key="TextPrimary" Color="#121C2A"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#64748B"/>
-        <SolidColorBrush x:Key="BrandPurple" Color="#593AD8"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#1C1B1A"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#414750"/>
+        <SolidColorBrush x:Key="BrandPurple" Color="#004277"/>
         
         <Style x:Key="KpiCard" TargetType="Border">
             <Setter Property="Background" Value="#FFFFFF"/>
@@ -22,7 +22,7 @@
             <Setter Property="Margin" Value="0,0,16,0"/>
             <Setter Property="Effect">
                 <Setter.Value>
-                    <DropShadowEffect Color="#2D3282" BlurRadius="15" ShadowDepth="2" Opacity="0.03"/>
+                    <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.03"/>
                 </Setter.Value>
             </Setter>
         </Style>
@@ -44,6 +44,22 @@
         </Style>
     </UserControl.Resources>
 
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                  PanningMode="VerticalOnly">
+        <ScrollViewer.Resources>
+            <!-- Ultra-thin sleek scrollbar -->
+            <Style TargetType="ScrollBar">
+                <Setter Property="Width" Value="6"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Opacity" Value="0.5"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Opacity" Value="1"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </ScrollViewer.Resources>
+
     <Grid Margin="0,0,8,0">
         <Grid.RowDefinitions>
             <!-- Title section -->
@@ -53,8 +69,9 @@
             <!-- Premium Vector Charts Row -->
             <RowDefinition Height="Auto"/>
             <!-- Lower Section: Tables -->
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+
 
         <!-- TITLE ROW -->
         <Grid Grid.Row="0" Margin="0,0,0,24">
@@ -155,7 +172,7 @@
             <!-- Weekly Sales & Fee Trend Chart Card -->
             <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
                 <Border.Effect>
-                    <DropShadowEffect Color="#2D3282" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
+                    <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
                 </Border.Effect>
                 
                 <Grid>
@@ -600,7 +617,7 @@
             <!-- Top Categories Share Card -->
             <Border Grid.Column="2" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
                 <Border.Effect>
-                    <DropShadowEffect Color="#2D3282" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
+                    <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
                 </Border.Effect>
                 
                 <Grid>
@@ -648,7 +665,7 @@
             <!-- LEFT: Recent Orders Card -->
             <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
                 <Border.Effect>
-                    <DropShadowEffect Color="#2D3282" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
+                    <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
                 </Border.Effect>
                 
                 <Grid>
@@ -751,7 +768,7 @@
                                                 <Setter Property="Foreground" Value="{StaticResource BrandPurple}"/>
                                             </Trigger>
                                             <Trigger Property="Text" Value="Chờ xác nhận">
-                                                <Setter Property="Foreground" Value="#64748B"/>
+                                                <Setter Property="Foreground" Value="#414750"/>
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
@@ -765,7 +782,7 @@
             <!-- RIGHT: Top Performing Shops Card -->
             <Border Grid.Column="2" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
                 <Border.Effect>
-                    <DropShadowEffect Color="#2D3282" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
+                    <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
                 </Border.Effect>
                 
                 <Grid>
@@ -805,4 +822,6 @@
             </Border>
         </Grid>
     </Grid>
+    </ScrollViewer>
 </UserControl>
+

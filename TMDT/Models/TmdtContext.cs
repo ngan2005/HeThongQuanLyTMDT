@@ -430,6 +430,9 @@ public partial class TmdtContext : DbContext
             entity.Property(e => e.OriginalPrice).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.ProductName).HasMaxLength(200);
+            entity.Property(e => e.ProductCode)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.Rating)
                 .HasDefaultValue(0m)
                 .HasColumnType("decimal(3, 2)");

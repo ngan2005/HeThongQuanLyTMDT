@@ -1,0 +1,411 @@
+<Window x:Class="TMDT.Views.Seller.SellerMainView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:TMDT.ViewModels.Seller"
+        xmlns:views="clr-namespace:TMDT.Views.Seller"
+        xmlns:converters="clr-namespace:TMDT.Converters"
+        mc:Ignorable="d"
+        Title="Seller Portal | MyShop" Height="680" Width="1120"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        MouseDown="Window_MouseDown">
+
+    <Window.DataContext>
+        <vm:SellerMainViewModel/>
+    </Window.DataContext>
+
+    <Window.Resources>
+        <!-- Converter for checking active menu -->
+        <converters:EqualityToBooleanConverter x:Key="EqualityToBooleanConverter"/>
+
+        <!-- Mapping ViewModels to Views using DataTemplates -->
+        <DataTemplate DataType="{x:Type vm:SellerDashboardViewModel}">
+            <views:SellerDashboardView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SellerProductsViewModel}">
+            <views:SellerProductsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SellerOrdersViewModel}">
+            <views:SellerOrdersView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SellerVouchersViewModel}">
+            <views:SellerVouchersView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SellerWalletViewModel}">
+            <views:SellerWalletView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SellerProfileViewModel}">
+            <views:SellerProfileView/>
+        </DataTemplate>
+
+        <!-- Design System Colors — Seller Teal & Indigo Theme -->
+        <SolidColorBrush x:Key="SidebarBg" Color="#1E1B4B"/> <!-- Very dark Indigo -->
+        <SolidColorBrush x:Key="BrandTeal" Color="#0D9488"/> <!-- Modern Teal -->
+        <SolidColorBrush x:Key="BgWhite" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="BgMain" Color="#F8FAFC"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#1E293B"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#64748B"/>
+        <SolidColorBrush x:Key="BorderSlate" Color="#E2E8F0"/>
+
+        <!-- Sidebar RadioButton Style with Smooth Hover Translate & Glow Active Indicator -->
+        <Style x:Key="SidebarButton" TargetType="RadioButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#94A3B8"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="GroupName" Value="SidebarMenu"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Grid>
+                            <!-- Hover glow: subtle brand teal -->
+                            <Border x:Name="glow" CornerRadius="8" Opacity="0" Background="#0D9488">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#0D9488" BlurRadius="8" ShadowDepth="0" Opacity="0.25"/>
+                                </Border.Effect>
+                            </Border>
+
+                            <!-- Background Highlight Border -->
+                            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8" Padding="12,0">
+                                <Border.RenderTransform>
+                                    <TranslateTransform x:Name="translate" X="0"/>
+                                </Border.RenderTransform>
+                                <Grid>
+                                    <!-- Active indicator stripe: brand teal -->
+                                    <Border x:Name="indicator" Width="3" Height="16" Background="#0D9488" CornerRadius="1.5" HorizontalAlignment="Left" VerticalAlignment="Center" Opacity="0"/>
+                                    
+                                    <!-- Content Area -->
+                                    <ContentPresenter x:Name="content" Margin="14,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                        
+                        <ControlTemplate.Triggers>
+                            <!-- Hover: soft teal tint -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#0D9488"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.10"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="translate" Storyboard.TargetProperty="X" To="4" Duration="0:0:0.12"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="translate" Storyboard.TargetProperty="X" To="0" Duration="0:0:0.12"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                            
+                            <!-- Active: gradient pill + indicator glow -->
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#0D9488"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.22"/>
+                                <Setter TargetName="indicator" Property="Opacity" Value="1"/>
+                                <Setter TargetName="glow" Property="Opacity" Value="0.08"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Toggle arrow button style -->
+        <Style x:Key="SidebarToggleButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#2E2A66"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Window Control Button Styles -->
+        <Style x:Key="WindowNavButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#E2E8F0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="WindowCloseButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#FEE2E2"/>
+                                <Setter Property="Foreground" Value="#EF4444"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <!-- Main Window Container -->
+        <Border Background="{StaticResource BgMain}" CornerRadius="16" BorderBrush="{StaticResource BorderSlate}" BorderThickness="1">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="30" Color="#1E1B4B" Direction="270" ShadowDepth="4" Opacity="0.10"/>
+            </Border.Effect>
+        </Border>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <!-- Column 0: Sidebar -->
+                <ColumnDefinition x:Name="SidebarColumn" Width="Auto"/>
+                <!-- Column 1: Main Content Workspace -->
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ========================================== -->
+            <!-- COLUMN 0: SIDEBAR (DARK INDIGO THEME) -->
+            <!-- ========================================== -->
+            <Border x:Name="SidebarBorder" Grid.Column="0" Background="{StaticResource SidebarBg}" CornerRadius="15,0,0,15" Width="240" ClipToBounds="True">
+                <Grid Margin="8,16">
+                    <Grid.RowDefinitions>
+                        <!-- Brand logo & System tag -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Navigation Menu -->
+                        <RowDefinition Height="*"/>
+                        <!-- Bottom Admin Account Profile -->
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Brand Header with collapse toggle -->
+                    <Grid Grid.Row="0" Margin="0,0,0,24">
+                        <StackPanel Margin="8,0,0,0">
+                            <TextBlock x:Name="BrandTitle" Text="MyShop" FontSize="22" FontWeight="ExtraBold" Foreground="#FFFFFF" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock x:Name="BrandSubtitle" Text="KÊNH NGƯỜI BÁN" FontSize="9.5" FontWeight="Bold" Foreground="#0D9488" Margin="2,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        </StackPanel>
+                        <!-- Collapse/Expand toggle arrow -->
+                        <Button x:Name="SidebarToggleBtn" Style="{StaticResource SidebarToggleButton}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,4,0" Click="SidebarToggle_Click" ToolTip="Thu/Mở thanh điều hướng">
+                            <TextBlock x:Name="ToggleArrow" Text="&#xE76B;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#0D9488"/>
+                        </Button>
+                    </Grid>
+
+                    <!-- Navigation Menu -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled" Margin="0,0,0,16">
+                        <StackPanel>
+                            <!-- Dashboard -->
+                            <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowDashboardCommand}" 
+                                         IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Dashboard, Mode=OneWay}"
+                                         ToolTip="Tổng quan Dashboard">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE9D2;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#94A3B8" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="t0" Text="Tổng quan Dashboard" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
+                                        <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <!-- Products -->
+                            <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowProductsCommand}" 
+                                         IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Products, Mode=OneWay}"
+                                         ToolTip="Sản phẩm của Shop">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE179;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#94A3B8" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Sản phẩm của Shop" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
+                                        <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <!-- Orders -->
+                            <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowOrdersCommand}" 
+                                         IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Orders, Mode=OneWay}"
+                                         ToolTip="Đơn hàng khách đặt">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8D5;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#94A3B8" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Đơn hàng khách đặt" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
+                                        <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <!-- Vouchers -->
+                            <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowVouchersCommand}" 
+                                         IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Vouchers, Mode=OneWay}"
+                                         ToolTip="Mã giảm giá (Voucher)">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE1A1;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#94A3B8" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Mã giảm giá (Voucher)" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
+                                        <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <!-- Wallet -->
+                            <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowWalletCommand}" 
+                                         IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Wallet, Mode=OneWay}"
+                                         ToolTip="Ví tiền &amp; Rút tiền">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xEDF4;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#94A3B8" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Ví tiền &amp; Rút tiền" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
+                                        <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <!-- Profile -->
+                            <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowProfileCommand}" 
+                                         IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Profile, Mode=OneWay}"
+                                         ToolTip="Cài đặt Shop">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#94A3B8" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Cài đặt Shop" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
+                                        <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </RadioButton>
+
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Bottom Profile Info -->
+                    <Border Grid.Row="2" Background="#262261" CornerRadius="10" Padding="12" Opacity="0.95" BorderThickness="1" BorderBrush="#20FFFFFF">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Clickable Profile Area -->
+                            <Button Grid.Column="0" Command="{Binding ShowProfileCommand}" Background="Transparent" BorderThickness="0">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="Transparent" Cursor="Hand" ToolTip="Xem thông tin Shop">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <!-- Avatar Circle (S for Seller) -->
+                                                <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16" Background="{StaticResource BrandTeal}">
+                                                    <TextBlock Text="S" Foreground="#FFFFFF" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                </Border>
+
+                                                <!-- Details (hidden when collapsed) -->
+                                                <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                                                    <StackPanel.Style>
+                                                        <Style TargetType="StackPanel">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </StackPanel.Style>
+                                                    <TextBlock Text="{Binding ShopName}" TextTrimming="CharacterEllipsis" FontSize="11.5" FontWeight="SemiBold" Foreground="#FFFFFF" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                    <TextBlock Text="Kênh Người Bán" FontSize="9.5" Foreground="#94A3B8" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+
+                            <!-- Logout button -->
+                            <Button Grid.Column="1" Background="Transparent" BorderThickness="0" Cursor="Hand" Click="Logout_Click" ToolTip="Đăng xuất" Margin="8,0,0,0">
+                                <TextBlock Text="&#xE7E8;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#F87171" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- ========================================== -->
+            <!-- COLUMN 1: MAIN WORKSPACE (LIGHT CLEAN THEME) -->
+            <!-- ========================================== -->
+            <Grid Grid.Column="1" Margin="24,0,24,24">
+                <Grid.RowDefinitions>
+                    <!-- Top Window controls Header -->
+                    <RowDefinition Height="64"/>
+                    <!-- Dynamic Body Workspace -->
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- TOP BAR HEADER -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Subtitle status -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Kênh Người Bán" FontSize="11.5" Foreground="{StaticResource TextSecondary}" FontWeight="SemiBold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text=" / " FontSize="11.5" Foreground="{StaticResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text="{Binding ActiveMenu}" FontSize="11.5" Foreground="{StaticResource BrandTeal}" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                    </StackPanel>
+
+                    <!-- Top Window action controls -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Style="{StaticResource WindowNavButton}" Click="MinimizeButton_Click" Margin="0,0,4,0">
+                            <TextBlock Text="&#xE921;" FontFamily="Segoe MDL2 Assets" FontSize="10" FontWeight="Bold"/>
+                        </Button>
+                        <Button Style="{StaticResource WindowCloseButton}" Click="ExitButton_Click">
+                            <TextBlock Text="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="10" FontWeight="Bold"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <!-- DYNAMIC CONTENT BODY -->
+                <ContentControl Grid.Row="1" Content="{Binding CurrentView}"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

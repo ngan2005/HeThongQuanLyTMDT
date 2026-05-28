@@ -9,9 +9,9 @@
 
     <UserControl.Resources>
         <!-- Style tokens -->
-        <SolidColorBrush x:Key="TextPrimary" Color="#121C2A"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#64748B"/>
-        <SolidColorBrush x:Key="BrandPurple" Color="#593AD8"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#1C1B1A"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#414750"/>
+        <SolidColorBrush x:Key="BrandPurple" Color="#004277"/>
         
         <Style x:Key="MetricCardBorder" TargetType="Border">
             <Setter Property="Background" Value="#FFFFFF"/>
@@ -202,3 +202,4 @@
         </ScrollViewer>
     </Grid>
 </UserControl>
+

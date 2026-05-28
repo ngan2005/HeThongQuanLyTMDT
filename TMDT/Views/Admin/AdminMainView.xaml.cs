@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 using TMDT.ViewModels.Admin;
 
@@ -10,6 +11,7 @@ namespace TMDT.Views.Admin
     {
         private const double ExpandedWidth = 240;
         private const double CollapsedWidth = 68;
+        private DateTime _lastClickTime = DateTime.MinValue;
 
         public AdminMainView()
         {
@@ -24,7 +26,6 @@ namespace TMDT.Views.Admin
             vm.IsSidebarExpanded = !vm.IsSidebarExpanded;
             double targetWidth = vm.IsSidebarExpanded ? ExpandedWidth : CollapsedWidth;
 
-            // Animate sidebar border width
             var widthAnim = new DoubleAnimation
             {
                 To = targetWidth,
@@ -33,10 +34,7 @@ namespace TMDT.Views.Admin
             };
             SidebarBorder.BeginAnimation(WidthProperty, widthAnim);
 
-            // Rotate toggle arrow: &#xE76B; = ChevronLeft, &#xE76C; = ChevronRight
             ToggleArrow.Text = vm.IsSidebarExpanded ? "\uE76B" : "\uE76C";
-
-            // Hide/show brand text
             BrandTitle.Visibility = vm.IsSidebarExpanded ? Visibility.Visible : Visibility.Collapsed;
             BrandSubtitle.Visibility = vm.IsSidebarExpanded ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -44,6 +42,20 @@ namespace TMDT.Views.Admin
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton != MouseButtonState.Pressed) return;
+
+            // Phát hiện double-click thủ công để Toggle Maximize
+            var now = DateTime.Now;
+            if ((now - _lastClickTime).TotalMilliseconds < 400)
+            {
+                ToggleMaximize();
+                _lastClickTime = DateTime.MinValue;
+                return;
+            }
+            _lastClickTime = now;
+
+            // Không cho kéo khi đang Maximized
+            if (this.WindowState == WindowState.Maximized) return;
+
             var source = e.OriginalSource as DependencyObject;
             while (source != null)
             {
@@ -54,9 +66,41 @@ namespace TMDT.Views.Admin
                     source is System.Windows.Controls.ScrollViewer ||
                     source is System.Windows.Controls.DataGrid)
                     return;
-                source = System.Windows.Media.VisualTreeHelper.GetParent(source);
+                source = VisualTreeHelper.GetParent(source);
             }
             DragMove();
+        }
+
+        private void MaximizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleMaximize();
+        }
+
+        private void ToggleMaximize()
+        {
+            if (this.WindowState == WindowState.Maximized)
+                this.WindowState = WindowState.Normal;
+            else
+                this.WindowState = WindowState.Maximized;
+        }
+
+        // Tự động cập nhật CornerRadius và icon khi WindowState thay đổi
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            if (this.WindowState == WindowState.Maximized)
+            {
+                MainBorder.CornerRadius = new CornerRadius(0);
+                SidebarBorder.CornerRadius = new CornerRadius(0);
+                MaximizeIcon.Text = "\uE923"; // Restore icon
+                MaximizeButton.ToolTip = "Thu nhỏ cửa sổ";
+            }
+            else
+            {
+                MainBorder.CornerRadius = new CornerRadius(16);
+                SidebarBorder.CornerRadius = new CornerRadius(15, 0, 0, 15);
+                MaximizeIcon.Text = "\uE922"; // Maximize icon
+                MaximizeButton.ToolTip = "Phóng to";
+            }
         }
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)

@@ -1,0 +1,281 @@
+<UserControl x:Class="TMDT.Views.Seller.SellerWalletView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TMDT.Views.Seller"
+             mc:Ignorable="d" 
+             d:DesignHeight="580" d:DesignWidth="820">
+
+    <UserControl.Resources>
+        <Style x:Key="InputLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#64748B"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+        </Style>
+
+        <Style x:Key="FormInput" TargetType="TextBox">
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#1E293B"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="6">
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#FFFFFF"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#0D9488"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="1.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <!-- Left: Card & Form -->
+            <ColumnDefinition Width="1*"/>
+            <!-- Right: Lịch sử giao dịch -->
+            <ColumnDefinition Width="1.2*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ========================================== -->
+        <!-- LEFT COLUMN: PREMIUM WALLET CARD & FORM -->
+        <!-- ========================================== -->
+        <Grid Grid.Column="0" Margin="0,0,16,0">
+            <Grid.RowDefinitions>
+                <!-- Card -->
+                <RowDefinition Height="Auto"/>
+                <!-- Form -->
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- 1. WALLET VIRTUAL CARD (DEEP INDIGO GRADIENT) -->
+            <Border Grid.Row="0" CornerRadius="16" Height="165" Margin="0,0,0,16" Padding="20">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#0F172A" Offset="0"/> <!-- Dark Slate -->
+                        <GradientStop Color="#1E1B4B" Offset="0.5"/> <!-- Deep Indigo -->
+                        <GradientStop Color="#0D9488" Offset="1"/> <!-- Modern Teal -->
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="16" Color="#1E1B4B" Direction="270" ShadowDepth="4" Opacity="0.25"/>
+                </Border.Effect>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <!-- Chip & Card Name -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Number Placeholder -->
+                        <RowDefinition Height="*"/>
+                        <!-- Balance & Expiry -->
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Chip & System Title -->
+                    <Grid Grid.Row="0">
+                        <TextBlock Text="SHOP WALLET" FontSize="11" FontWeight="Bold" Foreground="#94A3B8" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <Border Background="#F59E0B" Width="30" Height="22" CornerRadius="4" HorizontalAlignment="Right" VerticalAlignment="Center"/> <!-- Chip -->
+                    </Grid>
+
+                    <!-- Card Account Number representation -->
+                    <TextBlock Grid.Row="1" Text="••••  ••••  ••••  8970" FontSize="15" Foreground="#CBD5E1" FontWeight="Medium" VerticalAlignment="Center" FontFamily="Consolas, Segoe UI"/>
+
+                    <!-- Balance & Expiry -->
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="SỐ DƯ KHẢ DỤNG" FontSize="9.5" Foreground="#94A3B8" FontWeight="SemiBold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Text="{Binding WalletBalance, StringFormat={}{0:N0} đ}" FontSize="20" Foreground="#FFFFFF" FontWeight="ExtraBold" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                            <TextBlock Text="HẠN DÙNG" FontSize="8.5" Foreground="#94A3B8" HorizontalAlignment="Right" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Text="12 / 29" FontSize="11.5" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Right" Margin="0,2,0,0" FontFamily="Consolas"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- 2. WITHDRAW FORM -->
+            <Border Grid.Row="1" Background="#FFFFFF" CornerRadius="16" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Yêu Cầu Rút Tiền Về Ngân Hàng" FontSize="14" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,16" FontFamily="Be Vietnam Pro, Segoe UI"/>
+
+                    <StackPanel Grid.Row="1">
+                        <!-- Amount -->
+                        <TextBlock Style="{StaticResource InputLabel}" Text="Số tiền muốn rút (đ) *"/>
+                        <TextBox Style="{StaticResource FormInput}" Text="{Binding AmountInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0,0,0,12"/>
+
+                        <!-- Bank Name -->
+                        <TextBlock Style="{StaticResource InputLabel}" Text="Ngân hàng nhận tiền *"/>
+                        <ComboBox Height="36" SelectedValuePath="Content" SelectedValue="{Binding BankNameInput}" Margin="0,0,0,12">
+                            <ComboBox.Resources>
+                                <Style TargetType="ComboBox">
+                                    <Setter Property="Background" Value="#F8FAFC"/>
+                                    <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                    <Setter Property="Padding" Value="10,0"/>
+                                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                </Style>
+                            </ComboBox.Resources>
+                            <ComboBoxItem Content="Vietcombank" IsSelected="True"/>
+                            <ComboBoxItem Content="Vietinbank"/>
+                            <ComboBoxItem Content="BIDV"/>
+                            <ComboBoxItem Content="Techcombank"/>
+                            <ComboBoxItem Content="MB Bank"/>
+                            <ComboBoxItem Content="Agribank"/>
+                        </ComboBox>
+
+                        <!-- Account Number -->
+                        <TextBlock Style="{StaticResource InputLabel}" Text="Số tài khoản ngân hàng *"/>
+                        <TextBox Style="{StaticResource FormInput}" Text="{Binding AccountNumberInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0,0,0,12" ToolTip="Nhập số tài khoản thụ hưởng"/>
+                    </StackPanel>
+
+                    <!-- Action Submit -->
+                    <Button Grid.Row="2" Command="{Binding SendWithdrawRequestCommand}" Background="#0D9488" BorderThickness="0" Height="36" Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <Button.Content>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE172;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Text=" Gửi Yêu Cầu Rút Tiền" FontSize="12.5" Foreground="#FFFFFF" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            </StackPanel>
+                        </Button.Content>
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="0.9"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ========================================== -->
+        <!-- RIGHT COLUMN: TRANSACTION HISTORY LIST -->
+        <!-- ========================================== -->
+        <Border Grid.Column="1" Background="#FFFFFF" CornerRadius="16" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Lịch Sử Yêu Cầu Rút Tiền" FontSize="15.5" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,16" FontFamily="Be Vietnam Pro, Segoe UI"/>
+
+                <!-- Transactions DataGrid -->
+                <DataGrid Grid.Row="1" ItemsSource="{Binding WithdrawRequests}" AutoGenerateColumns="False" 
+                          HeadersVisibility="Column" GridLinesVisibility="None" Background="Transparent" 
+                          BorderThickness="0" RowHeight="42" IsReadOnly="True">
+                    <DataGrid.Resources>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#F8FAFC"/>
+                            <Setter Property="Foreground" Value="#64748B"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="FontSize" Value="11"/>
+                            <Setter Property="Padding" Value="8,4"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+                        </Style>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="#F1F5F9"/>
+                        </Style>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="8,0"/>
+                            <Setter Property="FontSize" Value="12"/>
+                            <Setter Property="Foreground" Value="#1E293B"/>
+                            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+                        </Style>
+                    </DataGrid.Resources>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Ngân Hàng" Binding="{Binding BankName}" Width="100"/>
+                        <DataGridTextColumn Header="Số Tài Khoản" Binding="{Binding AccountNumber}" Width="110"/>
+                        <DataGridTextColumn Header="Số Tiền Rút" Binding="{Binding Amount, StringFormat={}{0:N0} đ}" Width="90"/>
+                        <DataGridTextColumn Header="Ngày Gửi" Binding="{Binding RequestedAt, StringFormat=\{0:dd/MM/yyyy HH:mm\}}" Width="120"/>
+                        <DataGridTemplateColumn Header="Trạng Thái" Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="4" Padding="6,2" HorizontalAlignment="Left">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Pending">
+                                                        <Setter Property="Background" Value="#FFEFE2"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Approved">
+                                                        <Setter Property="Background" Value="#ECFDF5"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Rejected">
+                                                        <Setter Property="Background" Value="#FEE2E2"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock FontSize="9.5" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Pending">
+                                                            <Setter Property="Text" Value="Đang xử lý"/>
+                                                            <Setter Property="Foreground" Value="#EA580C"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Approved">
+                                                            <Setter Property="Text" Value="Đã duyệt"/>
+                                                            <Setter Property="Foreground" Value="#059669"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Rejected">
+                                                            <Setter Property="Text" Value="Từ chối"/>
+                                                            <Setter Property="Foreground" Value="#EF4444"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

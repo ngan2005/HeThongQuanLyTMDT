@@ -6,5 +6,6 @@
     <conv:InverseBooleanConverter x:Key="InverseBool"/>
     <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
     <conv:HexToCharConverter x:Key="HexToCharConverter"/>
+    <conv:EqualityToBooleanConverter x:Key="EqualityToBooleanConverter"/>
     
 </ResourceDictionary>

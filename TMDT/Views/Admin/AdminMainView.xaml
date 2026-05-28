@@ -7,12 +7,14 @@
         xmlns:views="clr-namespace:TMDT.Views.Admin"
         xmlns:converters="clr-namespace:TMDT.Converters"
         mc:Ignorable="d"
-        Title="Admin Portal | MyShop" Height="680" Width="1120"
+        Title="Admin Portal | MyShop" Height="768" Width="1280"
         WindowStartupLocation="CenterScreen"
         Background="Transparent"
         WindowStyle="None"
+        ResizeMode="CanResizeWithGrip"
         AllowsTransparency="True"
-        MouseDown="Window_MouseDown">
+        MouseDown="Window_MouseDown"
+        StateChanged="Window_StateChanged">
 
     <Window.DataContext>
         <vm:AdminMainViewModel/>
@@ -63,19 +65,19 @@
             <views:AdminProfileView/>
         </DataTemplate>
 
-        <!-- Modern Colors -->
-        <SolidColorBrush x:Key="SidebarBg" Color="#131130"/>
-        <SolidColorBrush x:Key="BrandPurple" Color="#6366F1"/>
+        <!-- Design System Colors — LogisticsPro Warm MD3 Palette -->
+        <SolidColorBrush x:Key="SidebarBg" Color="#F7F3F0"/>
+        <SolidColorBrush x:Key="BrandPurple" Color="#004277"/>
         <SolidColorBrush x:Key="BgWhite" Color="#FFFFFF"/>
-        <SolidColorBrush x:Key="BgMain" Color="#FAF9FF"/>
-        <SolidColorBrush x:Key="TextPrimary" Color="#1E293B"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#64748B"/>
-        <SolidColorBrush x:Key="BorderSlate" Color="#E2E8F0"/>
+        <SolidColorBrush x:Key="BgMain" Color="#FDF8F6"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#1C1B1A"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#414750"/>
+        <SolidColorBrush x:Key="BorderSlate" Color="#C1C7D2"/>
 
-        <!-- Sidebar RadioButton Style with Smooth Hover Translate & Glow Active Indicator -->
+        <!-- Sidebar RadioButton Style — LogisticsPro Warm MD3 Light Sidebar -->
         <Style x:Key="SidebarButton" TargetType="RadioButton">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#94A3B8"/>
+            <Setter Property="Foreground" Value="#414750"/>
             <Setter Property="Height" Value="40"/>
             <Setter Property="Margin" Value="0,2"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -85,22 +87,14 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
                         <Grid>
-                            <!-- Glow effect behind active item -->
-                            <Border x:Name="glow" CornerRadius="8" Opacity="0" Background="#6366F1">
-                                <Border.Effect>
-                                    <DropShadowEffect Color="#6366F1" BlurRadius="8" ShadowDepth="0" Opacity="0.3"/>
-                                </Border.Effect>
-                            </Border>
-
                             <!-- Background Highlight Border -->
                             <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8" Padding="12,0">
                                 <Border.RenderTransform>
                                     <TranslateTransform x:Name="translate" X="0"/>
                                 </Border.RenderTransform>
                                 <Grid>
-                                    <!-- Indicator vertical stripe -->
-                                    <Border x:Name="indicator" Width="3" Height="16" Background="#6366F1" CornerRadius="1.5" HorizontalAlignment="Left" VerticalAlignment="Center" Opacity="0"/>
-                                    
+                                    <!-- Active indicator stripe: brand blue -->
+                                    <Border x:Name="indicator" Width="3" Height="16" Background="#004277" CornerRadius="1.5" HorizontalAlignment="Left" VerticalAlignment="Center" Opacity="0"/>
                                     <!-- Content Area -->
                                     <ContentPresenter x:Name="content" Margin="14,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                 </Grid>
@@ -108,11 +102,10 @@
                         </Grid>
                         
                         <ControlTemplate.Triggers>
-                            <!-- Hover state: Translucent light background & Translate X -->
+                            <!-- Hover: soft warm tint -->
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#FFFFFF"/>
-                                <Setter TargetName="border" Property="Opacity" Value="0.06"/>
-                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter TargetName="border" Property="Background" Value="#E6E2DE"/>
+                                <Setter Property="Foreground" Value="#1C1B1A"/>
                                 <Trigger.EnterActions>
                                     <BeginStoryboard>
                                         <Storyboard>
@@ -128,14 +121,11 @@
                                     </BeginStoryboard>
                                 </Trigger.ExitActions>
                             </Trigger>
-                            
-                            <!-- Checked/Active state: Glow + Indicator + Solid Highlight -->
+                            <!-- Active: blue pill + indicator -->
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#FFFFFF"/>
-                                <Setter TargetName="border" Property="Opacity" Value="0.08"/>
+                                <Setter TargetName="border" Property="Background" Value="#D3E4FF"/>
                                 <Setter TargetName="indicator" Property="Opacity" Value="1"/>
-                                <Setter TargetName="glow" Property="Opacity" Value="0.05"/>
-                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter Property="Foreground" Value="#001C38"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -159,7 +149,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="Background" Value="#25215A"/>
+                                <Setter TargetName="bd" Property="Background" Value="#E6E2DE"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -218,9 +208,9 @@
 
     <Grid>
         <!-- Main Window Container -->
-        <Border Background="{StaticResource BgMain}" CornerRadius="16" BorderBrush="{StaticResource BorderSlate}" BorderThickness="1">
+        <Border x:Name="MainBorder" Background="{StaticResource BgMain}" CornerRadius="16" BorderBrush="{StaticResource BorderSlate}" BorderThickness="1">
             <Border.Effect>
-                <DropShadowEffect BlurRadius="30" Color="#2D3282" Direction="270" ShadowDepth="4" Opacity="0.08"/>
+                <DropShadowEffect BlurRadius="30" Color="#2B1B69" Direction="270" ShadowDepth="4" Opacity="0.10"/>
             </Border.Effect>
         </Border>
 
@@ -235,7 +225,7 @@
             <!-- ========================================== -->
             <!-- COLUMN 0: SIDEBAR (DARK INDIGO THEME) -->
             <!-- ========================================== -->
-            <Border x:Name="SidebarBorder" Grid.Column="0" Background="{StaticResource SidebarBg}" CornerRadius="15,0,0,15" Width="240" ClipToBounds="True">
+            <Border x:Name="SidebarBorder" Grid.Column="0" Background="{StaticResource SidebarBg}" BorderBrush="{StaticResource BorderSlate}" BorderThickness="0,0,1,0" CornerRadius="15,0,0,15" Width="240" ClipToBounds="True">
                 <Grid Margin="8,16">
                     <Grid.RowDefinitions>
                         <!-- Brand logo & System tag -->
@@ -249,12 +239,12 @@
                     <!-- Brand Header with collapse toggle -->
                     <Grid Grid.Row="0" Margin="0,0,0,24">
                         <StackPanel Margin="8,0,0,0">
-                            <TextBlock x:Name="BrandTitle" Text="MyShop" FontSize="22" FontWeight="ExtraBold" Foreground="#FFFFFF" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                            <TextBlock x:Name="BrandSubtitle" Text="HỆ THỐNG QUẢN TRỊ VIÊN" FontSize="9.5" FontWeight="Bold" Foreground="#818CF8" Margin="2,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock x:Name="BrandTitle" Text="MyShop" FontSize="22" FontWeight="ExtraBold" Foreground="#1C1B1A" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock x:Name="BrandSubtitle" Text="HỆ THỐNG QUẢN TRỊ VIÊN" FontSize="9.5" FontWeight="Bold" Foreground="#004277" Margin="2,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
                         </StackPanel>
                         <!-- Collapse/Expand toggle arrow -->
                         <Button x:Name="SidebarToggleBtn" Style="{StaticResource SidebarToggleButton}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,4,0" Click="SidebarToggle_Click" ToolTip="Thu/Mở thanh điều hướng">
-                            <TextBlock x:Name="ToggleArrow" Text="&#xE76B;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#818CF8"/>
+                            <TextBlock x:Name="ToggleArrow" Text="&#xE76B;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#004277"/>
                         </Button>
                     </Grid>
 
@@ -266,7 +256,7 @@
                                          IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Dashboard, Mode=OneWay}"
                                          ToolTip="Tổng quan Dashboard">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE9D2;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#C7D2FE" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="&#xE9D2;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#004277" Width="24" VerticalAlignment="Center"/>
                                     <TextBlock x:Name="t0" Text="Tổng quan Dashboard" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
                                         <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
                                     </TextBlock>
@@ -278,7 +268,7 @@
                                          IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Orders, Mode=OneWay}"
                                          ToolTip="Quản lý Đơn hàng">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE8D5;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#C7D2FE" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="&#xE8D5;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#004277" Width="24" VerticalAlignment="Center"/>
                                     <TextBlock Text="Quản lý Đơn hàng" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
                                         <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
                                     </TextBlock>
@@ -290,7 +280,7 @@
                                          IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Shops, Mode=OneWay}"
                                          ToolTip="Duyệt cửa hàng">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE719;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#C7D2FE" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="&#xE719;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#004277" Width="24" VerticalAlignment="Center"/>
                                     <TextBlock Text="Duyệt cửa hàng" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
                                         <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
                                     </TextBlock>
@@ -302,7 +292,7 @@
                                          IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Products, Mode=OneWay}"
                                          ToolTip="Duyệt sản phẩm">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE179;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#C7D2FE" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="&#xE179;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#004277" Width="24" VerticalAlignment="Center"/>
                                     <TextBlock Text="Duyệt sản phẩm" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
                                         <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
                                     </TextBlock>
@@ -314,7 +304,7 @@
                                          IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Withdraws, Mode=OneWay}"
                                          ToolTip="Yêu cầu rút tiền">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xEDF4;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#C7D2FE" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="&#xEDF4;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#004277" Width="24" VerticalAlignment="Center"/>
                                     <TextBlock Text="Yêu cầu rút tiền" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
                                         <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
                                     </TextBlock>
@@ -326,7 +316,7 @@
                                          IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Complaints, Mode=OneWay}"
                                          ToolTip="Giải quyết khiếu nại">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE1A1;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#C7D2FE" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="&#xE1A1;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#004277" Width="24" VerticalAlignment="Center"/>
                                     <TextBlock Text="Giải quyết khiếu nại" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
                                         <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
                                     </TextBlock>
@@ -338,7 +328,7 @@
                                          IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Marketing, Mode=OneWay}"
                                          ToolTip="Kênh Marketing">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE724;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#C7D2FE" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="&#xE724;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#004277" Width="24" VerticalAlignment="Center"/>
                                     <TextBlock Text="Kênh Marketing" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
                                         <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
                                     </TextBlock>
@@ -350,7 +340,7 @@
                                          IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Categories, Mode=OneWay}"
                                          ToolTip="Quản lý Danh mục">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE814;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#C7D2FE" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="&#xE814;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#004277" Width="24" VerticalAlignment="Center"/>
                                     <TextBlock Text="Quản lý Danh mục" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
                                         <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
                                     </TextBlock>
@@ -362,7 +352,7 @@
                                          IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Reports, Mode=OneWay}"
                                          ToolTip="Báo cáo &amp; Thống kê">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE9F9;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#C7D2FE" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="&#xE9F9;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#004277" Width="24" VerticalAlignment="Center"/>
                                     <TextBlock Text="Báo cáo &amp; Thống kê" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
                                         <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
                                     </TextBlock>
@@ -374,7 +364,7 @@
                                          IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Users, Mode=OneWay}"
                                          ToolTip="Quản lý Thành viên">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#C7D2FE" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#004277" Width="24" VerticalAlignment="Center"/>
                                     <TextBlock Text="Quản lý Thành viên" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
                                         <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
                                     </TextBlock>
@@ -386,7 +376,7 @@
                                          IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Settings, Mode=OneWay}"
                                          ToolTip="Cấu hình Hệ thống">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#C7D2FE" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#004277" Width="24" VerticalAlignment="Center"/>
                                     <TextBlock Text="Cấu hình Hệ thống" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
                                         <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
                                     </TextBlock>
@@ -398,7 +388,7 @@
                                          IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=AuditLogs, Mode=OneWay}"
                                          ToolTip="Nhật ký Hoạt động">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE81C;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#C7D2FE" Width="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="&#xE81C;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#004277" Width="24" VerticalAlignment="Center"/>
                                     <TextBlock Text="Nhật ký Hoạt động" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
                                         <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
                                     </TextBlock>
@@ -409,7 +399,7 @@
                     </ScrollViewer>
 
                     <!-- Bottom Profile Info -->
-                    <Border Grid.Row="2" Background="#1B1938" CornerRadius="10" Padding="12" Opacity="0.95" BorderThickness="1" BorderBrush="#0DFFFFFF">
+                    <Border Grid.Row="2" Background="#E6E2DE" CornerRadius="10" Padding="12" Opacity="0.95" BorderThickness="1" BorderBrush="#C1C7D2">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -442,8 +432,8 @@
                                                              </Style.Triggers>
                                                          </Style>
                                                      </StackPanel.Style>
-                                                     <TextBlock Text="{Binding AdminName}" FontSize="12.5" FontWeight="SemiBold" Foreground="#FFFFFF" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                                     <TextBlock Text="Quản trị tối cao" FontSize="10.5" Foreground="#A5B4FC" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                     <TextBlock Text="{Binding AdminName}" FontSize="12.5" FontWeight="SemiBold" Foreground="#1C1B1A" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                     <TextBlock Text="Quản trị tối cao" FontSize="10.5" Foreground="#414750" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                                  </StackPanel>
                                              </Grid>
                                          </Border>
@@ -453,7 +443,7 @@
 
                              <!-- Logout button -->
                              <Button Grid.Column="1" Background="Transparent" BorderThickness="0" Cursor="Hand" Click="Logout_Click" ToolTip="Đăng xuất" Margin="8,0,0,0">
-                                 <TextBlock Text="&#xE7E8;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#F87171" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                 <TextBlock Text="&#xE7E8;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#BA1A1A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                              </Button>
                          </Grid>
                      </Border>
@@ -487,10 +477,13 @@
 
                      <!-- Top Window action controls -->
                      <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                         <Button Style="{StaticResource WindowNavButton}" Click="MinimizeButton_Click" Margin="0,0,4,0">
+                         <Button Style="{StaticResource WindowNavButton}" Click="MinimizeButton_Click" Margin="0,0,4,0" ToolTip="Thu nhỏ">
                              <TextBlock Text="&#xE921;" FontFamily="Segoe MDL2 Assets" FontSize="10" FontWeight="Bold"/>
                          </Button>
-                         <Button Style="{StaticResource WindowCloseButton}" Click="ExitButton_Click">
+                         <Button x:Name="MaximizeButton" Style="{StaticResource WindowNavButton}" Click="MaximizeButton_Click" Margin="0,0,4,0" ToolTip="Phóng to">
+                             <TextBlock x:Name="MaximizeIcon" Text="&#xE922;" FontFamily="Segoe MDL2 Assets" FontSize="10" FontWeight="Bold"/>
+                         </Button>
+                         <Button Style="{StaticResource WindowCloseButton}" Click="ExitButton_Click" ToolTip="Đóng">
                              <TextBlock Text="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="10" FontWeight="Bold"/>
                          </Button>
                      </StackPanel>

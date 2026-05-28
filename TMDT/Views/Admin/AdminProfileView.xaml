@@ -7,9 +7,9 @@
              d:DesignHeight="650" d:DesignWidth="880">
 
     <UserControl.Resources>
-        <SolidColorBrush x:Key="TextPrimary" Color="#121C2A"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#64748B"/>
-        <SolidColorBrush x:Key="BrandPurple" Color="#593AD8"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#1C1B1A"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#414750"/>
+        <SolidColorBrush x:Key="BrandPurple" Color="#004277"/>
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,8,0">
@@ -37,7 +37,7 @@
 
                 <!-- Left Column: Profile Card -->
                 <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="24" VerticalAlignment="Top">
-                    <Border.Effect><DropShadowEffect Color="#2D3282" BlurRadius="15" ShadowDepth="2" Opacity="0.03"/></Border.Effect>
+                    <Border.Effect><DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.03"/></Border.Effect>
                     <StackPanel>
                         <!-- Avatar -->
                         <Border Width="100" Height="100" CornerRadius="50" Background="#EEF2FF" BorderThickness="4" BorderBrush="#FFFFFF" HorizontalAlignment="Center">
@@ -74,7 +74,7 @@
                 <StackPanel Grid.Column="2">
                     <!-- Form 1: Edit Profile -->
                     <Border Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="24" Margin="0,0,0,24">
-                        <Border.Effect><DropShadowEffect Color="#2D3282" BlurRadius="15" ShadowDepth="2" Opacity="0.03"/></Border.Effect>
+                        <Border.Effect><DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.03"/></Border.Effect>
                         <StackPanel>
                             <TextBlock Text="Chỉnh sửa thông tin" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,16"/>
                             
@@ -126,7 +126,7 @@
 
                     <!-- Form 2: Change Password -->
                     <Border Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="24">
-                        <Border.Effect><DropShadowEffect Color="#2D3282" BlurRadius="15" ShadowDepth="2" Opacity="0.03"/></Border.Effect>
+                        <Border.Effect><DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.03"/></Border.Effect>
                         <StackPanel>
                             <TextBlock Text="Đổi mật khẩu" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,16"/>
                             
@@ -180,3 +180,4 @@
         </Grid>
     </ScrollViewer>
 </UserControl>
+

@@ -1,0 +1,249 @@
+<UserControl x:Class="TMDT.Views.Seller.SellerProfileView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TMDT.Views.Seller"
+             mc:Ignorable="d" 
+             d:DesignHeight="580" d:DesignWidth="820">
+
+    <UserControl.Resources>
+        <Style x:Key="InputLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#64748B"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+        </Style>
+
+        <Style x:Key="FormInput" TargetType="TextBox">
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#1E293B"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="6">
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#FFFFFF"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#0D9488"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="1.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Toggle Switch Style -->
+        <Style x:Key="ToggleSwitchStyle" TargetType="ToggleButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid Cursor="Hand">
+                            <Border x:Name="background" Width="44" Height="22" Background="#CBD5E1" CornerRadius="11" SnapsToDevicePixels="True">
+                                <Border.Child>
+                                    <Ellipse x:Name="thumb" Width="16" Height="16" Fill="#FFFFFF" HorizontalAlignment="Left" Margin="3,0,3,0">
+                                        <Ellipse.RenderTransform>
+                                            <TranslateTransform X="0"/>
+                                        </Ellipse.RenderTransform>
+                                    </Ellipse>
+                                </Border.Child>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="background" Property="Background" Value="#0D9488"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="thumb" 
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" 
+                                                             To="22" Duration="0:0:0.15"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="thumb" 
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" 
+                                                             To="0" Duration="0:0:0.15"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <!-- Left panel: Shop settings -->
+            <ColumnDefinition Width="1.3*"/>
+            <!-- Right panel: Help & Shop Stats cards -->
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ========================================== -->
+        <!-- LEFT COLUMN: SHOP CONFIG FORM -->
+        <!-- ========================================== -->
+        <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="16" BorderThickness="1" BorderBrush="#F1F5F9" Padding="24" Margin="0,0,16,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Thiết Lập Thông Tin Cửa Hàng" FontSize="15.5" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,20" FontFamily="Be Vietnam Pro, Segoe UI"/>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,16">
+                    <StackPanel>
+                        <!-- Shop Name -->
+                        <TextBlock Style="{StaticResource InputLabel}" Text="Tên Cửa Hàng (Shop Name) *"/>
+                        <TextBox Style="{StaticResource FormInput}" Text="{Binding ShopNameInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0,0,0,14"/>
+
+                        <!-- Logo URL -->
+                        <TextBlock Style="{StaticResource InputLabel}" Text="Đường dẫn Logo Shop (Logo URI/Path)"/>
+                        <TextBox Style="{StaticResource FormInput}" Text="{Binding LogoInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0,0,0,14"/>
+
+                        <!-- Warehouse Address -->
+                        <TextBlock Style="{StaticResource InputLabel}" Text="Địa chỉ kho lấy hàng / trả hàng *"/>
+                        <TextBox Style="{StaticResource FormInput}" Text="{Binding WarehouseAddressInput, UpdateSourceTrigger=PropertyChanged}" Height="54" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,14"/>
+
+                        <!-- Date Opened & Commission Rate (Readonly badges) -->
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Date Opened -->
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Style="{StaticResource InputLabel}" Text="Ngày mở shop"/>
+                                <TextBox Style="{StaticResource FormInput}" Text="{Binding OpenedAtDisplay}" IsReadOnly="True" Height="36" Background="#F1F5F9" Foreground="#64748B"/>
+                            </StackPanel>
+
+                            <!-- Commission Rate -->
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Style="{StaticResource InputLabel}" Text="Chiết khấu sàn (%)"/>
+                                <TextBox Style="{StaticResource FormInput}" Text="{Binding CommissionRate, StringFormat={}{0}%}" IsReadOnly="True" Height="36" Background="#F1F5F9" Foreground="#64748B"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Border BorderThickness="0,0,0,1" BorderBrush="#F1F5F9" Margin="0,0,0,16"/>
+
+                        <!-- Vacation Mode toggle -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                                <TextBlock Text="Chế độ Tạm Nghỉ (Vacation Mode)" FontSize="12.5" FontWeight="SemiBold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="Khi bật chế độ tạm nghỉ, khách hàng sẽ không thể đặt đơn hàng mới từ shop của bạn, giúp bạn có thời gian đi nghỉ lễ hoặc tạm ngưng vận hành." FontSize="10.5" Foreground="#64748B" TextWrapping="Wrap" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            </StackPanel>
+                            <ToggleButton Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}" IsChecked="{Binding VacationMode}" VerticalAlignment="Center"/>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Save button -->
+                <Button Grid.Row="2" Command="{Binding SaveProfileCommand}" Background="#0D9488" BorderThickness="0" Height="38" Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text=" Lưu Thiết Lập Cửa Hàng" FontSize="12.5" Foreground="#FFFFFF" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        </StackPanel>
+                    </Button.Content>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Opacity" Value="0.9"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- ========================================== -->
+        <!-- RIGHT COLUMN: GUIDANCE & PREVIEW -->
+        <!-- ========================================== -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <!-- Shop preview visual -->
+                <RowDefinition Height="Auto"/>
+                <!-- Guidelines instructions -->
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- 1. Shop Visual Card -->
+            <Border Grid.Row="0" Background="#FFFFFF" CornerRadius="16" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20" Margin="0,0,0,16">
+                <StackPanel HorizontalAlignment="Center" Margin="0,10">
+                    <!-- Shop avatar placeholder -->
+                    <Border CornerRadius="36" Width="72" Height="72" Background="#F0FDFA" BorderBrush="#0D9488" BorderThickness="2" HorizontalAlignment="Center">
+                        <TextBlock Text="🏪" FontSize="36" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Text="{Binding ShopNameInput}" FontSize="15" FontWeight="Bold" Foreground="#1E293B" HorizontalAlignment="Center" Margin="0,12,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                    <TextBlock Text="Cửa Hàng Hoạt Động Bán Lẻ" FontSize="11.5" Foreground="#64748B" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                    
+                    <Border Background="#ECFDF5" CornerRadius="4" Padding="8,3" Margin="0,10,0,0" HorizontalAlignment="Center">
+                        <TextBlock Text="Trạng thái: Đang hoạt động" FontSize="10" FontWeight="Bold" Foreground="#059669" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- 2. Guidelines for Seller -->
+            <Border Grid.Row="1" Background="#FFFFFF" CornerRadius="16" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Hướng Dẫn Vận Hành Shop" FontSize="13.5" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,12" FontFamily="Be Vietnam Pro, Segoe UI"/>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <!-- Tip 1 -->
+                            <TextBlock Text="1. Quy trình giao nhận hàng" FontSize="11.5" FontWeight="SemiBold" Foreground="#1E293B" Margin="0,0,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Text="Khi có đơn hàng mới (trạng thái Chờ duyệt), vui lòng kiểm tra kho và nhấn nút 'Chuẩn Bị &amp; Giao Hàng' trong vòng 24h để tránh bị tính điểm phạt vận hành." FontSize="10.5" Foreground="#64748B" TextWrapping="Wrap" Margin="0,0,0,12" FontFamily="Be Vietnam Pro, Segoe UI"/>
+
+                            <!-- Tip 2 -->
+                            <TextBlock Text="2. Thêm mới sản phẩm đúng ngành" FontSize="11.5" FontWeight="SemiBold" Foreground="#1E293B" Margin="0,0,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Text="Chọn đúng Danh mục ngành hàng khi đăng bán sản phẩm giúp thuật toán gợi ý hiển thị sản phẩm tới người mua tiềm năng chính xác nhất." FontSize="10.5" Foreground="#64748B" TextWrapping="Wrap" Margin="0,0,0,12" FontFamily="Be Vietnam Pro, Segoe UI"/>
+
+                            <!-- Tip 3 -->
+                            <TextBlock Text="3. Rút tiền doanh thu" FontSize="11.5" FontWeight="SemiBold" Foreground="#1E293B" Margin="0,0,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Text="Số tiền doanh thu sẽ được tích lũy vào Số dư Ví của shop ngay khi đơn hàng chuyển sang trạng thái Hoàn thành. Yêu cầu rút tiền được xử lý giải ngân bởi Admin trong 1-3 ngày làm việc." FontSize="10.5" Foreground="#64748B" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

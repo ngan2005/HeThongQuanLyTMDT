@@ -18,17 +18,17 @@
     </Window.DataContext>
 
     <Window.Resources>
-        <!-- Fluent Design Color Palette -->
-        <SolidColorBrush x:Key="PrimaryBrush" Color="#6366F1"/>
-        <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#4F46E5"/>
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F8F9FF"/>
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#94A3B8"/>
+        <!-- Design System Color Palette — MyShop Brand Sync -->
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#5B5CEB"/>
+        <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#6C63FF"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F8FAFF"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#A3AED0"/>
         
         <!-- Modern TextBox Style with Focus Glow -->
         <Style x:Key="ModernTextBox" TargetType="TextBox">
-            <Setter Property="Background" Value="#131130"/>
-            <Setter Property="Foreground" Value="#F8F9FF"/>
-            <Setter Property="BorderBrush" Value="#FFFFFF"/>
+            <Setter Property="Background" Value="#2A1F72"/>
+            <Setter Property="Foreground" Value="#F0F4FF"/>
+            <Setter Property="BorderBrush" Value="#5B5CEB"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Height" Value="38"/>
@@ -40,14 +40,14 @@
                             <!-- Glow border for focus -->
                             <Border x:Name="glow" CornerRadius="8" Opacity="0" Background="Transparent" BorderThickness="0">
                                 <Border.Effect>
-                                    <DropShadowEffect Color="#6366F1" BlurRadius="12" ShadowDepth="0" Opacity="0.4"/>
+                                    <DropShadowEffect Color="#6C63FF" BlurRadius="10" ShadowDepth="0" Opacity="0.35"/>
                                 </Border.Effect>
-                                <Border BorderBrush="#6366F1" BorderThickness="1.5" CornerRadius="8"/>
+                                <Border BorderBrush="#6C63FF" BorderThickness="1.5" CornerRadius="8"/>
                             </Border>
 
                             <!-- Main Border -->
                             <Border x:Name="border" Background="{TemplateBinding Background}" 
-                                    BorderBrush="#FFFFFF" Opacity="0.1"
+                                    BorderBrush="#8080C0" Opacity="0.35"
                                     BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8"/>
 
                             <!-- Content Grid -->
@@ -73,8 +73,8 @@
 
                             <!-- Focus Glow Animation -->
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#6366F1"/>
-                                <Setter TargetName="border" Property="Opacity" Value="0.3"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#6C63FF"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.6"/>
                                 <Trigger.EnterActions>
                                     <BeginStoryboard>
                                         <Storyboard>
@@ -98,9 +98,9 @@
 
         <!-- Modern PasswordBox Style -->
         <Style x:Key="ModernPasswordBox" TargetType="PasswordBox">
-            <Setter Property="Background" Value="#131130"/>
-            <Setter Property="Foreground" Value="#F8F9FF"/>
-            <Setter Property="BorderBrush" Value="#FFFFFF"/>
+            <Setter Property="Background" Value="#2A1F72"/>
+            <Setter Property="Foreground" Value="#F0F4FF"/>
+            <Setter Property="BorderBrush" Value="#5B5CEB"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Height" Value="38"/>
@@ -112,14 +112,14 @@
                             <!-- Glow border for focus -->
                             <Border x:Name="glow" CornerRadius="8" Opacity="0" Background="Transparent" BorderThickness="0">
                                 <Border.Effect>
-                                    <DropShadowEffect Color="#6366F1" BlurRadius="12" ShadowDepth="0" Opacity="0.4"/>
+                                    <DropShadowEffect Color="#6C63FF" BlurRadius="10" ShadowDepth="0" Opacity="0.35"/>
                                 </Border.Effect>
-                                <Border BorderBrush="#6366F1" BorderThickness="1.5" CornerRadius="8"/>
+                                <Border BorderBrush="#6C63FF" BorderThickness="1.5" CornerRadius="8"/>
                             </Border>
 
                             <!-- Main Border -->
                             <Border x:Name="border" Background="{TemplateBinding Background}" 
-                                    BorderBrush="#FFFFFF" Opacity="0.1"
+                                    BorderBrush="#8080C0" Opacity="0.35"
                                     BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8"/>
 
                             <!-- Content Grid -->
@@ -145,8 +145,8 @@
 
                             <!-- Focus Glow Animation -->
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#6366F1"/>
-                                <Setter TargetName="border" Property="Opacity" Value="0.3"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#6C63FF"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.6"/>
                                 <Trigger.EnterActions>
                                     <BeginStoryboard>
                                         <Storyboard>
@@ -190,7 +190,7 @@
                                     <ScaleTransform ScaleX="1.0" ScaleY="1.0"/>
                                 </Border.RenderTransform>
                                 <Border.Effect>
-                                    <DropShadowEffect x:Name="buttonShadow" Color="#6366F1" BlurRadius="8" ShadowDepth="1" Opacity="0.2"/>
+                                    <DropShadowEffect x:Name="buttonShadow" Color="#5B5CEB" BlurRadius="10" ShadowDepth="2" Opacity="0.3"/>
                                 </Border.Effect>
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
@@ -384,13 +384,14 @@
         <Grid Panel.ZIndex="0">
             <Grid.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#0A091A" Offset="0"/>
-                    <GradientStop Color="#14112E" Offset="1"/>
+                    <GradientStop Color="#1F1445" Offset="0"/>
+                    <GradientStop Color="#2B1B69" Offset="0.6"/>
+                    <GradientStop Color="#3A2A82" Offset="1"/>
                 </LinearGradientBrush>
             </Grid.Background>
             
-            <!-- Shape 1 (Indigo blur) -->
-            <Ellipse Width="350" Height="350" Fill="#4F46E5" Opacity="0.16" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-50,-50,0,0">
+            <!-- Shape 1 (Brand Purple blur) -->
+            <Ellipse Width="350" Height="350" Fill="#5B5CEB" Opacity="0.18" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-50,-50,0,0">
                 <Ellipse.Effect>
                     <BlurEffect Radius="120"/>
                 </Ellipse.Effect>
@@ -399,8 +400,8 @@
                 </Ellipse.RenderTransform>
             </Ellipse>
             
-            <!-- Shape 2 (Pink/Purple blur) -->
-            <Ellipse Width="400" Height="400" Fill="#D946EF" Opacity="0.08" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-80,-80">
+            <!-- Shape 2 (Indigo blur) -->
+            <Ellipse Width="400" Height="400" Fill="#6C63FF" Opacity="0.10" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-80,-80">
                 <Ellipse.Effect>
                     <BlurEffect Radius="140"/>
                 </Ellipse.Effect>
@@ -437,16 +438,16 @@
                 <!-- GLASSMORPHISM CONTAINER (CARD REDESIGN) -->
                 <Border Width="740" Height="370" CornerRadius="20" BorderThickness="1.2">
                     <Border.Background>
-                        <SolidColorBrush Color="#171536" Opacity="0.65"/>
+                        <SolidColorBrush Color="#241A68" Opacity="0.75"/>
                     </Border.Background>
                     <Border.BorderBrush>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#FFFFFF" Offset="0" />
-                            <GradientStop Color="#FFFFFF" Offset="1" />
+                            <GradientStop Color="#7B72FF" Offset="0" />
+                            <GradientStop Color="#4C3FAA" Offset="1" />
                         </LinearGradientBrush>
                     </Border.BorderBrush>
                     <Border.Effect>
-                        <DropShadowEffect BlurRadius="40" Color="#000000" Direction="270" ShadowDepth="8" Opacity="0.45"/>
+                        <DropShadowEffect BlurRadius="40" Color="#2B1B69" Direction="270" ShadowDepth="8" Opacity="0.5"/>
                     </Border.Effect>
 
                     <Grid>
@@ -458,23 +459,24 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- LEFT COLUMN: MASCOT & BRANDING -->
-                        <Border Grid.Column="0" CornerRadius="19,0,0,19" BorderThickness="0,0,1.2,0" BorderBrush="#20FFFFFF">
+                        <Border Grid.Column="0" CornerRadius="19,0,0,19" BorderThickness="0,0,1.2,0" BorderBrush="#30FFFFFF">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="#0B0A1E" Offset="0"/>
-                                    <GradientStop Color="#151336" Offset="1"/>
+                                    <GradientStop Color="#2C1F6D" Offset="0"/>
+                                    <GradientStop Color="#3D2D8A" Offset="0.6"/>
+                                    <GradientStop Color="#5B5CEB" Offset="1"/>
                                 </LinearGradientBrush>
                             </Border.Background>
                             
                             <Grid Margin="16">
                                 <!-- Top Branding -->
                                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,8,0,0">
-                                    <TextBlock Text="MyShop AI" FontSize="16" FontWeight="ExtraBold" Foreground="#6366F1" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI">
+                                    <TextBlock Text="MyShop AI" FontSize="16" FontWeight="ExtraBold" Foreground="#FFFFFF" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI">
                                         <TextBlock.Effect>
-                                            <DropShadowEffect Color="#6366F1" BlurRadius="12" Opacity="0.5" ShadowDepth="0"/>
+                                            <DropShadowEffect Color="#5B5CEB" BlurRadius="10" Opacity="0.6" ShadowDepth="0"/>
                                         </TextBlock.Effect>
                                     </TextBlock>
-                                    <TextBlock Text="Trợ lý đăng ký thông minh" FontSize="9.5" Foreground="#94A3B8" Opacity="0.75" FontWeight="Medium" Margin="0,2,0,0" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Trợ lý đăng ký thông minh" FontSize="9.5" Foreground="#D4D8FF" Opacity="0.85" FontWeight="Medium" Margin="0,2,0,0" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                 </StackPanel>
 
                                 <!-- Mascot Container (Floating) -->
@@ -483,15 +485,15 @@
                                         <TranslateTransform x:Name="MascotFloatTransform" Y="0"/>
                                     </Grid.RenderTransform>
                                     
-                                    <!-- Neon Glow behind Mascot -->
-                                    <Ellipse Width="120" Height="120" Fill="#6366F1" Opacity="0.12" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <!-- Ambient Glow behind Mascot -->
+                                    <Ellipse Width="120" Height="120" Fill="#5B5CEB" Opacity="0.20" HorizontalAlignment="Center" VerticalAlignment="Center">
                                         <Ellipse.Effect>
                                             <BlurEffect Radius="45"/>
                                         </Ellipse.Effect>
                                     </Ellipse>
 
                                     <!-- Robot Body Outer Border (Cyber Capsule) -->
-                                    <Border x:Name="RobotBody" Width="110" Height="130" CornerRadius="55" BorderThickness="1.5" BorderBrush="#6366F1" Background="#1A183C" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <Border x:Name="RobotBody" Width="110" Height="130" CornerRadius="55" BorderThickness="1.5" BorderBrush="#6C63FF" Background="#1A183C" VerticalAlignment="Center" HorizontalAlignment="Center">
                                         <Border.RenderTransform>
                                             <TransformGroup x:Name="RobotBodyTransform">
                                                 <RotateTransform Angle="0" CenterX="55" CenterY="65"/>
@@ -613,8 +615,8 @@
                                     <StackPanel.RenderTransform>
                                         <TranslateTransform x:Name="RevealTitleTransform" Y="15"/>
                                     </StackPanel.RenderTransform>
-                                    <TextBlock Text="Đăng ký tài khoản" FontSize="22" FontWeight="Bold" Foreground="#F8F9FF" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    <TextBlock Text="Tham gia hệ thống phân phối thông minh MyShop" FontSize="12" Foreground="#94A3B8" Margin="0,3,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Đăng ký tài khoản" FontSize="22" FontWeight="Bold" Foreground="#F0F4FF" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Tham gia hệ thống phân phối thông minh MyShop" FontSize="12" Foreground="#A3AED0" Margin="0,3,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                 </StackPanel>
 
                                 <!-- Stagger 2: Fields Grid -->
@@ -700,7 +702,7 @@
                                         <TranslateTransform x:Name="RevealLinkTransform" Y="15"/>
                                     </StackPanel.RenderTransform>
                                     <TextBlock Text="Bạn đã có tài khoản MyShop?" FontSize="11.5" Foreground="#94A3B8" Opacity="0.8" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    <TextBlock Text="Đăng nhập ngay" FontSize="11.5" FontWeight="Bold" Foreground="#6366F1" Margin="5,0,0,0" Cursor="Hand" MouseLeftButtonDown="BackToLogin_Click" FontFamily="Be Vietnam Pro, Segoe UI">
+                                    <TextBlock Text="Đăng nhập ngay" FontSize="11.5" FontWeight="Bold" Foreground="#6C63FF" Margin="5,0,0,0" Cursor="Hand" MouseLeftButtonDown="BackToLogin_Click" FontFamily="Be Vietnam Pro, Segoe UI">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
                                                 <Style.Triggers>

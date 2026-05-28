@@ -9,9 +9,9 @@
 
     <UserControl.Resources>
         <!-- Style tokens -->
-        <SolidColorBrush x:Key="TextPrimary" Color="#121C2A"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#64748B"/>
-        <SolidColorBrush x:Key="BrandPurple" Color="#593AD8"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#1C1B1A"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#414750"/>
+        <SolidColorBrush x:Key="BrandPurple" Color="#004277"/>
         
         <Style x:Key="FilterButton" TargetType="RadioButton">
             <Setter Property="Background" Value="Transparent"/>
@@ -114,16 +114,16 @@
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <!-- Product DataGrid -->
-                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="2.5*"/>
                 <ColumnDefinition Width="20"/>
                 <!-- Detail Inspector Card -->
-                <ColumnDefinition Width="1.3*"/>
+                <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
 
             <!-- LEFT: DataGrid List -->
             <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="16">
                 <Border.Effect>
-                    <DropShadowEffect Color="#2D3282" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
+                    <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
                 </Border.Effect>
                 
                 <DataGrid ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}" AutoGenerateColumns="False" 
@@ -165,6 +165,16 @@
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Product Code -->
+                        <DataGridTextColumn Header="MÃ SẢN PHẨM" Binding="{Binding ProductCode}" Width="105">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
                                     <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
                                     <Setter Property="VerticalAlignment" Value="Center"/>
                                 </Style>
@@ -281,7 +291,7 @@
             <!-- RIGHT: Product Detail Inspector Card -->
             <Border Grid.Column="2" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
                 <Border.Effect>
-                    <DropShadowEffect Color="#2D3282" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
+                    <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
                 </Border.Effect>
 
                 <Grid>
@@ -342,6 +352,10 @@
                         <!-- Detail Fields ScrollView -->
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,16">
                             <StackPanel>
+                                <!-- Product Code Field -->
+                                <TextBlock Text="MÃ SẢN PHẨM" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="{Binding SelectedProduct.ProductCode}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" Margin="0,4,0,16" FontFamily="Be Vietnam Pro, Segoe UI"/>
+
                                 <!-- Shop Field -->
                                 <TextBlock Text="CỬA HÀNG ĐĂNG BÁN" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                 <TextBlock Text="{Binding SelectedProduct.Shop.ShopName}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" Margin="0,4,0,16" FontFamily="Be Vietnam Pro, Segoe UI"/>
@@ -432,3 +446,4 @@
         </Grid>
     </Grid>
 </UserControl>
+

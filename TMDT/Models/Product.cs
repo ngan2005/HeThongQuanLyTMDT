@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace TMDT.Models;
@@ -12,6 +12,8 @@ public partial class Product
     public int? CategoryId { get; set; }
 
     public string ProductName { get; set; } = null!;
+
+    public string? ProductCode { get; set; }
 
     public string? Description { get; set; }
 

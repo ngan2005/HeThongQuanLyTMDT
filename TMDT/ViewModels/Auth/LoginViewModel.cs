@@ -93,7 +93,7 @@ namespace TMDT.ViewModels.Auth
 
             TMDT.DTOs.UserDto user = null;
 
-            // Failsafe Mock Admin Login giúp bạn test giao diện cực nhanh!
+            // Failsafe Mock Login giúp bạn test giao diện cực nhanh!
             if (Username.Trim().ToLower() == "admin" && Password == "admin")
             {
                 user = new TMDT.DTOs.UserDto
@@ -102,6 +102,17 @@ namespace TMDT.ViewModels.Auth
                     Email = "admin@myshop.com",
                     FullName = "Administrator Tối Cao",
                     RoleName = "Admin",
+                    Avatar = ""
+                };
+            }
+            else if (Username.Trim().ToLower() == "seller" && Password == "seller")
+            {
+                user = new TMDT.DTOs.UserDto
+                {
+                    UserCode = "USR-SELLER",
+                    Email = "seller@myshop.com",
+                    FullName = "Chủ Shop Đẹp Trai",
+                    RoleName = "Seller",
                     Avatar = ""
                 };
             }
@@ -124,6 +135,11 @@ namespace TMDT.ViewModels.Auth
                 {
                     var adminView = new TMDT.Views.Admin.AdminMainView();
                     adminView.Show();
+                }
+                else if (user.RoleName == "Seller")
+                {
+                    var sellerView = new TMDT.Views.Seller.SellerMainView();
+                    sellerView.Show();
                 }
                 else
                 {
