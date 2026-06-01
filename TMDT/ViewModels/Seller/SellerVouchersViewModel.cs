@@ -129,65 +129,6 @@ namespace TMDT.ViewModels.Seller
                 System.Diagnostics.Debug.WriteLine("Failed to load vouchers: " + ex.Message);
             }
 
-            LoadMockVouchers();
-        }
-
-        private void LoadMockVouchers()
-        {
-            var mockVouchers = new ObservableCollection<Voucher>();
-
-            mockVouchers.Add(new Voucher
-            {
-                VoucherId = 701,
-                VoucherCode = "MYS50K",
-                VoucherName = "Khuyến mãi Khai trương Shop",
-                DiscountType = "Fixed",
-                DiscountValue = 50000,
-                MinOrderValue = 300000,
-                MaxDiscount = 50000,
-                TotalQuantity = 100,
-                UsedCount = 24,
-                StartDate = DateTime.Now.AddDays(-5),
-                EndDate = DateTime.Now.AddDays(25),
-                IsActive = true
-            });
-
-            mockVouchers.Add(new Voucher
-            {
-                VoucherId = 702,
-                VoucherCode = "HE10PCT",
-                VoucherName = "Chào hè rực rỡ giảm 10%",
-                DiscountType = "Percentage",
-                DiscountValue = 10,
-                MinOrderValue = 150000,
-                MaxDiscount = 80000,
-                TotalQuantity = 200,
-                UsedCount = 85,
-                StartDate = DateTime.Now.AddDays(-15),
-                EndDate = DateTime.Now.AddDays(15),
-                IsActive = true
-            });
-
-            mockVouchers.Add(new Voucher
-            {
-                VoucherId = 703,
-                VoucherCode = "VIPMEMBER",
-                VoucherName = "Voucher đặc biệt tri ân khách hàng thân thiết",
-                DiscountType = "Percentage",
-                DiscountValue = 15,
-                MinOrderValue = 500000,
-                MaxDiscount = 200000,
-                TotalQuantity = 50,
-                UsedCount = 42,
-                StartDate = DateTime.Now.AddDays(-30),
-                EndDate = DateTime.Now.AddDays(-1),
-                IsActive = false
-            });
-
-            foreach (var v in mockVouchers)
-            {
-                Vouchers.Add(v);
-            }
         }
 
         private void ResetInputs()

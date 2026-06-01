@@ -1,373 +1,776 @@
 <UserControl x:Class="TMDT.Views.Admin.AdminOrdersView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:TMDT.Views.Admin"
-             mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="850">
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="1100">
 
     <UserControl.Resources>
-        <!-- Style tokens -->
-        <SolidColorBrush x:Key="TextPrimary" Color="#1C1B1A"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#414750"/>
-        <SolidColorBrush x:Key="BrandPurple" Color="#004277"/>
-        
-        <!-- Command button styles -->
-        <Style x:Key="ActionButton" TargetType="Button">
-            <Setter Property="Height" Value="36"/>
-            <Setter Property="FontSize" Value="12.5"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Margin" Value="0,8"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <DropShadowEffect x:Key="CardShadow" BlurRadius="16" ShadowDepth="2" Opacity="0.07" Color="#000" Direction="270"/>
+
+        <Style x:Key="FilterPill" TargetType="RadioButton">
+            <Setter Property="Background" Value="{DynamicResource SurfaceLow}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
             <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8">
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource SurfaceMid}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource BrandAccent}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource PrimaryBtnText}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="StatCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource CardBg}"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderSlate}"/>
+            <Setter Property="Effect" Value="{StaticResource CardShadow}"/>
+            <Setter Property="Padding" Value="20"/>
+        </Style>
+
+        <Style x:Key="StatusBadge" TargetType="Border">
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
     </UserControl.Resources>
 
-    <Grid Margin="0,0,8,0">
-        <Grid.RowDefinitions>
-            <!-- Title & Search bar -->
-            <RowDefinition Height="Auto"/>
-            <!-- Action Filter bar -->
-            <RowDefinition Height="Auto"/>
-            <!-- Main Content Area: Table + Detail Inspector -->
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Grid>
+        <!-- MAIN CONTENT -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
+            <StackPanel Margin="0,0,0,20">
+                <!-- Page Header -->
+                <TextBlock Text="Quản lý Đơn hàng" FontSize="22" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,4"/>
+                <TextBlock Text="Giám sát và xử lý mọi giao dịch trên sàn TMDT"
+                           FontSize="12.5" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,24"/>
 
-        <!-- 1. TITLE & SEARCH ROW -->
-        <Grid Grid.Row="0" Margin="0,0,0,16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="280"/>
-            </Grid.ColumnDefinitions>
+                <!-- Stats Row -->
+                <UniformGrid Columns="4" Margin="0,0,0,24">
+                    <Border Style="{StaticResource StatCard}" Margin="0,0,10,0">
+                        <StackPanel>
+                            <TextBlock Text="Tổng đơn hàng" FontSize="11" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Text="{Binding TotalOrders}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,6,0,0"/>
+                            <TextBlock Text="Trên toàn sàn" FontSize="10.5" Foreground="{DynamicResource BrandPurple}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource StatCard}" Margin="0,0,10,0">
+                        <StackPanel>
+                            <TextBlock Text="Chờ xác nhận" FontSize="11" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Text="{Binding PendingOrders}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource WarningOrange}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,6,0,0"/>
+                            <TextBlock Text="Cần xử lý ngay" FontSize="10.5" Foreground="{DynamicResource WarningOrange}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource StatCard}" Margin="0,0,10,0">
+                        <StackPanel>
+                            <TextBlock Text="Đang giao hàng" FontSize="11" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Text="{Binding ShippingOrders}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource WarningOrange}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,6,0,0"/>
+                            <TextBlock Text="Đơn đang vận chuyển" FontSize="10.5" Foreground="{DynamicResource WarningOrange}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource StatCard}">
+                        <StackPanel>
+                            <TextBlock Text="Doanh thu đơn" FontSize="11" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock FontSize="22" FontWeight="Bold" Foreground="{DynamicResource SuccessGreen}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,6,0,0">
+                                <Run Text="{Binding TotalRevenue, StringFormat={}{0:N0}}"/><Run Text=" đ"/>
+                            </TextBlock>
+                            <TextBlock Text="Đơn hoàn thành" FontSize="10.5" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
 
-            <StackPanel Grid.Column="0">
-                <TextBlock Text="Quản lý Đơn hàng Toàn sàn" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                <TextBlock Text="Giám sát mọi giao dịch mua bán, can thiệp xử lý hủy đơn khẩn cấp hoặc hoàn tiền khi cần thiết" FontSize="12.5" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
-            </StackPanel>
-
-            <!-- Search box -->
-            <Border Grid.Column="1" Background="#FFFFFF" CornerRadius="8" BorderThickness="1" BorderBrush="#DFE9FD" Height="38" Padding="12,0" VerticalAlignment="Center">
-                <Grid>
+                <!-- Toolbar -->
+                <Grid Margin="0,0,0,16">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="20"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
-                    <TextBox Grid.Column="1" Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Background="Transparent" 
-                             VerticalAlignment="Center" FontSize="12.5" Padding="6,0,0,0" Margin="0" 
-                             Tag="Tìm mã đơn, tên shop, người mua..." FontFamily="Be Vietnam Pro, Segoe UI"/>
+
+                    <!-- Filter Pills -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <RadioButton Content="Tất cả" Style="{StaticResource FilterPill}" IsChecked="True" Click="FilterPill_Click" Tag="Tất cả"/>
+                        <RadioButton Content="Chờ xác nhận" Style="{StaticResource FilterPill}" Click="FilterPill_Click" Tag="Chờ xác nhận" Margin="6,0,0,0"/>
+                        <RadioButton Content="Đang xử lý" Style="{StaticResource FilterPill}" Click="FilterPill_Click" Tag="Đang xử lý" Margin="6,0,0,0"/>
+                        <RadioButton Content="Đang giao" Style="{StaticResource FilterPill}" Click="FilterPill_Click" Tag="Đang giao hàng" Margin="6,0,0,0"/>
+                        <RadioButton Content="Hoàn thành" Style="{StaticResource FilterPill}" Click="FilterPill_Click" Tag="Hoàn thành" Margin="6,0,0,0"/>
+                        <RadioButton Content="Đã hủy" Style="{StaticResource FilterPill}" Click="FilterPill_Click" Tag="Đã hủy" Margin="6,0,0,0"/>
+                        <RadioButton Content="Hoàn tiền" Style="{StaticResource FilterPill}" Click="FilterPill_Click" Tag="Hoàn tiền" Margin="6,0,0,0"/>
+                    </StackPanel>
+
+                    <!-- Search -->
+                    <Border Grid.Column="1" Background="{DynamicResource CardBg}" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Height="36" Padding="12,0" VerticalAlignment="Center">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="220"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="1" Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
+                                     BorderThickness="0" Background="Transparent" VerticalAlignment="Center"
+                                     FontSize="12.5" Padding="6,0,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        </Grid>
+                    </Border>
                 </Grid>
-            </Border>
-        </Grid>
 
-        <!-- 2. FILTER STATUS BAR -->
-        <Grid Grid.Row="1" Margin="0,0,0,16">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Trạng thái:" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" Margin="0,0,8,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                <ComboBox ItemsSource="{Binding Statuses}" SelectedItem="{Binding SelectedStatus}" Width="160" Height="32" FontSize="12.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalContentAlignment="Center" Background="#FFFFFF" BorderBrush="#DFE9FD"/>
-            </StackPanel>
-        </Grid>
+                <!-- Orders Table -->
+                <Border Background="{DynamicResource CardBg}" CornerRadius="14" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Effect="{StaticResource CardShadow}">
+                    <DataGrid ItemsSource="{Binding FilteredOrders}" AutoGenerateColumns="False"
+                              Background="Transparent" BorderThickness="0" GridLinesVisibility="None"
+                              CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True"
+                              RowBackground="{DynamicResource GridRowBg}" AlternatingRowBackground="{DynamicResource GridAltRowBg}"
+                              HeadersVisibility="Column" RowHeight="50"
+                              FontFamily="Be Vietnam Pro, Segoe UI"
+                              SelectionMode="Single"
+                              MouseDoubleClick="DataGrid_MouseDoubleClick"
+                              SelectionChanged="DataGrid_SelectionChanged">
+                        <DataGrid.Resources>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="Background" Value="{DynamicResource GridHeaderBg}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="FontSize" Value="11"/>
+                                <Setter Property="Padding" Value="12,10"/>
+                                <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource BorderSlate}"/>
+                                <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+                            </Style>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Padding" Value="12,0"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="DataGridCell">
+                                            <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource GridSelectedBg}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                            <Style TargetType="DataGridRow">
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource GridSelectedBg}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource SurfaceMid}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
 
-        <!-- 3. MAIN CONTENT: TABLE + INSPECTOR -->
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <!-- Orders DataGrid -->
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="20"/>
-                <!-- Detail Inspector Card -->
-                <ColumnDefinition Width="1.4*"/>
-            </Grid.ColumnDefinitions>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="MÃ ĐƠN" Binding="{Binding OrderCode}" Width="100">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource BrandPurple}"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
 
-            <!-- LEFT: DataGrid List -->
-            <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="16">
-                <Border.Effect>
-                    <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
-                </Border.Effect>
-                
-                <DataGrid ItemsSource="{Binding FilteredOrders}" SelectedItem="{Binding SelectedOrder}" AutoGenerateColumns="False" 
-                          Background="Transparent" BorderThickness="0" GridLinesVisibility="None"
-                          CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True"
-                          RowBackground="#FFFFFF" AlternatingRowBackground="#F8FAFC"
-                          HeadersVisibility="Column" RowHeight="44" FontFamily="Be Vietnam Pro, Segoe UI">
-                    <DataGrid.Resources>
-                        <!-- Header Style -->
-                        <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="Background" Value="#F8FAFC"/>
-                            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter Property="FontSize" Value="11.5"/>
-                            <Setter Property="Padding" Value="10,8"/>
-                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                            <Setter Property="BorderBrush" Value="#E2E8F0"/>
-                            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
-                        </Style>
-                        <!-- Cell Style -->
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Padding" Value="10,0"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="DataGridCell">
-                                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                                            <ContentPresenter VerticalAlignment="Center"/>
+                            <DataGridTemplateColumn Header="NGƯỜI MUA" Width="1.5*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Buyer.FullName}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                            <TextBlock Text="{Binding Buyer.Email}" FontSize="10.5" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="CỬA HÀNG" Binding="{Binding Shop.ShopName}" Width="1.3*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="NGÀY ĐẶT" Binding="{Binding OrderDate, StringFormat={}{0:dd/MM/yyyy HH:mm}}" Width="130">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource TextMuted}"/>
+                                        <Setter Property="FontSize" Value="11.5"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="TỔNG TIỀN" Binding="{Binding TotalAmount, StringFormat={}{0:N0} đ}" Width="110">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource SuccessGreen}"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTemplateColumn Header="TRẠNG THÁI" Width="130">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border>
+                                            <Border.Style>
+                                                <Style TargetType="Border" BasedOn="{StaticResource StatusBadge}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding OrderStatus}" Value="Chờ xác nhận">
+                                                            <Setter Property="Background" Value="{DynamicResource WarningBg}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding OrderStatus}" Value="Đang xử lý">
+                                                            <Setter Property="Background" Value="#EFF6FF"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding OrderStatus}" Value="Đang giao hàng">
+                                                            <Setter Property="Background" Value="{DynamicResource WarningBg}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding OrderStatus}" Value="Hoàn thành">
+                                                            <Setter Property="Background" Value="{DynamicResource SuccessGreenBg}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding OrderStatus}" Value="Đã hủy">
+                                                            <Setter Property="Background" Value="{DynamicResource DangerRedBg}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding OrderStatus}" Value="Hoàn tiền">
+                                                            <Setter Property="Background" Value="#F3E8FF"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock FontSize="10.5" FontWeight="Bold" VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Chờ xác nhận">
+                                                                <Setter Property="Text" Value="Chờ xác nhận"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource WarningOrange}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Đang xử lý">
+                                                                <Setter Property="Text" Value="Đang xử lý"/>
+                                                                <Setter Property="Foreground" Value="#3B82F6"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Đang giao hàng">
+                                                                <Setter Property="Text" Value="Đang giao hàng"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource WarningOrange}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Hoàn thành">
+                                                                <Setter Property="Text" Value="Hoàn thành"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource SuccessGreen}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Đã hủy">
+                                                                <Setter Property="Text" Value="Đã hủy"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource DangerRed}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Hoàn tiền">
+                                                                <Setter Property="Text" Value="Hoàn tiền"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource BrandPurple}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                         </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </DataGrid.Resources>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
 
-                    <DataGrid.Columns>
-                        <!-- Order Code -->
-                        <DataGridTextColumn Header="MÃ ĐƠN" Binding="{Binding OrderCode}" Width="90">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="FontWeight" Value="Bold"/>
-                                    <Setter Property="Foreground" Value="{StaticResource BrandPurple}"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                            <DataGridTemplateColumn Header="THAO TÁC" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Click="ViewOrder_Click"
+                                                Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="4"
+                                                ToolTip="Xem chi tiết">
+                                            <materialDesign:PackIcon Kind="ChevronRight" Foreground="{DynamicResource TextSecondary}" Width="18" Height="18"/>
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
 
-                        <!-- Buyer Name -->
-                        <DataGridTextColumn Header="NGƯỜI MUA" Binding="{Binding Buyer.FullName}" Width="1.5*">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-                                    <Setter Property="FontWeight" Value="SemiBold"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+        <!-- LIGHTBOX DETAIL OVERLAY -->
+        <Grid x:Name="LightboxOverlay" Visibility="Collapsed" Background="#CC000000">
+            <!-- Backdrop Click to Close -->
+            <Button Click="CloseLightbox" Background="Transparent" BorderThickness="0"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"/>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
 
-                        <!-- Shop Name -->
-                        <DataGridTextColumn Header="CỬA HÀNG" Binding="{Binding Shop.ShopName}" Width="1.5*">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+            <!-- MODAL CARD -->
+            <Border Background="{DynamicResource CardBg}" CornerRadius="16" BorderThickness="1"
+                    BorderBrush="{DynamicResource BorderSlate}"
+                    Width="860" MaxHeight="640"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border.Effect>
+                    <DropShadowEffect Color="#818CF8" BlurRadius="40" ShadowDepth="0" Opacity="0.12"/>
+                </Border.Effect>
 
-                        <!-- Total Amount -->
-                        <DataGridTextColumn Header="TỔNG TIỀN" Binding="{Binding TotalAmount, StringFormat={}{0:N0} đ}" Width="100">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="FontWeight" Value="Bold"/>
-                                    <Setter Property="Foreground" Value="#10B981"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>   <!-- Header -->
+                        <RowDefinition Height="Auto"/>   <!-- Bento Stats -->
+                        <RowDefinition Height="*"/>      <!-- Body -->
+                        <RowDefinition Height="Auto"/>   <!-- Footer -->
+                    </Grid.RowDefinitions>
 
-                        <!-- Status badge -->
-                        <DataGridTemplateColumn Header="TRẠNG THÁI" Width="110">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
+                    <!-- ROW 0: HEADER -->
+                    <Border Grid.Row="0" CornerRadius="16,16,0,0" Padding="32,28,32,24" ClipToBounds="True">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="{DynamicResource BgMain.Color}" Offset="0"/>
+                                <GradientStop Color="{DynamicResource SurfaceHigh.Color}" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>   <!-- Avatar -->
+                                <ColumnDefinition Width="*"/>      <!-- Info -->
+                                <ColumnDefinition Width="Auto"/>   <!-- Close -->
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Rotated Icon Box -->
+                            <Grid Grid.Column="0" Margin="0,0,24,0" Width="80" Height="80">
+                                <Border CornerRadius="14" BorderThickness="2" BorderBrush="{DynamicResource BrandPurple}"
+                                        Background="{DynamicResource BrandActiveBg}" Width="80" Height="80">
+                                    <Border.RenderTransform>
+                                        <RotateTransform Angle="3" CenterX="40" CenterY="40"/>
+                                    </Border.RenderTransform>
+                                </Border>
+                                <TextBlock Text="&#xE8D5;" FontFamily="Segoe MDL2 Assets" FontSize="36"
+                                           Foreground="{DynamicResource BrandPurple}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <!-- Order Code & Status -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding SelectedOrder.OrderCode}" FontSize="26" FontWeight="ExtraBold"
+                                           Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"
+                                           TextTrimming="CharacterEllipsis"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                     <Border CornerRadius="6" Padding="8,4" HorizontalAlignment="Left" VerticalAlignment="Center">
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding OrderStatus}" Value="Chờ xác nhận">
-                                                        <Setter Property="Background" Value="#FFF7ED"/>
+                                                    <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Chờ xác nhận">
+                                                        <Setter Property="Background" Value="{DynamicResource WarningBg}"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding OrderStatus}" Value="Đang xử lý">
+                                                    <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Đang xử lý">
                                                         <Setter Property="Background" Value="#EFF6FF"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding OrderStatus}" Value="Đang giao hàng">
-                                                        <Setter Property="Background" Value="#FEF3C7"/>
+                                                    <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Đang giao hàng">
+                                                        <Setter Property="Background" Value="{DynamicResource WarningBg}"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding OrderStatus}" Value="Hoàn thành">
-                                                        <Setter Property="Background" Value="#E6FDF4"/>
+                                                    <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Hoàn thành">
+                                                        <Setter Property="Background" Value="{DynamicResource SuccessGreenBg}"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding OrderStatus}" Value="Đã hủy">
-                                                        <Setter Property="Background" Value="#FEF2F2"/>
+                                                    <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Đã hủy">
+                                                        <Setter Property="Background" Value="{DynamicResource DangerRedBg}"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding OrderStatus}" Value="Hoàn tiền">
+                                                    <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Hoàn tiền">
                                                         <Setter Property="Background" Value="#F3E8FF"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        
-                                        <TextBlock Text="{Binding OrderStatus}" FontSize="10.5" FontWeight="Bold" HorizontalAlignment="Center">
+                                        <TextBlock FontSize="10.5" FontWeight="Bold" VerticalAlignment="Center">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding OrderStatus}" Value="Chờ xác nhận">
-                                                            <Setter Property="Foreground" Value="#EA580C"/>
+                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Chờ xác nhận">
+                                                            <Setter Property="Text" Value="⏳ CHỜ XÁC NHẬN"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource WarningOrange}"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding OrderStatus}" Value="Đang xử lý">
+                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Đang xử lý">
+                                                            <Setter Property="Text" Value="⚙️ ĐANG XỬ LÝ"/>
                                                             <Setter Property="Foreground" Value="#3B82F6"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding OrderStatus}" Value="Đang giao hàng">
-                                                            <Setter Property="Foreground" Value="#D97706"/>
+                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Đang giao hàng">
+                                                            <Setter Property="Text" Value="🚚 ĐANG GIAO HÀNG"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource WarningOrange}"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding OrderStatus}" Value="Hoàn thành">
-                                                            <Setter Property="Foreground" Value="#10B981"/>
+                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Hoàn thành">
+                                                            <Setter Property="Text" Value="✅ ĐƠN HOÀN THÀNH"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource SuccessGreen}"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding OrderStatus}" Value="Đã hủy">
-                                                            <Setter Property="Foreground" Value="#EF4444"/>
+                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Đã hủy">
+                                                            <Setter Property="Text" Value="❌ ĐƠN ĐÃ HỦY"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource DangerRed}"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding OrderStatus}" Value="Hoàn tiền">
-                                                            <Setter Property="Foreground" Value="#9333EA"/>
+                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Hoàn tiền">
+                                                            <Setter Property="Text" Value="💰 ĐÃ HOÀN TIỀN"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource BrandPurple}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </TextBlock.Style>
                                         </TextBlock>
                                     </Border>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Border>
+                                </StackPanel>
+                            </StackPanel>
 
-            <!-- RIGHT: Order Detail Inspector Card -->
-            <Border Grid.Column="2" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
-                <Border.Effect>
-                    <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
-                </Border.Effect>
-
-                <Grid>
-                    <!-- Displayed only when an Order is selected -->
-                    <Grid>
-                        <Grid.Style>
-                            <Style TargetType="Grid">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsOrderSelected}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </Style>
-                        </Grid.Style>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/> <!-- Header details -->
-                            <RowDefinition Height="*"/>    <!-- Scrollable fields -->
-                            <RowDefinition Height="Auto"/> <!-- Actions footer -->
-                        </Grid.RowDefinitions>
-
-                        <!-- Header Info -->
-                        <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,10,0,20">
-                            <Border Width="60" Height="60" Background="#EFF3FF" CornerRadius="30" HorizontalAlignment="Center">
-                                <TextBlock Text="&#xE8D5;" FontFamily="Segoe MDL2 Assets" FontSize="24" Foreground="{StaticResource BrandPurple}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="{Binding SelectedOrder.OrderCode}" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" Margin="0,12,0,4" HorizontalAlignment="Center" TextAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                            <TextBlock Text="{Binding SelectedOrder.OrderDate, StringFormat={}{0:dd/MM/yyyy HH:mm}}" FontSize="11.5" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                        </StackPanel>
-
-                        <!-- Detail Fields ScrollView -->
-                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,16">
-                            <StackPanel>
-                                <!-- Basic Info -->
-                                <TextBlock Text="THÔNG TIN NGƯỜI MUA" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                <TextBlock Text="{Binding SelectedOrder.Buyer.FullName}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" Margin="0,4,0,12" FontFamily="Be Vietnam Pro, Segoe UI"/>
-
-                                <TextBlock Text="THÔNG TIN CỬA HÀNG" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                <TextBlock Text="{Binding SelectedOrder.Shop.ShopName}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" Margin="0,4,0,12" FontFamily="Be Vietnam Pro, Segoe UI"/>
-
-                                <TextBlock Text="PHƯƠNG THỨC THANH TOÁN" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                <TextBlock Text="{Binding SelectedOrder.PaymentMethod}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" Margin="0,4,0,12" FontFamily="Be Vietnam Pro, Segoe UI"/>
-
-                                <!-- Items List -->
-                                <TextBlock Text="SẢN PHẨM TRONG ĐƠN" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,8"/>
-                                <ItemsControl ItemsSource="{Binding SelectedOrder.OrderDetails}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border BorderThickness="0,0,0,1" BorderBrush="#F1F5F9" Padding="0,6">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                                        <TextBlock Text="{Binding Product.ProductName}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" TextWrapping="Wrap"/>
-                                                        <TextBlock Text="{Binding Quantity, StringFormat={}Số lượng: {0}}" FontSize="11" Foreground="{StaticResource TextSecondary}"/>
-                                                    </StackPanel>
-                                                    <TextBlock Grid.Column="1" Text="{Binding UnitPrice, StringFormat={}{0:N0} đ}" FontSize="12" FontWeight="Bold" Foreground="{StaticResource BrandPurple}" VerticalAlignment="Center"/>
-                                                </Grid>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-
-                                <!-- Totals -->
-                                <Border Background="#F8FAFC" CornerRadius="8" Padding="12" Margin="0,16,0,0">
-                                    <StackPanel>
-                                        <Grid Margin="0,0,0,6">
-                                            <TextBlock Text="Tạm tính" FontSize="11.5" Foreground="{StaticResource TextSecondary}"/>
-                                            <TextBlock Text="{Binding SelectedOrder.SubTotal, StringFormat={}{0:N0} đ}" FontSize="11.5" FontWeight="SemiBold" HorizontalAlignment="Right"/>
-                                        </Grid>
-                                        <Grid Margin="0,0,0,6">
-                                            <TextBlock Text="Phí vận chuyển" FontSize="11.5" Foreground="{StaticResource TextSecondary}"/>
-                                            <TextBlock Text="{Binding SelectedOrder.ShippingFee, StringFormat={}{0:N0} đ}" FontSize="11.5" FontWeight="SemiBold" HorizontalAlignment="Right"/>
-                                        </Grid>
-                                        <Grid Margin="0,0,0,6">
-                                            <TextBlock Text="Giảm giá" FontSize="11.5" Foreground="{StaticResource TextSecondary}"/>
-                                            <TextBlock Text="{Binding SelectedOrder.Discount, StringFormat={}-{0:N0} đ}" FontSize="11.5" FontWeight="SemiBold" Foreground="#EF4444" HorizontalAlignment="Right"/>
-                                        </Grid>
-                                        <Border BorderThickness="0,1,0,0" BorderBrush="#E2E8F0" Margin="0,6" Padding="0,8,0,0">
-                                            <Grid>
-                                                <TextBlock Text="Tổng thanh toán" FontSize="12.5" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
-                                                <TextBlock Text="{Binding SelectedOrder.TotalAmount, StringFormat={}{0:N0} đ}" FontSize="14" FontWeight="Bold" Foreground="#10B981" HorizontalAlignment="Right"/>
-                                            </Grid>
+                            <!-- Close Button -->
+                            <Button Grid.Column="2" Click="CloseLightbox" Background="Transparent"
+                                    BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}"
+                                    Width="40" Height="40" Cursor="Hand" VerticalAlignment="Top">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="bd" Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="8">
+                                            <TextBlock Text="&#xE106;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                                       Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
-                                    </StackPanel>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource SurfaceHigh}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- ROW 1: BENTO STATS GRID -->
+                    <Grid Grid.Row="1" Margin="32,8,32,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Card 1: Total Amount -->
+                        <Border Grid.Column="0" Background="{DynamicResource SurfaceHigh}" CornerRadius="10"
+                                BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="18,14">
+                            <StackPanel>
+                                <TextBlock Text="TỔNG THANH TOÁN" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}"
+                                           FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <TextBlock FontSize="20" FontWeight="ExtraBold" Foreground="{DynamicResource SuccessGreen}" FontFamily="Be Vietnam Pro, Segoe UI" TextTrimming="CharacterEllipsis">
+                                    <Run Text="{Binding SelectedOrder.TotalAmount, StringFormat={}{0:N0}, TargetNullValue='0'}"/><Run Text=" đ"/>
+                                </TextBlock>
+                                <Border Height="3" CornerRadius="2" Background="{DynamicResource BorderSlate}" Margin="0,10,0,0">
+                                    <Border.Child>
+                                        <Border Width="80" Height="3" CornerRadius="2" HorizontalAlignment="Left" Background="{DynamicResource SuccessGreen}">
+                                            <Border.Effect>
+                                                <DropShadowEffect Color="{DynamicResource SuccessGreen.Color}" BlurRadius="6" ShadowDepth="0" Opacity="0.6"/>
+                                            </Border.Effect>
+                                        </Border>
+                                    </Border.Child>
                                 </Border>
                             </StackPanel>
-                        </ScrollViewer>
+                        </Border>
 
-                        <!-- Action Buttons Footer -->
-                        <StackPanel Grid.Row="2">
-                            <!-- Refund button -->
-                            <Button Content="Thực hiện Hoàn tiền" 
-                                    Background="#F59E0B" Foreground="#FFFFFF"
-                                    Command="{Binding RefundOrderCommand}"
-                                    Style="{StaticResource ActionButton}">
-                            </Button>
+                        <!-- Card 2: Items Count -->
+                        <Border Grid.Column="2" Background="{DynamicResource SurfaceHigh}" CornerRadius="10"
+                                BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="18,14">
+                            <StackPanel>
+                                <TextBlock Text="SỐ SẢN PHẨM" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}"
+                                           FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <TextBlock FontSize="20" FontWeight="ExtraBold" Foreground="{DynamicResource BrandPurple}" FontFamily="Be Vietnam Pro, Segoe UI">
+                                    <Run Text="{Binding SelectedOrder.OrderDetails.Count, FallbackValue='0'}"/><Run Text=" sp"/>
+                                </TextBlock>
+                                <Border Height="3" CornerRadius="2" Background="{DynamicResource BorderSlate}" Margin="0,10,0,0">
+                                    <Border.Child>
+                                        <Border Width="40" Height="3" CornerRadius="2" HorizontalAlignment="Left" Background="{DynamicResource BrandPurple}">
+                                            <Border.Effect>
+                                                <DropShadowEffect Color="{DynamicResource BrandPurple.Color}" BlurRadius="6" ShadowDepth="0" Opacity="0.6"/>
+                                            </Border.Effect>
+                                        </Border>
+                                    </Border.Child>
+                                </Border>
+                            </StackPanel>
+                        </Border>
 
-                            <!-- Cancel button -->
-                            <Button Content="Hủy đơn khẩn cấp" 
-                                    Background="#EF4444" Foreground="#FFFFFF"
-                                    Command="{Binding CancelOrderCommand}"
-                                    Style="{StaticResource ActionButton}">
-                            </Button>
-                        </StackPanel>
+                        <!-- Card 3: Date -->
+                        <Border Grid.Column="4" Background="{DynamicResource SurfaceHigh}" CornerRadius="10"
+                                BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="18,14">
+                            <StackPanel>
+                                <TextBlock Text="NGÀY ĐẶT HÀNG" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}"
+                                           FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <TextBlock Text="{Binding SelectedOrder.OrderDate, StringFormat={}{0:dd/MM/yyyy}, TargetNullValue='-'}"
+                                           FontSize="18" FontWeight="ExtraBold"
+                                           Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center"/>
+                                <TextBlock Text="Thời gian tạo đơn" FontSize="9.5" Foreground="{DynamicResource TextMuted}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,8,0,0"/>
+                            </StackPanel>
+                        </Border>
                     </Grid>
 
-                    <!-- Unselected state placeholder -->
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,20">
-                        <StackPanel.Style>
-                            <Style TargetType="StackPanel">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsOrderSelected}" Value="False">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </Style>
-                        </StackPanel.Style>
-                        
-                        <TextBlock Text="&#xE8D5;" FontFamily="Segoe MDL2 Assets" FontSize="44" Foreground="#DFE9FD" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Chọn một đơn hàng để xem thông tin chi tiết và thao tác quản lý" FontSize="12.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" Margin="0,14,0,0" TextAlignment="Center" Width="180" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                    </StackPanel>
+                    <!-- ROW 2: BODY -->
+                    <Grid Grid.Row="2" Margin="32,0,32,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- LEFT: Order Info -->
+                        <StackPanel Grid.Column="0">
+                            <!-- Section: Buyer -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                                <Border Width="20" Height="1" Background="{DynamicResource BrandPurple}" Opacity="0.5" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="Thông tin Người mua" FontSize="13" FontWeight="Bold"
+                                           Foreground="{DynamicResource BrandPurple}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                                <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                                           Foreground="{DynamicResource BrandPurple}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding SelectedOrder.Buyer.FullName}" FontSize="13.5" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="{Binding SelectedOrder.Buyer.Email}" FontSize="11.5" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,1,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Section: Shop -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                                <Border Width="20" Height="1" Background="{DynamicResource BrandPurple}" Opacity="0.5" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="Thông tin Cửa hàng" FontSize="13" FontWeight="Bold"
+                                           Foreground="{DynamicResource BrandPurple}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                                <TextBlock Text="&#xE719;" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                                           Foreground="{DynamicResource BrandPurple}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding SelectedOrder.Shop.ShopName}" FontSize="13.5" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="{Binding SelectedOrder.PaymentMethod}" FontSize="11.5" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,1,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Products List -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <Border Width="20" Height="1" Background="{DynamicResource BrandPurple}" Opacity="0.5" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="Sản phẩm trong đơn" FontSize="13" FontWeight="Bold"
+                                           Foreground="{DynamicResource BrandPurple}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            </StackPanel>
+                            <Border Background="{DynamicResource SurfaceHigh}" CornerRadius="10" Padding="14" MaxHeight="160" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                    <ItemsControl ItemsSource="{Binding SelectedOrder.OrderDetails}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderThickness="0,0,0,1" BorderBrush="{DynamicResource BorderSlate}" Padding="0,6">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Grid.Column="0">
+                                                            <TextBlock Text="{Binding Product.ProductName}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                            <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI">
+                                                                <Run Text="SL: "/><Run Text="{Binding Quantity}"/><Run Text=" × "/><Run Text="{Binding UnitPrice, StringFormat={}{0:N0} đ}"/>
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                        <TextBlock Grid.Column="1" Text="{Binding UnitPrice, StringFormat={}{0:N0} đ}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource BrandPurple}" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </Border>
+
+                            <!-- Totals -->
+                            <Border Background="{DynamicResource SurfaceHigh}" CornerRadius="10" Padding="14" Margin="0,14,0,0" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}">
+                                <StackPanel>
+                                    <Grid Margin="0,0,0,6">
+                                        <TextBlock Text="Tạm tính" FontSize="12" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        <TextBlock Text="{Binding SelectedOrder.SubTotal, StringFormat={}{0:N0} đ}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Right" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    </Grid>
+                                    <Grid Margin="0,0,0,6">
+                                        <TextBlock Text="Phí vận chuyển" FontSize="12" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        <TextBlock Text="{Binding SelectedOrder.ShippingFee, StringFormat={}{0:N0} đ}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Right" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    </Grid>
+                                    <Grid Margin="0,0,0,8">
+                                        <TextBlock Text="Giảm giá" FontSize="12" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource DangerRed}" HorizontalAlignment="Right" FontFamily="Be Vietnam Pro, Segoe UI">
+                                            <Run Text="-"/><Run Text="{Binding SelectedOrder.Discount, StringFormat={}{0:N0} đ, TargetNullValue='0 đ'}"/>
+                                        </TextBlock>
+                                    </Grid>
+                                    <Border Background="{DynamicResource BrandActiveBg}" CornerRadius="8" Padding="10" Margin="0,4,0,0">
+                                        <Grid>
+                                            <TextBlock Text="TỔNG CẦN THANH TOÁN" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                            <TextBlock Text="{Binding SelectedOrder.TotalAmount, StringFormat={}{0:N0} đ}" FontSize="15" FontWeight="ExtraBold" Foreground="{DynamicResource SuccessGreen}" HorizontalAlignment="Right" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- RIGHT: Action Panel -->
+                        <Border Grid.Column="2" Background="{DynamicResource SurfaceHigh}" CornerRadius="12"
+                                BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="18">
+                            <StackPanel>
+                                <TextBlock Text="Thao tác" FontSize="12.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,14"/>
+                                <TextBlock Text="Hành động của bạn sẽ được ghi lại trong nhật ký hệ thống."
+                                           FontSize="11.5" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"
+                                           FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,16"/>
+
+                                <!-- Cancel button -->
+                                <Button Command="{Binding CancelOrderCommand}" Background="{DynamicResource DangerRed}" BorderThickness="0"
+                                        Height="40" Cursor="Hand" Margin="0,0,0,8">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Chờ xác nhận">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Đang xử lý">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Đang giao hàng">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="8">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <materialDesign:PackIcon Kind="Cancel" Foreground="{DynamicResource PrimaryBtnText}" Width="16" Height="16" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Hủy đơn hàng" Foreground="{DynamicResource PrimaryBtnText}" FontSize="12.5" FontWeight="Bold" VerticalAlignment="Center" Margin="8,0,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bd" Property="Opacity" Value="0.85"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <!-- Refund button -->
+                                <Button Command="{Binding RefundOrderCommand}" Background="{DynamicResource WarningOrange}" BorderThickness="0"
+                                        Height="40" Cursor="Hand">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Đã hủy">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Hoàn thành">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Đang giao hàng">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="8">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <materialDesign:PackIcon Kind="CashRefund" Foreground="{DynamicResource PrimaryBtnText}" Width="16" Height="16" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Hoàn tiền" Foreground="{DynamicResource PrimaryBtnText}" FontSize="12.5" FontWeight="Bold" VerticalAlignment="Center" Margin="8,0,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bd" Property="Opacity" Value="0.85"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <!-- Hint when no action available -->
+                                <TextBlock FontSize="11" Foreground="{DynamicResource TextMuted}" TextWrapping="Wrap" Margin="0,12,0,0" FontFamily="Be Vietnam Pro, Segoe UI">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value=""/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Hoàn thành">
+                                                    <Setter Property="Text" Value="Đơn đã hoàn thành. Có thể thực hiện hoàn tiền nếu cần."/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Hoàn tiền">
+                                                    <Setter Property="Text" Value="Đơn đã được hoàn tiền. Không còn thao tác nào khả dụng."/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- ROW 3: FOOTER -->
+                    <Border Grid.Row="3" CornerRadius="0,0,16,16" BorderThickness="0,1,0,0"
+                            BorderBrush="{DynamicResource BorderSlate}" Padding="32,12" Margin="0,16,0,0">
+                        <Border.Background>
+                            <SolidColorBrush Color="#0A0E1A" Opacity="0.5"/>
+                        </Border.Background>
+                        <Grid>
+                            <TextBlock HorizontalAlignment="Left" FontSize="9.5" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="MÃ ĐƠN HÀNG: {0}">
+                                        <Binding Path="SelectedOrder.OrderCode"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                            <TextBlock HorizontalAlignment="Right" FontSize="9.5" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="NGÀY TẠO: {0:dd/MM/yyyy HH:mm}">
+                                        <Binding Path="SelectedOrder.OrderDate"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </Grid>
+                    </Border>
                 </Grid>
             </Border>
         </Grid>
     </Grid>
 </UserControl>
-

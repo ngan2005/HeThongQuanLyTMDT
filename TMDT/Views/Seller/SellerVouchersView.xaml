@@ -8,6 +8,8 @@
              d:DesignHeight="580" d:DesignWidth="820">
 
     <UserControl.Resources>
+        <DropShadowEffect x:Key="CardShadow" BlurRadius="16" ShadowDepth="2" Opacity="0.06" Color="#000" Direction="270"/>
+
         <Style x:Key="InputLabel" TargetType="TextBlock">
             <Setter Property="FontSize" Value="11.5"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -29,7 +31,7 @@
                         <Border x:Name="border" Background="{TemplateBinding Background}" 
                                 BorderBrush="{TemplateBinding BorderBrush}" 
                                 BorderThickness="{TemplateBinding BorderThickness}" 
-                                CornerRadius="6">
+                                CornerRadius="8">
                             <ScrollViewer x:Name="PART_ContentHost" Focusable="false"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -46,35 +48,58 @@
     </UserControl.Resources>
 
     <Grid>
-        <Grid.ColumnDefinitions>
-            <!-- Left: Vouchers list (as premium cards) -->
-            <ColumnDefinition Width="1.3*"/>
-            <!-- Right: Create Voucher Form -->
-            <ColumnDefinition Width="1*"/>
-        </Grid.ColumnDefinitions>
-
         <!-- ========================================== -->
-        <!-- LEFT COLUMN: VOUCHERS CARDS LIST -->
+        <!-- MAIN CONTENT: FULL-WIDTH VOUCHERS GRID -->
         <!-- ========================================== -->
-        <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="16" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20" Margin="0,0,16,0">
+        <Border Background="#FFFFFF" CornerRadius="16" BorderThickness="1" BorderBrush="#F1F5F9" Padding="24">
+            <Border.Effect>
+                <StaticResource ResourceKey="CardShadow"/>
+            </Border.Effect>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="Khuyến Mãi &amp; Voucher Của Shop" FontSize="15.5" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,16" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                <!-- Header block -->
+                <Grid Grid.Row="0" Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Grid.Column="0" Text="Khuyến Mãi &amp; Voucher Của Shop" FontSize="16" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                    
+                    <Button Grid.Column="1" Click="OpenCreateVoucher_Click" HorizontalAlignment="Right" Background="#0D9488" Foreground="White" BorderThickness="0" Height="34" Padding="16,0" Cursor="Hand" VerticalAlignment="Center">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE109;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <TextBlock Text=" Đăng voucher mới" FontSize="12.5" Foreground="#FFFFFF" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    </StackPanel>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
 
+                <!-- Coupon Cards list -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                     <ItemsControl ItemsSource="{Binding Vouchers}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel ItemWidth="360" Margin="0,0,-12,0"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <!-- Custom Coupon Card Style with Dashed Border and Circle Cuts -->
-                                <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="12" Margin="0,0,0,14" Height="100" ClipToBounds="True">
+                                <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="12" Margin="0,0,14,14" Height="106" Width="346" ClipToBounds="True">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <!-- Left side: Discount Type/Logo -->
-                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="80"/>
                                             <!-- Split dashed line -->
                                             <ColumnDefinition Width="Auto"/>
                                             <!-- Right side: Details -->
@@ -84,11 +109,10 @@
                                         <!-- Left Side: Large discount tag -->
                                         <Border Grid.Column="0" Background="#0D9488" CornerRadius="11,0,0,11">
                                             <Grid>
-                                                <!-- Circular Cutouts at top and bottom of split line -->
                                                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                                     <!-- Icon coupon -->
                                                     <TextBlock Text="&#xE1A1;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="#FFFFFF" HorizontalAlignment="Center"/>
-                                                    <TextBlock Text="VOUCHER" FontSize="9" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                    <TextBlock Text="VOUCHER" FontSize="9.5" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
@@ -110,11 +134,11 @@
                                                     <Border Background="#F0FDFA" BorderBrush="#0D9488" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
                                                         <TextBlock Text="{Binding VoucherCode}" FontSize="11" FontWeight="Bold" Foreground="#0D9488" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                                     </Border>
-                                                    <TextBlock Text="{Binding VoucherName}" FontSize="12.5" FontWeight="SemiBold" Foreground="#1E293B" TextTrimming="CharacterEllipsis" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                    <TextBlock Text="{Binding VoucherName}" FontSize="12" FontWeight="SemiBold" Foreground="#1E293B" TextTrimming="CharacterEllipsis" FontFamily="Be Vietnam Pro, Segoe UI" MaxWidth="120"/>
                                                 </StackPanel>
 
                                                 <!-- Discount Value text -->
-                                                <TextBlock FontSize="12" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI">
+                                                <TextBlock FontSize="11.5" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI">
                                                     <Run Text="Giảm: "/>
                                                     <Run Text="{Binding DiscountValue, StringFormat={}{0:N0}}" FontWeight="Bold" Foreground="#EA580C"/>
                                                     <Style TargetType="TextBlock">
@@ -122,7 +146,7 @@
                                                             <DataTrigger Binding="{Binding DiscountType}" Value="Percentage">
                                                                 <Setter Property="Text">
                                                                     <Setter.Value>
-                                                                        <TextBlock FontSize="12" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI">
+                                                                        <TextBlock FontSize="11.5" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI">
                                                                             <Run Text="Giảm: "/>
                                                                             <Run Text="{Binding DiscountValue, StringFormat={}{0:N0}%}" FontWeight="Bold" Foreground="#EA580C"/>
                                                                             <Run Text=" (Tối đa "/>
@@ -142,9 +166,9 @@
                                             </StackPanel>
 
                                             <!-- Quick Action: Toggle Status -->
-                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="4,0,0,0">
                                                 <!-- Used count -->
-                                                <TextBlock Text="{Binding UsedCount, StringFormat={}{0} đã dùng}" FontSize="10.5" Foreground="#64748B" HorizontalAlignment="Right" Margin="0,0,0,10" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                <TextBlock Text="{Binding UsedCount, StringFormat={}{0} đã dùng}" FontSize="10" Foreground="#64748B" HorizontalAlignment="Right" Margin="0,0,0,12" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                                 
                                                 <!-- Toggle active button -->
                                                 <Button Content="Tạm dừng" FontSize="10" Padding="8,4" Cursor="Hand"
@@ -184,116 +208,138 @@
         </Border>
 
         <!-- ========================================== -->
-        <!-- RIGHT COLUMN: CREATE VOUCHER FORM -->
+        <!-- LIGHTBOX OVERLAY: CREATE VOUCHER DIALOG -->
         <!-- ========================================== -->
-        <Border Grid.Column="1" Background="#FFFFFF" CornerRadius="16" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+        <Grid x:Name="LightboxOverlay" Visibility="Collapsed">
+            <!-- Translucent Backdrop -->
+            <Border Background="#990F172A" MouseDown="LightboxOverlay_MouseDown"/>
 
-                <TextBlock Grid.Row="0" Text="Tạo Mã Giảm Giá Mới" FontSize="14" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,16" FontFamily="Be Vietnam Pro, Segoe UI"/>
+            <!-- Dialog Content Card -->
+            <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="520" Margin="0,30,0,30">
+                <Border Background="#FFFFFF" CornerRadius="16" Effect="{StaticResource CardShadow}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <!-- Header -->
+                            <RowDefinition Height="Auto"/>
+                            <!-- Scrollable Content -->
+                            <RowDefinition Height="*"/>
+                            <!-- Action Submit -->
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,16">
-                    <StackPanel>
-                        <!-- Voucher Code -->
-                        <TextBlock Style="{StaticResource InputLabel}" Text="Mã Code Voucher (Nên viết liền không dấu) *"/>
-                        <TextBox Style="{StaticResource FormInput}" Text="{Binding VoucherCodeInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0,0,0,12" ToolTip="Ví dụ: GIAM20K, MYSUMMER"/>
+                        <!-- Header -->
+                        <Border Grid.Row="0" Background="#0D9488" CornerRadius="16,16,0,0" Padding="24,18">
+                            <Grid>
+                                <TextBlock Text="Tạo Mã Giảm Giá Mới" FontSize="15" FontWeight="Bold" Foreground="White" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <Button HorizontalAlignment="Right" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" Cursor="Hand" Click="CloseLightbox_Click">
+                                    <TextBlock Text="&#xE10A;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="White"/>
+                                </Button>
+                            </Grid>
+                        </Border>
 
-                        <!-- Voucher Name -->
-                        <TextBlock Style="{StaticResource InputLabel}" Text="Tên Voucher (Mô tả hiển thị) *"/>
-                        <TextBox Style="{StaticResource FormInput}" Text="{Binding VoucherNameInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0,0,0,12" ToolTip="Ví dụ: Giảm giá mùa hè cho tất cả đơn hàng"/>
+                        <!-- Form Scrollable panel -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MaxHeight="400" Padding="24,20">
+                            <StackPanel>
+                                <!-- Voucher Code -->
+                                <TextBlock Style="{StaticResource InputLabel}" Text="Mã Code Voucher (Nên viết liền không dấu) *"/>
+                                <TextBox Style="{StaticResource FormInput}" Text="{Binding VoucherCodeInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0,0,0,14" ToolTip="Ví dụ: GIAM20K, MYSUMMER"/>
 
-                        <!-- Discount Type -->
-                        <TextBlock Style="{StaticResource InputLabel}" Text="Loại Hình Giảm Giá"/>
-                        <ComboBox Height="36" SelectedValuePath="Tag" SelectedValue="{Binding DiscountTypeInput}" Margin="0,0,0,12">
-                            <ComboBox.Resources>
-                                <Style TargetType="ComboBox">
-                                    <Setter Property="Background" Value="#F8FAFC"/>
-                                    <Setter Property="BorderBrush" Value="#E2E8F0"/>
-                                    <Setter Property="BorderThickness" Value="1"/>
-                                    <Setter Property="Padding" Value="10,0"/>
-                                    <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                </Style>
-                            </ComboBox.Resources>
-                            <ComboBoxItem Content="Theo phần trăm (%)" Tag="Percentage" IsSelected="True"/>
-                            <ComboBoxItem Content="Số tiền cố định (đ)" Tag="Fixed"/>
-                        </ComboBox>
+                                <!-- Voucher Name -->
+                                <TextBlock Style="{StaticResource InputLabel}" Text="Tên Voucher (Mô tả hiển thị) *"/>
+                                <TextBox Style="{StaticResource FormInput}" Text="{Binding VoucherNameInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0,0,0,14" ToolTip="Ví dụ: Giảm giá mùa hè cho tất cả đơn hàng"/>
 
-                        <!-- Discount Value -->
-                        <TextBlock Style="{StaticResource InputLabel}" Text="Mức Giảm Giá (Số tiền hoặc số %)*"/>
-                        <TextBox Style="{StaticResource FormInput}" Text="{Binding DiscountValueInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0,0,0,12"/>
+                                <!-- Discount Type -->
+                                <TextBlock Style="{StaticResource InputLabel}" Text="Loại Hình Giảm Giá"/>
+                                <ComboBox Height="36" SelectedValuePath="Tag" SelectedValue="{Binding DiscountTypeInput}" Margin="0,0,0,14">
+                                    <ComboBox.Resources>
+                                        <Style TargetType="ComboBox">
+                                            <Setter Property="Background" Value="#F8FAFC"/>
+                                            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                                            <Setter Property="BorderThickness" Value="1"/>
+                                            <Setter Property="Padding" Value="10,0"/>
+                                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                        </Style>
+                                    </ComboBox.Resources>
+                                    <ComboBoxItem Content="Theo phần trăm (%)" Tag="Percentage" IsSelected="True"/>
+                                    <ComboBoxItem Content="Số tiền cố định (đ)" Tag="Fixed"/>
+                                </ComboBox>
 
-                        <!-- Max Discount (enabled only if Percentage is active) -->
-                        <StackPanel Margin="0,0,0,12">
-                            <StackPanel.Style>
-                                <Style TargetType="StackPanel">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding DiscountTypeInput}" Value="Fixed">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </StackPanel.Style>
-                            <TextBlock Style="{StaticResource InputLabel}" Text="Mức giảm tối đa (đ)"/>
-                            <TextBox Style="{StaticResource FormInput}" Text="{Binding MaxDiscountInput, UpdateSourceTrigger=PropertyChanged}" Height="36"/>
-                        </StackPanel>
+                                <!-- Discount Value -->
+                                <TextBlock Style="{StaticResource InputLabel}" Text="Mức Giảm Giá (Số tiền hoặc số %)*"/>
+                                <TextBox Style="{StaticResource FormInput}" Text="{Binding DiscountValueInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0,0,0,14"/>
 
-                        <!-- Min Order Value -->
-                        <TextBlock Style="{StaticResource InputLabel}" Text="Giá trị đơn hàng tối thiểu (đ)"/>
-                        <TextBox Style="{StaticResource FormInput}" Text="{Binding MinOrderValueInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0,0,0,12"/>
+                                <!-- Max Discount (enabled only if Percentage is active) -->
+                                <StackPanel Margin="0,0,0,14">
+                                    <StackPanel.Style>
+                                        <Style TargetType="StackPanel">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding DiscountTypeInput}" Value="Fixed">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+                                    <TextBlock Style="{StaticResource InputLabel}" Text="Mức giảm tối đa (đ)"/>
+                                    <TextBox Style="{StaticResource FormInput}" Text="{Binding MaxDiscountInput, UpdateSourceTrigger=PropertyChanged}" Height="36"/>
+                                </StackPanel>
 
-                        <!-- Row: Total Qty & Duration -->
-                        <Grid Margin="0,0,0,12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="8"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                                <!-- Min Order Value -->
+                                <TextBlock Style="{StaticResource InputLabel}" Text="Giá trị đơn hàng tối thiểu (đ)"/>
+                                <TextBox Style="{StaticResource FormInput}" Text="{Binding MinOrderValueInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0,0,0,14"/>
 
-                            <!-- Total quantity -->
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Style="{StaticResource InputLabel}" Text="Số lượng phát hành"/>
-                                <TextBox Style="{StaticResource FormInput}" Text="{Binding TotalQuantityInput, UpdateSourceTrigger=PropertyChanged}" Height="36"/>
+                                <!-- Row: Total Qty & Duration -->
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Total quantity -->
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Style="{StaticResource InputLabel}" Text="Số lượng phát hành"/>
+                                        <TextBox Style="{StaticResource FormInput}" Text="{Binding TotalQuantityInput, UpdateSourceTrigger=PropertyChanged}" Height="36"/>
+                                    </StackPanel>
+
+                                    <!-- Duration days -->
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Style="{StaticResource InputLabel}" Text="Thời hạn dùng (ngày)"/>
+                                        <TextBox Style="{StaticResource FormInput}" Text="{Binding DurationDaysInput, UpdateSourceTrigger=PropertyChanged}" Height="36"/>
+                                    </StackPanel>
+                                </Grid>
                             </StackPanel>
+                        </ScrollViewer>
 
-                            <!-- Duration days -->
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Style="{StaticResource InputLabel}" Text="Thời hạn dùng (ngày)"/>
-                                <TextBox Style="{StaticResource FormInput}" Text="{Binding DurationDaysInput, UpdateSourceTrigger=PropertyChanged}" Height="36"/>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-                </ScrollViewer>
-
-                <!-- Create Voucher Action button -->
-                <Button Grid.Row="2" Command="{Binding SaveVoucherCommand}" Background="#0D9488" BorderThickness="0" Height="38" Cursor="Hand">
-                    <Button.Template>
-                         <ControlTemplate TargetType="Button">
-                             <Border Background="{TemplateBinding Background}" CornerRadius="6">
-                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                             </Border>
-                         </ControlTemplate>
-                     </Button.Template>
-                     <Button.Content>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE105;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <TextBlock Text=" Tạo &amp; Phát Hành Voucher" FontSize="12.5" Foreground="#FFFFFF" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                        </StackPanel>
-                    </Button.Content>
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Opacity" Value="0.9"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
+                        <!-- Footer -->
+                        <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="#F1F5F9" Padding="24,16" CornerRadius="0,0,16,16">
+                            <Button Command="{Binding SaveVoucherCommand}" Click="CloseLightbox_Click" Background="#0D9488" BorderThickness="0" Height="38" Cursor="Hand">
+                                <Button.Template>
+                                     <ControlTemplate TargetType="Button">
+                                         <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                         </Border>
+                                     </ControlTemplate>
+                                 </Button.Template>
+                                 <Button.Content>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE105;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <TextBlock Text=" Tạo &amp; Phát Hành Voucher" FontSize="12.5" Foreground="#FFFFFF" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    </StackPanel>
+                                </Button.Content>
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Opacity" Value="0.9"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </Border>
+                    </Grid>
+                </Border>
             </Grid>
-        </Border>
+        </Grid>
     </Grid>
 </UserControl>

@@ -9,15 +9,12 @@
 
     <UserControl.Resources>
         <!-- Style tokens -->
-        <SolidColorBrush x:Key="TextPrimary" Color="#1C1B1A"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#414750"/>
-        <SolidColorBrush x:Key="BrandPurple" Color="#004277"/>
 
         <Style x:Key="SettingsCard" TargetType="Border">
-            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Background" Value="{DynamicResource CardBg}"/>
             <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#F1F5F9"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderSlate}"/>
             <Setter Property="Padding" Value="24"/>
             <Setter Property="Margin" Value="0,0,0,20"/>
         </Style>
@@ -84,7 +81,7 @@
         </StackPanel>
 
         <!-- 2. SETTINGS LIST -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
             <StackPanel Margin="0,0,8,0">
                 
                 <!-- CARD 1: FINANCIAL CONFIGURATION -->
@@ -109,7 +106,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBox Grid.Column="0" Text="{Binding PlatformCommissionRate, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}"/>
-                                    <Border Grid.Column="1" Background="#F1F5F9" Width="36" BorderBrush="#DFE9FD" BorderThickness="0,1,1,1" CornerRadius="0,4,4,0">
+                                    <Border Grid.Column="1" Background="#F1F5F9" Width="36" BorderBrush="{DynamicResource BorderSlate}" BorderThickness="0,1,1,1" CornerRadius="0,4,4,0">
                                         <TextBlock Text="%" FontSize="13" Foreground="{StaticResource TextSecondary}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                 </Grid>
@@ -125,7 +122,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBox Grid.Column="0" Text="{Binding MinWithdrawAmount, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}"/>
-                                    <Border Grid.Column="1" Background="#F1F5F9" Width="42" BorderBrush="#DFE9FD" BorderThickness="0,1,1,1" CornerRadius="0,4,4,0">
+                                    <Border Grid.Column="1" Background="#F1F5F9" Width="42" BorderBrush="{DynamicResource BorderSlate}" BorderThickness="0,1,1,1" CornerRadius="0,4,4,0">
                                         <TextBlock Text="VNĐ" FontSize="11" Foreground="{StaticResource TextSecondary}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                 </Grid>
@@ -168,7 +165,7 @@
                 </Border>
 
                 <!-- CARD 3: MAINTENANCE SYSTEM (CRITICAL CONTROL) -->
-                <Border Style="{StaticResource SettingsCard}" BorderBrush="#FCA5A5" Background="#FEF2F2">
+                <Border Style="{StaticResource SettingsCard}" BorderBrush="#FCA5A5" Background="{DynamicResource DangerRedBg}">
                     <StackPanel>
                         <TextBlock Text="Chế độ bảo trì hệ thống (Maintenance Mode)" FontSize="14.5" FontWeight="Bold" Foreground="#DC2626" Margin="0,0,0,6" FontFamily="Be Vietnam Pro, Segoe UI"/>
                         <TextBlock Text="⚠️ CẢNH BÁO: KHI KÍCH HOẠT CHẾ ĐỘ NÀY, TOÀN BỘ SÀN THƯƠNG MẠI SẼ TẠM DỪNG HOẠT ĐỘNG MUA BÁN. NGƯỜI MUA CHỈ NHÌN THẤY TRANG THÔNG BÁO BẢO TRÌ ĐỂ HỆ THỐNG NÂNG CẤP DỮ LIỆU." 
@@ -216,4 +213,7 @@
         </Border>
     </Grid>
 </UserControl>
+
+
+
 

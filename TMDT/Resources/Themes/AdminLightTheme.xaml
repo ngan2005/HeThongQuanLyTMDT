@@ -1,0 +1,50 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- ===== ADMIN LIGHT THEME ===== -->
+
+    <!-- Keys matching existing views -->
+    <SolidColorBrush x:Key="TextPrimary"        Color="#0F172A"/>
+    <SolidColorBrush x:Key="TextSecondary"       Color="#64748B"/>
+    <SolidColorBrush x:Key="BrandPurple"         Color="#4F46E5"/>
+
+    <!-- Main backgrounds -->
+    <SolidColorBrush x:Key="AppBackground"       Color="#F1F5F9"/>
+    <SolidColorBrush x:Key="SidebarBg"           Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="BgMain"              Color="#F1F5F9"/>
+    <SolidColorBrush x:Key="BgWhite"             Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="SurfaceHigh"         Color="#F8FAFC"/>
+
+    <!-- Brand -->
+    <SolidColorBrush x:Key="BrandActiveBg"       Color="#EEF2FF"/>
+    <SolidColorBrush x:Key="BrandHoverBg"        Color="#F8FAFC"/>
+
+    <!-- Borders -->
+    <SolidColorBrush x:Key="BorderSlate"         Color="#E2E8F0"/>
+
+    <!-- DataGrid -->
+    <SolidColorBrush x:Key="GridRowBg"           Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="GridAltRowBg"        Color="#F8FAFC"/>
+    <SolidColorBrush x:Key="GridHeaderBg"        Color="#F8FAFC"/>
+
+    <!-- Action buttons -->
+    <SolidColorBrush x:Key="ActionBtnBg"         Color="#EFF3FF"/>
+    <SolidColorBrush x:Key="ActionBtnHoverBg"    Color="#DFE9FD"/>
+
+    <!-- Semantic colors -->
+    <SolidColorBrush x:Key="PrimaryBtnText"     Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="DangerRed"           Color="#EF4444"/>
+    <SolidColorBrush x:Key="DangerRedBg"         Color="#FEF2F2"/>
+    <SolidColorBrush x:Key="DangerRedBorder"     Color="#FECACA"/>
+
+    <!-- Sidebar (Light) -->
+    <SolidColorBrush x:Key="SidebarTextDefault"  Color="#414750"/>
+    <SolidColorBrush x:Key="SidebarTextSelected" Color="#004277"/>
+    <SolidColorBrush x:Key="SidebarBorder"       Color="#C1C7D2"/>
+    <SolidColorBrush x:Key="SidebarHoverBg"      Color="#E6E2DE"/>
+    <SolidColorBrush x:Key="SidebarActiveBg"      Color="#D3E4FF"/>
+    <SolidColorBrush x:Key="SidebarActiveText"   Color="#001C38"/>
+
+    <!-- Cards / Lightbox -->
+    <SolidColorBrush x:Key="CardBg"              Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="ProfileCardBg"       Color="#F8FAFC"/>
+</ResourceDictionary>

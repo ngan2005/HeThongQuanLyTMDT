@@ -9,9 +9,6 @@
 
     <UserControl.Resources>
         <!-- Style tokens -->
-        <SolidColorBrush x:Key="TextPrimary" Color="#1C1B1A"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#414750"/>
-        <SolidColorBrush x:Key="BrandPurple" Color="#004277"/>
 
         <Style x:Key="ActionButton" TargetType="Button">
             <Setter Property="Height" Value="36"/>
@@ -57,7 +54,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- LEFT: Category List Board -->
-            <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="16">
+            <Border Grid.Column="0" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="16">
                 <Border.Effect>
                     <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
                 </Border.Effect>
@@ -65,18 +62,18 @@
                 <DataGrid ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" AutoGenerateColumns="False" 
                           Background="Transparent" BorderThickness="0" GridLinesVisibility="None"
                           CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True"
-                          RowBackground="#FFFFFF" AlternatingRowBackground="#F8FAFC"
+                          RowBackground="{DynamicResource CardBg}" AlternatingRowBackground="{DynamicResource GridAltRowBg}"
                           HeadersVisibility="Column" RowHeight="46" FontFamily="Be Vietnam Pro, Segoe UI">
                     <DataGrid.Resources>
                         <!-- Header Style -->
                         <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="Background" Value="#F8FAFC"/>
+                            <Setter Property="Background" Value="{DynamicResource GridHeaderBg}"/>
                             <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
                             <Setter Property="FontSize" Value="11.5"/>
                             <Setter Property="Padding" Value="10,8"/>
                             <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource BorderSlate}"/>
                             <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
                         </Style>
                         <!-- Cell Style -->
@@ -195,7 +192,7 @@
             </Border>
 
             <!-- RIGHT: Category Editor Card -->
-            <Border Grid.Column="2" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
+            <Border Grid.Column="2" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="20">
                 <Border.Effect>
                     <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
                 </Border.Effect>
@@ -226,15 +223,15 @@
 
                     <!-- Input: Name -->
                     <TextBlock Text="Tên ngành hàng" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,6"/>
-                    <TextBox Text="{Binding CategoryName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,16" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                    <TextBox Text="{Binding CategoryName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,16" Height="36" BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1" Padding="8,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
 
                     <!-- Input: Icon Hex -->
                     <TextBlock Text="Mã Icon Segoe MDL2 (Ví dụ: E13A)" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,6"/>
-                    <TextBox Text="{Binding CategoryIcon, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,16" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                    <TextBox Text="{Binding CategoryIcon, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,16" Height="36" BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1" Padding="8,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
 
                     <!-- Input: Sort Order -->
                     <TextBlock Text="Thứ tự sắp xếp hiển thị" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,6"/>
-                    <TextBox Text="{Binding CategorySortOrder, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,24" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                    <TextBox Text="{Binding CategorySortOrder, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,24" Height="36" BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1" Padding="8,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
 
                     <!-- Action buttons -->
                     <Button Command="{Binding SaveCategoryCommand}" Background="{StaticResource BrandPurple}" Foreground="#FFFFFF" Margin="0,0,0,10">
@@ -291,4 +288,7 @@
         </Grid>
     </Grid>
 </UserControl>
+
+
+
 

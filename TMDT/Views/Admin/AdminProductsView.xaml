@@ -9,9 +9,6 @@
 
     <UserControl.Resources>
         <!-- Style tokens -->
-        <SolidColorBrush x:Key="TextPrimary" Color="#1C1B1A"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#414750"/>
-        <SolidColorBrush x:Key="BrandPurple" Color="#004277"/>
         
         <Style x:Key="FilterButton" TargetType="RadioButton">
             <Setter Property="Background" Value="Transparent"/>
@@ -29,7 +26,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#F1F5F9"/>
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource BorderSlate}"/>
                                 <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
@@ -86,7 +83,7 @@
             </StackPanel>
 
             <!-- Search box -->
-            <Border Grid.Column="1" Background="#FFFFFF" CornerRadius="8" BorderThickness="1" BorderBrush="#DFE9FD" Height="38" Padding="12,0" VerticalAlignment="Center">
+            <Border Grid.Column="1" Background="{DynamicResource CardBg}" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Height="38" Padding="12,0" VerticalAlignment="Center">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="20"/>
@@ -121,7 +118,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- LEFT: DataGrid List -->
-            <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="16">
+            <Border Grid.Column="0" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="16">
                 <Border.Effect>
                     <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
                 </Border.Effect>
@@ -129,18 +126,18 @@
                 <DataGrid ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}" AutoGenerateColumns="False" 
                           Background="Transparent" BorderThickness="0" GridLinesVisibility="None"
                           CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True"
-                          RowBackground="#FFFFFF" AlternatingRowBackground="#F8FAFC"
+                          RowBackground="{DynamicResource CardBg}" AlternatingRowBackground="{DynamicResource GridAltRowBg}"
                           HeadersVisibility="Column" RowHeight="44" FontFamily="Be Vietnam Pro, Segoe UI">
                     <DataGrid.Resources>
                         <!-- Header Style -->
                         <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="Background" Value="#F8FAFC"/>
+                            <Setter Property="Background" Value="{DynamicResource GridHeaderBg}"/>
                             <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
                             <Setter Property="FontSize" Value="11.5"/>
                             <Setter Property="Padding" Value="10,8"/>
                             <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource BorderSlate}"/>
                             <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
                         </Style>
                         <!-- Cell Style -->
@@ -187,7 +184,7 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <!-- Mock Image Box placeholder -->
-                                        <Border Width="28" Height="28" Background="#EFF3FF" CornerRadius="6" Margin="0,0,10,0">
+                                        <Border Width="28" Height="28" Background="{DynamicResource SidebarHoverBg}" CornerRadius="6" Margin="0,0,10,0">
                                             <TextBlock Text="&#xE179;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{StaticResource BrandPurple}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
                                         <TextBlock Text="{Binding ProductName}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
@@ -289,7 +286,7 @@
             </Border>
 
             <!-- RIGHT: Product Detail Inspector Card -->
-            <Border Grid.Column="2" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
+            <Border Grid.Column="2" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="20">
                 <Border.Effect>
                     <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
                 </Border.Effect>
@@ -305,7 +302,7 @@
 
                         <!-- Image box and Product Title -->
                         <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,10,0,20">
-                            <Border Width="68" Height="68" Background="#EFF3FF" CornerRadius="8" HorizontalAlignment="Center">
+                            <Border Width="68" Height="68" Background="{DynamicResource SidebarHoverBg}" CornerRadius="8" HorizontalAlignment="Center">
                                 <TextBlock Text="&#xE179;" FontFamily="Segoe MDL2 Assets" FontSize="30" Foreground="{StaticResource BrandPurple}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <TextBlock Text="{Binding SelectedProduct.ProductName}" FontSize="14.5" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" Margin="0,12,0,4" HorizontalAlignment="Center" TextAlignment="Center" MaxHeight="45" TextTrimming="CharacterEllipsis" FontFamily="Be Vietnam Pro, Segoe UI"/>
@@ -350,7 +347,7 @@
                         </StackPanel>
 
                         <!-- Detail Fields ScrollView -->
-                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,16">
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden" Margin="0,0,0,16">
                             <StackPanel>
                                 <!-- Product Code Field -->
                                 <TextBlock Text="MÃ SẢN PHẨM" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
@@ -446,4 +443,7 @@
         </Grid>
     </Grid>
 </UserControl>
+
+
+
 

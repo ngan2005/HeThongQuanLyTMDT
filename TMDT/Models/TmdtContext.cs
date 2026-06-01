@@ -640,8 +640,8 @@ public partial class TmdtContext : DbContext
             entity.HasIndex(e => e.Email, "UQ__User__A9D105348039FAC4").IsUnique();
 
             entity.Property(e => e.Avatar)
-                .HasMaxLength(300)
-                .IsUnicode(false);
+                .HasMaxLength(int.MaxValue)
+                .IsUnicode();
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");

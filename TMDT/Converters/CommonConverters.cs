@@ -9,12 +9,26 @@ namespace TMDT.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            bool boolValue = (bool)value;
+            bool boolValue = value is bool b && b;
             if (parameter?.ToString() == "Inverse")
             {
                 return boolValue ? Visibility.Collapsed : Visibility.Visible;
             }
             return boolValue ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class InverseBooleanToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            bool boolValue = value is bool b && b;
+            return boolValue ? Visibility.Collapsed : Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -95,6 +109,52 @@ namespace TMDT.Converters
             if (value is bool boolValue && boolValue && parameter != null)
                 return parameter.ToString();
             return Binding.DoNothing;
+        }
+    }
+
+    public class Base64ToImageConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string base64 && !string.IsNullOrWhiteSpace(base64))
+            {
+                try
+                {
+                    byte[] bytes = System.Convert.FromBase64String(base64);
+                    using var ms = new System.IO.MemoryStream(bytes);
+                    var image = new System.Windows.Media.Imaging.BitmapImage();
+                    image.BeginInit();
+                    image.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    image.StreamSource = ms;
+                    image.EndInit();
+                    image.Freeze();
+                    return image;
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class StringNullOrEmptyToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            bool isEmpty = string.IsNullOrWhiteSpace(value as string);
+            return parameter?.ToString() == "Inverse" ? isEmpty : !isEmpty;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }

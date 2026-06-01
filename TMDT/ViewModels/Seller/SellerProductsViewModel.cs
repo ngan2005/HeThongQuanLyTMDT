@@ -16,9 +16,9 @@ namespace TMDT.ViewModels.Seller
         private ObservableCollection<Category> _categories;
         private Product _selectedProduct;
         private string _searchText = "";
-        private string _statusFilter = "All"; // All, Pending, Approved, Rejected
+        private string _statusFilter = "All";
 
-        // Inspector fields for add/edit
+        // Inspector fields
         private string _productNameInput;
         private string _productCodeInput;
         private decimal _priceInput;
@@ -103,7 +103,27 @@ namespace TMDT.ViewModels.Seller
         public bool IsEditMode
         {
             get => _isEditMode;
-            set { _isEditMode = value; OnPropertyChanged(); }
+            set { _isEditMode = value; OnPropertyChanged(); OnPropertyChanged(nameof(FormTitle)); OnPropertyChanged(nameof(FormStatusBadge)); }
+        }
+
+        // Dynamic form title
+        public string FormTitle => IsEditMode ? "Chi tiết sản phẩm" : "Thêm sản phẩm mới";
+
+        // Dynamic status badge text
+        public string FormStatusBadge
+        {
+            get
+            {
+                if (!IsEditMode) return "Chế độ thêm mới";
+                return SelectedProduct?.Status switch
+                {
+                    "Pending" => "⏳ Chờ Admin duyệt",
+                    "Approved" => "✅ Đang bán",
+                    "Rejected" => "❌ Bị từ chối",
+                    "Deleted" => "🗑 Đã xóa",
+                    _ => "—"
+                };
+            }
         }
         #endregion
 
@@ -115,21 +135,14 @@ namespace TMDT.ViewModels.Seller
 
         public SellerProductsViewModel()
         {
-            try
-            {
-                _context = new TmdtContext();
-            }
-            catch
-            {
-                // Failsafe
-            }
+            try { _context = new TmdtContext(); } catch { }
 
             Products = new ObservableCollection<Product>();
             Categories = new ObservableCollection<Category>();
 
-            SaveProductCommand = new RelayCommand(ExecuteSaveProduct);
-            ResetFieldsCommand = new RelayCommand(o => ResetInspector());
-            DeleteProductCommand = new RelayCommand(ExecuteDeleteProduct, o => SelectedProduct != null);
+            SaveProductCommand = new RelayCommand(_ => ExecuteSaveProduct());
+            ResetFieldsCommand = new RelayCommand(_ => ResetInspector());
+            DeleteProductCommand = new RelayCommand(_ => ExecuteDeleteProduct(), _ => SelectedProduct != null && SelectedProduct.Status != "Deleted");
             SetFilterCommand = new RelayCommand(o => StatusFilter = o?.ToString() ?? "All");
 
             LoadCategories();
@@ -145,12 +158,10 @@ namespace TMDT.ViewModels.Seller
                 if (_context != null && _context.Categories.Any())
                 {
                     foreach (var cat in _context.Categories.ToList())
-                    {
                         Categories.Add(cat);
-                    }
                 }
             }
-            catch {}
+            catch { }
 
             if (!Categories.Any())
             {
@@ -165,160 +176,40 @@ namespace TMDT.ViewModels.Seller
         {
             Products.Clear();
             int currentShopId = GetCurrentShopId();
+            if (currentShopId <= 0) return;
 
             try
             {
-                if (_context != null && _context.Products.Any())
+                if (_context == null) return;
+
+                var query = _context.Products
+                    .Include(p => p.Category)
+                    .Where(p => p.ShopId == currentShopId)
+                    .AsQueryable();
+
+                if (!string.IsNullOrEmpty(SearchText))
                 {
-                    var query = _context.Products
-                        .Include(p => p.Category)
-                        .Where(p => p.ShopId == currentShopId)
-                        .AsQueryable();
-
-                    if (!string.IsNullOrEmpty(SearchText))
-                    {
-                        query = query.Where(p => p.ProductName.Contains(SearchText) ||
-                                                 (p.ProductCode != null && p.ProductCode.Contains(SearchText)));
-                    }
-
-                    if (StatusFilter == "Pending")
-                    {
-                        query = query.Where(p => p.Status == "Pending" || string.IsNullOrEmpty(p.Status));
-                    }
-                    else if (StatusFilter == "Approved")
-                    {
-                        query = query.Where(p => p.Status == "Approved");
-                    }
-                    else if (StatusFilter == "Rejected")
-                    {
-                        query = query.Where(p => p.Status == "Rejected");
-                    }
-
-                    var dbProducts = query.ToList();
-                    foreach (var prod in dbProducts)
-                    {
-                        Products.Add(prod);
-                    }
-
-                    if (Products.Any()) return;
+                    query = query.Where(p => p.ProductName.Contains(SearchText) ||
+                                            (p.ProductCode != null && p.ProductCode.Contains(SearchText)));
                 }
+
+                if (StatusFilter == "Pending")
+                    query = query.Where(p => p.Status == "Pending" || string.IsNullOrEmpty(p.Status));
+                else if (StatusFilter == "Approved")
+                    query = query.Where(p => p.Status == "Approved");
+                else if (StatusFilter == "Rejected")
+                    query = query.Where(p => p.Status == "Rejected");
+                else if (StatusFilter == "Deleted")
+                    query = query.Where(p => p.Status == "Deleted");
+                else
+                    query = query.Where(p => p.Status != "Deleted");
+
+                foreach (var prod in query.ToList())
+                    Products.Add(prod);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Failed to load products from DB: " + ex.Message);
-            }
-
-            LoadMockProducts();
-        }
-
-        private void LoadMockProducts()
-        {
-            var mockProds = new ObservableCollection<Product>();
-
-            mockProds.Add(new Product
-            {
-                ProductId = 7001,
-                ProductCode = "TEE-ORGANIC",
-                ProductName = "Áo Thun Unisex Cotton Organic Cao Cấp",
-                CategoryId = 2,
-                Price = 189000,
-                OriginalPrice = 250000,
-                StockQuantity = 215,
-                SoldCount = 285,
-                Rating = 4.8m,
-                Status = "Approved",
-                Description = "Áo thun 100% cotton hữu cơ cao cấp, thoáng mát mịn màng.",
-                Category = Categories.FirstOrDefault(c => c.CategoryId == 2)
-            });
-
-            mockProds.Add(new Product
-            {
-                ProductId = 7002,
-                ProductCode = "TEFAL-5.6L",
-                ProductName = "Nồi Chiên Không Dầu Tefal XXL 5.6L",
-                CategoryId = 1,
-                Price = 2490000,
-                OriginalPrice = 3500000,
-                StockQuantity = 52,
-                SoldCount = 98,
-                Rating = 4.7m,
-                Status = "Approved",
-                Description = "Nồi chiên Tefal dung tích 5.6L lý tưởng cho gia đình.",
-                Category = Categories.FirstOrDefault(c => c.CategoryId == 1)
-            });
-
-            mockProds.Add(new Product
-            {
-                ProductId = 7003,
-                ProductCode = "ROBO-QREVO",
-                ProductName = "Robot Hút Bụi Lau Nhà Roborock Q Revo",
-                CategoryId = 1,
-                Price = 14500000,
-                OriginalPrice = 18000000,
-                StockQuantity = 15,
-                SoldCount = 30,
-                Rating = 4.9m,
-                Status = "Approved",
-                Description = "Robot lau nhà đa năng, tự giặt giẻ và sấy khô giẻ tiện lợi.",
-                Category = Categories.FirstOrDefault(c => c.CategoryId == 1)
-            });
-
-            mockProds.Add(new Product
-            {
-                ProductId = 7004,
-                ProductCode = "SONY-WH1000",
-                ProductName = "Tai nghe Chống Ồn Sony WH-1000XM5",
-                CategoryId = 3,
-                Price = 6490000,
-                OriginalPrice = 8490000,
-                StockQuantity = 8,
-                SoldCount = 12,
-                Rating = 4.8m,
-                Status = "Approved",
-                Description = "Tai nghe chụp tai Sony chống ồn thế hệ thứ 5.",
-                Category = Categories.FirstOrDefault(c => c.CategoryId == 3)
-            });
-
-            mockProds.Add(new Product
-            {
-                ProductId = 7005,
-                ProductCode = "IPHONE-15PRO",
-                ProductName = "Điện thoại Apple iPhone 15 Pro Max 256GB",
-                CategoryId = 3,
-                Price = 29490000,
-                OriginalPrice = 34990000,
-                StockQuantity = 12,
-                SoldCount = 4,
-                Rating = 0,
-                Status = "Pending",
-                Description = "Siêu phẩm điện thoại cao cấp nhất từ nhà Táo với khung vỏ titanium.",
-                Category = Categories.FirstOrDefault(c => c.CategoryId == 3)
-            });
-
-            var filtered = mockProds.AsQueryable();
-
-            if (!string.IsNullOrEmpty(SearchText))
-            {
-                filtered = filtered.Where(p => p.ProductName.ToLower().Contains(SearchText.ToLower()) ||
-                                               (p.ProductCode != null && p.ProductCode.ToLower().Contains(SearchText.ToLower())));
-            }
-
-            if (StatusFilter == "Pending")
-            {
-                filtered = filtered.Where(p => p.Status == "Pending" || string.IsNullOrEmpty(p.Status));
-            }
-            else if (StatusFilter == "Approved")
-            {
-                filtered = filtered.Where(p => p.Status == "Approved");
-            }
-            else if (StatusFilter == "Rejected")
-            {
-                filtered = filtered.Where(p => p.Status == "Rejected");
-            }
-
-            foreach (var prod in filtered.ToList())
-            {
-                Products.Add(prod);
+                System.Diagnostics.Debug.WriteLine("LoadProducts failed: " + ex.Message);
             }
         }
 
@@ -334,6 +225,7 @@ namespace TMDT.ViewModels.Seller
                 DescriptionInput = SelectedProduct.Description;
                 SelectedCategoryInput = Categories.FirstOrDefault(c => c.CategoryId == SelectedProduct.CategoryId) ?? Categories.FirstOrDefault();
                 IsEditMode = true;
+                OnPropertyChanged(nameof(FormStatusBadge));
             }
             else
             {
@@ -353,16 +245,17 @@ namespace TMDT.ViewModels.Seller
             DescriptionInput = "";
             SelectedCategoryInput = Categories.FirstOrDefault();
             IsEditMode = false;
+            OnPropertyChanged(nameof(FormTitle));
+            OnPropertyChanged(nameof(FormStatusBadge));
         }
 
-        private async void ExecuteSaveProduct(object obj)
+        private async void ExecuteSaveProduct()
         {
             if (string.IsNullOrWhiteSpace(ProductNameInput))
             {
-                MessageBox.Show("Vui lòng điền tên sản phẩm!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Vui lòng nhập tên sản phẩm!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-
             if (PriceInput <= 0)
             {
                 MessageBox.Show("Giá bán phải lớn hơn 0!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -370,14 +263,18 @@ namespace TMDT.ViewModels.Seller
             }
 
             int currentShopId = GetCurrentShopId();
+            if (currentShopId <= 0)
+            {
+                MessageBox.Show("Không tìm thấy cửa hàng. Vui lòng đăng nhập lại.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
             if (IsEditMode && SelectedProduct != null)
             {
-                // Update existing
                 SelectedProduct.ProductName = ProductNameInput;
                 SelectedProduct.ProductCode = ProductCodeInput;
                 SelectedProduct.Price = PriceInput;
-                SelectedProduct.OriginalPrice = OriginalPriceInput;
+                SelectedProduct.OriginalPrice = OriginalPriceInput > 0 ? OriginalPriceInput : PriceInput;
                 SelectedProduct.StockQuantity = StockInput;
                 SelectedProduct.Description = DescriptionInput;
                 SelectedProduct.CategoryId = SelectedCategoryInput?.CategoryId ?? 1;
@@ -385,44 +282,42 @@ namespace TMDT.ViewModels.Seller
 
                 try
                 {
-                    if (_context != null)
+                    var dbProd = await _context.Products.FindAsync(SelectedProduct.ProductId);
+                    if (dbProd != null)
                     {
-                        var dbProd = await _context.Products.FindAsync(SelectedProduct.ProductId);
-                        if (dbProd != null)
-                        {
-                            dbProd.ProductName = ProductNameInput;
-                            dbProd.ProductCode = ProductCodeInput;
-                            dbProd.Price = PriceInput;
-                            dbProd.OriginalPrice = OriginalPriceInput;
-                            dbProd.StockQuantity = StockInput;
-                            dbProd.Description = DescriptionInput;
-                            dbProd.CategoryId = SelectedCategoryInput?.CategoryId ?? 1;
-
-                            await _context.SaveChangesAsync();
-                        }
+                        dbProd.ProductName = ProductNameInput;
+                        dbProd.ProductCode = ProductCodeInput;
+                        dbProd.Price = PriceInput;
+                        dbProd.OriginalPrice = OriginalPriceInput > 0 ? OriginalPriceInput : PriceInput;
+                        dbProd.StockQuantity = StockInput;
+                        dbProd.Description = DescriptionInput;
+                        dbProd.CategoryId = SelectedCategoryInput?.CategoryId ?? 1;
+                        await _context.SaveChangesAsync();
                     }
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine("EF update product failed: " + ex.Message);
+                    System.Diagnostics.Debug.WriteLine("Update product failed: " + ex.Message);
                 }
 
+                AuditLogHelper.Log("UPDATE_PRODUCT", $"Sửa '{ProductNameInput}' (ID:{SelectedProduct.ProductId})", "Product", "Normal");
                 MessageBox.Show("Đã cập nhật sản phẩm thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
             {
-                // Add new (Pending status)
                 var newProd = new Product
                 {
                     ShopId = currentShopId,
                     ProductName = ProductNameInput,
-                    ProductCode = string.IsNullOrWhiteSpace(ProductCodeInput) ? "PROD-" + Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper() : ProductCodeInput,
+                    ProductCode = string.IsNullOrWhiteSpace(ProductCodeInput)
+                        ? "PROD-" + Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper()
+                        : ProductCodeInput,
                     Price = PriceInput,
                     OriginalPrice = OriginalPriceInput > 0 ? OriginalPriceInput : PriceInput,
                     StockQuantity = StockInput,
                     Description = DescriptionInput,
                     CategoryId = SelectedCategoryInput?.CategoryId ?? 1,
-                    Status = "Pending", // Seller products are Pending until Admin approves
+                    Status = "Pending",
                     CreatedAt = DateTime.Now,
                     SoldCount = 0,
                     Rating = 0,
@@ -431,71 +326,64 @@ namespace TMDT.ViewModels.Seller
 
                 try
                 {
-                    if (_context != null)
-                    {
-                        _context.Products.Add(newProd);
-                        await _context.SaveChangesAsync();
-                        newProd.ProductId = newProd.ProductId; // DB assigned ID
-                    }
+                    _context.Products.Add(newProd);
+                    await _context.SaveChangesAsync();
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine("EF insert product failed: " + ex.Message);
-                    // generate mock ID
+                    System.Diagnostics.Debug.WriteLine("Insert product failed: " + ex.Message);
                     newProd.ProductId = new Random().Next(8000, 9999);
                 }
 
-                MessageBox.Show("Đã thêm mới sản phẩm! Vui lòng chờ Admin phê duyệt để sản phẩm hiển thị trên sàn.", "Đăng bán thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                AuditLogHelper.Log("ADD_PRODUCT", $"Thêm '{ProductNameInput}' (Code:{newProd.ProductCode})", "Product", "Normal");
+                MessageBox.Show("Đã thêm sản phẩm! Vui lòng chờ Admin phê duyệt để hiển thị trên sàn.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             }
 
             LoadProducts();
             ResetInspector();
         }
 
-        private async void ExecuteDeleteProduct(object obj)
+        private async void ExecuteDeleteProduct()
         {
             if (SelectedProduct == null) return;
 
-            var result = MessageBox.Show($"Bạn có chắc chắn muốn xóa sản phẩm '{SelectedProduct.ProductName}'?", "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            var result = MessageBox.Show(
+                $"Xóa sản phẩm '{SelectedProduct.ProductName}'?\nSản phẩm sẽ được chuyển vào thùng rác.",
+                "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes) return;
 
             try
             {
-                if (_context != null)
+                var dbProd = await _context.Products.FindAsync(SelectedProduct.ProductId);
+                if (dbProd != null)
                 {
-                    var dbProd = await _context.Products.FindAsync(SelectedProduct.ProductId);
-                    if (dbProd != null)
-                    {
-                        _context.Products.Remove(dbProd);
-                        await _context.SaveChangesAsync();
-                    }
+                    dbProd.Status = "Deleted";           // Soft delete
+                    await _context.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("EF delete product failed: " + ex.Message);
+                System.Diagnostics.Debug.WriteLine("Soft delete failed: " + ex.Message);
             }
 
+            AuditLogHelper.Log("DELETE_PRODUCT", $"Xóa '{SelectedProduct.ProductName}' (ID:{SelectedProduct.ProductId})", "Product", "Warning");
             Products.Remove(SelectedProduct);
             ResetInspector();
-            MessageBox.Show("Đã xóa sản phẩm thành công!", "Xóa thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("Đã xóa sản phẩm!", "Xóa thành công", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private int GetCurrentShopId()
         {
             try
             {
-                if (_context != null)
-                {
-                    var shop = _context.Shops
-                        .Include(s => s.User)
-                        .FirstOrDefault(s => s.User != null && s.User.Email == "seller@myshop.com")
-                        ?? _context.Shops.FirstOrDefault();
-                    if (shop != null) return shop.ShopId;
-                }
+                if (_context == null) return 0;
+                var shop = _context.Shops
+                    .Include(s => s.User)
+                    .FirstOrDefault(s => s.User != null && s.User.Email == "seller@myshop.com")
+                    ?? _context.Shops.FirstOrDefault();
+                return shop?.ShopId ?? 0;
             }
-            catch {}
-            return 1; // Default mock shop ID
+            catch { return 0; }
         }
     }
 }

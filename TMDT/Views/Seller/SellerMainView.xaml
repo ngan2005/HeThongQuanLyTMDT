@@ -12,7 +12,8 @@
         Background="Transparent"
         WindowStyle="None"
         AllowsTransparency="True"
-        MouseDown="Window_MouseDown">
+        MouseDown="Window_MouseDown"
+        StateChanged="Window_StateChanged">
 
     <Window.DataContext>
         <vm:SellerMainViewModel/>
@@ -21,6 +22,8 @@
     <Window.Resources>
         <!-- Converter for checking active menu -->
         <converters:EqualityToBooleanConverter x:Key="EqualityToBooleanConverter"/>
+        <converters:StringNullOrEmptyToBoolConverter x:Key="StringNullOrEmptyToBool"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
 
         <!-- Mapping ViewModels to Views using DataTemplates -->
         <DataTemplate DataType="{x:Type vm:SellerDashboardViewModel}">
@@ -240,6 +243,34 @@
                     <!-- Navigation Menu -->
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled" Margin="0,0,0,16">
                         <StackPanel>
+
+                            <!-- Register Shop Button (only when no shop yet) -->
+                            <Button Command="{Binding RegisterShopCommand}"
+                                    Height="40" Margin="0,2,0,12"
+                                    Cursor="Hand"
+                                    ToolTip="Đăng ký mở cửa hàng">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="bd" Background="#0D9488" CornerRadius="8" Padding="12,0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="White" Width="24" VerticalAlignment="Center"/>
+                                                <TextBlock Text="Đăng ký Shop mới" FontSize="12.5" FontWeight="SemiBold"
+                                                           Foreground="White" FontFamily="Be Vietnam Pro, Segoe UI"
+                                                           VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="bd" Property="Background" Value="#0F766E"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+
+                            <!-- Divider -->
+                            <Border Height="1" Background="#2E2A66" Margin="0,0,0,8" Opacity="0.5"/>
+
                             <!-- Dashboard -->
                             <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowDashboardCommand}" 
                                          IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Dashboard, Mode=OneWay}"
@@ -394,10 +425,13 @@
 
                     <!-- Top Window action controls -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Style="{StaticResource WindowNavButton}" Click="MinimizeButton_Click" Margin="0,0,4,0">
+                        <Button Style="{StaticResource WindowNavButton}" Click="MinimizeButton_Click" Margin="0,0,4,0" ToolTip="Thu nhỏ">
                             <TextBlock Text="&#xE921;" FontFamily="Segoe MDL2 Assets" FontSize="10" FontWeight="Bold"/>
                         </Button>
-                        <Button Style="{StaticResource WindowCloseButton}" Click="ExitButton_Click">
+                        <Button x:Name="MaximizeButton" Style="{StaticResource WindowNavButton}" Click="MaximizeButton_Click" Margin="0,0,4,0" ToolTip="Phóng to">
+                            <TextBlock x:Name="MaximizeIcon" Text="&#xE922;" FontFamily="Segoe MDL2 Assets" FontSize="10" FontWeight="Bold"/>
+                        </Button>
+                        <Button Style="{StaticResource WindowCloseButton}" Click="ExitButton_Click" ToolTip="Đóng">
                             <TextBlock Text="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="10" FontWeight="Bold"/>
                         </Button>
                     </StackPanel>

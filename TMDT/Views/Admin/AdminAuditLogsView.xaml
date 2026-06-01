@@ -7,9 +7,6 @@
              d:DesignHeight="600" d:DesignWidth="880">
 
     <UserControl.Resources>
-        <SolidColorBrush x:Key="TextPrimary" Color="#1C1B1A"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#414750"/>
-        <SolidColorBrush x:Key="BrandPurple" Color="#004277"/>
     </UserControl.Resources>
 
     <Grid Margin="0,0,8,0">
@@ -35,7 +32,7 @@
 
             <!-- Refresh Button -->
             <Button Grid.Column="1" Command="{Binding RefreshCommand}" Height="36" Padding="16,0" Margin="0,0,8,0"
-                    Background="#EFF3FF" Foreground="{StaticResource BrandPurple}" BorderThickness="0" Cursor="Hand"
+                    Background="{DynamicResource SidebarHoverBg}" Foreground="{StaticResource BrandPurple}" BorderThickness="0" Cursor="Hand"
                     FontSize="12.5" FontWeight="SemiBold" FontFamily="Be Vietnam Pro, Segoe UI">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
@@ -56,7 +53,7 @@
 
             <!-- Clear All Button -->
             <Button Grid.Column="2" Command="{Binding ClearAllLogsCommand}" Height="36" Padding="16,0"
-                    Background="#FEF2F2" Foreground="#EF4444" BorderThickness="0" Cursor="Hand"
+                    Background="{DynamicResource DangerRedBg}" Foreground="#EF4444" BorderThickness="0" Cursor="Hand"
                     FontSize="12.5" FontWeight="SemiBold" FontFamily="Be Vietnam Pro, Segoe UI">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
@@ -87,10 +84,10 @@
             </Grid.ColumnDefinitions>
 
             <!-- Total Logs -->
-            <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="16,12">
+            <Border Grid.Column="0" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="16,12">
                 <Border.Effect><DropShadowEffect Color="#1C1B1A" BlurRadius="12" ShadowDepth="2" Opacity="0.03"/></Border.Effect>
                 <StackPanel Orientation="Horizontal">
-                    <Border Width="40" Height="40" Background="#EFF3FF" CornerRadius="10" Margin="0,0,12,0">
+                    <Border Width="40" Height="40" Background="{DynamicResource SidebarHoverBg}" CornerRadius="10" Margin="0,0,12,0">
                         <TextBlock Text="&#xE81C;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="{StaticResource BrandPurple}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <StackPanel VerticalAlignment="Center">
@@ -101,7 +98,7 @@
             </Border>
 
             <!-- Warning Logs -->
-            <Border Grid.Column="2" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="16,12">
+            <Border Grid.Column="2" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="16,12">
                 <Border.Effect><DropShadowEffect Color="#1C1B1A" BlurRadius="12" ShadowDepth="2" Opacity="0.03"/></Border.Effect>
                 <StackPanel Orientation="Horizontal">
                     <Border Width="40" Height="40" Background="#FFF7ED" CornerRadius="10" Margin="0,0,12,0">
@@ -115,10 +112,10 @@
             </Border>
 
             <!-- Critical Logs -->
-            <Border Grid.Column="4" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="16,12">
+            <Border Grid.Column="4" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="16,12">
                 <Border.Effect><DropShadowEffect Color="#1C1B1A" BlurRadius="12" ShadowDepth="2" Opacity="0.03"/></Border.Effect>
                 <StackPanel Orientation="Horizontal">
-                    <Border Width="40" Height="40" Background="#FEF2F2" CornerRadius="10" Margin="0,0,12,0">
+                    <Border Width="40" Height="40" Background="{DynamicResource DangerRedBg}" CornerRadius="10" Margin="0,0,12,0">
                         <TextBlock Text="&#xE783;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="#EF4444" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <StackPanel VerticalAlignment="Center">
@@ -140,7 +137,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- Search -->
-            <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="8" BorderThickness="1" BorderBrush="#DFE9FD" Height="36" Padding="12,0">
+            <Border Grid.Column="0" Background="{DynamicResource CardBg}" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Height="36" Padding="12,0">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="20"/>
@@ -155,16 +152,16 @@
             <!-- Category filter -->
             <ComboBox Grid.Column="2" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}"
                       Height="36" FontSize="12.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalContentAlignment="Center"
-                      Background="#FFFFFF" BorderBrush="#DFE9FD"/>
+                      Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderSlate}"/>
 
             <!-- Severity filter -->
             <ComboBox Grid.Column="4" ItemsSource="{Binding Severities}" SelectedItem="{Binding SelectedSeverity}"
                       Height="36" FontSize="12.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalContentAlignment="Center"
-                      Background="#FFFFFF" BorderBrush="#DFE9FD"/>
+                      Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderSlate}"/>
         </Grid>
 
         <!-- 4. LOG TABLE -->
-        <Border Grid.Row="3" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="16">
+        <Border Grid.Row="3" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="16">
             <Border.Effect>
                 <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
             </Border.Effect>
@@ -172,17 +169,17 @@
             <DataGrid ItemsSource="{Binding FilteredLogs}" AutoGenerateColumns="False"
                       Background="Transparent" BorderThickness="0" GridLinesVisibility="None"
                       CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True"
-                      RowBackground="#FFFFFF" AlternatingRowBackground="#F8FAFC"
+                      RowBackground="{DynamicResource CardBg}" AlternatingRowBackground="{DynamicResource GridAltRowBg}"
                       HeadersVisibility="Column" RowHeight="46" FontFamily="Be Vietnam Pro, Segoe UI">
                 <DataGrid.Resources>
                     <Style TargetType="DataGridColumnHeader">
-                        <Setter Property="Background" Value="#F8FAFC"/>
+                        <Setter Property="Background" Value="{DynamicResource GridHeaderBg}"/>
                         <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
                         <Setter Property="FontWeight" Value="SemiBold"/>
                         <Setter Property="FontSize" Value="11.5"/>
                         <Setter Property="Padding" Value="10,8"/>
                         <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                        <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource BorderSlate}"/>
                         <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
                     </Style>
                     <Style TargetType="DataGridCell">
@@ -290,4 +287,7 @@
         </Border>
     </Grid>
 </UserControl>
+
+
+
 

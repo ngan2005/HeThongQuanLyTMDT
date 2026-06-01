@@ -7,12 +7,9 @@
              d:DesignHeight="650" d:DesignWidth="880">
 
     <UserControl.Resources>
-        <SolidColorBrush x:Key="TextPrimary" Color="#1C1B1A"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#414750"/>
-        <SolidColorBrush x:Key="BrandPurple" Color="#004277"/>
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,8,0">
+    <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled" Padding="0,0,8,0">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -36,14 +33,52 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Left Column: Profile Card -->
-                <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="24" VerticalAlignment="Top">
+                <Border Grid.Column="0" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="24" VerticalAlignment="Top">
                     <Border.Effect><DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.03"/></Border.Effect>
                     <StackPanel>
-                        <!-- Avatar -->
-                        <Border Width="100" Height="100" CornerRadius="50" Background="#EEF2FF" BorderThickness="4" BorderBrush="#FFFFFF" HorizontalAlignment="Center">
-                            <Border.Effect><DropShadowEffect Color="#000000" BlurRadius="10" ShadowDepth="2" Opacity="0.05"/></Border.Effect>
-                            <TextBlock Text="A" FontSize="40" FontWeight="Bold" Foreground="{StaticResource BrandPurple}" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                        </Border>
+                        <!-- Avatar: circular with base64 image or letter placeholder -->
+                        <Grid Width="100" Height="100" HorizontalAlignment="Center">
+                            <!-- Background circle -->
+                            <Ellipse Fill="{DynamicResource BrandActiveBg}"/>
+                            <!-- Avatar image (clipped to circle) -->
+                            <Grid>
+                                <Grid.Clip>
+                                    <EllipseGeometry Center="50,50" RadiusX="50" RadiusY="50"/>
+                                </Grid.Clip>
+                                <Image Source="{Binding Avatar, Converter={StaticResource Base64ToImageConverter}}"
+                                       Stretch="UniformToFill"
+                                       Visibility="{Binding Avatar, Converter={StaticResource StringNullOrEmptyToBool}, ConverterParameter=Inverse}"/>
+                            </Grid>
+                            <!-- Placeholder letter -->
+                            <TextBlock Text="A" FontSize="40" FontWeight="Bold"
+                                       Foreground="{DynamicResource BrandPurple}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       FontFamily="Be Vietnam Pro, Segoe UI"
+                                       Visibility="{Binding Avatar, Converter={StaticResource StringNullOrEmptyToBool}}"/>
+
+                            <!-- Camera overlay button -->
+                            <Button Command="{Binding ChangeAvatarCommand}"
+                                    Width="28" Height="28" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                    Cursor="Hand" ToolTip="Đổi ảnh đại diện">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="bd" Background="{DynamicResource BrandPurple}" CornerRadius="14">
+                                            <Border.Effect>
+                                                <DropShadowEffect Color="#000000" BlurRadius="6" ShadowDepth="1" Opacity="0.2"/>
+                                            </Border.Effect>
+                                            <TextBlock Text="&#xE722;" FontFamily="Segoe MDL2 Assets"
+                                                       FontSize="13" Foreground="White"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="bd" Property="Opacity" Value="0.85"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
                         
                         <TextBlock Text="{Binding FullName}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center" Margin="0,16,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
                         <Border Background="#E0E7FF" CornerRadius="6" Padding="10,4" HorizontalAlignment="Center" Margin="0,0,0,16">
@@ -73,7 +108,7 @@
                 <!-- Right Column: Edit Forms -->
                 <StackPanel Grid.Column="2">
                     <!-- Form 1: Edit Profile -->
-                    <Border Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="24" Margin="0,0,0,24">
+                    <Border Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="24" Margin="0,0,0,24">
                         <Border.Effect><DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.03"/></Border.Effect>
                         <StackPanel>
                             <TextBlock Text="Chỉnh sửa thông tin" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,16"/>
@@ -125,7 +160,7 @@
                     </Border>
 
                     <!-- Form 2: Change Password -->
-                    <Border Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="24">
+                    <Border Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="24">
                         <Border.Effect><DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.03"/></Border.Effect>
                         <StackPanel>
                             <TextBlock Text="Đổi mật khẩu" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,16"/>
@@ -167,7 +202,7 @@
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="bd" Property="Background" Value="#E2E8F0"/>
+                                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource BorderSlate}"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
@@ -180,4 +215,7 @@
         </Grid>
     </ScrollViewer>
 </UserControl>
+
+
+
 

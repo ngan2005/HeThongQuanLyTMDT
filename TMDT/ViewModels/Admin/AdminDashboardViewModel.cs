@@ -11,7 +11,6 @@ namespace TMDT.ViewModels.Admin
     {
         private TmdtContext _context;
 
-        // Statistics Properties
         private int _totalUsers;
         public int TotalUsers { get => _totalUsers; set { _totalUsers = value; OnPropertyChanged(); } }
 
@@ -36,11 +35,12 @@ namespace TMDT.ViewModels.Admin
         private int _withdrawPendingCount;
         public int WithdrawPendingCount { get => _withdrawPendingCount; set { _withdrawPendingCount = value; OnPropertyChanged(); } }
 
-        // Collections
         public ObservableCollection<OrderSummary> RecentOrders { get; set; }
         public ObservableCollection<ShopSummary> TopShops { get; set; }
         public ObservableCollection<RevenueTrendPoint> RevenueTrend { get; set; }
         public ObservableCollection<CategorySharePoint> CategoryShares { get; set; }
+
+        public string TodayDate => DateTime.Now.ToString("dd/MM/yyyy");
 
         public AdminDashboardViewModel()
         {
@@ -57,19 +57,17 @@ namespace TMDT.ViewModels.Admin
             try
             {
                 _context = new TmdtContext();
-                
-                // 1. Core Stats
-                TotalUsers = _context.Users.Count(u => u.Role.RoleName == "User");
+
+                TotalUsers = _context.Users.Count();
                 TotalShops = _context.Shops.Count();
                 PendingShops = _context.Shops.Count(s => s.IsActive == null);
-                
+
                 TotalProducts = _context.Products.Count();
                 PendingProducts = _context.Products.Count(p => p.Status == "Pending" || p.ApprovedAt == null);
 
                 var currentMonth = DateTime.Now.Month;
                 var currentYear = DateTime.Now.Year;
 
-                // Revenue & Commission (Current Month)
                 var monthlyOrders = _context.Orders
                     .Where(o => o.OrderDate.HasValue && o.OrderDate.Value.Month == currentMonth && o.OrderDate.Value.Year == currentYear)
                     .ToList();
@@ -77,10 +75,8 @@ namespace TMDT.ViewModels.Admin
                 MonthlyRevenue = monthlyOrders.Sum(o => o.TotalAmount ?? 0);
                 CommissionsEarned = monthlyOrders.Sum(o => o.PlatformFee ?? 0);
 
-                // Withdraws (Mocked count for now as there's no explicit Withdraw table referenced yet)
-                WithdrawPendingCount = 0; 
+                WithdrawPendingCount = _context.WithdrawRequests.Count(w => w.Status == "Pending");
 
-                // 2. Recent Orders
                 var recentOrders = _context.Orders
                     .Include(o => o.Buyer)
                     .Include(o => o.Shop)
@@ -90,19 +86,18 @@ namespace TMDT.ViewModels.Admin
 
                 foreach (var order in recentOrders)
                 {
-                    RecentOrders.Add(new OrderSummary 
-                    { 
-                        OrderId = order.OrderCode ?? $"ORD-{order.OrderId}", 
-                        BuyerName = order.Buyer?.FullName ?? "Khách hàng", 
-                        ShopName = order.Shop?.ShopName ?? "Cửa hàng", 
-                        TotalAmount = order.TotalAmount ?? 0, 
-                        Commission = order.PlatformFee ?? 0, 
-                        PaymentMethod = order.PaymentMethod ?? "Online", 
-                        Status = order.OrderStatus ?? "Hoàn thành" 
+                    RecentOrders.Add(new OrderSummary
+                    {
+                        OrderId = order.OrderCode ?? $"ORD-{order.OrderId}",
+                        BuyerName = order.Buyer?.FullName ?? "Khách hàng",
+                        ShopName = order.Shop?.ShopName ?? "Cửa hàng",
+                        TotalAmount = order.TotalAmount ?? 0,
+                        Commission = order.PlatformFee ?? 0,
+                        PaymentMethod = order.PaymentMethod ?? "Online",
+                        Status = order.OrderStatus ?? "Hoàn thành"
                     });
                 }
 
-                // 3. Top Shops (By Wallet Balance or Order sum)
                 var topShops = _context.Shops
                     .OrderByDescending(s => s.WalletBalance)
                     .Take(4)
@@ -110,15 +105,14 @@ namespace TMDT.ViewModels.Admin
 
                 foreach (var shop in topShops)
                 {
-                    TopShops.Add(new ShopSummary 
-                    { 
-                        ShopName = shop.ShopName, 
-                        TotalSales = shop.WalletBalance ?? 0, 
-                        Category = "Đa ngành" // Can join with categories later
+                    TopShops.Add(new ShopSummary
+                    {
+                        ShopName = shop.ShopName,
+                        TotalSales = shop.WalletBalance ?? 0,
+                        Category = "Đa ngành"
                     });
                 }
 
-                // 4. Chart Data: Revenue Trend (Last 7 Days)
                 var last7Days = Enumerable.Range(0, 7).Select(i => DateTime.Now.Date.AddDays(-i)).Reverse().ToList();
                 var rawTrend = new List<RevenueTrendPoint>();
 
@@ -128,30 +122,26 @@ namespace TMDT.ViewModels.Admin
                         .Where(o => o.OrderDate.HasValue && o.OrderDate.Value.Date == date)
                         .ToList();
 
-                    rawTrend.Add(new RevenueTrendPoint 
-                    { 
-                        DayName = GetVietnameseDayOfWeek(date.DayOfWeek), 
-                        TotalAmount = dailyOrders.Sum(o => o.TotalAmount ?? 0), 
-                        Commission = dailyOrders.Sum(o => o.PlatformFee ?? 0) 
+                    rawTrend.Add(new RevenueTrendPoint
+                    {
+                        DayName = GetVietnameseDayOfWeek(date.DayOfWeek),
+                        TotalAmount = dailyOrders.Sum(o => o.TotalAmount ?? 0),
+                        Commission = dailyOrders.Sum(o => o.PlatformFee ?? 0)
                     });
                 }
 
                 decimal maxAmount = rawTrend.Any() ? rawTrend.Max(t => t.TotalAmount) : 0;
                 decimal maxCommission = rawTrend.Any() ? rawTrend.Max(t => t.Commission) : 0;
-
-                // Ensure it's not 0 to avoid division by zero
                 if (maxAmount == 0) maxAmount = 1;
                 if (maxCommission == 0) maxCommission = 1;
 
                 foreach (var p in rawTrend)
                 {
-                    // Add minimum height for visual if no data
                     p.AmountHeight = p.TotalAmount > 0 ? (double)(p.TotalAmount / maxAmount * 150) : 5;
                     p.CommissionHeight = p.Commission > 0 ? (double)(p.Commission / maxCommission * 150) : 5;
                     RevenueTrend.Add(p);
                 }
 
-                // 5. Chart Data: Category Share (By Product Count)
                 var topCategories = _context.Products
                     .Include(p => p.Category)
                     .Where(p => p.Category != null)
@@ -169,19 +159,18 @@ namespace TMDT.ViewModels.Admin
                 {
                     var cat = topCategories[i];
                     double percentage = Math.Round((cat.Count / totalProductsWithCat) * 100);
-                    
-                    CategoryShares.Add(new CategorySharePoint 
-                    { 
-                        CategoryName = cat.CategoryName, 
-                        Percentage = percentage, 
-                        DisplayValue = $"{percentage}% ({cat.Count})", 
-                        ColorHex = colors[i % colors.Length] 
+
+                    CategoryShares.Add(new CategorySharePoint
+                    {
+                        CategoryName = cat.CategoryName,
+                        Percentage = percentage,
+                        DisplayValue = $"{percentage}% ({cat.Count})",
+                        ColorHex = colors[i % colors.Length]
                     });
                 }
             }
             catch (Exception ex)
             {
-                // Optionally log exception or handle it
                 System.Diagnostics.Debug.WriteLine($"Error loading dashboard data: {ex.Message}");
             }
         }
@@ -200,60 +189,8 @@ namespace TMDT.ViewModels.Admin
                 default: return "";
             }
         }
-
-        private void LoadMockData()
-        {
-            TotalUsers = 1420;
-            TotalShops = 48;
-            PendingShops = 5;
-            TotalProducts = 890;
-            PendingProducts = 24;
-            MonthlyRevenue = 328400000;
-            CommissionsEarned = 16420000;
-            WithdrawPendingCount = 3;
-
-            RecentOrders.Clear();
-            RecentOrders.Add(new OrderSummary { OrderId = "ORD-9024", BuyerName = "Nguyễn Hoàng Nam", ShopName = "Hanoi Gadgets Store", TotalAmount = 28990000, Commission = 1449500, PaymentMethod = "Thanh toán Online", Status = "Đã hoàn thành" });
-            RecentOrders.Add(new OrderSummary { OrderId = "ORD-9025", BuyerName = "Trần Thị Thanh Vân", ShopName = "Fashionista Zone", TotalAmount = 1490000, Commission = 74500, PaymentMethod = "COD (Nhận hàng trả tiền)", Status = "Đang giao hàng" });
-            RecentOrders.Add(new OrderSummary { OrderId = "ORD-9026", BuyerName = "Lê Minh Tuấn", ShopName = "TechWorld Vietnam", TotalAmount = 9490000, Commission = 474500, PaymentMethod = "Thanh toán Online", Status = "Đang xử lý" });
-            RecentOrders.Add(new OrderSummary { OrderId = "ORD-9027", BuyerName = "Phạm Quỳnh Chi", ShopName = "Cosmetic & Beauty", TotalAmount = 2650000, Commission = 132500, PaymentMethod = "COD", Status = "Chờ xác nhận" });
-
-            TopShops.Clear();
-            TopShops.Add(new ShopSummary { ShopName = "Hanoi Gadgets Store", TotalSales = 124500000, Category = "Công nghệ số" });
-            TopShops.Add(new ShopSummary { ShopName = "TechWorld Vietnam", TotalSales = 89000000, Category = "Điện tử gia dụng" });
-            TopShops.Add(new ShopSummary { ShopName = "Fashionista Zone", TotalSales = 54200000, Category = "Thời trang" });
-            TopShops.Add(new ShopSummary { ShopName = "Cosmetic & Beauty", TotalSales = 41200000, Category = "Mỹ phẩm" });
-
-            RevenueTrend.Clear();
-            var rawTrend = new List<RevenueTrendPoint>
-            {
-                new RevenueTrendPoint { DayName = "Thứ 2", TotalAmount = 24500000, Commission = 1225000 },
-                new RevenueTrendPoint { DayName = "Thứ 3", TotalAmount = 38200000, Commission = 1910000 },
-                new RevenueTrendPoint { DayName = "Thứ 4", TotalAmount = 29400000, Commission = 1470000 },
-                new RevenueTrendPoint { DayName = "Thứ 5", TotalAmount = 45900000, Commission = 2295000 },
-                new RevenueTrendPoint { DayName = "Thứ 6", TotalAmount = 52100000, Commission = 2605000 },
-                new RevenueTrendPoint { DayName = "Thứ 7", TotalAmount = 74800000, Commission = 3740000 },
-                new RevenueTrendPoint { DayName = "Chủ Nhật", TotalAmount = 63500000, Commission = 3175000 }
-            };
-
-            decimal maxAmount = rawTrend.Max(t => t.TotalAmount);
-            decimal maxCommission = rawTrend.Max(t => t.Commission);
-            foreach (var p in rawTrend)
-            {
-                p.AmountHeight = maxAmount > 0 ? (double)(p.TotalAmount / maxAmount * 150) : 0;
-                p.CommissionHeight = maxCommission > 0 ? (double)(p.Commission / maxCommission * 150) : 0;
-                RevenueTrend.Add(p);
-            }
-
-            CategoryShares.Clear();
-            CategoryShares.Add(new CategorySharePoint { CategoryName = "Công nghệ số & Thiết bị", Percentage = 45, DisplayValue = "45% (148M)", ColorHex = "#593AD8" });
-            CategoryShares.Add(new CategorySharePoint { CategoryName = "Điện tử gia dụng", Percentage = 27, DisplayValue = "27% (89M)", ColorHex = "#10B981" });
-            CategoryShares.Add(new CategorySharePoint { CategoryName = "Thời trang & Phụ kiện", Percentage = 16, DisplayValue = "16% (54M)", ColorHex = "#EA580C" });
-            CategoryShares.Add(new CategorySharePoint { CategoryName = "Mỹ phẩm & Làm đẹp", Percentage = 12, DisplayValue = "12% (41M)", ColorHex = "#EC4899" });
-        }
     }
 
-    // Helper classes for UI Binding
     public class OrderSummary
     {
         public string OrderId { get; set; }
@@ -277,10 +214,8 @@ namespace TMDT.ViewModels.Admin
         public string DayName { get; set; }
         public decimal TotalAmount { get; set; }
         public decimal Commission { get; set; }
-        
         public double AmountHeight { get; set; }
         public double CommissionHeight { get; set; }
-
         public string AmountDisplay => (TotalAmount / 1000000m).ToString("N1") + "M";
         public string CommissionDisplay => (Commission / 1000m).ToString("N0") + "K";
     }
@@ -293,4 +228,3 @@ namespace TMDT.ViewModels.Admin
         public string ColorHex { get; set; }
     }
 }
-

@@ -55,6 +55,7 @@ namespace TMDT.ViewModels.Admin
         public ICommand ApproveProductCommand { get; }
         public ICommand RejectProductCommand { get; }
         public ICommand FilterCommand { get; }
+        public ICommand CloseDetailCommand { get; }
 
         public AdminProductsViewModel()
         {
@@ -73,6 +74,7 @@ namespace TMDT.ViewModels.Admin
             ApproveProductCommand = new RelayCommand(ExecuteApproveProduct, CanExecuteApproveProduct);
             RejectProductCommand = new RelayCommand(ExecuteRejectProduct, CanExecuteRejectProduct);
             FilterCommand = new RelayCommand(o => StatusFilter = o?.ToString() ?? "All");
+            CloseDetailCommand = new RelayCommand(o => SelectedProduct = null);
 
             LoadProducts();
         }

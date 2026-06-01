@@ -7,5 +7,7 @@
     <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
     <conv:HexToCharConverter x:Key="HexToCharConverter"/>
     <conv:EqualityToBooleanConverter x:Key="EqualityToBooleanConverter"/>
+    <conv:Base64ToImageConverter x:Key="Base64ToImageConverter"/>
+    <conv:StringNullOrEmptyToBoolConverter x:Key="StringNullOrEmptyToBool"/>
     
 </ResourceDictionary>

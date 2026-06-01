@@ -18,31 +18,34 @@ namespace TMDT.ViewModels.Auth
         public string Username
         {
             get => _username;
-            set 
+            set
             {
                 SetProperty(ref _username, value);
-                if (IsLoginFailed) IsLoginFailed = false; // Reset error when typing
-                if (IsLoginSuccess) IsLoginSuccess = false;
+                if (IsLoginFailed) IsLoginFailed = false;
             }
         }
 
         public string Password
         {
             get => _password;
-            set 
+            set
             {
                 SetProperty(ref _password, value);
-                if (IsLoginFailed) IsLoginFailed = false; // Reset error when typing
-                if (IsLoginSuccess) IsLoginSuccess = false;
+                if (IsLoginFailed) IsLoginFailed = false;
             }
         }
-
-        private bool _isLoginSuccess;
 
         public bool IsLoading
         {
             get => _isLoading;
             set => SetProperty(ref _isLoading, value);
+        }
+
+        private bool _isLoginSuccess;
+        public bool IsLoginSuccess
+        {
+            get => _isLoginSuccess;
+            set => SetProperty(ref _isLoginSuccess, value);
         }
 
         public bool IsLoginFailed
@@ -51,22 +54,14 @@ namespace TMDT.ViewModels.Auth
             set => SetProperty(ref _isLoginFailed, value);
         }
 
-        public bool IsLoginSuccess
-        {
-            get => _isLoginSuccess;
-            set => SetProperty(ref _isLoginSuccess, value);
-        }
-
-        // Commands
         public ICommand LoginCommand { get; }
         public ICommand ShowRegisterCommand { get; }
         public ICommand ExitCommand { get; }
 
         public LoginViewModel()
         {
-            // Trong thực tế nên dùng DI Container
             _authService = new AuthService(new TmdtContext());
-            
+
             LoginCommand = new RelayCommand(ExecuteLogin);
             ShowRegisterCommand = new RelayCommand(ExecuteShowRegister);
             ExitCommand = new RelayCommand(ExecuteExit);
@@ -77,96 +72,84 @@ namespace TMDT.ViewModels.Auth
             if (IsLoading) return;
 
             IsLoginFailed = false;
-            IsLoginSuccess = false;
 
             if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password))
             {
                 IsLoginFailed = true;
-                MessageBox.Show("Vui lòng nhập đầy đủ thông tin!");
+                MessageBox.Show("Vui lòng nhập đầy đủ thông tin!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             IsLoading = true;
 
-            // Giả lập thời gian phản hồi mạng khoảng 1s để chạy hoạt ảnh xoay loading mượt mà
-            await Task.Delay(1000);
-
-            TMDT.DTOs.UserDto user = null;
-
-            // Failsafe Mock Login giúp bạn test giao diện cực nhanh!
-            if (Username.Trim().ToLower() == "admin" && Password == "admin")
+            try
             {
-                user = new TMDT.DTOs.UserDto
-                {
-                    UserCode = "USR-ADMIN",
-                    Email = "admin@myshop.com",
-                    FullName = "Administrator Tối Cao",
-                    RoleName = "Admin",
-                    Avatar = ""
-                };
-            }
-            else if (Username.Trim().ToLower() == "seller" && Password == "seller")
-            {
-                user = new TMDT.DTOs.UserDto
-                {
-                    UserCode = "USR-SELLER",
-                    Email = "seller@myshop.com",
-                    FullName = "Chủ Shop Đẹp Trai",
-                    RoleName = "Seller",
-                    Avatar = ""
-                };
-            }
-            else
-            {
-                user = await _authService.LoginAsync(Username, Password);
-            }
+                var user = await _authService.LoginAsync(Username.Trim(), Password);
 
-            IsLoading = false;
-
-            if (user != null)
-            {
-                IsLoginSuccess = true;
-                // Chờ mascot chạy hoạt ảnh thành công (success reaction)
-                await Task.Delay(1200);
-
-                MessageBox.Show($"Chào mừng {user.FullName} ({user.RoleName})!");
-                
-                if (user.RoleName == "Admin")
+                if (user != null)
                 {
-                    var adminView = new TMDT.Views.Admin.AdminMainView();
-                    adminView.Show();
-                }
-                else if (user.RoleName == "Seller")
-                {
-                    var sellerView = new TMDT.Views.Seller.SellerMainView();
-                    sellerView.Show();
+                    // Lưu session
+                    SessionManager.CurrentUser = user;
+
+                    Window targetWindow = null;
+                    string redirectMsg = "";
+
+                    switch (user.RoleName)
+                    {
+                        case "Admin":
+                            targetWindow = new Views.Admin.AdminMainView();
+                            redirectMsg = $"Chào Admin {user.FullName}!";
+                            break;
+                        case "Seller":
+                            targetWindow = new Views.Seller.SellerMainView();
+                            redirectMsg = $"Chào Seller {user.FullName}!";
+                            break;
+                        case "Buyer":
+                            targetWindow = new Views.MainWindow();
+                            redirectMsg = $"Chào {user.FullName}!";
+                            break;
+                        default:
+                            MessageBox.Show("Tài khoản không có quyền truy cập hệ thống.", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            IsLoading = false;
+                            return;
+                    }
+
+                    // Đóng Login
+                    foreach (Window win in Application.Current.Windows)
+                    {
+                        if (win is Views.Auth.LoginView)
+                        {
+                            win.Close();
+                            break;
+                        }
+                    }
+
+                    // Mở trang phù hợp
+                    if (targetWindow != null)
+                    {
+                        MessageBox.Show(redirectMsg, "Đăng nhập thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                        targetWindow.Show();
+                    }
                 }
                 else
                 {
-                    var mainView = new TMDT.Views.MainWindow();
-                    mainView.Show();
-                }
-
-                // Tìm và đóng cửa sổ LoginView hiện tại
-                foreach (Window win in Application.Current.Windows)
-                {
-                    if (win is TMDT.Views.Auth.LoginView)
-                    {
-                        win.Close();
-                        break;
-                    }
+                    IsLoginFailed = true;
+                    MessageBox.Show("Email hoặc mật khẩu không đúng!", "Đăng nhập thất bại", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
-            else
+            catch (System.Exception ex)
             {
-                IsLoginFailed = true;
-                MessageBox.Show("Email hoặc mật khẩu không đúng!");
+                MessageBox.Show($"Lỗi: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
         private void ExecuteShowRegister(object parameter)
         {
-            // Logic chuyển sang màn hình đăng ký sẽ được xử lý qua View hoặc NavigationService
+            // TODO: navigation sang RegisterView
         }
 
         private void ExecuteExit(object parameter)

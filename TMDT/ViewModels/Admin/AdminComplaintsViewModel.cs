@@ -70,6 +70,7 @@ namespace TMDT.ViewModels.Admin
         public ICommand ResolveComplaintCommand { get; }
         public ICommand DismissComplaintCommand { get; }
         public ICommand FilterCommand { get; }
+        public ICommand CloseDetailCommand { get; }
 
         public AdminComplaintsViewModel()
         {
@@ -88,6 +89,7 @@ namespace TMDT.ViewModels.Admin
             ResolveComplaintCommand = new RelayCommand(ExecuteResolveComplaint, CanExecuteResolveComplaint);
             DismissComplaintCommand = new RelayCommand(ExecuteDismissComplaint, CanExecuteDismissComplaint);
             FilterCommand = new RelayCommand(o => StatusFilter = o?.ToString() ?? "All");
+            CloseDetailCommand = new RelayCommand(o => SelectedComplaint = null);
 
             LoadComplaints();
         }
@@ -138,103 +140,7 @@ namespace TMDT.ViewModels.Admin
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("EF query for Complaints failed, loading mocks. " + ex.Message);
-            }
-
-            // Fallback mock complaints
-            LoadMockComplaints();
-        }
-
-        private void LoadMockMockRelations(Complaint c, string buyerName, string buyerEmail, decimal orderTotal)
-        {
-            c.Buyer = new User { FullName = buyerName, Email = buyerEmail };
-            c.Order = new Order { TotalAmount = orderTotal };
-        }
-
-        private void LoadMockComplaints()
-        {
-            var mockComps = new ObservableCollection<Complaint>();
-
-            // Mock 1: Pending
-            var comp1 = new Complaint
-            {
-                ComplaintId = 901,
-                OrderId = 20045,
-                BuyerId = 12,
-                Content = "Tôi đặt mua Tai nghe Sony WH-1000XM5 mới nguyên seal nhưng khi nhận hàng thì hộp có dấu hiệu bị bóc mở trước đó, cáp sạc bị cũ và tai nghe có vết xước nhẹ ở củ tai trái. Đã nhắn tin cho shop nhưng shop từ chối hỗ trợ đổi trả.",
-                Status = "Pending",
-                SubmittedAt = DateTime.Now.AddDays(-2),
-            };
-            LoadMockMockRelations(comp1, "Phạm Minh Hoàng", "hoangpm@gmail.com", 6490000);
-            mockComps.Add(comp1);
-
-            // Mock 2: Pending
-            var comp2 = new Complaint
-            {
-                ComplaintId = 902,
-                OrderId = 20089,
-                BuyerId = 14,
-                Content = "Shop giao sai màu áo khoác. Tôi đặt màu Be nhưng nhận được màu Đen xám. Ngoài ra chất vải cũng mỏng hơn mô tả rất nhiều, có mùi nilon khó chịu. Yêu cầu hoàn tiền và trả hàng.",
-                Status = "Pending",
-                SubmittedAt = DateTime.Now.AddHours(-18),
-            };
-            LoadMockMockRelations(comp2, "Nguyễn Thị Mai", "mainguyen98@yahoo.com", 380000);
-            mockComps.Add(comp2);
-
-            // Mock 3: Resolved
-            var comp3 = new Complaint
-            {
-                ComplaintId = 903,
-                OrderId = 20012,
-                BuyerId = 15,
-                Content = "Sản phẩm nồi chiên không dầu bị nứt vỡ phần vỏ nhựa phía sau do vận chuyển. Shop hứa đền bù nhưng trì hoãn đã 1 tuần chưa gửi hàng thay thế.",
-                Status = "Resolved",
-                SubmittedAt = DateTime.Now.AddDays(-10),
-                ResolvedAt = DateTime.Now.AddDays(-8),
-                Resolution = "Đã làm việc với shop. Shop đã gửi lại vỏ máy mới và đền bù mã giảm giá 50.000đ cho khách hàng. Khách hàng xác nhận hài lòng."
-            };
-            LoadMockMockRelations(comp3, "Lê Hoàng Long", "longlh.hust@gmail.com", 2490000);
-            mockComps.Add(comp3);
-
-            // Mock 4: Dismissed
-            var comp4 = new Complaint
-            {
-                ComplaintId = 904,
-                OrderId = 19998,
-                BuyerId = 16,
-                Content = "Tôi không thích mùi của trà thảo mộc detox này nữa nên muốn trả hàng hoàn tiền, mặc dù tôi đã bóc hộp ra uống thử 2 gói rồi.",
-                Status = "Dismissed",
-                SubmittedAt = DateTime.Now.AddDays(-12),
-                ResolvedAt = DateTime.Now.AddDays(-11),
-                Resolution = "Yêu cầu hoàn trả không hợp lý do khách hàng đã bóc hộp sử dụng thử và lý do hoàn trả xuất phát từ chủ quan không phải lỗi sản phẩm."
-            };
-            LoadMockMockRelations(comp4, "Trần Thu Trang", "trangtt99@outlook.com", 850000);
-            mockComps.Add(comp4);
-
-            // Apply Filters to mock data
-            var filtered = mockComps.AsQueryable();
-            if (!string.IsNullOrEmpty(SearchText))
-            {
-                filtered = filtered.Where(c => c.Content.ToLower().Contains(SearchText.ToLower()) || 
-                                               c.Buyer.FullName.ToLower().Contains(SearchText.ToLower()));
-            }
-
-            if (StatusFilter == "Pending")
-            {
-                filtered = filtered.Where(c => c.Status == "Pending" || string.IsNullOrEmpty(c.Status));
-            }
-            else if (StatusFilter == "Resolved")
-            {
-                filtered = filtered.Where(c => c.Status == "Resolved");
-            }
-            else if (StatusFilter == "Dismissed")
-            {
-                filtered = filtered.Where(c => c.Status == "Dismissed");
-            }
-
-            foreach (var comp in filtered.ToList())
-            {
-                Complaints.Add(comp);
+                System.Diagnostics.Debug.WriteLine("EF query for Complaints failed: " + ex.Message);
             }
         }
 

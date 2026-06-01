@@ -1,7 +1,12 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using TMDT.Models;
+using TMDT.Services;
+using TMDT.Services.Interfaces;
+using TMDT.Utilities;
 
 namespace TMDT.ViewModels.Buyer
 {
@@ -19,6 +24,14 @@ namespace TMDT.ViewModels.Buyer
         public ObservableCollection<Banner> Banners { get; set; }
 
         public ICommand LoginCommand { get; }
+        public ICommand LogoutCommand { get; }
+        public ICommand BecomeSellerCommand { get; }
+        public ICommand OpenSellerPortalCommand { get; }
+
+        public bool IsLoggedIn => SessionManager.IsLoggedIn;
+        public bool IsBuyer => SessionManager.IsBuyer;
+        public bool IsSeller => SessionManager.IsSeller;
+        public string UserName => SessionManager.CurrentUser?.FullName ?? "";
 
         public HomeViewModel()
         {
@@ -26,36 +39,73 @@ namespace TMDT.ViewModels.Buyer
             FeaturedProducts = new ObservableCollection<Product>();
             Banners = new ObservableCollection<Banner>();
 
-            LoginCommand = new TMDT.Utilities.RelayCommand(ExecuteLogin);
+            LoginCommand = new RelayCommand(_ => ExecuteLogin());
+            LogoutCommand = new RelayCommand(_ => ExecuteLogout());
+            BecomeSellerCommand = new RelayCommand(_ => ExecuteBecomeSeller(), _ => IsLoggedIn && IsBuyer);
+            OpenSellerPortalCommand = new RelayCommand(_ => ExecuteOpenSellerPortal(), _ => IsLoggedIn && IsSeller);
 
-            LoadMockData();
+            LoadCategories();
         }
 
-        private void ExecuteLogin(object parameter)
+        private void LoadCategories()
         {
-            var loginView = new TMDT.Views.Auth.LoginView();
+            try
+            {
+                using var context = new TmdtContext();
+                var cats = context.Categories.Where(c => c.IsActive == true).OrderBy(c => c.SortOrder).Take(8).ToList();
+                Categories.Clear();
+                foreach (var c in cats)
+                    Categories.Add(c);
+            }
+            catch { }
+        }
+
+        private void ExecuteLogin()
+        {
+            var loginView = new Views.Auth.LoginView();
             loginView.ShowDialog();
+            OnPropertyChanged(nameof(IsLoggedIn));
+            OnPropertyChanged(nameof(IsBuyer));
+            OnPropertyChanged(nameof(IsSeller));
+            OnPropertyChanged(nameof(UserName));
         }
 
-        private void LoadMockData()
+        private void ExecuteLogout()
         {
-            // Danh mục mẫu
-            Categories.Add(new Category { CategoryName = "Điện thoại - Máy tính bảng", Icon = "Smartphone" });
-            Categories.Add(new Category { CategoryName = "Laptop - Máy tính", Icon = "Laptop" });
-            Categories.Add(new Category { CategoryName = "Phụ kiện - Thiết bị số", Icon = "Headphones" });
-            Categories.Add(new Category { CategoryName = "Điện gia dụng", Icon = "Home" });
-            Categories.Add(new Category { CategoryName = "Thời trang nam", Icon = "Tshirt" });
-            Categories.Add(new Category { CategoryName = "Thời trang nữ", Icon = "Dress" });
+            SessionManager.Clear();
+            OnPropertyChanged(nameof(IsLoggedIn));
+            OnPropertyChanged(nameof(IsBuyer));
+            OnPropertyChanged(nameof(IsSeller));
+            OnPropertyChanged(nameof(UserName));
+        }
 
-            // Sản phẩm mẫu bám sát hình ảnh
-            FeaturedProducts.Add(new Product { ProductName = "iPhone 15 Pro Max 256GB", Price = 28990000, OriginalPrice = 34990000, Rating = 4.8m });
-            FeaturedProducts.Add(new Product { ProductName = "Laptop ASUS ROG Zephyrus G14", Price = 26990000, OriginalPrice = 31990000, Rating = 4.7m });
-            FeaturedProducts.Add(new Product { ProductName = "Tai nghe Apple AirPods Pro 2", Price = 5490000, OriginalPrice = 6490000, Rating = 4.9m });
-            FeaturedProducts.Add(new Product { ProductName = "Apple Watch Series 9 45mm", Price = 9490000, OriginalPrice = 11990000, Rating = 4.6m });
-            FeaturedProducts.Add(new Product { ProductName = "Nước hoa Chanel Coco Mademoiselle", Price = 2650000, OriginalPrice = 3290000, Rating = 4.5m });
+        private void ExecuteBecomeSeller()
+        {
+            if (!SessionManager.IsBuyer)
+            {
+                MessageBox.Show("Bạn đã là Người bán hoặc không có quyền thực hiện.", "Thông báo",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
 
-            // Banner mẫu
-            Banners.Add(new Banner { Title = "Rực rỡ mùa hè SALE đến 50%", ImageUrl = "pack://application:,,,/Resources/Images/banner_summer.png" });
+            var dialog = new Views.Seller.ShopRegistrationDialog
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                MessageBox.Show(
+                    "Yêu cầu đăng ký shop đã được gửi!\nVui lòng chờ Admin phê duyệt để bắt đầu bán hàng.",
+                    "Đang chờ duyệt", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void ExecuteOpenSellerPortal()
+        {
+            var sellerWindow = new Views.Seller.SellerMainView();
+            sellerWindow.Show();
+            Application.Current.MainWindow?.Close();
         }
     }
 }

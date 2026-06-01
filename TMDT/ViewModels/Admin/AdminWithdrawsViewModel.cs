@@ -55,6 +55,7 @@ namespace TMDT.ViewModels.Admin
         public ICommand ApproveWithdrawCommand { get; }
         public ICommand RejectWithdrawCommand { get; }
         public ICommand FilterCommand { get; }
+        public ICommand CloseDetailCommand { get; }
 
         public AdminWithdrawsViewModel()
         {
@@ -73,6 +74,7 @@ namespace TMDT.ViewModels.Admin
             ApproveWithdrawCommand = new RelayCommand(ExecuteApproveWithdraw, CanExecuteApproveWithdraw);
             RejectWithdrawCommand = new RelayCommand(ExecuteRejectWithdraw, CanExecuteRejectWithdraw);
             FilterCommand = new RelayCommand(o => StatusFilter = o?.ToString() ?? "All");
+            CloseDetailCommand = new RelayCommand(o => SelectedRequest = null);
 
             LoadRequests();
         }
@@ -125,93 +127,6 @@ namespace TMDT.ViewModels.Admin
                 System.Diagnostics.Debug.WriteLine("EF query for WithdrawRequests failed, loading mocks. " + ex.Message);
             }
 
-            // Fallback mock requests
-            LoadMockRequests();
-        }
-
-        private void LoadMockRequests()
-        {
-            var mockReqs = new ObservableCollection<WithdrawRequest>();
-
-            // Mock 1: Pending
-            mockReqs.Add(new WithdrawRequest
-            {
-                WithdrawId = 801,
-                ShopId = 1,
-                Amount = 15000000,
-                BankName = "Ngân hàng Thương mại Cổ phần Ngoại thương Việt Nam (Vietcombank)",
-                AccountNumber = "1012948756",
-                Status = "Pending",
-                RequestedAt = DateTime.Now.AddDays(-1),
-                Shop = new Shop { ShopName = "Hanoi Gadgets Store", WalletBalance = 124500000 }
-            });
-
-            // Mock 2: Pending
-            mockReqs.Add(new WithdrawRequest
-            {
-                WithdrawId = 802,
-                ShopId = 2,
-                Amount = 35000000,
-                BankName = "Ngân hàng Kỹ thương Việt Nam (Techcombank)",
-                AccountNumber = "19034567823011",
-                Status = "Pending",
-                RequestedAt = DateTime.Now.AddHours(-6),
-                Shop = new Shop { ShopName = "Fashionista Zone", WalletBalance = 54200000 }
-            });
-
-            // Mock 3: Approved
-            mockReqs.Add(new WithdrawRequest
-            {
-                WithdrawId = 803,
-                ShopId = 3,
-                Amount = 5000000,
-                BankName = "Ngân hàng Đầu tư và Phát triển Việt Nam (BIDV)",
-                AccountNumber = "21510001245789",
-                Status = "Approved",
-                RequestedAt = DateTime.Now.AddDays(-5),
-                ProcessedAt = DateTime.Now.AddDays(-5).AddHours(4),
-                Shop = new Shop { ShopName = "Gia Dụng Thông Minh Việt", WalletBalance = 4500000 }
-            });
-
-            // Mock 4: Rejected
-            mockReqs.Add(new WithdrawRequest
-            {
-                WithdrawId = 804,
-                ShopId = 4,
-                Amount = 80000000,
-                BankName = "Ngân hàng Quân đội (MB Bank)",
-                AccountNumber = "0982456123",
-                Status = "Rejected",
-                RequestedAt = DateTime.Now.AddDays(-3),
-                ProcessedAt = DateTime.Now.AddDays(-3).AddHours(2),
-                Shop = new Shop { ShopName = "Phụ Kiện Điện Thoại Giá Rẻ 247", WalletBalance = 1500000 }
-            });
-
-            // Apply Filters to mock data
-            var filtered = mockReqs.AsQueryable();
-            if (!string.IsNullOrEmpty(SearchText))
-            {
-                filtered = filtered.Where(w => w.BankName.ToLower().Contains(SearchText.ToLower()) || 
-                                               w.Shop.ShopName.ToLower().Contains(SearchText.ToLower()));
-            }
-
-            if (StatusFilter == "Pending")
-            {
-                filtered = filtered.Where(w => w.Status == "Pending" || string.IsNullOrEmpty(w.Status));
-            }
-            else if (StatusFilter == "Approved")
-            {
-                filtered = filtered.Where(w => w.Status == "Approved");
-            }
-            else if (StatusFilter == "Rejected")
-            {
-                filtered = filtered.Where(w => w.Status == "Rejected");
-            }
-
-            foreach (var req in filtered.ToList())
-            {
-                WithdrawRequests.Add(req);
-            }
         }
 
         // --- Commands Implementation ---

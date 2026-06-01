@@ -1,0 +1,22 @@
+Line 1089: 
+Line 1090:                                     <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{DynamicResource BrandPurple}" Width="24" VerticalAlignment="Center"/>
+Line 1091: 
+Line 1092: 
+Line 1093:                                     <TextBlock Text="CÃ? Ã? Ã? u hÃ?Ã?Ã? nh HÃ? Ã? Ã?Ã? thÃ? Ã? Ã?Ã?ng" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
+Line 1094: 
+Line 1095: 
+Line 1096:                                         <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+Line 1097: 
+Line 1098: 
+Line 1099:                                     </TextBlock>
+Line 1100: 
+Line 1101: 
+Line 1102:                                 </StackPanel>
+Line 1103: 
+Line 1104: 
+Line 1105:                             </RadioButton>
+Line 1106: 
+Line 1107: 
+Line 1108: 
+Line 1109: 
+Line 1110: 

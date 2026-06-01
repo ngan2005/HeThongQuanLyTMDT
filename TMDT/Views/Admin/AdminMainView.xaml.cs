@@ -1,9 +1,11 @@
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using TMDT.ViewModels.Admin;
+using TMDT.Utilities;
 
 namespace TMDT.Views.Admin
 {
@@ -12,6 +14,10 @@ namespace TMDT.Views.Admin
         private const double ExpandedWidth = 240;
         private const double CollapsedWidth = 68;
         private DateTime _lastClickTime = DateTime.MinValue;
+        private bool _isDarkMode = true; // Dark by default (matches App.xaml)
+
+        private const string DarkThemeUri  = "Resources/Themes/AdminDarkTheme.xaml";
+        private const string LightThemeUri = "Resources/Themes/AdminLightTheme.xaml";
 
         public AdminMainView()
         {
@@ -113,8 +119,43 @@ namespace TMDT.Views.Admin
             this.WindowState = WindowState.Minimized;
         }
 
+        private void ThemeToggle_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                _isDarkMode = !_isDarkMode;
+
+                // Use relative URI to match App.xaml
+                var newThemeUri = _isDarkMode ? DarkThemeUri : LightThemeUri;
+                var relativeUri = new Uri(newThemeUri, UriKind.Relative);
+
+                var appDicts = Application.Current.Resources.MergedDictionaries;
+
+                // Find and remove the existing Admin theme dict
+                var existing = appDicts.FirstOrDefault(d =>
+                    d.Source != null &&
+                    (d.Source.OriginalString.Contains("AdminDarkTheme") ||
+                     d.Source.OriginalString.Contains("AdminLightTheme")));
+
+                if (existing != null)
+                {
+                    appDicts.Remove(existing);
+                }
+
+                // Load and add the new theme dict
+                appDicts.Add(new System.Windows.ResourceDictionary { Source = relativeUri });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi chuyển đổi Theme: " + ex.Message);
+                // Revert state if failed
+                _isDarkMode = !_isDarkMode;
+            }
+        }
+
         private void Logout_Click(object sender, RoutedEventArgs e)
         {
+            SessionManager.Clear();
             var loginView = new Auth.LoginView();
             loginView.Show();
             this.Close();

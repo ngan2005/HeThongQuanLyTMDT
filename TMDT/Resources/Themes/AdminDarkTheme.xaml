@@ -1,0 +1,82 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- ===== ADMIN DARK THEME — Slate Indigo Palette ===== -->
+
+    <!-- ── Typography Colors ── -->
+    <SolidColorBrush x:Key="TextPrimary"        Color="#F1F5F9"/>
+    <SolidColorBrush x:Key="TextSecondary"       Color="#94A3B8"/>
+    <SolidColorBrush x:Key="TextMuted"           Color="#64748B"/>
+
+    <!-- ── Brand / Accent (Indigo-Violet) ── -->
+    <SolidColorBrush x:Key="BrandPurple"         Color="#818CF8"/>
+    <SolidColorBrush x:Key="BrandAccent"         Color="#6366F1"/>
+    <SolidColorBrush x:Key="BrandAccentLight"    Color="#A5B4FC"/>
+
+    <!-- ── Main Backgrounds (Slate-800 range) ── -->
+    <SolidColorBrush x:Key="AppBackground"       Color="#0F172A"/>
+    <SolidColorBrush x:Key="BgMain"              Color="#0F172A"/>
+    <SolidColorBrush x:Key="SidebarBg"           Color="#1E293B"/>
+    <SolidColorBrush x:Key="BgWhite"             Color="#1E293B"/>
+
+    <!-- ── Surface Levels ── -->
+    <SolidColorBrush x:Key="SurfaceLow"          Color="#1E293B"/>
+    <SolidColorBrush x:Key="SurfaceMid"          Color="#243047"/>
+    <SolidColorBrush x:Key="SurfaceHigh"         Color="#2D3E55"/>
+    <SolidColorBrush x:Key="SurfaceCard"         Color="#1E293B"/>
+
+    <!-- ── Borders ── -->
+    <SolidColorBrush x:Key="BorderSlate"         Color="#334155"/>
+    <SolidColorBrush x:Key="BorderSubtle"        Color="#1E293B"/>
+
+    <!-- ── Brand States ── -->
+    <SolidColorBrush x:Key="BrandActiveBg"       Color="#312E81"/>
+    <SolidColorBrush x:Key="BrandHoverBg"        Color="#1E1B4B"/>
+
+    <!-- ── DataGrid ── -->
+    <SolidColorBrush x:Key="GridRowBg"           Color="#1E293B"/>
+    <SolidColorBrush x:Key="GridAltRowBg"        Color="#243047"/>
+    <SolidColorBrush x:Key="GridHeaderBg"        Color="#172032"/>
+    <SolidColorBrush x:Key="GridSelectedBg"      Color="#1E1B4B"/>
+
+    <!-- ── Action Buttons ── -->
+    <SolidColorBrush x:Key="ActionBtnBg"         Color="#4F46E5"/>
+    <SolidColorBrush x:Key="ActionBtnHoverBg"    Color="#4338CA"/>
+    <SolidColorBrush x:Key="PrimaryBtnText"      Color="#FFFFFF"/>
+
+    <!-- ── Semantic — Danger ── -->
+    <SolidColorBrush x:Key="DangerRed"           Color="#F87171"/>
+    <SolidColorBrush x:Key="DangerRedBg"         Color="#2A1010"/>
+    <SolidColorBrush x:Key="DangerRedBorder"     Color="#7F1D1D"/>
+
+    <!-- ── Semantic — Success ── -->
+    <SolidColorBrush x:Key="SuccessGreen"        Color="#34D399"/>
+    <SolidColorBrush x:Key="SuccessGreenBg"      Color="#0A2A1E"/>
+
+    <!-- ── Semantic — Warning ── -->
+    <SolidColorBrush x:Key="WarningOrange"       Color="#FB923C"/>
+    <SolidColorBrush x:Key="WarningBg"           Color="#2A1500"/>
+
+    <!-- ── Sidebar Specific ── -->
+    <SolidColorBrush x:Key="SidebarTextDefault"  Color="#94A3B8"/>
+    <SolidColorBrush x:Key="SidebarTextSelected" Color="#F1F5F9"/>
+    <SolidColorBrush x:Key="SidebarBorder"       Color="#334155"/>
+    <SolidColorBrush x:Key="SidebarHoverBg"      Color="#243047"/>
+    <SolidColorBrush x:Key="SidebarActiveBg"     Color="#312E81"/>
+    <SolidColorBrush x:Key="SidebarActiveText"   Color="#F1F5F9"/>
+
+    <!-- ── Cards / Lightbox ── -->
+    <SolidColorBrush x:Key="CardBg"              Color="#1E293B"/>
+    <SolidColorBrush x:Key="ProfileCardBg"       Color="#243047"/>
+
+    <!-- ── Gradients ── -->
+    <LinearGradientBrush x:Key="BrandGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#4F46E5" Offset="0"/>
+        <GradientStop Color="#7C3AED" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="CardHeaderGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#312E81" Offset="0"/>
+        <GradientStop Color="#1E1B4B" Offset="1"/>
+    </LinearGradientBrush>
+
+</ResourceDictionary>

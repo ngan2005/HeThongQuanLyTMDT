@@ -107,35 +107,6 @@ namespace TMDT.ViewModels.Seller
                 System.Diagnostics.Debug.WriteLine("Failed to load wallet from DB: " + ex.Message);
             }
 
-            // Mock Fallback
-            WalletBalance = 24890000;
-            LoadMockWithdraws();
-        }
-
-        private void LoadMockWithdraws()
-        {
-            WithdrawRequests.Clear();
-
-            WithdrawRequests.Add(new WithdrawRequest
-            {
-                WithdrawId = 801,
-                Amount = 5000000,
-                BankName = "Vietcombank",
-                AccountNumber = "0071001234567",
-                Status = "Approved",
-                RequestedAt = DateTime.Now.AddDays(-10),
-                ProcessedAt = DateTime.Now.AddDays(-9)
-            });
-
-            WithdrawRequests.Add(new WithdrawRequest
-            {
-                WithdrawId = 802,
-                Amount = 10000000,
-                BankName = "Vietinbank",
-                AccountNumber = "1098237482937",
-                Status = "Pending",
-                RequestedAt = DateTime.Now.AddDays(-1)
-            });
         }
 
         private void ResetInputs()

@@ -9,9 +9,6 @@
 
     <UserControl.Resources>
         <!-- Style tokens -->
-        <SolidColorBrush x:Key="TextPrimary" Color="#1C1B1A"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#414750"/>
-        <SolidColorBrush x:Key="BrandPurple" Color="#004277"/>
         
         <Style x:Key="TabRadioButton" TargetType="RadioButton">
             <Setter Property="Background" Value="Transparent"/>
@@ -29,7 +26,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#F1F5F9"/>
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource BorderSlate}"/>
                                 <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
@@ -111,7 +108,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Left Column: Banner list table -->
-                <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="16">
+                <Border Grid.Column="0" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="16">
                     <DataGrid ItemsSource="{Binding Banners}" SelectedItem="{Binding SelectedBanner}" AutoGenerateColumns="False" 
                               Background="Transparent" BorderThickness="0" GridLinesVisibility="None" IsReadOnly="True" HeadersVisibility="Column" RowHeight="46">
                         <DataGrid.Columns>
@@ -129,7 +126,7 @@
                                                             <Setter Property="Background" Value="#E6FDF4"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding IsActive}" Value="False">
-                                                            <Setter Property="Background" Value="#F1F5F9"/>
+                                                            <Setter Property="Background" Value="{DynamicResource BorderSlate}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -144,7 +141,7 @@
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding IsActive}" Value="False">
                                                                 <Setter Property="Text" Value="Tạm ẩn"/>
-                                                                <Setter Property="Foreground" Value="#414750"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -158,28 +155,120 @@
                     </DataGrid>
                 </Border>
 
-                <!-- Right Column: Add banner form & Details -->
-                <Border Grid.Column="2" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
-                    <StackPanel>
-                        <TextBlock Text="THIẾT LẬP BANNER MỚI" FontSize="13" FontWeight="Bold" Foreground="{StaticResource BrandPurple}" Margin="0,0,0,16"/>
-                        
-                        <!-- Inputs -->
-                        <TextBlock Text="Tiêu đề chiến dịch" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                        <TextBox Text="{Binding BannerTitle, UpdateSourceTrigger=PropertyChanged}" Margin="0,6,0,12" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0"/>
+                <!-- Right Column: Banner Form — Bento Card -->
+                <Border Grid.Column="2" Background="{DynamicResource CardBg}" CornerRadius="14" BorderThickness="1"
+                        BorderBrush="{DynamicResource BorderSlate}">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#818CF8" BlurRadius="20" ShadowDepth="0" Opacity="0.08"/>
+                    </Border.Effect>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
-                        <TextBlock Text="Đường dẫn ảnh (URL Unsplash/Web)" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                        <TextBox Text="{Binding BannerImageUrl, UpdateSourceTrigger=PropertyChanged}" Margin="0,6,0,12" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0"/>
+                        <!-- Header -->
+                        <Border Grid.Row="0" CornerRadius="14,14,0,0" Padding="20,16">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#6366F1" Offset="0"/>
+                                    <GradientStop Color="#818CF8" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="32" Height="32" CornerRadius="8" Background="#FFFFFF20">
+                                    <TextBlock Text="&#xE7C4;" FontFamily="Segoe MDL2 Assets" FontSize="15"
+                                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="BANNER QUẢNG CÁO" FontSize="11" FontWeight="Bold"
+                                               Foreground="#FFFFFFCC" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Thiết lập banner trang chủ" FontSize="12.5" FontWeight="SemiBold"
+                                               Foreground="White" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
 
-                        <TextBlock Text="Liên kết khi click (Link URL)" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                        <TextBox Text="{Binding BannerLinkUrl, UpdateSourceTrigger=PropertyChanged}" Margin="0,6,0,12" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0"/>
+                        <!-- Form Body -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
+                            <StackPanel Margin="20,16,20,20">
 
-                        <TextBlock Text="Thứ tự hiển thị (Sort Order)" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                        <TextBox Text="{Binding BannerSortOrder, UpdateSourceTrigger=PropertyChanged}" Margin="0,6,0,20" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0"/>
+                                <TextBlock Text="TIÊU ĐỀ CHIẾN DỊCH" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <Border BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14">
+                                    <TextBox Text="{Binding BannerTitle, UpdateSourceTrigger=PropertyChanged}"
+                                             BorderThickness="0" Height="36" Background="Transparent"
+                                             Padding="10,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="12.5"/>
+                                </Border>
 
-                        <!-- Save/Delete buttons -->
-                        <Button Content="Kích hoạt Banner lên trang chủ" Background="{StaticResource BrandPurple}" Foreground="#FFFFFF" Style="{StaticResource ActionButton}" Command="{Binding AddBannerCommand}" Margin="0,0,0,10"/>
-                        <Button Content="Xóa Banner được chọn" Background="#EF4444" Foreground="#FFFFFF" Style="{StaticResource ActionButton}" Command="{Binding DeleteBannerCommand}"/>
-                    </StackPanel>
+                                <TextBlock Text="ĐỊA CHỈ ẢNH (URL)" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <Border BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14">
+                                    <TextBox Text="{Binding BannerImageUrl, UpdateSourceTrigger=PropertyChanged}"
+                                             BorderThickness="0" Height="36" Background="Transparent"
+                                             Padding="10,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="12.5"/>
+                                </Border>
+
+                                <TextBlock Text="LIÊN KẾT KHI CLICK" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <Border BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14">
+                                    <TextBox Text="{Binding BannerLinkUrl, UpdateSourceTrigger=PropertyChanged}"
+                                             BorderThickness="0" Height="36" Background="Transparent"
+                                             Padding="10,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="12.5"/>
+                                </Border>
+
+                                <TextBlock Text="THỨ TỰ HIỂN THỊ" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <Border BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,20">
+                                    <TextBox Text="{Binding BannerSortOrder, UpdateSourceTrigger=PropertyChanged}"
+                                             BorderThickness="0" Height="36" Background="Transparent"
+                                             Padding="10,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="12.5"/>
+                                </Border>
+
+                                <!-- Action Buttons -->
+                                <Button Command="{Binding AddBannerCommand}" Height="40" Cursor="Hand" Margin="0,0,0,10">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="bd" Background="#6366F1" CornerRadius="8">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="&#xE7C4;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="White" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Kích hoạt Banner" Foreground="White" FontSize="12.5"
+                                                               FontWeight="Bold" Margin="8,0,0,0" VerticalAlignment="Center"
+                                                               FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bd" Property="Opacity" Value="0.85"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <Button Command="{Binding DeleteBannerCommand}" Height="40" Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="bd" Background="{DynamicResource DangerRedBg}" CornerRadius="8"
+                                                    BorderBrush="{DynamicResource DangerRed}" BorderThickness="1">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                                                               Foreground="{DynamicResource DangerRed}" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Xóa Banner" Foreground="{DynamicResource DangerRed}"
+                                                               FontSize="12.5" FontWeight="Bold" Margin="8,0,0,0"
+                                                               VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bd" Property="Opacity" Value="0.8"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
                 </Border>
             </Grid>
 
@@ -205,7 +294,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Left Column: Voucher table -->
-                <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="16">
+                <Border Grid.Column="0" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="16">
                     <DataGrid ItemsSource="{Binding Vouchers}" SelectedItem="{Binding SelectedVoucher}" AutoGenerateColumns="False" 
                               Background="Transparent" BorderThickness="0" GridLinesVisibility="None" IsReadOnly="True" HeadersVisibility="Column" RowHeight="46">
                         <DataGrid.Columns>
@@ -254,31 +343,118 @@
                     </DataGrid>
                 </Border>
 
-                <!-- Right Column: Add voucher form -->
-                <Border Grid.Column="2" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
-                    <StackPanel>
-                        <TextBlock Text="TẠO VOUCHER SÀN TÀI TRỢ" FontSize="13" FontWeight="Bold" Foreground="{StaticResource BrandPurple}" Margin="0,0,0,16"/>
-                        
-                        <!-- Inputs -->
-                        <TextBlock Text="Mã giảm giá (Ví dụ: SALE66)" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                        <TextBox Text="{Binding VoucherCode, UpdateSourceTrigger=PropertyChanged}" Margin="0,6,0,12" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0"/>
-
-                        <TextBlock Text="Tên chương trình voucher" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                        <TextBox Text="{Binding VoucherName, UpdateSourceTrigger=PropertyChanged}" Margin="0,6,0,12" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0"/>
-
-                        <TextBlock Text="Số tiền giảm (đ)" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                        <TextBox Text="{Binding VoucherDiscountValue, UpdateSourceTrigger=PropertyChanged}" Margin="0,6,0,12" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0"/>
-
-                        <TextBlock Text="Giá trị đơn hàng tối thiểu (đ)" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                        <TextBox Text="{Binding VoucherMinOrderValue, UpdateSourceTrigger=PropertyChanged}" Margin="0,6,0,12" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0"/>
-
-                        <TextBlock Text="Tổng số lượng phát hành" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                        <TextBox Text="{Binding VoucherTotalQuantity, UpdateSourceTrigger=PropertyChanged}" Margin="0,6,0,20" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0"/>
-
-                        <!-- Save/Delete buttons -->
-                        <Button Content="Tạo và kích hoạt Voucher" Background="#10B981" Foreground="#FFFFFF" Style="{StaticResource ActionButton}" Command="{Binding AddVoucherCommand}" Margin="0,0,0,10"/>
-                        <Button Content="Dừng hoạt động Voucher" Background="#EF4444" Foreground="#FFFFFF" Style="{StaticResource ActionButton}" Command="{Binding DeleteVoucherCommand}"/>
-                    </StackPanel>
+                <!-- Right Column: Voucher Form — Bento Card -->
+                <Border Grid.Column="2" Background="{DynamicResource CardBg}" CornerRadius="14" BorderThickness="1"
+                        BorderBrush="{DynamicResource BorderSlate}">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#10B981" BlurRadius="20" ShadowDepth="0" Opacity="0.08"/>
+                    </Border.Effect>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <!-- Header -->
+                        <Border Grid.Row="0" CornerRadius="14,14,0,0" Padding="20,16">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#059669" Offset="0"/>
+                                    <GradientStop Color="#10B981" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="32" Height="32" CornerRadius="8" Background="#FFFFFF20">
+                                    <TextBlock Text="&#xE1A1;" FontFamily="Segoe MDL2 Assets" FontSize="15"
+                                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="VOUCHER TOÀN SÀN" FontSize="11" FontWeight="Bold"
+                                               Foreground="#FFFFFFCC" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Tạo mã giảm giá sàn tài trợ" FontSize="12.5" FontWeight="SemiBold"
+                                               Foreground="White" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        <!-- Form Body -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
+                            <StackPanel Margin="20,16,20,20">
+                                <TextBlock Text="MÃ GIẢM GIÁ" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <Border BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14">
+                                    <TextBox Text="{Binding VoucherCode, UpdateSourceTrigger=PropertyChanged}"
+                                             BorderThickness="0" Height="36" Background="Transparent"
+                                             Padding="10,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="12.5"/>
+                                </Border>
+                                <TextBlock Text="TÊN CHƯƠNG TRÌNH" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <Border BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14">
+                                    <TextBox Text="{Binding VoucherName, UpdateSourceTrigger=PropertyChanged}"
+                                             BorderThickness="0" Height="36" Background="Transparent"
+                                             Padding="10,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="12.5"/>
+                                </Border>
+                                <TextBlock Text="SỐ TIỀN GIẢM (đ)" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <Border BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14">
+                                    <TextBox Text="{Binding VoucherDiscountValue, UpdateSourceTrigger=PropertyChanged}"
+                                             BorderThickness="0" Height="36" Background="Transparent"
+                                             Padding="10,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="12.5"/>
+                                </Border>
+                                <TextBlock Text="ĐƠN HÀNG TỐI THIỂU (đ)" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <Border BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14">
+                                    <TextBox Text="{Binding VoucherMinOrderValue, UpdateSourceTrigger=PropertyChanged}"
+                                             BorderThickness="0" Height="36" Background="Transparent"
+                                             Padding="10,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="12.5"/>
+                                </Border>
+                                <TextBlock Text="SỐ LƯỢNG PHÁT HÀNH" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <Border BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,20">
+                                    <TextBox Text="{Binding VoucherTotalQuantity, UpdateSourceTrigger=PropertyChanged}"
+                                             BorderThickness="0" Height="36" Background="Transparent"
+                                             Padding="10,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="12.5"/>
+                                </Border>
+                                <Button Command="{Binding AddVoucherCommand}" Height="40" Cursor="Hand" Margin="0,0,0,10">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="bd" Background="#10B981" CornerRadius="8">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="&#xE1A1;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="White" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Tạo &amp; Kích hoạt Voucher" Foreground="White" FontSize="12.5"
+                                                               FontWeight="Bold" Margin="8,0,0,0" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bd" Property="Opacity" Value="0.85"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <Button Command="{Binding DeleteVoucherCommand}" Height="40" Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="bd" Background="{DynamicResource DangerRedBg}" CornerRadius="8"
+                                                    BorderBrush="{DynamicResource DangerRed}" BorderThickness="1">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                                                               Foreground="{DynamicResource DangerRed}" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Dừng Voucher" Foreground="{DynamicResource DangerRed}"
+                                                               FontSize="12.5" FontWeight="Bold" Margin="8,0,0,0"
+                                                               VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bd" Property="Opacity" Value="0.8"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
                 </Border>
             </Grid>
 
@@ -304,7 +480,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Left Column: FlashSale campaign table -->
-                <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="16">
+                <Border Grid.Column="0" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="16">
                     <DataGrid ItemsSource="{Binding FlashSales}" SelectedItem="{Binding SelectedFlashSale}" AutoGenerateColumns="False" 
                               Background="Transparent" BorderThickness="0" GridLinesVisibility="None" IsReadOnly="True" HeadersVisibility="Column" RowHeight="46">
                         <DataGrid.Columns>
@@ -316,7 +492,7 @@
                             <DataGridTemplateColumn Header="TRẠNG THÁI" Width="100">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border CornerRadius="6" Padding="6,2" HorizontalAlignment="Left" Background="#E6FDF4">
+                                        <Border CornerRadius="6" Padding="6,2" HorizontalAlignment="Left" Background="{DynamicResource ActionBtnHoverBg}">
                                             <TextBlock Text="Đang diễn ra" FontSize="11" FontWeight="Bold" Foreground="#10B981"/>
                                         </Border>
                                     </DataTemplate>
@@ -326,32 +502,118 @@
                     </DataGrid>
                 </Border>
 
-                <!-- Right Column: Setup FlashSale form -->
-                <Border Grid.Column="2" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
-                    <StackPanel>
-                        <TextBlock Text="CẤU HÌNH FLASH SALE MỚI" FontSize="13" FontWeight="Bold" Foreground="{StaticResource BrandPurple}" Margin="0,0,0,16"/>
-                        
-                        <!-- Inputs -->
-                        <TextBlock Text="Tên chiến dịch đợt Flash Sale" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                        <TextBox Text="{Binding FlashCampaignName, UpdateSourceTrigger=PropertyChanged}" Margin="0,6,0,12" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0"/>
-
-                        <TextBlock Text="Chọn sản phẩm tham gia" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                        <ComboBox ItemsSource="{Binding AvailableProducts}" SelectedItem="{Binding FlashSelectedProduct}" DisplayMemberPath="ProductName" Margin="0,6,0,12" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0"/>
-
-                        <TextBlock Text="Giá bán giờ vàng (đ)" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                        <TextBox Text="{Binding FlashPrice, UpdateSourceTrigger=PropertyChanged}" Margin="0,6,0,12" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0"/>
-
-                        <TextBlock Text="Giới hạn tồn kho bán Flash Sale" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                        <TextBox Text="{Binding FlashStockLimit, UpdateSourceTrigger=PropertyChanged}" Margin="0,6,0,20" Height="36" BorderBrush="#DFE9FD" BorderThickness="1" Padding="8,8,0,0"/>
-
-                        <!-- Save/Delete buttons -->
-                        <Button Content="Kích hoạt đếm ngược giờ vàng" Background="#EA580C" Foreground="#FFFFFF" Style="{StaticResource ActionButton}" Command="{Binding AddFlashSaleCommand}" Margin="0,0,0,10"/>
-                        <Button Content="Hủy chương trình Flash Sale" Background="#EF4444" Foreground="#FFFFFF" Style="{StaticResource ActionButton}" Command="{Binding DeleteFlashSaleCommand}"/>
-                    </StackPanel>
+                <!-- Right Column: FlashSale Form — Bento Card -->
+                <Border Grid.Column="2" Background="{DynamicResource CardBg}" CornerRadius="14" BorderThickness="1"
+                        BorderBrush="{DynamicResource BorderSlate}">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#EA580C" BlurRadius="20" ShadowDepth="0" Opacity="0.08"/>
+                    </Border.Effect>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <!-- Header -->
+                        <Border Grid.Row="0" CornerRadius="14,14,0,0" Padding="20,16">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#C2410C" Offset="0"/>
+                                    <GradientStop Color="#EA580C" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="32" Height="32" CornerRadius="8" Background="#FFFFFF20">
+                                    <TextBlock Text="&#xE945;" FontFamily="Segoe MDL2 Assets" FontSize="15"
+                                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="FLASH SALE GIỜ VÀNG" FontSize="11" FontWeight="Bold"
+                                               Foreground="#FFFFFFCC" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Cấu hình chiến dịch đếm ngược" FontSize="12.5" FontWeight="SemiBold"
+                                               Foreground="White" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        <!-- Form Body -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
+                            <StackPanel Margin="20,16,20,20">
+                                <TextBlock Text="TÊN CHIẾN DỊCH" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <Border BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14">
+                                    <TextBox Text="{Binding FlashCampaignName, UpdateSourceTrigger=PropertyChanged}"
+                                             BorderThickness="0" Height="36" Background="Transparent"
+                                             Padding="10,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="12.5"/>
+                                </Border>
+                                <TextBlock Text="SẢN PHẨM THAM GIA" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <Border BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14">
+                                    <ComboBox ItemsSource="{Binding AvailableProducts}" SelectedItem="{Binding FlashSelectedProduct}"
+                                              DisplayMemberPath="ProductName" BorderThickness="0" Height="36" Background="Transparent"
+                                              Padding="6,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="12.5"/>
+                                </Border>
+                                <TextBlock Text="GIÁ BÁN GIỜ VÀNG (đ)" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <Border BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14">
+                                    <TextBox Text="{Binding FlashPrice, UpdateSourceTrigger=PropertyChanged}"
+                                             BorderThickness="0" Height="36" Background="Transparent"
+                                             Padding="10,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="12.5"/>
+                                </Border>
+                                <TextBlock Text="GIỚI HẠN TỒN KHO" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <Border BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,20">
+                                    <TextBox Text="{Binding FlashStockLimit, UpdateSourceTrigger=PropertyChanged}"
+                                             BorderThickness="0" Height="36" Background="Transparent"
+                                             Padding="10,8,0,0" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="12.5"/>
+                                </Border>
+                                <Button Command="{Binding AddFlashSaleCommand}" Height="40" Cursor="Hand" Margin="0,0,0,10">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="bd" Background="#EA580C" CornerRadius="8">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="&#xE945;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="White" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Kích hoạt Flash Sale" Foreground="White" FontSize="12.5"
+                                                               FontWeight="Bold" Margin="8,0,0,0" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bd" Property="Opacity" Value="0.85"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <Button Command="{Binding DeleteFlashSaleCommand}" Height="40" Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="bd" Background="{DynamicResource DangerRedBg}" CornerRadius="8"
+                                                    BorderBrush="{DynamicResource DangerRed}" BorderThickness="1">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                                                               Foreground="{DynamicResource DangerRed}" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Hủy Flash Sale" Foreground="{DynamicResource DangerRed}"
+                                                               FontSize="12.5" FontWeight="Bold" Margin="8,0,0,0"
+                                                               VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bd" Property="Opacity" Value="0.8"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
                 </Border>
             </Grid>
             
         </Grid>
     </Grid>
 </UserControl>
+
+
+
 

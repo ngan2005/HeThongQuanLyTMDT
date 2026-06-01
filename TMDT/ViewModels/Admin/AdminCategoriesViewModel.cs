@@ -122,32 +122,7 @@ namespace TMDT.ViewModels.Admin
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("EF query for Categories failed, loading mocks. " + ex.Message);
-            }
-
-            // Fallback mock categories
-            LoadMockCategories();
-        }
-
-        private void LoadMockCategories()
-        {
-            var mockCats = new ObservableCollection<Category>();
-
-            mockCats.Add(new Category { CategoryId = 1, CategoryName = "Thiết bị Gia dụng", Icon = "E13A", SortOrder = 1, IsActive = true });
-            mockCats.Add(new Category { CategoryId = 2, CategoryName = "Thời trang Unisex", Icon = "E1A6", SortOrder = 2, IsActive = true });
-            mockCats.Add(new Category { CategoryId = 3, CategoryName = "Thiết bị Âm thanh", Icon = "E18D", SortOrder = 3, IsActive = true });
-            mockCats.Add(new Category { CategoryId = 4, CategoryName = "Sức khỏe & Sắc đẹp", Icon = "E1A5", SortOrder = 4, IsActive = true });
-            mockCats.Add(new Category { CategoryId = 5, CategoryName = "Phụ kiện Điện thoại", Icon = "E1C9", SortOrder = 5, IsActive = false });
-
-            // Attach dummy products for product count display
-            mockCats[0].Products.Add(new Product());
-            mockCats[0].Products.Add(new Product());
-            mockCats[1].Products.Add(new Product());
-            mockCats[3].Products.Add(new Product());
-
-            foreach (var cat in mockCats)
-            {
-                Categories.Add(cat);
+                System.Diagnostics.Debug.WriteLine("EF query for Categories failed: " + ex.Message);
             }
         }
 

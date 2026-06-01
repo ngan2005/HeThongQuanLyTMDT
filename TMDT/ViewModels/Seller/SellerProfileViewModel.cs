@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using Microsoft.EntityFrameworkCore;
 using TMDT.Models;
 using TMDT.Utilities;
@@ -19,6 +20,11 @@ namespace TMDT.ViewModels.Seller
         private decimal _commissionRate;
         private bool _vacationMode;
         private string _openedAtDisplay;
+
+        private int _totalProducts;
+        private int _totalOrders;
+        private decimal _walletBalance;
+        private decimal _shopRating;
 
         public Shop Shop
         {
@@ -50,7 +56,14 @@ namespace TMDT.ViewModels.Seller
         public bool VacationMode
         {
             get => _vacationMode;
-            set { _vacationMode = value; OnPropertyChanged(); }
+            set
+            {
+                _vacationMode = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(VacationBg));
+                OnPropertyChanged(nameof(VacationFg));
+                OnPropertyChanged(nameof(VacationText));
+            }
         }
         public string OpenedAtDisplay
         {
@@ -59,18 +72,59 @@ namespace TMDT.ViewModels.Seller
         }
         #endregion
 
-        // Commands
+        #region Dashboard Stats
+        public int TotalProducts
+        {
+            get => _totalProducts;
+            set { _totalProducts = value; OnPropertyChanged(); }
+        }
+        public int TotalOrders
+        {
+            get => _totalOrders;
+            set { _totalOrders = value; OnPropertyChanged(); }
+        }
+        public decimal WalletBalance
+        {
+            get => _walletBalance;
+            set { _walletBalance = value; OnPropertyChanged(); OnPropertyChanged(nameof(WalletBalanceDisplay)); }
+        }
+        public string WalletBalanceDisplay => WalletBalance >= 1000000
+            ? (WalletBalance / 1000000m).ToString("N1") + "M"
+            : WalletBalance.ToString("N0");
+        public decimal ShopRating
+        {
+            get => _shopRating;
+            set { _shopRating = value; OnPropertyChanged(); }
+        }
+        public string VacationText => VacationMode ? "Đang tạm nghỉ" : "Bình thường";
+        public Brush VacationBg => VacationMode
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF7ED"))
+            : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F0FDF4"));
+        public Brush VacationFg => VacationMode
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EA580C"))
+            : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#059669"));
+        #endregion
+
+        #region Events
+        public event Action OpenProfileRequest;
+        public event Action CloseProfileRequest;
+        #endregion
+
+        #region Commands
         public ICommand SaveProfileCommand { get; }
+        public ICommand OpenProfileCommand { get; }
+        public ICommand ToggleVacationCommand { get; }
+        public ICommand WithdrawCommand { get; }
+        #endregion
 
         public SellerProfileViewModel()
         {
-            try
-            {
-                _context = new TmdtContext();
-            }
-            catch {}
+            try { _context = new TmdtContext(); } catch { }
 
             SaveProfileCommand = new RelayCommand(ExecuteSaveProfile);
+            OpenProfileCommand = new RelayCommand(_ => OpenProfileRequest?.Invoke());
+            ToggleVacationCommand = new RelayCommand(_ => ExecuteToggleVacation());
+            WithdrawCommand = new RelayCommand(_ => MessageBox.Show("Tính năng rút tiền đang được phát triển.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information));
 
             LoadShopProfile();
         }
@@ -78,50 +132,61 @@ namespace TMDT.ViewModels.Seller
         private void LoadShopProfile()
         {
             int currentShopId = GetCurrentShopId();
+            if (currentShopId <= 0) return;
 
             try
             {
-                if (_context != null)
-                {
-                    var dbShop = _context.Shops.Find(currentShopId);
-                    if (dbShop != null)
-                    {
-                        Shop = dbShop;
-                        PopulateFields();
-                        return;
-                    }
-                }
+                if (_context == null) return;
+
+                var dbShop = _context.Shops.Find(currentShopId);
+                if (dbShop == null) return;
+
+                Shop = dbShop;
+                PopulateFields();
+
+                // Load stats
+                TotalProducts = _context.Products.Count(p => p.ShopId == currentShopId && p.Status == "Approved");
+                TotalOrders = _context.Orders.Count(o => o.ShopId == currentShopId);
+                WalletBalance = dbShop.WalletBalance ?? 0;
+                ShopRating = dbShop.Rating ?? 0;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Failed to load shop profile from DB: " + ex.Message);
+                System.Diagnostics.Debug.WriteLine("Failed to load shop profile: " + ex.Message);
             }
-
-            // Mock Shop Profile
-            Shop = new Shop
-            {
-                ShopId = 1,
-                ShopName = "MyShop Premium Store",
-                Logo = "pack://application:,,,/Resources/Images/default_shop.png",
-                WarehouseAddress = "236 Hoàng Quốc Việt, Cầu Giấy, Hà Nội",
-                CommissionRate = 3.0m,
-                VacationMode = false,
-                OpenedAt = DateTime.Now.AddMonths(-6)
-            };
-            PopulateFields();
         }
 
         private void PopulateFields()
         {
-            if (Shop != null)
+            if (Shop == null) return;
+            ShopNameInput = Shop.ShopName;
+            LogoInput = Shop.Logo;
+            WarehouseAddressInput = Shop.WarehouseAddress;
+            CommissionRate = Shop.CommissionRate ?? 3.0m;
+            VacationMode = Shop.VacationMode ?? false;
+            OpenedAtDisplay = Shop.OpenedAt.HasValue ? Shop.OpenedAt.Value.ToString("dd/MM/yyyy") : DateTime.Now.ToString("dd/MM/yyyy");
+        }
+
+        private void ExecuteToggleVacation()
+        {
+            VacationMode = !VacationMode;
+            Shop.VacationMode = VacationMode;
+
+            try
             {
-                ShopNameInput = Shop.ShopName;
-                LogoInput = Shop.Logo;
-                WarehouseAddressInput = Shop.WarehouseAddress;
-                CommissionRate = Shop.CommissionRate ?? 3.0m;
-                VacationMode = Shop.VacationMode ?? false;
-                OpenedAtDisplay = Shop.OpenedAt.HasValue ? Shop.OpenedAt.Value.ToString("dd/MM/yyyy") : DateTime.Now.ToString("dd/MM/yyyy");
+                var dbShop = _context?.Shops.Find(Shop.ShopId);
+                if (dbShop != null)
+                {
+                    dbShop.VacationMode = VacationMode;
+                    _context?.SaveChanges();
+                }
             }
+            catch { }
+
+            MessageBox.Show(VacationMode
+                ? "Đã bật chế độ tạm nghỉ. Khách hàng không thể đặt đơn hàng."
+                : "Đã tắt chế độ tạm nghỉ. Shop hoạt động bình thường.",
+                "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private async void ExecuteSaveProfile(object obj)
@@ -131,7 +196,6 @@ namespace TMDT.ViewModels.Seller
                 MessageBox.Show("Tên cửa hàng không được để trống!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-
             if (string.IsNullOrWhiteSpace(WarehouseAddressInput))
             {
                 MessageBox.Show("Địa chỉ kho không được để trống!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -145,43 +209,37 @@ namespace TMDT.ViewModels.Seller
 
             try
             {
-                if (_context != null)
+                var dbShop = await _context.Shops.FindAsync(Shop.ShopId);
+                if (dbShop != null)
                 {
-                    var dbShop = await _context.Shops.FindAsync(Shop.ShopId);
-                    if (dbShop != null)
-                    {
-                        dbShop.ShopName = ShopNameInput;
-                        dbShop.Logo = LogoInput;
-                        dbShop.WarehouseAddress = WarehouseAddressInput;
-                        dbShop.VacationMode = VacationMode;
-
-                        await _context.SaveChangesAsync();
-                    }
+                    dbShop.ShopName = ShopNameInput;
+                    dbShop.Logo = LogoInput;
+                    dbShop.WarehouseAddress = WarehouseAddressInput;
+                    dbShop.VacationMode = VacationMode;
+                    await _context.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("EF save shop profile failed: " + ex.Message);
+                System.Diagnostics.Debug.WriteLine("EF save failed: " + ex.Message);
             }
 
-            MessageBox.Show("Đã lưu cấu hình thông tin Shop thành công!", "Cập nhật thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("Đã lưu cấu hình thông tin Shop thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+            CloseProfileRequest?.Invoke();
         }
 
         private int GetCurrentShopId()
         {
             try
             {
-                if (_context != null)
-                {
-                    var shop = _context.Shops
-                        .Include(s => s.User)
-                        .FirstOrDefault(s => s.User != null && s.User.Email == "seller@myshop.com")
-                        ?? _context.Shops.FirstOrDefault();
-                    if (shop != null) return shop.ShopId;
-                }
+                if (_context == null) return 0;
+                var shop = _context.Shops
+                    .Include(s => s.User)
+                    .FirstOrDefault(s => s.User != null && s.User.Email == "seller@myshop.com")
+                    ?? _context.Shops.FirstOrDefault();
+                return shop?.ShopId ?? 0;
             }
-            catch {}
-            return 1;
+            catch { return 0; }
         }
     }
 }

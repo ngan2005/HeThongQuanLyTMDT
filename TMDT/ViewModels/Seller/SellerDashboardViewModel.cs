@@ -38,10 +38,6 @@ namespace TMDT.ViewModels.Seller
             TopProducts = new ObservableCollection<SellerProductSummary>();
             RevenueTrend = new ObservableCollection<SellerRevenueTrendPoint>();
 
-            // 1. Load mock data first as a baseline (ensures premium UI looks complete)
-            LoadMockData();
-
-            // 2. Try to load live DB data for the mock seller or actual first shop
             LoadRealData();
         }
 

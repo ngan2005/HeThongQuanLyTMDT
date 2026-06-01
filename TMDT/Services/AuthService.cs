@@ -24,28 +24,41 @@ namespace TMDT.Services
                 .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.Email == email);
 
-            if (user == null || !PasswordHelper.VerifyPassword(password, user.Password)) 
+            if (user == null || !PasswordHelper.VerifyPassword(password, user.Password))
                 return null;
+
+            // Lấy ShopId + ShopName nếu là Seller
+            int? shopId = null;
+            string? shopName = null;
+            if (user.Role?.RoleName == "Seller")
+            {
+                var shop = await _context.Shops.FirstOrDefaultAsync(s => s.UserId == user.UserId);
+                if (shop != null)
+                {
+                    shopId = shop.ShopId;
+                    shopName = shop.ShopName;
+                }
+            }
 
             return new UserDto
             {
+                UserId = user.UserId,
                 UserCode = user.UserCode ?? $"USR-{user.UserId}",
                 Email = user.Email,
-                FullName = user.FullName,
+                FullName = user.FullName ?? user.Email.Split('@')[0],
                 RoleName = user.Role?.RoleName,
-                Avatar = user.Avatar
+                Avatar = user.Avatar,
+                ShopId = shopId,
+                ShopName = shopName
             };
         }
 
         public async Task<bool> RegisterAsync(RegisterRequest request)
         {
-            // Kiểm tra email tồn tại
             if (await _context.Users.AnyAsync(u => u.Email == request.Email))
                 return false;
 
-            // Lấy RoleId mặc định (ví dụ 2 là Buyer)
-            // Trong thực tế nên query theo tên Role
-            var defaultRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == "Buyer") 
+            var defaultRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == "Buyer")
                              ?? await _context.Roles.FirstOrDefaultAsync();
 
             var user = new User
@@ -53,7 +66,7 @@ namespace TMDT.Services
                 UserCode = "USR-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
                 FullName = request.FullName,
                 Email = request.Email,
-                Password = PasswordHelper.HashPassword(request.Password), // Đã mã hóa
+                Password = PasswordHelper.HashPassword(request.Password),
                 Phone = request.Phone,
                 RoleId = defaultRole?.RoleId ?? 1,
                 CreatedAt = DateTime.Now,
@@ -66,7 +79,6 @@ namespace TMDT.Services
 
         public Task<bool> LogoutAsync()
         {
-            // Xử lý logout nếu có session/token
             return Task.FromResult(true);
         }
     }

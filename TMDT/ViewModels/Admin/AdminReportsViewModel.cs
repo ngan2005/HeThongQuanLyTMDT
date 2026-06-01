@@ -106,14 +106,8 @@ namespace TMDT.ViewModels.Admin
             }
             catch
             {
-                // Mock fallback
+                // Log error
             }
-
-            // Mock summaries
-            TotalActiveShopsCount = 18;
-            TotalOrdersProcessed = 154;
-            TotalSystemRevenue = 48590000;
-            TotalCommissionEarned = TotalSystemRevenue * 0.05m;
         }
 
         // --- CSV EXPORT METHODS ---

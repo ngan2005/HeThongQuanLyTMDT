@@ -9,15 +9,12 @@
 
     <UserControl.Resources>
         <!-- Custom colors for Dashboard -->
-        <SolidColorBrush x:Key="TextPrimary" Color="#1C1B1A"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#414750"/>
-        <SolidColorBrush x:Key="BrandPurple" Color="#004277"/>
         
         <Style x:Key="KpiCard" TargetType="Border">
-            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Background" Value="{DynamicResource CardBg}"/>
             <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#F1F5F9"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderSlate}"/>
             <Setter Property="Padding" Value="20"/>
             <Setter Property="Margin" Value="0,0,16,0"/>
             <Setter Property="Effect">
@@ -28,7 +25,7 @@
         </Style>
 
         <Style x:Key="SleekProgressBar" TargetType="ProgressBar">
-            <Setter Property="Background" Value="#F1F5F9"/>
+            <Setter Property="Background" Value="{DynamicResource BorderSlate}"/>
             <Setter Property="Height" Value="8"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Template">
@@ -44,7 +41,7 @@
         </Style>
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+    <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled"
                   PanningMode="VerticalOnly">
         <ScrollViewer.Resources>
             <!-- Ultra-thin sleek scrollbar -->
@@ -81,7 +78,7 @@
             </StackPanel>
 
             <!-- Time indicator tag -->
-            <Border HorizontalAlignment="Right" VerticalAlignment="Center" Background="#EFF3FF" CornerRadius="8" Padding="12,6">
+            <Border HorizontalAlignment="Right" VerticalAlignment="Center" Background="{DynamicResource SidebarHoverBg}" CornerRadius="8" Padding="12,6">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="&#xE787;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="{StaticResource BrandPurple}" VerticalAlignment="Center"/>
                     <TextBlock Text="Hôm nay, 19/05/2026" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource BrandPurple}" Margin="6,0,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
@@ -103,7 +100,7 @@
                             <TextBlock Text="+14.2% so với tháng trước" FontSize="10.5" Foreground="#10B981" FontWeight="Medium" Margin="4,0,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
                         </StackPanel>
                     </StackPanel>
-                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Width="36" Height="36" Background="#EFF3FF" CornerRadius="8">
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Width="36" Height="36" Background="{DynamicResource SidebarHoverBg}" CornerRadius="8">
                         <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{StaticResource BrandPurple}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                 </Grid>
@@ -120,7 +117,7 @@
                             <TextBlock Text="+8.6% phí thu mới hôm nay" FontSize="10.5" Foreground="#10B981" FontWeight="Medium" Margin="4,0,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
                         </StackPanel>
                     </StackPanel>
-                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Width="36" Height="36" Background="#E6FDF4" CornerRadius="8">
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Width="36" Height="36" Background="{DynamicResource ActionBtnHoverBg}" CornerRadius="8">
                         <TextBlock Text="&#xEDF4;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#10B981" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                 </Grid>
@@ -137,7 +134,7 @@
                             <TextBlock Text="{Binding PendingShops, StringFormat={}{0} shop đang chờ duyệt}" FontSize="10.5" Foreground="{StaticResource BrandPurple}" FontWeight="SemiBold" Margin="4,0,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
                         </StackPanel>
                     </StackPanel>
-                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Width="36" Height="36" Background="#EFF3FF" CornerRadius="8">
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Width="36" Height="36" Background="{DynamicResource SidebarHoverBg}" CornerRadius="8">
                         <TextBlock Text="&#xE719;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{StaticResource BrandPurple}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                 </Grid>
@@ -154,7 +151,7 @@
                             <TextBlock Text="{Binding PendingProducts, StringFormat={}{0} sản phẩm cần duyệt}" FontSize="10.5" Foreground="#EF4444" FontWeight="SemiBold" Margin="4,0,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
                         </StackPanel>
                     </StackPanel>
-                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Width="36" Height="36" Background="#FEF2F2" CornerRadius="8">
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Width="36" Height="36" Background="{DynamicResource DangerRedBg}" CornerRadius="8">
                         <TextBlock Text="&#xE179;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#EF4444" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                 </Grid>
@@ -170,7 +167,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- Weekly Sales & Fee Trend Chart Card -->
-            <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
+            <Border Grid.Column="0" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="20">
                 <Border.Effect>
                     <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
                 </Border.Effect>
@@ -615,7 +612,7 @@
             </Border>
 
             <!-- Top Categories Share Card -->
-            <Border Grid.Column="2" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
+            <Border Grid.Column="2" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="20">
                 <Border.Effect>
                     <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
                 </Border.Effect>
@@ -663,7 +660,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- LEFT: Recent Orders Card -->
-            <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
+            <Border Grid.Column="0" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="20">
                 <Border.Effect>
                     <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
                 </Border.Effect>
@@ -684,18 +681,18 @@
                     <DataGrid Grid.Row="1" ItemsSource="{Binding RecentOrders}" AutoGenerateColumns="False" 
                               Background="Transparent" BorderThickness="0" GridLinesVisibility="None"
                               CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True"
-                              RowBackground="#FFFFFF" AlternatingRowBackground="#F8FAFC"
+                              RowBackground="{DynamicResource CardBg}" AlternatingRowBackground="{DynamicResource GridAltRowBg}"
                               HeadersVisibility="Column" RowHeight="38" FontFamily="Be Vietnam Pro, Segoe UI">
                         <DataGrid.Resources>
                             <!-- Header Style -->
                             <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="Background" Value="#F8FAFC"/>
+                                <Setter Property="Background" Value="{DynamicResource GridHeaderBg}"/>
                                 <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
                                 <Setter Property="FontSize" Value="11"/>
                                 <Setter Property="Padding" Value="10,8"/>
                                 <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                                <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource BorderSlate}"/>
                                 <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
                             </Style>
                             <!-- Cell Style -->
@@ -768,7 +765,7 @@
                                                 <Setter Property="Foreground" Value="{StaticResource BrandPurple}"/>
                                             </Trigger>
                                             <Trigger Property="Text" Value="Chờ xác nhận">
-                                                <Setter Property="Foreground" Value="#414750"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
@@ -780,7 +777,7 @@
             </Border>
 
             <!-- RIGHT: Top Performing Shops Card -->
-            <Border Grid.Column="2" Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
+            <Border Grid.Column="2" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="20">
                 <Border.Effect>
                     <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
                 </Border.Effect>
@@ -798,7 +795,7 @@
                     <ItemsControl Grid.Row="1" ItemsSource="{Binding TopShops}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border BorderThickness="0,0,0,1" BorderBrush="#F1F5F9" Padding="0,10" VerticalAlignment="Center">
+                                <Border BorderThickness="0,0,0,1" BorderBrush="{DynamicResource BorderSlate}" Padding="0,10" VerticalAlignment="Center">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
@@ -824,4 +821,7 @@
     </Grid>
     </ScrollViewer>
 </UserControl>
+
+
+
 

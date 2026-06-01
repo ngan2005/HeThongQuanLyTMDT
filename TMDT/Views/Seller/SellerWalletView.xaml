@@ -8,6 +8,8 @@
              d:DesignHeight="580" d:DesignWidth="820">
 
     <UserControl.Resources>
+        <DropShadowEffect x:Key="CardShadow" BlurRadius="16" ShadowDepth="2" Opacity="0.06" Color="#000" Direction="270"/>
+
         <Style x:Key="InputLabel" TargetType="TextBlock">
             <Setter Property="FontSize" Value="11.5"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -29,7 +31,7 @@
                         <Border x:Name="border" Background="{TemplateBinding Background}" 
                                 BorderBrush="{TemplateBinding BorderBrush}" 
                                 BorderThickness="{TemplateBinding BorderThickness}" 
-                                CornerRadius="6">
+                                CornerRadius="8">
                             <ScrollViewer x:Name="PART_ContentHost" Focusable="false"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -56,7 +58,7 @@
         <!-- ========================================== -->
         <!-- LEFT COLUMN: PREMIUM WALLET CARD & FORM -->
         <!-- ========================================== -->
-        <Grid Grid.Column="0" Margin="0,0,16,0">
+        <Grid Grid.Column="0" Margin="0,0,20,0">
             <Grid.RowDefinitions>
                 <!-- Card -->
                 <RowDefinition Height="Auto"/>
@@ -64,60 +66,76 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- 1. WALLET VIRTUAL CARD (DEEP INDIGO GRADIENT) -->
-            <Border Grid.Row="0" CornerRadius="16" Height="165" Margin="0,0,0,16" Padding="20">
+            <!-- 1. WALLET VIRTUAL CARD (DEEP INDIGO GRADIENT WITH GLASS SHINY REFLECTION) -->
+            <Border Grid.Row="0" CornerRadius="16" Height="170" Margin="0,0,0,20" Padding="24" ClipToBounds="True">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#0F172A" Offset="0"/> <!-- Dark Slate -->
-                        <GradientStop Color="#1E1B4B" Offset="0.5"/> <!-- Deep Indigo -->
+                        <GradientStop Color="#0F172A" Offset="0"/> <!-- Deep Slate -->
+                        <GradientStop Color="#1E1B4B" Offset="0.4"/> <!-- Deep Indigo -->
+                        <GradientStop Color="#312E81" Offset="0.75"/> <!-- Rich Indigo -->
                         <GradientStop Color="#0D9488" Offset="1"/> <!-- Modern Teal -->
                     </LinearGradientBrush>
                 </Border.Background>
                 <Border.Effect>
-                    <DropShadowEffect BlurRadius="16" Color="#1E1B4B" Direction="270" ShadowDepth="4" Opacity="0.25"/>
+                    <DropShadowEffect BlurRadius="20" Color="#1E1B4B" Direction="270" ShadowDepth="4" Opacity="0.25"/>
                 </Border.Effect>
 
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <!-- Chip & Card Name -->
-                        <RowDefinition Height="Auto"/>
-                        <!-- Number Placeholder -->
-                        <RowDefinition Height="*"/>
+                    <!-- Glossy overlay reflection -->
+                    <Border CornerRadius="16" Opacity="0.08" Margin="-24">
+                        <Border.Background>
+                            <RadialGradientBrush Center="0.8,0.2" RadiusX="1" RadiusY="1">
+                                <GradientStop Color="#FFFFFF" Offset="0"/>
+                                <GradientStop Color="Transparent" Offset="1"/>
+                            </RadialGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <!-- Chip & Card Name -->
+                            <RowDefinition Height="Auto"/>
+                            <!-- Number Placeholder -->
+                            <RowDefinition Height="*"/>
+                            <!-- Balance & Expiry -->
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Chip & System Title -->
+                        <Grid Grid.Row="0">
+                            <TextBlock Text="SHOP WALLET" FontSize="11" FontWeight="Bold" Foreground="#94A3B8" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <Border Background="#F59E0B" Width="32" Height="24" CornerRadius="5" HorizontalAlignment="Right" VerticalAlignment="Center"/> <!-- Chip -->
+                        </Grid>
+
+                        <!-- Card Account Number representation -->
+                        <TextBlock Grid.Row="1" Text="••••  ••••  ••••  8970" FontSize="16" Foreground="#CBD5E1" FontWeight="Medium" VerticalAlignment="Center" FontFamily="Consolas, Segoe UI"/>
+
                         <!-- Balance & Expiry -->
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="SỐ DƯ KHẢ DỤNG" FontSize="9.5" Foreground="#94A3B8" FontWeight="SemiBold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="{Binding WalletBalance, StringFormat={}{0:N0} đ}" FontSize="22" Foreground="#FFFFFF" FontWeight="ExtraBold" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            </StackPanel>
 
-                    <!-- Chip & System Title -->
-                    <Grid Grid.Row="0">
-                        <TextBlock Text="SHOP WALLET" FontSize="11" FontWeight="Bold" Foreground="#94A3B8" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                        <Border Background="#F59E0B" Width="30" Height="22" CornerRadius="4" HorizontalAlignment="Right" VerticalAlignment="Center"/> <!-- Chip -->
-                    </Grid>
-
-                    <!-- Card Account Number representation -->
-                    <TextBlock Grid.Row="1" Text="••••  ••••  ••••  8970" FontSize="15" Foreground="#CBD5E1" FontWeight="Medium" VerticalAlignment="Center" FontFamily="Consolas, Segoe UI"/>
-
-                    <!-- Balance & Expiry -->
-                    <Grid Grid.Row="2">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="SỐ DƯ KHẢ DỤNG" FontSize="9.5" Foreground="#94A3B8" FontWeight="SemiBold" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                            <TextBlock Text="{Binding WalletBalance, StringFormat={}{0:N0} đ}" FontSize="20" Foreground="#FFFFFF" FontWeight="ExtraBold" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                            <TextBlock Text="HẠN DÙNG" FontSize="8.5" Foreground="#94A3B8" HorizontalAlignment="Right" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                            <TextBlock Text="12 / 29" FontSize="11.5" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Right" Margin="0,2,0,0" FontFamily="Consolas"/>
-                        </StackPanel>
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                                <TextBlock Text="HẠN DÙNG" FontSize="8.5" Foreground="#94A3B8" HorizontalAlignment="Right" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="12 / 29" FontSize="12" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Right" Margin="0,2,0,0" FontFamily="Consolas"/>
+                            </StackPanel>
+                        </Grid>
                     </Grid>
                 </Grid>
             </Border>
 
             <!-- 2. WITHDRAW FORM -->
-            <Border Grid.Row="1" Background="#FFFFFF" CornerRadius="16" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
+            <Border Grid.Row="1" Background="#FFFFFF" CornerRadius="16" BorderThickness="1" BorderBrush="#F1F5F9" Padding="24">
+                <Border.Effect>
+                    <StaticResource ResourceKey="CardShadow"/>
+                </Border.Effect>
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -125,16 +143,16 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="Yêu Cầu Rút Tiền Về Ngân Hàng" FontSize="14" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,16" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                    <TextBlock Grid.Row="0" Text="Yêu Cầu Rút Tiền Về Ngân Hàng" FontSize="14.5" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,18" FontFamily="Be Vietnam Pro, Segoe UI"/>
 
                     <StackPanel Grid.Row="1">
                         <!-- Amount -->
                         <TextBlock Style="{StaticResource InputLabel}" Text="Số tiền muốn rút (đ) *"/>
-                        <TextBox Style="{StaticResource FormInput}" Text="{Binding AmountInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0,0,0,12"/>
+                        <TextBox Style="{StaticResource FormInput}" Text="{Binding AmountInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0,0,0,14"/>
 
                         <!-- Bank Name -->
                         <TextBlock Style="{StaticResource InputLabel}" Text="Ngân hàng nhận tiền *"/>
-                        <ComboBox Height="36" SelectedValuePath="Content" SelectedValue="{Binding BankNameInput}" Margin="0,0,0,12">
+                        <ComboBox Height="36" SelectedValuePath="Content" SelectedValue="{Binding BankNameInput}" Margin="0,0,0,14">
                             <ComboBox.Resources>
                                 <Style TargetType="ComboBox">
                                     <Setter Property="Background" Value="#F8FAFC"/>
@@ -142,6 +160,33 @@
                                     <Setter Property="BorderThickness" Value="1"/>
                                     <Setter Property="Padding" Value="10,0"/>
                                     <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ComboBox">
+                                                <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                                        BorderBrush="{TemplateBinding BorderBrush}" 
+                                                        BorderThickness="{TemplateBinding BorderThickness}" 
+                                                        CornerRadius="8">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <ContentPresenter Grid.Column="0" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                                        <ToggleButton Grid.Column="1" Focusable="false" ClickMode="Press" IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                                            <ToggleButton.Template>
+                                                                <ControlTemplate TargetType="ToggleButton">
+                                                                    <Border Background="Transparent" Width="30">
+                                                                        <TextBlock Text="&#xE0E5;" FontFamily="Segoe MDL2 Assets" FontSize="8.5" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                    </Border>
+                                                                </ControlTemplate>
+                                                            </ToggleButton.Template>
+                                                        </ToggleButton>
+                                                    </Grid>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
                                 </Style>
                             </ComboBox.Resources>
                             <ComboBoxItem Content="Vietcombank" IsSelected="True"/>
@@ -154,14 +199,14 @@
 
                         <!-- Account Number -->
                         <TextBlock Style="{StaticResource InputLabel}" Text="Số tài khoản ngân hàng *"/>
-                        <TextBox Style="{StaticResource FormInput}" Text="{Binding AccountNumberInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0,0,0,12" ToolTip="Nhập số tài khoản thụ hưởng"/>
+                        <TextBox Style="{StaticResource FormInput}" Text="{Binding AccountNumberInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0,0,0,14" ToolTip="Nhập số tài khoản thụ hưởng"/>
                     </StackPanel>
 
                     <!-- Action Submit -->
-                    <Button Grid.Row="2" Command="{Binding SendWithdrawRequestCommand}" Background="#0D9488" BorderThickness="0" Height="36" Cursor="Hand">
+                    <Button Grid.Row="2" Command="{Binding SendWithdrawRequestCommand}" Background="#0D9488" BorderThickness="0" Height="38" Cursor="Hand">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
-                                <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="8">
                                     <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                             </ControlTemplate>
@@ -189,19 +234,22 @@
         <!-- ========================================== -->
         <!-- RIGHT COLUMN: TRANSACTION HISTORY LIST -->
         <!-- ========================================== -->
-        <Border Grid.Column="1" Background="#FFFFFF" CornerRadius="16" BorderThickness="1" BorderBrush="#F1F5F9" Padding="20">
+        <Border Grid.Column="1" Background="#FFFFFF" CornerRadius="16" BorderThickness="1" BorderBrush="#F1F5F9" Padding="24">
+            <Border.Effect>
+                <StaticResource ResourceKey="CardShadow"/>
+            </Border.Effect>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="Lịch Sử Yêu Cầu Rút Tiền" FontSize="15.5" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,16" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                <TextBlock Grid.Row="0" Text="Lịch Sử Yêu Cầu Rút Tiền" FontSize="15.5" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,18" FontFamily="Be Vietnam Pro, Segoe UI"/>
 
                 <!-- Transactions DataGrid -->
                 <DataGrid Grid.Row="1" ItemsSource="{Binding WithdrawRequests}" AutoGenerateColumns="False" 
                           HeadersVisibility="Column" GridLinesVisibility="None" Background="Transparent" 
-                          BorderThickness="0" RowHeight="42" IsReadOnly="True">
+                          BorderThickness="0" RowHeight="44" IsReadOnly="True">
                     <DataGrid.Resources>
                         <Style TargetType="DataGridColumnHeader">
                             <Setter Property="Background" Value="#F8FAFC"/>
@@ -216,6 +264,11 @@
                         <Style TargetType="DataGridRow">
                             <Setter Property="BorderThickness" Value="0,0,0,1"/>
                             <Setter Property="BorderBrush" Value="#F1F5F9"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#F8FAFC"/>
+                                </Trigger>
+                            </Style.Triggers>
                         </Style>
                         <Style TargetType="DataGridCell">
                             <Setter Property="BorderThickness" Value="0"/>
@@ -226,14 +279,43 @@
                         </Style>
                     </DataGrid.Resources>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Ngân Hàng" Binding="{Binding BankName}" Width="100"/>
-                        <DataGridTextColumn Header="Số Tài Khoản" Binding="{Binding AccountNumber}" Width="110"/>
-                        <DataGridTextColumn Header="Số Tiền Rút" Binding="{Binding Amount, StringFormat={}{0:N0} đ}" Width="90"/>
-                        <DataGridTextColumn Header="Ngày Gửi" Binding="{Binding RequestedAt, StringFormat=\{0:dd/MM/yyyy HH:mm\}}" Width="120"/>
-                        <DataGridTemplateColumn Header="Trạng Thái" Width="80">
+                        <DataGridTextColumn Header="Ngân Hàng" Binding="{Binding BankName}" Width="100">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Số Tài Khoản" Binding="{Binding AccountNumber}" Width="110">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontWeight" Value="Medium"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Số Tiền Rút" Binding="{Binding Amount, StringFormat={}{0:N0} đ}" Width="95">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="Foreground" Value="#0D9488"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Ngày Gửi" Binding="{Binding RequestedAt, StringFormat=\{0:dd/MM/yyyy HH:mm\}}" Width="120">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="#64748B"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTemplateColumn Header="Trạng Thái" Width="90">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Border CornerRadius="4" Padding="6,2" HorizontalAlignment="Left">
+                                    <Border CornerRadius="5" Padding="8,2" HorizontalAlignment="Left" VerticalAlignment="Center">
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Style.Triggers>
