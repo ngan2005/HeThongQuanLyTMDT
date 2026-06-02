@@ -17,6 +17,12 @@ namespace TMDT.ViewModels.Admin
         private string _searchText = "";
         private string _statusFilter = "All"; // All, Pending, Approved, Rejected
 
+        private int _totalWithdraws;
+        private int _pendingWithdraws;
+        private int _approvedWithdraws;
+        private int _rejectedWithdraws;
+        private decimal _totalApprovedAmount;
+
         public ObservableCollection<WithdrawRequest> WithdrawRequests
         {
             get => _withdrawRequests;
@@ -51,11 +57,22 @@ namespace TMDT.ViewModels.Admin
             }
         }
 
+        public int TotalWithdraws { get => _totalWithdraws; set { _totalWithdraws = value; OnPropertyChanged(); } }
+        public int PendingWithdraws { get => _pendingWithdraws; set { _pendingWithdraws = value; OnPropertyChanged(); } }
+        public int ApprovedWithdraws { get => _approvedWithdraws; set { _approvedWithdraws = value; OnPropertyChanged(); } }
+        public int RejectedWithdraws { get => _rejectedWithdraws; set { _rejectedWithdraws = value; OnPropertyChanged(); } }
+        public decimal TotalApprovedAmount { get => _totalApprovedAmount; set { _totalApprovedAmount = value; OnPropertyChanged(); } }
+
+        // Events
+        public event Action ShowDetailRequest;
+        public event Action HideDetailRequest;
+
         // Commands
         public ICommand ApproveWithdrawCommand { get; }
         public ICommand RejectWithdrawCommand { get; }
         public ICommand FilterCommand { get; }
         public ICommand CloseDetailCommand { get; }
+        public ICommand ViewDetailCommand { get; }
 
         public AdminWithdrawsViewModel()
         {
@@ -75,6 +92,7 @@ namespace TMDT.ViewModels.Admin
             RejectWithdrawCommand = new RelayCommand(ExecuteRejectWithdraw, CanExecuteRejectWithdraw);
             FilterCommand = new RelayCommand(o => StatusFilter = o?.ToString() ?? "All");
             CloseDetailCommand = new RelayCommand(o => SelectedRequest = null);
+            ViewDetailCommand = new RelayCommand(o => ShowDetailRequest?.Invoke());
 
             LoadRequests();
         }
@@ -85,41 +103,52 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null && _context.WithdrawRequests.Any())
+                if (_context != null)
                 {
-                    var query = _context.WithdrawRequests
-                        .Include(w => w.Shop)
-                        .AsQueryable();
+                    _context.ChangeTracker.Clear();
 
-                    // Apply Search
-                    if (!string.IsNullOrEmpty(SearchText))
+                    if (_context.WithdrawRequests.Any())
                     {
-                        query = query.Where(w => w.BankName.Contains(SearchText) || 
-                                                 (w.Shop != null && w.Shop.ShopName.Contains(SearchText)));
-                    }
+                        TotalWithdraws = _context.WithdrawRequests.Count();
+                        PendingWithdraws = _context.WithdrawRequests.Count(w => w.Status == "Pending" || string.IsNullOrEmpty(w.Status));
+                        ApprovedWithdraws = _context.WithdrawRequests.Count(w => w.Status == "Approved");
+                        RejectedWithdraws = _context.WithdrawRequests.Count(w => w.Status == "Rejected");
+                        TotalApprovedAmount = _context.WithdrawRequests.Where(w => w.Status == "Approved").Sum(w => w.Amount ?? 0);
 
-                    // Apply Filter
-                    if (StatusFilter == "Pending")
-                    {
-                        query = query.Where(w => w.Status == "Pending" || string.IsNullOrEmpty(w.Status));
-                    }
-                    else if (StatusFilter == "Approved")
-                    {
-                        query = query.Where(w => w.Status == "Approved");
-                    }
-                    else if (StatusFilter == "Rejected")
-                    {
-                        query = query.Where(w => w.Status == "Rejected");
-                    }
+                        var query = _context.WithdrawRequests
+                            .Include(w => w.Shop)
+                            .AsQueryable();
 
-                    var dbRequests = query.ToList();
-                    foreach (var req in dbRequests)
-                    {
-                        WithdrawRequests.Add(req);
-                    }
+                        // Apply Search
+                        if (!string.IsNullOrEmpty(SearchText))
+                        {
+                            query = query.Where(w => w.BankName.Contains(SearchText) || 
+                                                     (w.Shop != null && w.Shop.ShopName.Contains(SearchText)));
+                        }
 
-                    if (WithdrawRequests.Any())
-                        return;
+                        // Apply Filter
+                        if (StatusFilter == "Pending")
+                        {
+                            query = query.Where(w => w.Status == "Pending" || string.IsNullOrEmpty(w.Status));
+                        }
+                        else if (StatusFilter == "Approved")
+                        {
+                            query = query.Where(w => w.Status == "Approved");
+                        }
+                        else if (StatusFilter == "Rejected")
+                        {
+                            query = query.Where(w => w.Status == "Rejected");
+                        }
+
+                        var dbRequests = query.ToList();
+                        foreach (var req in dbRequests)
+                        {
+                            WithdrawRequests.Add(req);
+                        }
+
+                        if (WithdrawRequests.Any() || (string.IsNullOrEmpty(SearchText) && StatusFilter == "All"))
+                            return;
+                    }
                 }
             }
             catch (Exception ex)
@@ -127,6 +156,93 @@ namespace TMDT.ViewModels.Admin
                 System.Diagnostics.Debug.WriteLine("EF query for WithdrawRequests failed, loading mocks. " + ex.Message);
             }
 
+            LoadMockRequests();
+        }
+
+        private void LoadMockRequests()
+        {
+            var mockReqs = new ObservableCollection<WithdrawRequest>();
+
+            mockReqs.Add(new WithdrawRequest
+            {
+                WithdrawId = 801,
+                ShopId = 1,
+                Amount = 1500000,
+                BankName = "Vietcombank",
+                AccountNumber = "0071000888999",
+                Status = "Pending",
+                RequestedAt = DateTime.Now.AddHours(-3),
+                Shop = new Shop { ShopName = "Tech World Store", WalletBalance = 2400000 }
+            });
+
+            mockReqs.Add(new WithdrawRequest
+            {
+                WithdrawId = 802,
+                ShopId = 2,
+                Amount = 5000000,
+                BankName = "Techcombank",
+                AccountNumber = "1903456789012",
+                Status = "Pending",
+                RequestedAt = DateTime.Now.AddDays(-1),
+                Shop = new Shop { ShopName = "Fashion Center", WalletBalance = 8500000 }
+            });
+
+            mockReqs.Add(new WithdrawRequest
+            {
+                WithdrawId = 803,
+                ShopId = 3,
+                Amount = 300000,
+                BankName = "MB Bank",
+                AccountNumber = "97042292019283",
+                Status = "Approved",
+                RequestedAt = DateTime.Now.AddDays(-5),
+                ProcessedAt = DateTime.Now.AddDays(-5).AddHours(2),
+                Shop = new Shop { ShopName = "Gia Dung Smart", WalletBalance = 120000 }
+            });
+
+            mockReqs.Add(new WithdrawRequest
+            {
+                WithdrawId = 804,
+                ShopId = 1,
+                Amount = 10000000,
+                BankName = "VietinBank",
+                AccountNumber = "101009999888",
+                Status = "Rejected",
+                RequestedAt = DateTime.Now.AddDays(-10),
+                ProcessedAt = DateTime.Now.AddDays(-10).AddHours(4),
+                Shop = new Shop { ShopName = "Tech World Store", WalletBalance = 2400000 }
+            });
+
+            TotalWithdraws = mockReqs.Count;
+            PendingWithdraws = mockReqs.Count(r => r.Status == "Pending" || string.IsNullOrEmpty(r.Status));
+            ApprovedWithdraws = mockReqs.Count(r => r.Status == "Approved");
+            RejectedWithdraws = mockReqs.Count(r => r.Status == "Rejected");
+            TotalApprovedAmount = mockReqs.Where(r => r.Status == "Approved").Sum(r => r.Amount ?? 0);
+
+            var filtered = mockReqs.AsQueryable();
+            if (!string.IsNullOrEmpty(SearchText))
+            {
+                filtered = filtered.Where(r => r.BankName.ToLower().Contains(SearchText.ToLower()) || 
+                                               r.Shop.ShopName.ToLower().Contains(SearchText.ToLower()));
+            }
+
+            if (StatusFilter == "Pending")
+            {
+                filtered = filtered.Where(r => r.Status == "Pending" || string.IsNullOrEmpty(r.Status));
+            }
+            else if (StatusFilter == "Approved")
+            {
+                filtered = filtered.Where(r => r.Status == "Approved");
+            }
+            else if (StatusFilter == "Rejected")
+            {
+                filtered = filtered.Where(r => r.Status == "Rejected");
+            }
+
+            foreach (var req in filtered.ToList())
+            {
+                WithdrawRequests.Add(req);
+            }
         }
 
         // --- Commands Implementation ---
@@ -182,6 +298,7 @@ namespace TMDT.ViewModels.Admin
             MessageBox.Show($"Đã phê duyệt yêu cầu rút tiền thành công! Đã khấu trừ {amountVal:N0} đ từ ví của Shop '{SelectedRequest.Shop?.ShopName}'.", 
                             "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             
+            HideDetailRequest?.Invoke();
             LoadRequests();
         }
 
@@ -218,6 +335,7 @@ namespace TMDT.ViewModels.Admin
             MessageBox.Show($"Đã từ chối yêu cầu rút tiền. Trạng thái đã được cập nhật thành Bị từ chối.", 
                             "Đã thực hiện", MessageBoxButton.OK, MessageBoxImage.Information);
 
+            HideDetailRequest?.Invoke();
             LoadRequests();
         }
     }

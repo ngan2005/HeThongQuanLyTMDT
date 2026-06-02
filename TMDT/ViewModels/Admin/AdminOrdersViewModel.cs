@@ -20,8 +20,8 @@ namespace TMDT.ViewModels.Admin
             set { _filteredOrders = value; OnPropertyChanged(); }
         }
 
-        private Order _selectedOrder;
-        public Order SelectedOrder
+        private Order? _selectedOrder;
+        public Order? SelectedOrder
         {
             get => _selectedOrder;
             set
@@ -63,8 +63,8 @@ namespace TMDT.ViewModels.Admin
         public decimal TotalRevenue { get => _totalRevenue; set { _totalRevenue = value; OnPropertyChanged(); } }
 
         // Events
-        public event Action<Order> ShowDetailRequest;
-        public event Action HideDetailRequest;
+        public event Action<Order?>? ShowDetailRequest;
+        public event Action? HideDetailRequest;
 
         // Commands
         public ICommand CancelOrderCommand { get; }
@@ -87,6 +87,7 @@ namespace TMDT.ViewModels.Admin
         {
             try
             {
+                _context.ChangeTracker.Clear();
                 var allOrders = _context.Orders
                     .Include(o => o.Shop)
                     .Include(o => o.Buyer)
@@ -102,6 +103,15 @@ namespace TMDT.ViewModels.Admin
                 TotalRevenue = allOrders.Where(o => o.OrderStatus == "Hoàn thành").Sum(o => o.TotalAmount ?? 0);
 
                 FilteredOrders = new ObservableCollection<Order>(allOrders);
+
+                if (SelectedOrder != null)
+                {
+                    var updated = allOrders.FirstOrDefault(o => o.OrderId == SelectedOrder.OrderId);
+                    if (updated != null)
+                    {
+                        SelectedOrder = updated;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -113,27 +123,45 @@ namespace TMDT.ViewModels.Admin
         {
             if (_context == null) return;
 
-            var query = _context.Orders
-                .Include(o => o.Shop)
-                .Include(o => o.Buyer)
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Product)
-                .AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(SearchKeyword))
+            try
             {
-                string keyword = SearchKeyword.ToLower();
-                query = query.Where(o =>
-                    (o.OrderCode ?? "").ToLower().Contains(keyword) ||
-                    (o.Shop != null && o.Shop.ShopName.ToLower().Contains(keyword)) ||
-                    (o.Buyer != null && o.Buyer.FullName.ToLower().Contains(keyword))
-                );
+                _context.ChangeTracker.Clear();
+                var query = _context.Orders
+                    .Include(o => o.Shop)
+                    .Include(o => o.Buyer)
+                    .Include(o => o.OrderDetails)
+                        .ThenInclude(od => od.Product)
+                    .AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(SearchKeyword))
+                {
+                    string keyword = SearchKeyword.ToLower();
+                    query = query.Where(o =>
+                        (o.OrderCode != null && o.OrderCode.ToLower().Contains(keyword)) ||
+                        (o.Shop != null && o.Shop.ShopName != null && o.Shop.ShopName.ToLower().Contains(keyword)) ||
+                        (o.Buyer != null && o.Buyer.FullName != null && o.Buyer.FullName.ToLower().Contains(keyword))
+                    );
+                }
+
+                if (SelectedStatus != "Tất cả")
+                    query = query.Where(o => o.OrderStatus == SelectedStatus);
+
+                var list = query.OrderByDescending(o => o.OrderDate).ToList();
+                FilteredOrders = new ObservableCollection<Order>(list);
+
+                if (SelectedOrder != null)
+                {
+                    var updated = list.FirstOrDefault(o => o.OrderId == SelectedOrder.OrderId);
+                    if (updated != null)
+                    {
+                        SelectedOrder = updated;
+                    }
+                }
             }
-
-            if (SelectedStatus != "Tất cả")
-                query = query.Where(o => o.OrderStatus == SelectedStatus);
-
-            FilteredOrders = new ObservableCollection<Order>(query.OrderByDescending(o => o.OrderDate).ToList());
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi lọc đơn hàng: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private bool CanCancelOrder(object _) =>
@@ -151,11 +179,17 @@ namespace TMDT.ViewModels.Admin
                 "Cảnh báo", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes) return;
 
-            try
+            using (var transaction = _context.Database.BeginTransaction())
             {
-                var dbOrder = _context.Orders.Find(SelectedOrder.OrderId);
-                if (dbOrder != null)
+                try
                 {
+                    var dbOrder = _context.Orders.Find(SelectedOrder.OrderId);
+                    if (dbOrder == null)
+                    {
+                        MessageBox.Show("Không tìm thấy đơn hàng trong cơ sở dữ liệu.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
                     dbOrder.OrderStatus = "Đã hủy";
                     _context.OrderStatusHistories.Add(new OrderStatusHistory
                     {
@@ -164,20 +198,30 @@ namespace TMDT.ViewModels.Admin
                         Note = "Hủy khẩn cấp bởi Admin",
                         ChangedAt = DateTime.Now
                     });
+
                     _context.SaveChanges();
+                    transaction.Commit();
+
                     SelectedOrder.OrderStatus = "Đã hủy";
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi hủy đơn: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    MessageBox.Show($"Lỗi hủy đơn: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
             }
 
             AuditLogHelper.Log("CANCEL_ORDER", $"Hủy '{SelectedOrder.OrderCode}' ({SelectedOrder.TotalAmount:N0} đ) — Shop: {SelectedOrder.Shop?.ShopName}", "Đơn hàng", "Critical");
             MessageBox.Show("Đã hủy đơn hàng.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+            
+            var selectedId = SelectedOrder?.OrderId;
             HideDetailRequest?.Invoke();
             LoadOrders();
+            if (selectedId.HasValue)
+            {
+                SelectedOrder = FilteredOrders.FirstOrDefault(o => o.OrderId == selectedId.Value);
+            }
         }
 
         private bool CanRefundOrder(object _) =>
@@ -194,11 +238,34 @@ namespace TMDT.ViewModels.Admin
                 "Xác nhận hoàn tiền", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes) return;
 
-            try
+            using (var transaction = _context.Database.BeginTransaction())
             {
-                var dbOrder = _context.Orders.Find(SelectedOrder.OrderId);
-                if (dbOrder != null)
+                try
                 {
+                    var dbOrder = _context.Orders.Find(SelectedOrder.OrderId);
+                    if (dbOrder == null)
+                    {
+                        MessageBox.Show("Không tìm thấy đơn hàng trong cơ sở dữ liệu.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Hoàn tiền vào ví người mua
+                    if (dbOrder.BuyerId.HasValue)
+                    {
+                        var buyer = _context.Users.Find(dbOrder.BuyerId.Value);
+                        if (buyer == null)
+                        {
+                            MessageBox.Show("Không tìm thấy thông tin người mua để hoàn tiền.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
+                        buyer.WalletBalance = (buyer.WalletBalance ?? 0) + (dbOrder.TotalAmount ?? 0);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Đơn hàng không có thông tin người mua.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
                     dbOrder.OrderStatus = "Hoàn tiền";
                     _context.OrderStatusHistories.Add(new OrderStatusHistory
                     {
@@ -207,20 +274,30 @@ namespace TMDT.ViewModels.Admin
                         Note = "Hoàn tiền bởi Admin",
                         ChangedAt = DateTime.Now
                     });
+
                     _context.SaveChanges();
+                    transaction.Commit();
+
                     SelectedOrder.OrderStatus = "Hoàn tiền";
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi hoàn tiền: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    MessageBox.Show($"Lỗi hoàn tiền: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
             }
 
             AuditLogHelper.Log("REFUND_ORDER", $"Hoàn tiền '{SelectedOrder.OrderCode}' ({SelectedOrder.TotalAmount:N0} đ) — Người mua: {SelectedOrder.Buyer?.FullName}", "Đơn hàng", "Critical");
             MessageBox.Show("Đã hoàn tiền cho người mua.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+            
+            var selectedId = SelectedOrder?.OrderId;
             HideDetailRequest?.Invoke();
             LoadOrders();
+            if (selectedId.HasValue)
+            {
+                SelectedOrder = FilteredOrders.FirstOrDefault(o => o.OrderId == selectedId.Value);
+            }
         }
     }
 }

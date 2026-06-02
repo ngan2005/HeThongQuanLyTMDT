@@ -21,6 +21,10 @@ namespace TMDT.ViewModels.Admin
         private int _categorySortOrder = 1;
         private bool _isEditing = false;
 
+        // Detail Request Events for Lightbox
+        public event Action ShowDetailRequest;
+        public event Action HideDetailRequest;
+
         public ObservableCollection<Category> Categories
         {
             get => _categories;
@@ -40,10 +44,7 @@ namespace TMDT.ViewModels.Admin
                     CategoryIcon = value.Icon ?? "E179";
                     CategorySortOrder = value.SortOrder ?? 1;
                     IsEditing = true;
-                }
-                else
-                {
-                    ClearInputs();
+                    ShowDetailRequest?.Invoke();
                 }
             }
         }
@@ -76,6 +77,8 @@ namespace TMDT.ViewModels.Admin
         public ICommand SaveCategoryCommand { get; }
         public ICommand DeleteCategoryCommand { get; }
         public ICommand CancelEditCommand { get; }
+        public ICommand CreateNewCommand { get; }
+        public ICommand CloseDetailCommand { get; }
 
         public AdminCategoriesViewModel()
         {
@@ -93,7 +96,9 @@ namespace TMDT.ViewModels.Admin
             // Setup Commands
             SaveCategoryCommand = new RelayCommand(ExecuteSaveCategory);
             DeleteCategoryCommand = new RelayCommand(ExecuteDeleteCategory);
-            CancelEditCommand = new RelayCommand(o => ClearInputs());
+            CancelEditCommand = new RelayCommand(ExecuteCancelEdit);
+            CreateNewCommand = new RelayCommand(ExecuteCreateNew);
+            CloseDetailCommand = new RelayCommand(ExecuteCloseDetail);
 
             LoadCategories();
         }
@@ -132,10 +137,30 @@ namespace TMDT.ViewModels.Admin
             CategoryIcon = "E179";
             CategorySortOrder = Categories.Any() ? Categories.Max(c => c.SortOrder ?? 0) + 1 : 1;
             IsEditing = false;
-            SelectedCategory = null;
+            _selectedCategory = null;
+            OnPropertyChanged(nameof(SelectedCategory));
         }
 
         // --- Commands Implementation ---
+
+        private void ExecuteCreateNew(object obj)
+        {
+            ClearInputs();
+            IsEditing = false;
+            ShowDetailRequest?.Invoke();
+        }
+
+        private void ExecuteCloseDetail(object obj)
+        {
+            ClearInputs();
+            HideDetailRequest?.Invoke();
+        }
+
+        private void ExecuteCancelEdit(object obj)
+        {
+            ClearInputs();
+            HideDetailRequest?.Invoke();
+        }
 
         private async void ExecuteSaveCategory(object obj)
         {
@@ -203,6 +228,7 @@ namespace TMDT.ViewModels.Admin
 
             LoadCategories();
             ClearInputs();
+            HideDetailRequest?.Invoke();
         }
 
         private async void ExecuteDeleteCategory(object obj)
@@ -238,6 +264,7 @@ namespace TMDT.ViewModels.Admin
 
             LoadCategories();
             ClearInputs();
+            HideDetailRequest?.Invoke();
         }
     }
 }

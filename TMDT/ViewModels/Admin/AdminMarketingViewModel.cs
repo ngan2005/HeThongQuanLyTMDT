@@ -28,19 +28,56 @@ namespace TMDT.ViewModels.Admin
         public Banner SelectedBanner
         {
             get => _selectedBanner;
-            set { _selectedBanner = value; OnPropertyChanged(); }
+            set 
+            { 
+                _selectedBanner = value; 
+                OnPropertyChanged(); 
+                if (value != null)
+                {
+                    BannerTitle = value.Title ?? "";
+                    BannerImageUrl = value.ImageUrl ?? "";
+                    BannerLinkUrl = value.LinkUrl ?? "";
+                    BannerSortOrder = value.SortOrder ?? 1;
+                    ShowDetailRequest?.Invoke();
+                }
+            }
         }
 
         public Voucher SelectedVoucher
         {
             get => _selectedVoucher;
-            set { _selectedVoucher = value; OnPropertyChanged(); }
+            set 
+            { 
+                _selectedVoucher = value; 
+                OnPropertyChanged(); 
+                if (value != null)
+                {
+                    VoucherCode = value.VoucherCode ?? "";
+                    VoucherName = value.VoucherName ?? "";
+                    VoucherDiscountValue = value.DiscountValue ?? 10000;
+                    VoucherMinOrderValue = value.MinOrderValue ?? 100000;
+                    VoucherTotalQuantity = value.TotalQuantity ?? 100;
+                    ShowDetailRequest?.Invoke();
+                }
+            }
         }
 
         public FlashSale SelectedFlashSale
         {
             get => _selectedFlashSale;
-            set { _selectedFlashSale = value; OnPropertyChanged(); }
+            set 
+            { 
+                _selectedFlashSale = value; 
+                OnPropertyChanged(); 
+                if (value != null)
+                {
+                    FlashCampaignName = value.CampaignName ?? "";
+                    FlashSelectedProduct = AvailableProducts.FirstOrDefault(p => p.ProductId == value.ProductId);
+                    FlashPrice = value.FlashPrice ?? 10000;
+                    FlashStockLimit = value.StockLimit ?? 10;
+                    ShowDetailRequest?.Invoke();
+                }
+            }
         }
 
         // New Input fields for Banners
@@ -157,6 +194,10 @@ namespace TMDT.ViewModels.Admin
         public bool IsVouchersActive => ActiveTab == "Vouchers";
         public bool IsFlashSalesActive => ActiveTab == "FlashSales";
 
+        // Events
+        public event Action ShowDetailRequest;
+        public event Action HideDetailRequest;
+
         // Commands
         public ICommand SelectTabCommand { get; }
         public ICommand AddBannerCommand { get; }
@@ -165,6 +206,8 @@ namespace TMDT.ViewModels.Admin
         public ICommand DeleteVoucherCommand { get; }
         public ICommand AddFlashSaleCommand { get; }
         public ICommand DeleteFlashSaleCommand { get; }
+        public ICommand CreateNewCommand { get; }
+        public ICommand CloseDetailCommand { get; }
 
         public AdminMarketingViewModel()
         {
@@ -194,7 +237,44 @@ namespace TMDT.ViewModels.Admin
             AddFlashSaleCommand = new RelayCommand(ExecuteAddFlashSale);
             DeleteFlashSaleCommand = new RelayCommand(ExecuteDeleteFlashSale);
 
+            CreateNewCommand = new RelayCommand(ExecuteCreateNew);
+            CloseDetailCommand = new RelayCommand(o => {
+                SelectedBanner = null;
+                SelectedVoucher = null;
+                SelectedFlashSale = null;
+                HideDetailRequest?.Invoke();
+            });
+
             LoadMarketingData();
+        }
+
+        private void ExecuteCreateNew(object obj)
+        {
+            _selectedBanner = null;
+            _selectedVoucher = null;
+            _selectedFlashSale = null;
+            OnPropertyChanged(nameof(SelectedBanner));
+            OnPropertyChanged(nameof(SelectedVoucher));
+            OnPropertyChanged(nameof(SelectedFlashSale));
+
+            // Clear inputs
+            BannerTitle = "";
+            BannerImageUrl = "";
+            BannerLinkUrl = "";
+            BannerSortOrder = 1;
+
+            VoucherCode = "";
+            VoucherName = "";
+            VoucherDiscountValue = 10000;
+            VoucherMinOrderValue = 100000;
+            VoucherTotalQuantity = 100;
+
+            FlashCampaignName = "";
+            FlashSelectedProduct = AvailableProducts.FirstOrDefault();
+            FlashPrice = 10000;
+            FlashStockLimit = 10;
+
+            ShowDetailRequest?.Invoke();
         }
 
         private void LoadMarketingData()
@@ -241,7 +321,6 @@ namespace TMDT.ViewModels.Admin
             {
                 System.Diagnostics.Debug.WriteLine("EF load marketing failed, loading mocks. " + ex.Message);
             }
-
         }
 
         // --- Commands Implementations ---
@@ -279,7 +358,7 @@ namespace TMDT.ViewModels.Admin
             }
 
             Banners.Add(newBanner);
-            SelectedBanner = newBanner;
+            SelectedBanner = null;
 
             // Clear inputs
             BannerTitle = "";
@@ -287,6 +366,7 @@ namespace TMDT.ViewModels.Admin
             BannerLinkUrl = "";
             BannerSortOrder = 1;
 
+            HideDetailRequest?.Invoke();
             MessageBox.Show("Đã thêm Banner quảng cáo toàn sàn thành công! Trang chủ người mua đã tự động cập nhật.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -297,11 +377,12 @@ namespace TMDT.ViewModels.Admin
             var result = MessageBox.Show($"Xác nhận xóa Banner '{SelectedBanner.Title}' khỏi trang chủ?", "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes) return;
 
+            var toRemove = SelectedBanner;
             try
             {
                 if (_context != null)
                 {
-                    var dbBanner = await _context.Banners.FindAsync(SelectedBanner.BannerId);
+                    var dbBanner = await _context.Banners.FindAsync(toRemove.BannerId);
                     if (dbBanner != null)
                     {
                         _context.Banners.Remove(dbBanner);
@@ -314,8 +395,9 @@ namespace TMDT.ViewModels.Admin
                 System.Diagnostics.Debug.WriteLine("Database update failed: " + ex.Message);
             }
 
-            Banners.Remove(SelectedBanner);
-            SelectedBanner = Banners.FirstOrDefault();
+            Banners.Remove(toRemove);
+            SelectedBanner = null;
+            HideDetailRequest?.Invoke();
         }
 
         private async void ExecuteAddVoucher(object obj)
@@ -354,7 +436,7 @@ namespace TMDT.ViewModels.Admin
             }
 
             Vouchers.Add(newVoucher);
-            SelectedVoucher = newVoucher;
+            SelectedVoucher = null;
 
             // Clear inputs
             VoucherCode = "";
@@ -363,6 +445,7 @@ namespace TMDT.ViewModels.Admin
             VoucherMinOrderValue = 100000;
             VoucherTotalQuantity = 100;
 
+            HideDetailRequest?.Invoke();
             MessageBox.Show("Đã tạo thành công Mã giảm giá toàn sàn do Sàn tài trợ!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -373,13 +456,14 @@ namespace TMDT.ViewModels.Admin
             var result = MessageBox.Show($"Xác nhận vô hiệu hóa Voucher '{SelectedVoucher.VoucherCode}'?", "Xác nhận dừng", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes) return;
 
-            SelectedVoucher.IsActive = false;
+            var toDisable = SelectedVoucher;
+            toDisable.IsActive = false;
 
             try
             {
                 if (_context != null)
                 {
-                    var dbVoucher = await _context.Vouchers.FindAsync(SelectedVoucher.VoucherId);
+                    var dbVoucher = await _context.Vouchers.FindAsync(toDisable.VoucherId);
                     if (dbVoucher != null)
                     {
                         dbVoucher.IsActive = false;
@@ -391,6 +475,9 @@ namespace TMDT.ViewModels.Admin
             {
                 System.Diagnostics.Debug.WriteLine("Database update failed: " + ex.Message);
             }
+            
+            SelectedVoucher = null;
+            HideDetailRequest?.Invoke();
         }
 
         private async void ExecuteAddFlashSale(object obj)
@@ -428,13 +515,14 @@ namespace TMDT.ViewModels.Admin
             }
 
             FlashSales.Add(newFlash);
-            SelectedFlashSale = newFlash;
+            SelectedFlashSale = null;
 
             // Clear inputs
             FlashCampaignName = "";
             FlashPrice = 10000;
             FlashStockLimit = 10;
 
+            HideDetailRequest?.Invoke();
             MessageBox.Show("Đã đưa sản phẩm tham gia chương trình Flash Sale thành công! Đếm ngược giờ vàng đã được kích hoạt.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -445,11 +533,12 @@ namespace TMDT.ViewModels.Admin
             var result = MessageBox.Show($"Xác nhận hủy chương trình Flash Sale cho sản phẩm '{SelectedFlashSale.Product?.ProductName}'?", "Xác nhận dừng", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes) return;
 
+            var toRemove = SelectedFlashSale;
             try
             {
                 if (_context != null)
                 {
-                    var dbFlash = await _context.FlashSales.FindAsync(SelectedFlashSale.FlashSaleId);
+                    var dbFlash = await _context.FlashSales.FindAsync(toRemove.FlashSaleId);
                     if (dbFlash != null)
                     {
                         _context.FlashSales.Remove(dbFlash);
@@ -462,8 +551,9 @@ namespace TMDT.ViewModels.Admin
                 System.Diagnostics.Debug.WriteLine("Database update failed: " + ex.Message);
             }
 
-            FlashSales.Remove(SelectedFlashSale);
-            SelectedFlashSale = FlashSales.FirstOrDefault();
+            FlashSales.Remove(toRemove);
+            SelectedFlashSale = null;
+            HideDetailRequest?.Invoke();
         }
     }
 }

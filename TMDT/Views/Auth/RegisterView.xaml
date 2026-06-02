@@ -6,7 +6,7 @@
         xmlns:vm="clr-namespace:TMDT.ViewModels.Auth"
         xmlns:helpers="clr-namespace:TMDT.Helpers"
         mc:Ignorable="d"
-        Title="Đăng ký | MyShop" Height="480" Width="820"
+        Title="Đăng ký | Volox" Height="480" Width="820"
         WindowStartupLocation="CenterScreen"
         Background="Transparent"
         WindowStyle="None"
@@ -471,7 +471,7 @@
                             <Grid Margin="16">
                                 <!-- Top Branding -->
                                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,8,0,0">
-                                    <TextBlock Text="MyShop AI" FontSize="16" FontWeight="ExtraBold" Foreground="#FFFFFF" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI">
+                                    <TextBlock Text="Volox AI" FontSize="16" FontWeight="ExtraBold" Foreground="#FFFFFF" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI">
                                         <TextBlock.Effect>
                                             <DropShadowEffect Color="#5B5CEB" BlurRadius="10" Opacity="0.6" ShadowDepth="0"/>
                                         </TextBlock.Effect>
@@ -616,7 +616,7 @@
                                         <TranslateTransform x:Name="RevealTitleTransform" Y="15"/>
                                     </StackPanel.RenderTransform>
                                     <TextBlock Text="Đăng ký tài khoản" FontSize="22" FontWeight="Bold" Foreground="#F0F4FF" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    <TextBlock Text="Tham gia hệ thống phân phối thông minh MyShop" FontSize="12" Foreground="#A3AED0" Margin="0,3,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Tham gia hệ thống phân phối thông minh Volox" FontSize="12" Foreground="#A3AED0" Margin="0,3,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                 </StackPanel>
 
                                 <!-- Stagger 2: Fields Grid -->
@@ -701,7 +701,7 @@
                                     <StackPanel.RenderTransform>
                                         <TranslateTransform x:Name="RevealLinkTransform" Y="15"/>
                                     </StackPanel.RenderTransform>
-                                    <TextBlock Text="Bạn đã có tài khoản MyShop?" FontSize="11.5" Foreground="#94A3B8" Opacity="0.8" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Bạn đã có tài khoản Volox?" FontSize="11.5" Foreground="#94A3B8" Opacity="0.8" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                     <TextBlock Text="Đăng nhập ngay" FontSize="11.5" FontWeight="Bold" Foreground="#6C63FF" Margin="5,0,0,0" Cursor="Hand" MouseLeftButtonDown="BackToLogin_Click" FontFamily="Be Vietnam Pro, Segoe UI">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">

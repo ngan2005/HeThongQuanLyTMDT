@@ -112,13 +112,15 @@ namespace TMDT.Helpers
                 }
 
                 // Seed Products for the shop
+                if (seller != null)
+                {
                     var shop = context.Shops.FirstOrDefault(s => s.UserId == seller.UserId);
                     var catElec = context.Categories.FirstOrDefault(c => c.CategoryName == "Điện tử & Công nghệ");
                     var catFashion = context.Categories.FirstOrDefault(c => c.CategoryName == "Thời trang nam");
                     var catHome = context.Categories.FirstOrDefault(c => c.CategoryName == "Gia dụng & Nội thất");
 
-                if (shop != null && !context.Products.Any(p => p.ShopId == shop.ShopId))
-                {
+                    if (shop != null && !context.Products.Any(p => p.ShopId == shop.ShopId))
+                    {
                     context.Products.AddRange(
                         new Product
                         {
@@ -207,97 +209,10 @@ namespace TMDT.Helpers
                     );
                     context.SaveChanges();
                 }
+                }
 
                 // Seed Orders for the shop
-                var buyer = context.Users.FirstOrDefault(u => u.Email == buyerEmail);
-                if (shop != null && buyer != null && !context.Orders.Any(o => o.ShopId == shop.ShopId))
-                {
-                    var address = new Address
-                    {
-                        RecipientName = buyer.FullName,
-                        Phone = buyer.Phone,
-                        FullAddress = "456 Lê Lợi, Quận 1, TP. Hồ Chí Minh"
-                    };
-                    context.Addresses.Add(address);
-                    context.SaveChanges();
-
-                    var product1 = context.Products.First(p => p.ProductCode == "TZ-001");
-                    var product3 = context.Products.First(p => p.ProductCode == "TZ-003");
-
-                    context.Orders.AddRange(
-                        new Order
-                        {
-                            ShopId = shop.ShopId,
-                            BuyerId = buyer.UserId,
-                            AddressId = address.AddressId,
-                            OrderCode = "ORD-10001",
-                            OrderStatus = "Completed",
-                            PaymentMethod = "Thanh toán Online",
-                            SubTotal = 1490000,
-                            ShippingFee = 30000,
-                            TotalAmount = 1520000,
-                            PlatformFee = 44700,
-                            OrderDate = DateTime.Now.AddDays(-5),
-                            CompletedAt = DateTime.Now.AddDays(-3)
-                        },
-                        new Order
-                        {
-                            ShopId = shop.ShopId,
-                            BuyerId = buyer.UserId,
-                            AddressId = address.AddressId,
-                            OrderCode = "ORD-10002",
-                            OrderStatus = "Shipping",
-                            PaymentMethod = "COD",
-                            SubTotal = 598000,
-                            ShippingFee = 25000,
-                            TotalAmount = 623000,
-                            PlatformFee = 18690,
-                            OrderDate = DateTime.Now.AddDays(-2),
-                            TrackingCode = "GHTK-123456789"
-                        },
-                        new Order
-                        {
-                            ShopId = shop.ShopId,
-                            BuyerId = buyer.UserId,
-                            AddressId = address.AddressId,
-                            OrderCode = "ORD-10003",
-                            OrderStatus = "Pending",
-                            PaymentMethod = "Thanh toán Online",
-                            SubTotal = 299000,
-                            ShippingFee = 30000,
-                            TotalAmount = 329000,
-                            PlatformFee = 9870,
-                            OrderDate = DateTime.Now.AddHours(-2)
-                        },
-                        new Order
-                        {
-                            ShopId = shop.ShopId,
-                            BuyerId = buyer.UserId,
-                            AddressId = address.AddressId,
-                            OrderCode = "ORD-10004",
-                            OrderStatus = "Cancelled",
-                            PaymentMethod = "COD",
-                            SubTotal = 890000,
-                            ShippingFee = 35000,
-                            TotalAmount = 925000,
-                            PlatformFee = 0,
-                            OrderDate = DateTime.Now.AddDays(-7)
-                        }
-                    );
-                    context.SaveChanges();
-
-                    // Add order details
-                    var completedOrder = context.Orders.First(o => o.OrderCode == "ORD-10001");
-                    var shippingOrder = context.Orders.First(o => o.OrderCode == "ORD-10002");
-                    var pendingOrder = context.Orders.First(o => o.OrderCode == "ORD-10003");
-
-                    context.OrderDetails.AddRange(
-                        new OrderDetail { OrderId = completedOrder.OrderId, ProductNameSnapshot = product1.ProductName, Quantity = 1, UnitPrice = product1.Price, TotalPrice = product1.Price },
-                        new OrderDetail { OrderId = shippingOrder.OrderId, ProductNameSnapshot = product3.ProductName, Quantity = 3, UnitPrice = product3.Price, TotalPrice = 597000 },
-                        new OrderDetail { OrderId = pendingOrder.OrderId, ProductNameSnapshot = "Bình giữ nhiệt Inox 500ml", Quantity = 1, UnitPrice = 299000, TotalPrice = 299000 }
-                    );
-                    context.SaveChanges();
-                }
+                // Demo order data removed to keep order management empty for real data only.
             }
         }
     }

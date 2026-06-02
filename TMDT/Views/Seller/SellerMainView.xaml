@@ -7,7 +7,7 @@
         xmlns:views="clr-namespace:TMDT.Views.Seller"
         xmlns:converters="clr-namespace:TMDT.Converters"
         mc:Ignorable="d"
-        Title="Seller Portal | MyShop" Height="680" Width="1120"
+        Title="Seller Portal | Volox" Height="680" Width="1120"
         WindowStartupLocation="CenterScreen"
         Background="Transparent"
         WindowStyle="None"
@@ -231,7 +231,7 @@
                     <!-- Brand Header with collapse toggle -->
                     <Grid Grid.Row="0" Margin="0,0,0,24">
                         <StackPanel Margin="8,0,0,0">
-                            <TextBlock x:Name="BrandTitle" Text="MyShop" FontSize="22" FontWeight="ExtraBold" Foreground="#FFFFFF" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock x:Name="BrandTitle" Text="Volox" FontSize="22" FontWeight="ExtraBold" Foreground="#FFFFFF" FontFamily="Be Vietnam Pro, Segoe UI"/>
                             <TextBlock x:Name="BrandSubtitle" Text="KÊNH NGƯỜI BÁN" FontSize="9.5" FontWeight="Bold" Foreground="#0D9488" Margin="2,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
                         </StackPanel>
                         <!-- Collapse/Expand toggle arrow -->

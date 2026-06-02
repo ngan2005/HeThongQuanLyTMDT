@@ -3,10 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TMDT.Views.Admin"
+             xmlns:helpers="clr-namespace:TMDT.Helpers"
              mc:Ignorable="d" 
-             d:DesignHeight="650" d:DesignWidth="880">
+             d:DesignHeight="700" d:DesignWidth="950">
 
     <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <DropShadowEffect x:Key="CardShadow" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Color="#000" Direction="270"/>
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled" Padding="0,0,8,0">
@@ -19,60 +23,88 @@
             <!-- 1. TITLE ROW -->
             <Grid Grid.Row="0" Margin="0,0,0,24">
                 <StackPanel>
-                    <TextBlock Text="Thông tin Tài khoản" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                    <TextBlock Text="Quản lý thông tin cá nhân và bảo mật của tài khoản quản trị" FontSize="12.5" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                    <TextBlock Text="Thông tin tài khoản" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                    <TextBlock Text="Quản lý hồ sơ cá nhân, cập nhật ảnh đại diện và thiết lập bảo mật mật khẩu" FontSize="12.5" Foreground="{DynamicResource TextSecondary}" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
                 </StackPanel>
             </Grid>
 
-            <!-- 2. CONTENT CARDS -->
+            <!-- 2. CONTENT CARDS (Bento Grid) -->
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="4*"/>
-                    <ColumnDefinition Width="24"/>
+                    <ColumnDefinition Width="20"/>
                     <ColumnDefinition Width="6*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Left Column: Profile Card -->
-                <Border Grid.Column="0" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="24" VerticalAlignment="Top">
-                    <Border.Effect><DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.03"/></Border.Effect>
+                <!-- ================= LEFT COLUMN: BENTO PROFILE CARD ================= -->
+                <Border Grid.Column="0" Background="{DynamicResource CardBg}" CornerRadius="16" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="24" VerticalAlignment="Top" Effect="{StaticResource CardShadow}">
                     <StackPanel>
-                        <!-- Avatar: circular with base64 image or letter placeholder -->
-                        <Grid Width="100" Height="100" HorizontalAlignment="Center">
-                            <!-- Background circle -->
-                            <Ellipse Fill="{DynamicResource BrandActiveBg}"/>
-                            <!-- Avatar image (clipped to circle) -->
+                        <!-- Avatar Section with Glow & Hover Effects -->
+                        <Grid Width="120" Height="120" HorizontalAlignment="Center" Margin="0,10,0,0">
+                            <!-- Glow Outer Ring -->
+                            <Ellipse Stroke="{DynamicResource BrandPurple}" StrokeThickness="2" Margin="-4">
+                                <Ellipse.Effect>
+                                    <DropShadowEffect Color="{DynamicResource BrandPurple.Color}" BlurRadius="8" Opacity="0.4" ShadowDepth="0"/>
+                                </Ellipse.Effect>
+                            </Ellipse>
+                            
+                            <!-- Inner Avatar Background -->
+                            <Ellipse Fill="{DynamicResource SurfaceMid}"/>
+                            
+                            <!-- Avatar Image (Clipped) -->
                             <Grid>
                                 <Grid.Clip>
-                                    <EllipseGeometry Center="50,50" RadiusX="50" RadiusY="50"/>
+                                    <EllipseGeometry Center="60,60" RadiusX="60" RadiusY="60"/>
                                 </Grid.Clip>
                                 <Image Source="{Binding Avatar, Converter={StaticResource Base64ToImageConverter}}"
                                        Stretch="UniformToFill"
                                        Visibility="{Binding Avatar, Converter={StaticResource StringNullOrEmptyToBool}, ConverterParameter=Inverse}"/>
                             </Grid>
-                            <!-- Placeholder letter -->
-                            <TextBlock Text="A" FontSize="40" FontWeight="Bold"
+                            
+                            <!-- Placeholder Letter when No Avatar -->
+                            <TextBlock Text="A" FontSize="44" FontWeight="Bold"
                                        Foreground="{DynamicResource BrandPurple}"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"
                                        FontFamily="Be Vietnam Pro, Segoe UI"
                                        Visibility="{Binding Avatar, Converter={StaticResource StringNullOrEmptyToBool}}"/>
 
-                            <!-- Camera overlay button -->
+                            <!-- Uploading / Processing overlay -->
+                            <Border Background="#A0000000" CornerRadius="60" Visibility="{Binding IsUploadingAvatar, Converter={StaticResource BoolToVis}}">
+                                <Grid>
+                                    <Ellipse Width="24" Height="24" Stroke="White" StrokeThickness="2" StrokeDashArray="3 1.5" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Ellipse.RenderTransform>
+                                            <RotateTransform Angle="0"/>
+                                        </Ellipse.RenderTransform>
+                                        <Ellipse.Triggers>
+                                            <EventTrigger RoutedEvent="Loaded">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Angle" From="0" To="360" Duration="0:0:1.5" RepeatBehavior="Forever"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Ellipse.Triggers>
+                                    </Ellipse>
+                                </Grid>
+                            </Border>
+
+                            <!-- Camera overlay upload button -->
                             <Button Command="{Binding ChangeAvatarCommand}"
-                                    Width="28" Height="28" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                    Width="32" Height="32" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                                     Cursor="Hand" ToolTip="Đổi ảnh đại diện">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
-                                        <Border x:Name="bd" Background="{DynamicResource BrandPurple}" CornerRadius="14">
+                                        <Border x:Name="bd" Background="{DynamicResource BrandPurple}" CornerRadius="16" BorderThickness="2" BorderBrush="{DynamicResource CardBg}">
                                             <Border.Effect>
-                                                <DropShadowEffect Color="#000000" BlurRadius="6" ShadowDepth="1" Opacity="0.2"/>
+                                                <DropShadowEffect Color="#000000" BlurRadius="6" ShadowDepth="2" Opacity="0.25"/>
                                             </Border.Effect>
                                             <TextBlock Text="&#xE722;" FontFamily="Segoe MDL2 Assets"
-                                                       FontSize="13" Foreground="White"
+                                                       FontSize="12" Foreground="White"
                                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="bd" Property="Opacity" Value="0.85"/>
+                                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource BrandAccent}"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
@@ -80,38 +112,71 @@
                             </Button>
                         </Grid>
                         
-                        <TextBlock Text="{Binding FullName}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center" Margin="0,16,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                        <Border Background="#E0E7FF" CornerRadius="6" Padding="10,4" HorizontalAlignment="Center" Margin="0,0,0,16">
-                            <TextBlock Text="{Binding Role}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource BrandPurple}"/>
+                        <TextBlock Text="{Binding FullName}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" Margin="0,20,0,6" FontFamily="Be Vietnam Pro, Segoe UI" TextAlignment="Center"/>
+                        
+                        <!-- Role Badge -->
+                        <Border BorderBrush="{DynamicResource BrandPurple}" BorderThickness="1" Background="Transparent" CornerRadius="12" Padding="12,3" HorizontalAlignment="Center" Margin="0,0,0,24">
+                            <TextBlock Text="{Binding Role}" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource BrandPurple}" FontFamily="Be Vietnam Pro, Segoe UI"/>
                         </Border>
 
-                        <Rectangle Height="1" Fill="#F1F5F9" Margin="0,8,0,16"/>
+                        <Border Height="1" Background="{DynamicResource BorderSlate}" Margin="0,0,0,20" Opacity="0.5"/>
 
-                        <!-- Details -->
-                        <StackPanel Margin="0,0,0,12">
-                            <TextBlock Text="Email" FontSize="11.5" Foreground="{StaticResource TextSecondary}" FontWeight="Medium" Margin="0,0,0,4"/>
-                            <TextBlock Text="{Binding Email}" FontSize="13" Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold"/>
-                        </StackPanel>
+                        <!-- Details Rows with premium Icons -->
+                        <StackPanel Margin="0,0,0,10">
+                            <!-- Row 1: Email -->
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="32"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Width="28" Height="28" Background="{DynamicResource SurfaceLow}" CornerRadius="6" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE715;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="{DynamicResource BrandPurple}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Email đăng nhập" FontSize="10" Foreground="{DynamicResource TextMuted}" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="{Binding Email}" FontSize="12.5" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold" Margin="0,2,0,0" FontFamily="Be Vietnam Pro, Segoe UI" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                            </Grid>
 
-                        <StackPanel Margin="0,0,0,12">
-                            <TextBlock Text="Số điện thoại" FontSize="11.5" Foreground="{StaticResource TextSecondary}" FontWeight="Medium" Margin="0,0,0,4"/>
-                            <TextBlock Text="{Binding Phone}" FontSize="13" Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold"/>
-                        </StackPanel>
+                            <!-- Row 2: Phone -->
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="32"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Width="28" Height="28" Background="{DynamicResource SurfaceLow}" CornerRadius="6" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE717;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="{DynamicResource BrandPurple}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Số điện thoại" FontSize="10" Foreground="{DynamicResource TextMuted}" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="{Binding Phone}" FontSize="12.5" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold" Margin="0,2,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                </StackPanel>
+                            </Grid>
 
-                        <StackPanel Margin="0,0,0,8">
-                            <TextBlock Text="Ngày tham gia" FontSize="11.5" Foreground="{StaticResource TextSecondary}" FontWeight="Medium" Margin="0,0,0,4"/>
-                            <TextBlock Text="{Binding JoinedDate, StringFormat={}{0:dd/MM/yyyy}}" FontSize="13" Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold"/>
+                            <!-- Row 3: Join Date -->
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="32"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Width="28" Height="28" Background="{DynamicResource SurfaceLow}" CornerRadius="6" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE787;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource BrandPurple}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Ngày tham gia" FontSize="10" Foreground="{DynamicResource TextMuted}" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="{Binding JoinedDateText}" FontSize="12.5" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold" Margin="0,2,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
                     </StackPanel>
                 </Border>
 
-                <!-- Right Column: Edit Forms -->
+                <!-- ================= RIGHT COLUMN: EDIT FORMS ================= -->
                 <StackPanel Grid.Column="2">
                     <!-- Form 1: Edit Profile -->
-                    <Border Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="24" Margin="0,0,0,24">
-                        <Border.Effect><DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.03"/></Border.Effect>
+                    <Border Background="{DynamicResource CardBg}" CornerRadius="16" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="24" Margin="0,0,0,20" Effect="{StaticResource CardShadow}">
                         <StackPanel>
-                            <TextBlock Text="Chỉnh sửa thông tin" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,16"/>
+                            <TextBlock Text="Chỉnh sửa thông tin cá nhân" FontSize="14.5" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,18"/>
                             
                             <Grid Margin="0,0,0,16">
                                 <Grid.ColumnDefinitions>
@@ -121,36 +186,40 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Họ và tên" FontSize="12.5" FontWeight="Medium" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,8"/>
-                                    <Border Background="#F8FAFC" CornerRadius="8" BorderThickness="1" BorderBrush="#E2E8F0" Height="40" Padding="12,0">
-                                        <TextBox Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Background="Transparent" VerticalAlignment="Center" FontSize="13" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Họ và tên" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <Border Background="{DynamicResource SurfaceLow}" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Height="40" Padding="12,0">
+                                        <TextBox Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Background="Transparent" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="13" Foreground="{DynamicResource TextPrimary}" CaretBrush="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                     </Border>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="2">
-                                    <TextBlock Text="Số điện thoại" FontSize="12.5" FontWeight="Medium" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,8"/>
-                                    <Border Background="#F8FAFC" CornerRadius="8" BorderThickness="1" BorderBrush="#E2E8F0" Height="40" Padding="12,0">
-                                        <TextBox Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Background="Transparent" VerticalAlignment="Center" FontSize="13" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Số điện thoại" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <Border Background="{DynamicResource SurfaceLow}" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Height="40" Padding="12,0">
+                                        <TextBox Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Background="Transparent" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="13" Foreground="{DynamicResource TextPrimary}" CaretBrush="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                     </Border>
                                 </StackPanel>
                             </Grid>
 
-                            <StackPanel Margin="0,0,0,24">
-                                <TextBlock Text="Email liên hệ (Được dùng để đăng nhập)" FontSize="12.5" FontWeight="Medium" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,8"/>
-                                <Border Background="#F8FAFC" CornerRadius="8" BorderThickness="1" BorderBrush="#E2E8F0" Height="40" Padding="12,0">
-                                    <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="{StaticResource TextSecondary}" BorderThickness="0" Background="Transparent" VerticalAlignment="Center" FontSize="13" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <StackPanel Margin="0,0,0,20">
+                                <TextBlock Text="Email liên hệ (Không thể thay đổi)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <Border Background="{DynamicResource SurfaceMid}" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Height="40" Padding="12,0" Opacity="0.7">
+                                    <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" BorderThickness="0" Background="Transparent" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="13" Foreground="{DynamicResource TextSecondary}" CaretBrush="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                 </Border>
                             </StackPanel>
 
-                            <Button Command="{Binding SaveProfileCommand}" HorizontalAlignment="Right" Width="140" Height="40" Background="{StaticResource BrandPurple}" Foreground="White" BorderThickness="0" Cursor="Hand">
+                            <!-- Save changes Button -->
+                            <Button Command="{Binding SaveProfileCommand}" HorizontalAlignment="Right" Width="150" Height="38" Background="{DynamicResource BrandPurple}" Foreground="White" BorderThickness="0" Cursor="Hand">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="8">
-                                            <TextBlock Text="Lưu thay đổi" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="11.5" Foreground="White" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                                <TextBlock Text="Lưu thay đổi" FontSize="12.5" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center"/>
+                                            </StackPanel>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="bd" Property="Background" Value="#4C30BA"/>
+                                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource BrandAccent}"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
@@ -160,19 +229,21 @@
                     </Border>
 
                     <!-- Form 2: Change Password -->
-                    <Border Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="24">
-                        <Border.Effect><DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.03"/></Border.Effect>
+                    <Border Background="{DynamicResource CardBg}" CornerRadius="16" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="24" Effect="{StaticResource CardShadow}">
                         <StackPanel>
-                            <TextBlock Text="Đổi mật khẩu" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,16"/>
+                            <TextBlock Text="Thiết lập mật khẩu mới" FontSize="14.5" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,18"/>
                             
                             <StackPanel Margin="0,0,0,16">
-                                <TextBlock Text="Mật khẩu hiện tại" FontSize="12.5" FontWeight="Medium" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,8"/>
-                                <Border Background="#F8FAFC" CornerRadius="8" BorderThickness="1" BorderBrush="#E2E8F0" Height="40" Padding="12,0">
-                                    <TextBox Text="{Binding CurrentPassword, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Background="Transparent" VerticalAlignment="Center" FontSize="13" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="Mật khẩu hiện tại" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <Border Background="{DynamicResource SurfaceLow}" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Height="40" Padding="12,0">
+                                    <PasswordBox x:Name="TxtCurrentPassword"
+                                                 helpers:PasswordBoxHelper.BindPassword="True"
+                                                 helpers:PasswordBoxHelper.BoundPassword="{Binding CurrentPassword, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                 BorderThickness="0" Background="Transparent" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="13" Foreground="{DynamicResource TextPrimary}" CaretBrush="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                 </Border>
                             </StackPanel>
 
-                            <Grid Margin="0,0,0,24">
+                             <Grid Margin="0,0,0,20">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="16"/>
@@ -180,29 +251,39 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Mật khẩu mới" FontSize="12.5" FontWeight="Medium" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,8"/>
-                                    <Border Background="#F8FAFC" CornerRadius="8" BorderThickness="1" BorderBrush="#E2E8F0" Height="40" Padding="12,0">
-                                        <TextBox Text="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Background="Transparent" VerticalAlignment="Center" FontSize="13" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Mật khẩu mới" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <Border Background="{DynamicResource SurfaceLow}" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Height="40" Padding="12,0">
+                                        <PasswordBox x:Name="TxtNewPassword"
+                                                     helpers:PasswordBoxHelper.BindPassword="True"
+                                                     helpers:PasswordBoxHelper.BoundPassword="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                     BorderThickness="0" Background="Transparent" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="13" Foreground="{DynamicResource TextPrimary}" CaretBrush="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                     </Border>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="2">
-                                    <TextBlock Text="Xác nhận mật khẩu mới" FontSize="12.5" FontWeight="Medium" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,8"/>
-                                    <Border Background="#F8FAFC" CornerRadius="8" BorderThickness="1" BorderBrush="#E2E8F0" Height="40" Padding="12,0">
-                                        <TextBox Text="{Binding ConfirmNewPassword, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Background="Transparent" VerticalAlignment="Center" FontSize="13" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Xác nhận mật khẩu mới" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <Border Background="{DynamicResource SurfaceLow}" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Height="40" Padding="12,0">
+                                        <PasswordBox x:Name="TxtConfirmNewPassword"
+                                                     helpers:PasswordBoxHelper.BindPassword="True"
+                                                     helpers:PasswordBoxHelper.BoundPassword="{Binding ConfirmNewPassword, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                     BorderThickness="0" Background="Transparent" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="13" Foreground="{DynamicResource TextPrimary}" CaretBrush="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                     </Border>
                                 </StackPanel>
                             </Grid>
 
-                            <Button Command="{Binding ChangePasswordCommand}" HorizontalAlignment="Right" Width="140" Height="40" Background="#F1F5F9" Foreground="{StaticResource TextPrimary}" BorderThickness="0" Cursor="Hand">
+                            <!-- Update Password Button -->
+                            <Button Command="{Binding ChangePasswordCommand}" HorizontalAlignment="Right" Width="150" Height="38" Background="{DynamicResource BrandPurple}" Foreground="White" BorderThickness="0" Cursor="Hand">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="8">
-                                            <TextBlock Text="Cập nhật mật khẩu" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock Text="&#xE8D7;" FontFamily="Segoe MDL2 Assets" FontSize="11.5" Foreground="White" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                                <TextBlock Text="Đổi mật khẩu" FontSize="12.5" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center"/>
+                                            </StackPanel>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource BorderSlate}"/>
+                                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource BrandAccent}"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
@@ -215,7 +296,3 @@
         </Grid>
     </ScrollViewer>
 </UserControl>
-
-
-
-

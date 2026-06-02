@@ -18,6 +18,11 @@ namespace TMDT.ViewModels.Admin
         private string _statusFilter = "All"; // All, Pending, Resolved, Dismissed
         private string _resolutionText = "";
 
+        private int _totalComplaints;
+        private int _pendingComplaints;
+        private int _resolvedComplaints;
+        private int _dismissedComplaints;
+
         public ObservableCollection<Complaint> Complaints
         {
             get => _complaints;
@@ -34,6 +39,11 @@ namespace TMDT.ViewModels.Admin
                 if (value != null)
                 {
                     ResolutionText = value.Resolution ?? "";
+                    ShowDetailRequest?.Invoke();
+                }
+                else
+                {
+                    HideDetailRequest?.Invoke();
                 }
             }
         }
@@ -66,11 +76,21 @@ namespace TMDT.ViewModels.Admin
             set { _resolutionText = value; OnPropertyChanged(); }
         }
 
+        public int TotalComplaints { get => _totalComplaints; set { _totalComplaints = value; OnPropertyChanged(); } }
+        public int PendingComplaints { get => _pendingComplaints; set { _pendingComplaints = value; OnPropertyChanged(); } }
+        public int ResolvedComplaints { get => _resolvedComplaints; set { _resolvedComplaints = value; OnPropertyChanged(); } }
+        public int DismissedComplaints { get => _dismissedComplaints; set { _dismissedComplaints = value; OnPropertyChanged(); } }
+
+        // Events
+        public event Action ShowDetailRequest;
+        public event Action HideDetailRequest;
+
         // Commands
         public ICommand ResolveComplaintCommand { get; }
         public ICommand DismissComplaintCommand { get; }
         public ICommand FilterCommand { get; }
         public ICommand CloseDetailCommand { get; }
+        public ICommand ViewDetailCommand { get; }
 
         public AdminComplaintsViewModel()
         {
@@ -90,6 +110,7 @@ namespace TMDT.ViewModels.Admin
             DismissComplaintCommand = new RelayCommand(ExecuteDismissComplaint, CanExecuteDismissComplaint);
             FilterCommand = new RelayCommand(o => StatusFilter = o?.ToString() ?? "All");
             CloseDetailCommand = new RelayCommand(o => SelectedComplaint = null);
+            ViewDetailCommand = new RelayCommand(o => ShowDetailRequest?.Invoke());
 
             LoadComplaints();
         }
@@ -100,8 +121,13 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null && _context.Complaints.Any())
+                if (_context != null)
                 {
+                    TotalComplaints = _context.Complaints.Count();
+                    PendingComplaints = _context.Complaints.Count(c => c.Status == "Pending" || string.IsNullOrEmpty(c.Status));
+                    ResolvedComplaints = _context.Complaints.Count(c => c.Status == "Resolved");
+                    DismissedComplaints = _context.Complaints.Count(c => c.Status == "Dismissed");
+
                     var query = _context.Complaints
                         .Include(c => c.Buyer)
                         .Include(c => c.Order)
@@ -133,9 +159,6 @@ namespace TMDT.ViewModels.Admin
                     {
                         Complaints.Add(comp);
                     }
-
-                    if (Complaints.Any())
-                        return;
                 }
             }
             catch (Exception ex)
@@ -188,6 +211,7 @@ namespace TMDT.ViewModels.Admin
             MessageBox.Show($"Đã xử lý khiếu nại #{SelectedComplaint.ComplaintId} thành công! Phương án giải quyết đã gửi đến cả Người mua và Shop.", 
                             "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             
+            HideDetailRequest?.Invoke();
             LoadComplaints();
         }
 
@@ -233,6 +257,7 @@ namespace TMDT.ViewModels.Admin
             MessageBox.Show($"Đã bác bỏ khiếu nại #{SelectedComplaint.ComplaintId}.", 
                             "Đã thực hiện", MessageBoxButton.OK, MessageBoxImage.Information);
 
+            HideDetailRequest?.Invoke();
             LoadComplaints();
         }
     }

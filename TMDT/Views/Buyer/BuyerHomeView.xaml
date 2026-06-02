@@ -35,19 +35,20 @@
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <materialDesign:PackIcon Kind="Shopping" Foreground="{StaticResource BrandPrimaryBrush}" Width="40" Height="40"/>
                         <StackPanel Margin="10,0">
-                            <TextBlock Text="MyShop" FontSize="24" FontWeight="Bold" Foreground="{StaticResource BrandPrimaryBrush}"/>
+                            <TextBlock Text="Volox" FontSize="24" FontWeight="Bold" Foreground="{StaticResource BrandPrimaryBrush}"/>
                             <TextBlock Text="Mua sắm thông minh, sống tiện ích" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
                         </StackPanel>
                     </StackPanel>
 
                     <!-- Search Box -->
                     <Grid Grid.Column="1" MaxWidth="600" HorizontalAlignment="Center">
-                        <TextBox Style="{StaticResource SearchBoxStyle}" Width="500" 
+                        <TextBox Style="{StaticResource SearchBoxStyle}" Width="500"
                                  Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"/>
                         <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
                                 HorizontalAlignment="Right" Margin="0,0,5,0"
                                 Background="{StaticResource BrandSecondaryBrush}" BorderThickness="0"
-                                Width="32" Height="32">
+                                Width="32" Height="32"
+                                Command="{Binding SearchCommand}">
                             <materialDesign:PackIcon Kind="Search" Width="18" Height="18"/>
                         </Button>
                     </Grid>
@@ -227,7 +228,9 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <components:ProductCard/>
+                                <components:ProductCard
+                                    ClickCommand="{Binding DataContext.ProductClickCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    ClickCommandParameter="{Binding}"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

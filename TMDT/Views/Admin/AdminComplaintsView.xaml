@@ -5,33 +5,37 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TMDT.Views.Admin"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="850">
+             d:DesignHeight="750" d:DesignWidth="950">
 
     <UserControl.Resources>
-        <!-- Style tokens -->
-        
-        <Style x:Key="FilterButton" TargetType="RadioButton">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <DropShadowEffect x:Key="CardShadow" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Color="#000" Direction="270"/>
+
+        <!-- Pill-style Filters -->
+        <Style x:Key="FilterPill" TargetType="RadioButton">
+            <Setter Property="Background" Value="{DynamicResource SurfaceLow}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Height" Value="32"/>
+            <Setter Property="Height" Value="34"/>
             <Setter Property="Padding" Value="16,0"/>
-            <Setter Property="Margin" Value="0,0,8,0"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="{DynamicResource BorderSlate}"/>
-                                <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource SurfaceMid}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#EFF3FF"/>
-                                <Setter Property="Foreground" Value="{StaticResource BrandPurple}"/>
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource BrandAccent}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource PrimaryBtnText}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -39,382 +43,613 @@
             </Setter>
         </Style>
 
-        <!-- Command button styles -->
-        <Style x:Key="ActionButton" TargetType="Button">
-            <Setter Property="Height" Value="36"/>
-            <Setter Property="FontSize" Value="12.5"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Margin" Value="0,8"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+        <!-- Stat Card Style -->
+        <Style x:Key="StatCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource CardBg}"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderSlate}"/>
+            <Setter Property="Effect" Value="{StaticResource CardShadow}"/>
+            <Setter Property="Padding" Value="20"/>
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="0,0,8,0">
-        <Grid.RowDefinitions>
-            <!-- Title & Search bar -->
-            <RowDefinition Height="Auto"/>
-            <!-- Action Filter bar -->
-            <RowDefinition Height="Auto"/>
-            <!-- Main Content Area: Table + Detail Inspector -->
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Grid>
+        <!-- ===== MAIN CONTENT ===== -->
+        <ScrollViewer VerticalScrollBarVisibility="Hidden" Padding="0,0,8,0">
+            <StackPanel Margin="0,0,0,20">
+                <!-- Page Header -->
+                <TextBlock Text="Giải quyết khiếu nại" FontSize="22" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,4"/>
+                <TextBlock Text="Phân xử tranh chấp, khiếu nại từ Người mua đối với các Shop và Đơn hàng trên hệ thống"
+                           FontSize="12.5" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,24"/>
 
-        <!-- 1. TITLE & SEARCH ROW -->
-        <Grid Grid.Row="0" Margin="0,0,0,16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="280"/>
-            </Grid.ColumnDefinitions>
+                <!-- Stats Row (Bento Grid Style) -->
+                <UniformGrid Columns="4" Margin="0,0,0,24">
+                    <!-- Total Complaints -->
+                    <Border Style="{StaticResource StatCard}" Margin="0,0,12,0">
+                        <StackPanel>
+                            <TextBlock Text="Tổng khiếu nại" FontSize="11" Foreground="{DynamicResource TextMuted}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Text="{Binding TotalComplaints}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,6,0,0"/>
+                            <TextBlock Text="Yêu cầu từ khách hàng" FontSize="10.5" Foreground="{DynamicResource BrandPurple}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Pending Complaints -->
+                    <Border Style="{StaticResource StatCard}" Margin="0,0,12,0">
+                        <StackPanel>
+                            <TextBlock Text="Chờ giải quyết" FontSize="11" Foreground="{DynamicResource TextMuted}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Text="{Binding PendingComplaints}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource WarningOrange}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,6,0,0"/>
+                            <TextBlock Text="Cần phân xử gấp" FontSize="10.5" Foreground="{DynamicResource WarningOrange}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
 
-            <StackPanel Grid.Column="0">
-                <TextBlock Text="Giải quyết khiếu nại" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                <TextBlock Text="Phân xử tranh chấp, khiếu nại từ Người mua đối với các Shop và Đơn hàng trên hệ thống" FontSize="12.5" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
-            </StackPanel>
+                    <!-- Resolved Complaints -->
+                    <Border Style="{StaticResource StatCard}" Margin="0,0,12,0">
+                        <StackPanel>
+                            <TextBlock Text="Đã xử lý" FontSize="11" Foreground="{DynamicResource TextMuted}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Text="{Binding ResolvedComplaints}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource SuccessGreen}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,6,0,0"/>
+                            <TextBlock Text="Đã đưa ra phương án" FontSize="10.5" Foreground="{DynamicResource SuccessGreen}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
 
-            <!-- Search box -->
-            <Border Grid.Column="1" Background="{DynamicResource CardBg}" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Height="38" Padding="12,0" VerticalAlignment="Center">
-                <Grid>
+                    <!-- Dismissed Complaints -->
+                    <Border Style="{StaticResource StatCard}">
+                        <StackPanel>
+                            <TextBlock Text="Đã bác bỏ" FontSize="11" Foreground="{DynamicResource TextMuted}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Text="{Binding DismissedComplaints}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,6,0,0"/>
+                            <TextBlock Text="Yêu cầu không hợp lệ" FontSize="10.5" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+
+                <!-- Toolbar -->
+                <Grid Margin="0,0,0,16">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="20"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
-                    <TextBox Grid.Column="1" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Background="Transparent" 
-                             VerticalAlignment="Center" FontSize="12.5" Padding="6,0,0,0" Margin="0" 
-                             Tag="Tìm tên khách, nội dung..." FontFamily="Be Vietnam Pro, Segoe UI"/>
+
+                    <!-- Filter Pills -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <RadioButton Content="Tất cả khiếu nại" Style="{StaticResource FilterPill}" IsChecked="True" Tag="All" Click="FilterPill_Click"/>
+                        <RadioButton Content="Chờ giải quyết" Style="{StaticResource FilterPill}" Tag="Pending" Click="FilterPill_Click" Margin="6,0,0,0"/>
+                        <RadioButton Content="Đã xử lý" Style="{StaticResource FilterPill}" Tag="Resolved" Click="FilterPill_Click" Margin="6,0,0,0"/>
+                        <RadioButton Content="Đã bác bỏ" Style="{StaticResource FilterPill}" Tag="Dismissed" Click="FilterPill_Click" Margin="6,0,0,0"/>
+                    </StackPanel>
+
+                    <!-- Search Box -->
+                    <Border Grid.Column="1" Background="{DynamicResource CardBg}" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Height="36" Padding="12,0" VerticalAlignment="Center">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="220"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="1" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     BorderThickness="0" Background="Transparent" VerticalAlignment="Center"
+                                     Foreground="{DynamicResource TextPrimary}" CaretBrush="{DynamicResource TextPrimary}"
+                                     FontSize="12.5" Padding="6,0,0,0" Tag="Tìm tên khách, nội dung..." FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        </Grid>
+                    </Border>
                 </Grid>
-            </Border>
-        </Grid>
 
-        <!-- 2. FILTER STATUS BAR -->
-        <Grid Grid.Row="1" Margin="0,0,0,16">
-            <StackPanel Orientation="Horizontal">
-                <RadioButton Content="Tất cả khiếu nại" Style="{StaticResource FilterButton}" IsChecked="True" Command="{Binding FilterCommand}" CommandParameter="All" FontSize="12.5" FontWeight="SemiBold"/>
-                <RadioButton Content="Chờ giải quyết" Style="{StaticResource FilterButton}" Command="{Binding FilterCommand}" CommandParameter="Pending" FontSize="12.5" FontWeight="SemiBold"/>
-                <RadioButton Content="Đã xử lý" Style="{StaticResource FilterButton}" Command="{Binding FilterCommand}" CommandParameter="Resolved" FontSize="12.5" FontWeight="SemiBold"/>
-                <RadioButton Content="Đã bác bỏ" Style="{StaticResource FilterButton}" Command="{Binding FilterCommand}" CommandParameter="Dismissed" FontSize="12.5" FontWeight="SemiBold"/>
-            </StackPanel>
-        </Grid>
-
-        <!-- 3. MAIN CONTENT: TABLE + INSPECTOR -->
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
                 <!-- Complaints DataGrid -->
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="20"/>
-                <!-- Detail Inspector Card -->
-                <ColumnDefinition Width="1.3*"/>
-            </Grid.ColumnDefinitions>
+                <Border Background="{DynamicResource CardBg}" CornerRadius="14" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Effect="{StaticResource CardShadow}" Padding="0">
+                    <DataGrid x:Name="ComplaintsGrid" ItemsSource="{Binding Complaints}" SelectedItem="{Binding SelectedComplaint}" AutoGenerateColumns="False"
+                              Background="Transparent" BorderThickness="0" GridLinesVisibility="None"
+                              CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True"
+                              RowBackground="{DynamicResource GridRowBg}" AlternatingRowBackground="{DynamicResource GridAltRowBg}"
+                              HeadersVisibility="Column" RowHeight="54"
+                              FontFamily="Be Vietnam Pro, Segoe UI"
+                              SelectionMode="Single"
+                              Foreground="{DynamicResource TextPrimary}"
+                              MouseDoubleClick="DataGrid_MouseDoubleClick"
+                              SelectionChanged="DataGrid_SelectionChanged">
+                        <DataGrid.Resources>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="Background" Value="{DynamicResource GridHeaderBg}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="FontSize" Value="11"/>
+                                <Setter Property="Padding" Value="12,10"/>
+                                <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource BorderSlate}"/>
+                                <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+                            </Style>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Padding" Value="12,0"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="DataGridCell">
+                                            <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource GridSelectedBg}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                            <Style TargetType="DataGridRow">
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource GridHoverBg}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
 
-            <!-- LEFT: DataGrid List -->
-            <Border Grid.Column="0" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="16">
-                <Border.Effect>
-                    <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
-                </Border.Effect>
-                
-                <DataGrid ItemsSource="{Binding Complaints}" SelectedItem="{Binding SelectedComplaint}" AutoGenerateColumns="False" 
-                          Background="Transparent" BorderThickness="0" GridLinesVisibility="None"
-                          CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True"
-                          RowBackground="{DynamicResource CardBg}" AlternatingRowBackground="{DynamicResource GridAltRowBg}"
-                          HeadersVisibility="Column" RowHeight="44" FontFamily="Be Vietnam Pro, Segoe UI">
-                    <DataGrid.Resources>
-                        <!-- Header Style -->
-                        <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="Background" Value="{DynamicResource GridHeaderBg}"/>
-                            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter Property="FontSize" Value="11.5"/>
-                            <Setter Property="Padding" Value="10,8"/>
-                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                            <Setter Property="BorderBrush" Value="{DynamicResource BorderSlate}"/>
-                            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
-                        </Style>
-                        <!-- Cell Style -->
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Padding" Value="10,0"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="DataGridCell">
-                                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                                            <ContentPresenter VerticalAlignment="Center"/>
+                        <DataGrid.Columns>
+                            <!-- Complaint ID -->
+                            <DataGridTextColumn Header="MÃ KN" Binding="{Binding ComplaintId}" Width="70">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <!-- Buyer Name -->
+                            <DataGridTextColumn Header="NGƯỜI KHIẾU NẠI" Binding="{Binding Buyer.FullName}" Width="1.5*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <!-- Order ID -->
+                            <DataGridTextColumn Header="MÃ ĐƠN HÀNG" Binding="{Binding OrderId}" Width="110">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource BrandPurple}"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <!-- Content -->
+                            <DataGridTextColumn Header="NỘI DUNG KHIẾU NẠI" Binding="{Binding Content}" Width="3*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <!-- Date Submitted -->
+                            <DataGridTextColumn Header="NGÀY GỬI" Binding="{Binding SubmittedAt, StringFormat={}{0:dd/MM/yyyy}}" Width="110">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <!-- Status Badge -->
+                            <DataGridTemplateColumn Header="TRẠNG THÁI" Width="130">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="6" Padding="10,4" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Pending">
+                                                            <Setter Property="Background" Value="{DynamicResource WarningBg}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Resolved">
+                                                            <Setter Property="Background" Value="{DynamicResource SuccessGreenBg}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Dismissed">
+                                                            <Setter Property="Background" Value="{DynamicResource BorderSlate}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="">
+                                                            <Setter Property="Background" Value="{DynamicResource WarningBg}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="{x:Null}">
+                                                            <Setter Property="Background" Value="{DynamicResource WarningBg}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+
+                                            <TextBlock FontSize="10.5" FontWeight="Bold" HorizontalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Pending">
+                                                                <Setter Property="Text" Value="⏳ Chờ xử lý"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource WarningOrange}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Resolved">
+                                                                <Setter Property="Text" Value="✅ Đã giải quyết"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource SuccessGreen}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Dismissed">
+                                                                <Setter Property="Text" Value="❌ Đã bác bỏ"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="">
+                                                                <Setter Property="Text" Value="⏳ Chờ xử lý"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource WarningOrange}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="{x:Null}">
+                                                                <Setter Property="Text" Value="⏳ Chờ xử lý"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource WarningOrange}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                         </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </DataGrid.Resources>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
 
-                    <DataGrid.Columns>
-                        <!-- Complaint ID -->
-                        <DataGridTextColumn Header="MÃ KN" Binding="{Binding ComplaintId}" Width="65">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="FontWeight" Value="Bold"/>
-                                    <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                            <!-- Actions -->
+                            <DataGridTemplateColumn Width="110">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Click="ViewComplaint_Click" Content="Chi tiết" Background="Transparent"
+                                                BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1"
+                                                Height="28" Padding="12,0" Cursor="Hand" VerticalAlignment="Center">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="bd" Background="{TemplateBinding Background}"
+                                                            BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                                                            CornerRadius="6">
+                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                            <TextBlock Text="&#xE740;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                                                            <TextBlock Text="{TemplateBinding Content}" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource SurfaceLow}"/>
+                                                            <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource BrandPurple}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
 
-                        <!-- Buyer Name -->
-                        <DataGridTextColumn Header="NGƯỜI KHIẾU NẠI" Binding="{Binding Buyer.FullName}" Width="1.2*">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-                                    <Setter Property="FontWeight" Value="SemiBold"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+        <!-- ===== LIGHTBOX MODAL OVERLAY ===== -->
+        <Grid x:Name="LightboxOverlay" Visibility="Collapsed" Background="#C0000000" MouseDown="LightboxOverlay_MouseDown">
+            <Border Width="860" Height="580" Background="{DynamicResource CardBg}" CornerRadius="16"
+                    BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}"
+                    VerticalAlignment="Center" HorizontalAlignment="Center" Effect="{StaticResource CardShadow}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/> <!-- Header -->
+                        <RowDefinition Height="Auto"/> <!-- Bento Stats Row -->
+                        <RowDefinition Height="*"/>    <!-- Body Content -->
+                        <RowDefinition Height="Auto"/> <!-- Footer -->
+                    </Grid.RowDefinitions>
 
-                        <!-- Order ID -->
-                        <DataGridTextColumn Header="MÃ ĐƠN" Binding="{Binding OrderId, StringFormat={}{0}}" Width="80">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="FontWeight" Value="Bold"/>
-                                    <Setter Property="Foreground" Value="{StaticResource BrandPurple}"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                    <!-- ── ROW 0: HEADER ─────────────────────────────────────────── -->
+                    <Border Grid.Row="0" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource BorderSlate}" Padding="32,24">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                        <!-- Content Summary -->
-                        <DataGridTextColumn Header="NỘI DUNG KHIẾU NẠI" Binding="{Binding Content}" Width="2*">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
-                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-
-                        <!-- Date Submitted -->
-                        <DataGridTextColumn Header="NGÀY GỬI" Binding="{Binding SubmittedAt, StringFormat={}{0:dd/MM/yyyy}}" Width="100">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-
-                        <!-- Status badge -->
-                        <DataGridTemplateColumn Header="TRẠNG THÁI" Width="110">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Border CornerRadius="6" Padding="8,4" HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Text="Chi tiết phân xử khiếu nại" FontSize="18" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                
+                                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                    <TextBlock Text="TRẠNG THÁI:" FontSize="10.5" Foreground="{DynamicResource TextMuted}" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <Border CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Status}" Value="Pending">
-                                                        <Setter Property="Background" Value="#FFF7ED"/>
+                                                    <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="Pending">
+                                                        <Setter Property="Background" Value="{DynamicResource WarningBg}"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Status}" Value="Resolved">
-                                                        <Setter Property="Background" Value="#E6FDF4"/>
+                                                    <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="Resolved">
+                                                        <Setter Property="Background" Value="{DynamicResource SuccessGreenBg}"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Status}" Value="Dismissed">
+                                                    <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="Dismissed">
                                                         <Setter Property="Background" Value="{DynamicResource BorderSlate}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="">
+                                                        <Setter Property="Background" Value="{DynamicResource WarningBg}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="{x:Null}">
+                                                        <Setter Property="Background" Value="{DynamicResource WarningBg}"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        
-                                        <TextBlock FontSize="11" FontWeight="Bold" HorizontalAlignment="Center">
+                                        <TextBlock FontSize="10.5" FontWeight="Bold" VerticalAlignment="Center">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Status}" Value="Pending">
-                                                            <Setter Property="Text" Value="Đang xử lý"/>
-                                                            <Setter Property="Foreground" Value="#EA580C"/>
+                                                        <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="Pending">
+                                                            <Setter Property="Text" Value="⏳ CHỜ PHÂN XỬ"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource WarningOrange}"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status}" Value="Resolved">
-                                                            <Setter Property="Text" Value="Đã phân xử"/>
-                                                            <Setter Property="Foreground" Value="#10B981"/>
+                                                        <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="Resolved">
+                                                            <Setter Property="Text" Value="✅ ĐÃ GIẢI QUYẾT XONG"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource SuccessGreen}"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status}" Value="Dismissed">
-                                                            <Setter Property="Text" Value="Đã bác bỏ"/>
+                                                        <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="Dismissed">
+                                                            <Setter Property="Text" Value="❌ ĐÃ BÁC BỎ YÊU CẦU"/>
                                                             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="">
+                                                            <Setter Property="Text" Value="⏳ CHỜ PHÂN XỬ"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource WarningOrange}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="{x:Null}">
+                                                            <Setter Property="Text" Value="⏳ CHỜ PHÂN XỬ"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource WarningOrange}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </TextBlock.Style>
                                         </TextBlock>
                                     </Border>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Border>
-
-            <!-- RIGHT: Complaint Detail Inspector Card -->
-            <Border Grid.Column="2" Background="{DynamicResource CardBg}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="20">
-                <Border.Effect>
-                    <DropShadowEffect Color="#1C1B1A" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
-                </Border.Effect>
-
-                <Grid>
-                    <!-- Displayed only when a Complaint is selected -->
-                    <Grid Visibility="{Binding SelectedComplaint, Converter={StaticResource NullToVisibilityConverter}}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/> <!-- Header details -->
-                            <RowDefinition Height="*"/>    <!-- Scrollable fields -->
-                            <RowDefinition Height="Auto"/> <!-- Actions footer -->
-                        </Grid.RowDefinitions>
-
-                        <!-- Header Info -->
-                        <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,10,0,20">
-                            <Border Width="60" Height="60" Background="{DynamicResource DangerRedBg}" CornerRadius="30" HorizontalAlignment="Center">
-                                <TextBlock Text="&#xE1A5;" FontFamily="Segoe MDL2 Assets" FontSize="24" Foreground="#EF4444" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="{Binding SelectedComplaint.Buyer.FullName}" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" Margin="0,12,0,4" HorizontalAlignment="Center" TextAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                            
-                            <Border CornerRadius="6" Padding="6,2" HorizontalAlignment="Center" Margin="0,4,0,0">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="Pending">
-                                                <Setter Property="Background" Value="#FFF7ED"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="Resolved">
-                                                <Setter Property="Background" Value="#E6FDF4"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="Dismissed">
-                                                <Setter Property="Background" Value="{DynamicResource BorderSlate}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <TextBlock FontSize="10" FontWeight="Bold">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="Pending">
-                                                    <Setter Property="Text" Value="ĐANG CHỜ PHÂN XỬ"/>
-                                                    <Setter Property="Foreground" Value="#EA580C"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="Resolved">
-                                                    <Setter Property="Text" Value="ĐÃ GIẢI QUYẾT XONG"/>
-                                                    <Setter Property="Foreground" Value="#10B981"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="Dismissed">
-                                                    <Setter Property="Text" Value="YÊU CẦU BỊ BÁC BỎ"/>
-                                                    <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </Border>
-                        </StackPanel>
-
-                        <!-- Detail Fields ScrollView -->
-                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden" Margin="0,0,0,16">
-                            <StackPanel>
-                                <!-- Order Link info -->
-                                <Grid Margin="0,0,0,16">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0">
-                                        <TextBlock Text="MÃ ĐƠN HÀNG" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                        <TextBlock Text="{Binding SelectedComplaint.OrderId, StringFormat={}{0}}" FontSize="13" FontWeight="Bold" Foreground="{StaticResource BrandPurple}" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1">
-                                        <TextBlock Text="GIÁ TRỊ ĐƠN" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                        <TextBlock Text="{Binding SelectedComplaint.Order.TotalAmount, StringFormat={}{0:N0} đ}" FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    </StackPanel>
-                                </Grid>
-
-                                <!-- Content details -->
-                                <TextBlock Text="NỘI DUNG KHIẾU NẠI CHI TIẾT" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                <Border Background="{DynamicResource DangerRedBg}" CornerRadius="8" Padding="12" Margin="0,4,0,16" BorderThickness="1" BorderBrush="#FEE2E2">
-                                    <TextBlock Text="{Binding SelectedComplaint.Content}" TextWrapping="Wrap" FontSize="12" Foreground="#991B1B" FontFamily="Be Vietnam Pro, Segoe UI" LineHeight="18"/>
-                                </Border>
-
-                                <!-- Resolution text area -->
-                                <TextBlock Text="PHƯƠNG ÁN GIẢI QUYẾT &amp; LÝ DO BÁC BỎ" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                <Border Background="{DynamicResource CardBg}" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" MinHeight="100" Margin="0,4,0,0" Padding="8">
-                                    <TextBox Text="{Binding ResolutionText, UpdateSourceTrigger=PropertyChanged}" 
-                                             AcceptsReturn="True" TextWrapping="Wrap" BorderThickness="0" Background="Transparent"
-                                             FontSize="12" FontFamily="Be Vietnam Pro, Segoe UI"
-                                             Tag="Nhập phương án giải quyết đền bù hoặc lý do bác bỏ khiếu nại này..."/>
-                                </Border>
+                                </StackPanel>
                             </StackPanel>
-                        </ScrollViewer>
 
-                        <!-- Action Buttons Footer -->
-                        <StackPanel Grid.Row="2">
-                            <!-- Resolve button (Visible only when pending) -->
-                            <Button Content="Chấp nhận &amp; Xử lý khiếu nại" 
-                                    Background="#10B981" Foreground="#FFFFFF"
-                                    Command="{Binding ResolveComplaintCommand}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource ActionButton}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="Pending">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </Style>
-                                </Button.Style>
+                            <!-- Close Button -->
+                            <Button Grid.Column="2" Click="CloseLightbox" Background="Transparent"
+                                    BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}"
+                                    Width="40" Height="40" Cursor="Hand" VerticalAlignment="Top">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="bd" Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="8">
+                                            <TextBlock Text="&#xE106;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                                       Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource SurfaceHigh}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
                             </Button>
+                        </Grid>
+                    </Border>
 
-                            <!-- Dismiss button (Visible only when pending) -->
-                            <Button Content="Bác bỏ khiếu nại này" 
-                                    Background="#EF4444" Foreground="#FFFFFF"
-                                    Command="{Binding DismissComplaintCommand}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource ActionButton}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="Pending">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-                        </StackPanel>
+                    <!-- ── ROW 1: BENTO STATS GRID ───────────────────────────────── -->
+                    <Grid Grid.Row="1" Margin="32,20,32,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Buyer Info -->
+                        <Border Grid.Column="0" Background="{DynamicResource SurfaceHigh}" CornerRadius="10"
+                                BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="18,14">
+                            <StackPanel>
+                                <TextBlock Text="NGƯỜI GỬI KHIẾU NẠI" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}"
+                                           FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <TextBlock Text="{Binding SelectedComplaint.Buyer.FullName}" FontSize="15" FontWeight="ExtraBold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Text="{Binding SelectedComplaint.Buyer.Email}" FontSize="10.5" Foreground="{DynamicResource TextMuted}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Order Info -->
+                        <Border Grid.Column="2" Background="{DynamicResource SurfaceHigh}" CornerRadius="10"
+                                BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="18,14">
+                            <StackPanel>
+                                <TextBlock Text="ĐƠN HÀNG TRANH CHẤP" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}"
+                                           FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <TextBlock FontSize="15" FontWeight="ExtraBold" Foreground="{DynamicResource BrandPurple}" FontFamily="Be Vietnam Pro, Segoe UI">
+                                    <Run Text="Mã đơn: #"/><Run Text="{Binding SelectedComplaint.OrderId}"/>
+                                </TextBlock>
+                                <TextBlock FontSize="10.5" Foreground="{DynamicResource TextMuted}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0">
+                                    <Run Text="Trị giá: "/><Run Text="{Binding SelectedComplaint.Order.TotalAmount, StringFormat={}{0:N0}}"/><Run Text=" đ"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Date Submitted -->
+                        <Border Grid.Column="4" Background="{DynamicResource SurfaceHigh}" CornerRadius="10"
+                                BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="18,14">
+                            <StackPanel>
+                                <TextBlock Text="NGÀY GỬI KHIẾU NẠI" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextSecondary}"
+                                           FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                                <TextBlock FontSize="15" FontWeight="ExtraBold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI">
+                                    <Run Text="{Binding SelectedComplaint.SubmittedAt, StringFormat={}{0:dd/MM/yyyy HH:mm}, TargetNullValue='Chưa rõ'}"/>
+                                </TextBlock>
+                                <TextBlock Text="Đã ghi nhận trên hệ thống" FontSize="9.5" Foreground="{DynamicResource TextMuted}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
                     </Grid>
 
-                    <!-- Unselected state placeholder -->
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,20">
-                        <StackPanel.Style>
-                            <Style TargetType="StackPanel">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedComplaint}" Value="{x:Null}">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </Style>
-                        </StackPanel.Style>
+                    <!-- ── ROW 2: BODY — Asymmetric Layout ───────────────────────── -->
+                    <Grid Grid.Row="2" Margin="32,0,32,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="4*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="5*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left: Complaint Content -->
+                        <Border Grid.Column="0" Background="{DynamicResource SurfaceHigh}" CornerRadius="12"
+                                BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="18">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <TextBlock Grid.Row="0" Text="NỘI DUNG KHIẾU NẠI CHI TIẾT" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource DangerRed}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,10"/>
+                                
+                                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                    <TextBlock Text="{Binding SelectedComplaint.Content}" FontSize="12.5" Foreground="{DynamicResource TextPrimary}" 
+                                               TextWrapping="Wrap" LineHeight="20" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                </ScrollViewer>
+                            </Grid>
+                        </Border>
+
+                        <!-- Right: Resolution Entry -->
+                        <Border Grid.Column="2" Background="{DynamicResource SurfaceHigh}" CornerRadius="12"
+                                BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="18">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Text="PHƯƠNG ÁN PHÂN XỬ &amp; LÝ DO BÁC BỎ" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource BrandPurple}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,10"/>
+
+                                <Border Grid.Row="1" Background="{DynamicResource CardBg}" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="8">
+                                    <TextBox Text="{Binding ResolutionText, UpdateSourceTrigger=PropertyChanged}" 
+                                             AcceptsReturn="True" TextWrapping="Wrap" BorderThickness="0" Background="Transparent"
+                                             FontSize="12.5" FontFamily="Be Vietnam Pro, Segoe UI" Foreground="{DynamicResource TextPrimary}"
+                                             CaretBrush="{DynamicResource TextPrimary}" VerticalScrollBarVisibility="Auto"
+                                             Tag="Nhập phương án giải quyết đền bù hoặc lý do bác bỏ khiếu nại này..."/>
+                                </Border>
+
+                                <TextBlock Grid.Row="2" Text="* Thông tin này sẽ được gửi trực tiếp đến hộp thư của Người mua và Chủ shop."
+                                           FontSize="10" Foreground="{DynamicResource TextMuted}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,8,0,0"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <!-- ── ROW 3: FOOTER ACTIONS ────────────────────────────────── -->
+                    <Border Grid.Row="3" CornerRadius="0,0,16,16" BorderThickness="0,1,0,0"
+                            BorderBrush="{DynamicResource BorderSlate}" Padding="32,16">
+                        <Border.Background>
+                            <SolidColorBrush Color="#0A0E1A" Opacity="0.5"/>
+                        </Border.Background>
                         
-                        <TextBlock Text="&#xE1A5;" FontFamily="Segoe MDL2 Assets" FontSize="44" Foreground="#DFE9FD" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Chọn một khiếu nại để tiến hành phân xử giải quyết" FontSize="12.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" Margin="0,14,0,0" TextAlignment="Center" Width="180" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                    </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="MÃ KHIẾU NẠI: " FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="{Binding SelectedComplaint.ComplaintId, StringFormat={}{0}}" FontSize="10.5" FontWeight="ExtraBold" Foreground="{DynamicResource BrandPurple}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            </StackPanel>
+
+                            <!-- Actions when Pending -->
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="Pending">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+
+                                <!-- Dismiss Button -->
+                                <Button Command="{Binding DismissComplaintCommand}" Background="{DynamicResource DangerRed}" BorderThickness="0"
+                                        Height="38" Width="150" Cursor="Hand" Margin="0,0,12,0">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="8">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="&#xE10A;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="White" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Bác bỏ khiếu nại" Foreground="White" FontSize="12.5" FontWeight="Bold" VerticalAlignment="Center" Margin="8,0,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bd" Property="Opacity" Value="0.85"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <!-- Resolve Button -->
+                                <Button Command="{Binding ResolveComplaintCommand}" Background="{DynamicResource SuccessGreen}" BorderThickness="0"
+                                        Height="38" Width="190" Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="8">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="&#xE930;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="White" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Chấp nhận &amp; Xử lý" Foreground="White" FontSize="12.5" FontWeight="Bold" VerticalAlignment="Center" Margin="8,0,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bd" Property="Opacity" Value="0.85"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </StackPanel>
+
+                            <!-- Read-only Resolution Info when already Resolved or Dismissed -->
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="Resolved">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding SelectedComplaint.Status}" Value="Dismissed">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="ĐÃ XỬ LÝ LÚC: " FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource TextMuted}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="{Binding SelectedComplaint.ResolvedAt, StringFormat={}{0:dd/MM/yyyy HH:mm}}" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
                 </Grid>
             </Border>
         </Grid>
     </Grid>
 </UserControl>
-
-
-
-

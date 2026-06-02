@@ -1,7 +1,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     
-    <!-- Brand Colors (MyShop) -->
+    <!-- Brand Colors (Volox) -->
     <Color x:Key="BrandPrimaryColor">#4F46E5</Color>
     <Color x:Key="BrandSecondaryColor">#6366F1</Color>
     <Color x:Key="BrandAccentColor">#8B5CF6</Color>

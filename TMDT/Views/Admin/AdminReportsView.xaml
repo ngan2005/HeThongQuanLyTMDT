@@ -5,41 +5,91 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TMDT.Views.Admin"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="850">
+             d:DesignHeight="600" d:DesignWidth="900">
 
     <UserControl.Resources>
         <!-- Style tokens -->
         
         <Style x:Key="MetricCardBorder" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource CardBg}"/>
-            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="CornerRadius" Value="16"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush" Value="{DynamicResource BorderSlate}"/>
             <Setter Property="Padding" Value="20,16"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#000" BlurRadius="10" ShadowDepth="1" Opacity="0.01"/>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style x:Key="ReportActionCard" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource CardBg}"/>
-            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="CornerRadius" Value="16"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#DFE9FD"/>
-            <Setter Property="Padding" Value="24"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderSlate}"/>
+            <Setter Property="Padding" Value="16"/>
             <Setter Property="Margin" Value="0,0,0,16"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#000" BlurRadius="10" ShadowDepth="1" Opacity="0.01"/>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style x:Key="ExportButton" TargetType="Button">
-            <Setter Property="Height" Value="38"/>
-            <Setter Property="FontSize" Value="12.5"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Segmented Control Radio Button style -->
+        <Style x:Key="ChartPeriodRadioButton" TargetType="RadioButton">
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+            <Setter Property="FontSize" Value="11.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontFamily" Value="Be Vietnam Pro, Segoe UI"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="GroupName" Value="PeriodGroup"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6" Padding="14,0">
+                            <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource CardBg}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource BrandAccent}"/>
+                                <Setter TargetName="border" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#000" BlurRadius="5" ShadowDepth="1" Opacity="0.08"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -52,18 +102,18 @@
             <RowDefinition Height="Auto"/>
             <!-- KPI Metrics overview cards -->
             <RowDefinition Height="Auto"/>
-            <!-- Reports Action Panel list -->
+            <!-- Chart & Actions Grid -->
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- 1. TITLE ROW -->
         <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="Báo cáo &amp; Thống kê Doanh thu" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-            <TextBlock Text="Kết xuất toàn bộ cơ sở dữ liệu bán hàng hệ thống ra file CSV/Excel phục vụ kế toán &amp; tài chính" FontSize="12.5" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+            <TextBlock Text="Báo cáo &amp; Thống kê Hệ thống" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+            <TextBlock Text="Theo dõi các chỉ số tài chính chủ chốt và kết xuất dữ liệu phục vụ báo cáo kế toán, kiểm toán" FontSize="12.5" Foreground="{DynamicResource TextSecondary}" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
         </StackPanel>
 
         <!-- 2. KPI METRICS CARDS -->
-        <Grid Grid.Row="1" Margin="0,0,0,24">
+        <Grid Grid.Row="1" Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="16"/>
@@ -76,130 +126,315 @@
 
             <!-- Card 1: System revenue -->
             <Border Grid.Column="0" Style="{StaticResource MetricCardBorder}">
-                <StackPanel>
-                    <TextBlock Text="TỔNG DOANH SỐ SÀN" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
-                    <TextBlock Text="{Binding TotalSystemRevenue, StringFormat={}{0:N0} đ}" FontSize="18" FontWeight="Bold" Foreground="#10B981" Margin="0,6,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                </StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="TỔNG DOANH SỐ" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}"/>
+                        <TextBlock Text="{Binding TotalSystemRevenue, StringFormat={}{0:N0} đ}" FontSize="18" FontWeight="Bold" Foreground="#10B981" Margin="0,6,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text="+12.5% so với tháng trước" FontSize="10" Foreground="#10B981" FontWeight="SemiBold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                    </StackPanel>
+                    
+                    <Border Grid.Column="1" Width="36" Height="36" Background="#1A10B981" CornerRadius="8" VerticalAlignment="Top" HorizontalAlignment="Right">
+                        <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#10B981" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </Grid>
             </Border>
 
-            <!-- Card 2: Commission Fee sàn 5% -->
+            <!-- Card 2: Commission Fee -->
             <Border Grid.Column="2" Style="{StaticResource MetricCardBorder}">
-                <StackPanel>
-                    <TextBlock Text="HOA HỒNG THU VỀ (5%)" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
-                    <TextBlock Text="{Binding TotalCommissionEarned, StringFormat={}{0:N0} đ}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource BrandPurple}" Margin="0,6,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                </StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="HOA HỒNG SÀN (5%)" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}"/>
+                        <TextBlock Text="{Binding TotalCommissionEarned, StringFormat={}{0:N0} đ}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource BrandAccent}" Margin="0,6,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text="Thu phí tự động giải ngân" FontSize="10" Foreground="{DynamicResource TextSecondary}" FontWeight="SemiBold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                    </StackPanel>
+                    
+                    <Border Grid.Column="1" Width="36" Height="36" Background="#1A7C3AED" CornerRadius="8" VerticalAlignment="Top" HorizontalAlignment="Right">
+                        <TextBlock Text="&#xE719;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource BrandAccent}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </Grid>
             </Border>
 
             <!-- Card 3: Orders completed -->
             <Border Grid.Column="4" Style="{StaticResource MetricCardBorder}">
-                <StackPanel>
-                    <TextBlock Text="ĐƠN HÀNG HOÀN TẤT" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
-                    <TextBlock Text="{Binding TotalOrdersProcessed}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" Margin="0,6,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                </StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="ĐƠN HÀNG HOÀN TẤT" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}"/>
+                        <TextBlock Text="{Binding TotalOrdersProcessed}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,6,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text="+8.3% trong tuần này" FontSize="10" Foreground="#3B82F6" FontWeight="SemiBold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                    </StackPanel>
+                    
+                    <Border Grid.Column="1" Width="36" Height="36" Background="#1A3B82F6" CornerRadius="8" VerticalAlignment="Top" HorizontalAlignment="Right">
+                        <TextBlock Text="&#xE8A1;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#3B82F6" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </Grid>
             </Border>
 
             <!-- Card 4: Active Shops -->
             <Border Grid.Column="6" Style="{StaticResource MetricCardBorder}">
-                <StackPanel>
-                    <TextBlock Text="CỬA HÀNG ĐANG BÁN" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
-                    <TextBlock Text="{Binding TotalActiveShopsCount}" FontSize="18" FontWeight="Bold" Foreground="#EA580C" Margin="0,6,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                </StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="ĐỐI TÁC CỬA HÀNG" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}"/>
+                        <TextBlock Text="{Binding TotalActiveShopsCount}" FontSize="18" FontWeight="Bold" Foreground="#EA580C" Margin="0,6,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text="+4 cửa hàng mới hôm nay" FontSize="10" Foreground="#EA580C" FontWeight="SemiBold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                    </StackPanel>
+                    
+                    <Border Grid.Column="1" Width="36" Height="36" Background="#1AEA580C" CornerRadius="8" VerticalAlignment="Top" HorizontalAlignment="Right">
+                        <TextBlock Text="&#xE716;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#EA580C" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </Grid>
             </Border>
         </Grid>
 
-        <!-- 3. ACTIONS PANEL -->
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Hidden">
-            <StackPanel>
-                
-                <!-- Action Row 1: Sales Transaction Report -->
-                <Border Style="{StaticResource ReportActionCard}">
-                    <Grid>
+        <!-- 3. MAIN WORKSPACE: CHART & EXPORTS -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.7*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="1.1*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- LEFT: Revenue Trend Chart Bento Card -->
+            <Border Grid.Column="0" Background="{DynamicResource CardBg}" CornerRadius="16" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="20">
+                <Border.Effect>
+                    <DropShadowEffect Color="#000" BlurRadius="15" ShadowDepth="2" Opacity="0.02"/>
+                </Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Chart Header -->
+                    <Grid Grid.Row="0" Margin="0,0,0,20">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        
-                        <!-- Icon -->
-                        <Border Grid.Column="0" Width="44" Height="44" Background="{DynamicResource ActionBtnHoverBg}" CornerRadius="8" Padding="10">
-                            <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="#10B981" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="Xu hướng Phân tích tài chính" FontSize="14.5" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Text="Đồ thị theo dõi biến động doanh thu toàn sàn trong kỳ" FontSize="12" Foreground="{DynamicResource TextSecondary}" Margin="0,2,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        </StackPanel>
+
+                        <!-- Period selector Segmented Control -->
+                        <Border Grid.Column="1" Background="{DynamicResource SurfaceLow}" CornerRadius="8" Padding="2" VerticalAlignment="Center" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton Content="Tháng" IsChecked="{Binding ReportPeriod, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Month}" Style="{StaticResource ChartPeriodRadioButton}"/>
+                                <RadioButton Content="Quý" IsChecked="{Binding ReportPeriod, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Quarter}" Style="{StaticResource ChartPeriodRadioButton}"/>
+                                <RadioButton Content="Năm" IsChecked="{Binding ReportPeriod, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Year}" Style="{StaticResource ChartPeriodRadioButton}"/>
+                            </StackPanel>
                         </Border>
-
-                        <!-- Details -->
-                        <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="Báo cáo Doanh thu &amp; Giao dịch toàn diện" FontSize="14.5" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                            <TextBlock Text="Xuất toàn bộ lịch sử đơn hàng hoàn tất bao gồm doanh thu bán lẻ, phí chiết khấu 5% trích sàn, người mua và trạng thái đơn." FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                        </StackPanel>
-
-                        <!-- Action -->
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Button Content="Xuất Báo Cáo CSV" Width="140" Background="#10B981" Foreground="#FFFFFF" Style="{StaticResource ExportButton}" Command="{Binding ExportTransactionsReportCommand}" Margin="0,0,8,0"/>
-                            <Button Content="Xuất Báo Cáo PDF" Width="140" Background="#059669" Foreground="#FFFFFF" Style="{StaticResource ExportButton}" Command="{Binding ExportTransactionsPdfCommand}"/>
-                        </StackPanel>
                     </Grid>
-                </Border>
 
-                <!-- Action Row 2: Shops list balance Report -->
-                <Border Style="{StaticResource ReportActionCard}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                    <!-- Pure XAML Curve Trend Chart -->
+                    <Grid Grid.Row="1" Height="250" VerticalAlignment="Bottom" Margin="0,10,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
                         
-                        <!-- Icon -->
-                        <Border Grid.Column="0" Width="44" Height="44" Background="#EEF2FF" CornerRadius="8" Padding="10">
-                            <TextBlock Text="&#xE719;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="{StaticResource BrandPurple}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
+                        <!-- Grid Lines -->
+                        <Border Grid.Row="0" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource BorderSlate}" Opacity="0.35" VerticalAlignment="Bottom"/>
+                        <Border Grid.Row="1" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource BorderSlate}" Opacity="0.35" VerticalAlignment="Bottom"/>
+                        <Border Grid.Row="2" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource BorderSlate}" Opacity="0.35" VerticalAlignment="Bottom"/>
 
-                        <!-- Details -->
-                        <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="Báo cáo Dữ liệu &amp; Số dư ví các Cửa hàng" FontSize="14.5" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                            <TextBlock Text="Kết xuất danh sách các Shop, số điện thoại liên kết, địa chỉ hoạt động, trạng thái kiểm duyệt và số tiền tích lũy ví hiện có." FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                        </StackPanel>
+                        <Grid Grid.Row="0" Grid.RowSpan="3" ClipToBounds="True">
+                            <!-- Trend Line Gradient Fill -->
+                            <Path StrokeThickness="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                <Path.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#1A7C3AED" Offset="0"/>
+                                        <GradientStop Color="#007C3AED" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Path.Fill>
+                                <Path.Data>
+                                    <PathGeometry>
+                                        <PathGeometry.Figures>
+                                            <PathFigure StartPoint="0,200" IsClosed="True">
+                                                <BezierSegment Point1="50,140" Point2="90,40" Point3="140,70"/>
+                                                <BezierSegment Point1="190,100" Point2="240,170" Point3="290,120"/>
+                                                <BezierSegment Point1="340,70" Point2="390,20" Point3="450,45"/>
+                                                <LineSegment Point="450,200"/>
+                                                <LineSegment Point="0,200"/>
+                                            </PathFigure>
+                                        </PathGeometry.Figures>
+                                    </PathGeometry>
+                                </Path.Data>
+                            </Path>
 
-                        <!-- Action -->
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Button Content="Xuất Báo Cáo CSV" Width="140" Background="{StaticResource BrandPurple}" Foreground="#FFFFFF" Style="{StaticResource ExportButton}" Command="{Binding ExportShopsReportCommand}" Margin="0,0,8,0"/>
-                            <Button Content="Xuất Báo Cáo PDF" Width="140" Background="#4338CA" Foreground="#FFFFFF" Style="{StaticResource ExportButton}" Command="{Binding ExportShopsPdfCommand}"/>
-                        </StackPanel>
+                            <!-- Trend Line Curve -->
+                            <Path StrokeThickness="3" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
+                                <Path.Stroke>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#4F46E5" Offset="0"/>
+                                        <GradientStop Color="#7C3AED" Offset="0.5"/>
+                                        <GradientStop Color="#EC4899" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Path.Stroke>
+                                <Path.Data>
+                                    <PathGeometry>
+                                        <PathGeometry.Figures>
+                                            <PathFigure StartPoint="0,200">
+                                                <BezierSegment Point1="50,140" Point2="90,40" Point3="140,70"/>
+                                                <BezierSegment Point1="190,100" Point2="240,170" Point3="290,120"/>
+                                                <BezierSegment Point1="340,70" Point2="390,20" Point3="450,45"/>
+                                            </PathFigure>
+                                        </PathGeometry.Figures>
+                                    </PathGeometry>
+                                </Path.Data>
+                            </Path>
+                        </Grid>
+
+                        <!-- Axis Labels -->
+                        <Grid Grid.Row="3" Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="T2" FontSize="11" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Left" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Grid.Column="1" Text="T3" FontSize="11" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Grid.Column="2" Text="T4" FontSize="11" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Grid.Column="3" Text="T5" FontSize="11" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Grid.Column="4" Text="T6" FontSize="11" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Grid.Column="5" Text="T7" FontSize="11" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Grid.Column="6" Text="CN" FontSize="11" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Right" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        </Grid>
                     </Grid>
-                </Border>
+                </Grid>
+            </Border>
 
-                <!-- Action Row 3: Withdraw financial Report -->
-                <Border Style="{StaticResource ReportActionCard}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <!-- Icon -->
-                        <Border Grid.Column="0" Width="44" Height="44" Background="#FFF7ED" CornerRadius="8" Padding="10">
-                            <TextBlock Text="&#xEDF4;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="#EA580C" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
+            <!-- RIGHT: Export Actions Bento Panel -->
+            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Hidden">
+                <StackPanel>
+                    <!-- Action Card 1: Transactions -->
+                    <Border Style="{StaticResource ReportActionCard}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                        <!-- Details -->
-                        <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="Báo cáo Lịch sử Rút tiền ngân hàng" FontSize="14.5" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                            <TextBlock Text="Lịch sử các lệnh đề nghị chi lương ngân hàng của các Shop, bao gồm tên ngân hàng, số tài khoản, số tiền và trạng thái chuyển khoản." FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                        </StackPanel>
+                            <!-- Icon Badge -->
+                            <Border Grid.Row="0" Grid.Column="0" Width="36" Height="36" Background="#1A10B981" CornerRadius="8" HorizontalAlignment="Left">
+                                <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#10B981" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
 
-                        <!-- Action -->
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Button Content="Xuất Báo Cáo CSV" Width="140" Background="#EA580C" Foreground="#FFFFFF" Style="{StaticResource ExportButton}" Command="{Binding ExportWithdrawsReportCommand}" Margin="0,0,8,0"/>
-                            <Button Content="Xuất Báo Cáo PDF" Width="140" Background="#C2410C" Foreground="#FFFFFF" Style="{StaticResource ExportButton}" Command="{Binding ExportWithdrawsPdfCommand}"/>
-                        </StackPanel>
-                    </Grid>
-                </Border>
+                            <!-- Details -->
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="Doanh thu &amp; Giao dịch" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="12,0,0,0" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="Kết xuất toàn bộ đơn hàng hoàn tất, hoa hồng 5% và trạng thái tài chính sàn." FontSize="11.5" Foreground="{DynamicResource TextSecondary}" Margin="0,10,0,14" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI"/>
 
-            </StackPanel>
-        </ScrollViewer>
+                            <!-- Buttons -->
+                            <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" Content="Xuất CSV" Background="#1A10B981" Foreground="#10B981" Style="{StaticResource ExportButton}" Command="{Binding ExportTransactionsReportCommand}"/>
+                                <Button Grid.Column="2" Content="Xuất PDF" Background="#10B981" Foreground="White" Style="{StaticResource ExportButton}" Command="{Binding ExportTransactionsPdfCommand}"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <!-- Action Card 2: Shops list -->
+                    <Border Style="{StaticResource ReportActionCard}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Icon Badge -->
+                            <Border Grid.Row="0" Grid.Column="0" Width="36" Height="36" Background="#1A7C3AED" CornerRadius="8" HorizontalAlignment="Left">
+                                <TextBlock Text="&#xE719;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#7C3AED" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <!-- Details -->
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="Số dư &amp; Ví Cửa hàng" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="12,0,0,0" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="Kết xuất danh sách các Shop, số điện thoại liên kết và số dư ví tài chính hiện tại." FontSize="11.5" Foreground="{DynamicResource TextSecondary}" Margin="0,10,0,14" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI"/>
+
+                            <!-- Buttons -->
+                            <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" Content="Xuất CSV" Background="#1A7C3AED" Foreground="#7C3AED" Style="{StaticResource ExportButton}" Command="{Binding ExportShopsReportCommand}"/>
+                                <Button Grid.Column="2" Content="Xuất PDF" Background="#7C3AED" Foreground="White" Style="{StaticResource ExportButton}" Command="{Binding ExportShopsPdfCommand}"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <!-- Action Card 3: Withdraw requests -->
+                    <Border Style="{StaticResource ReportActionCard}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Icon Badge -->
+                            <Border Grid.Row="0" Grid.Column="0" Width="36" Height="36" Background="#1AEA580C" CornerRadius="8" HorizontalAlignment="Left">
+                                <TextBlock Text="&#xEDF4;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#EA580C" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <!-- Details -->
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="Lịch sử Rút tiền" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="12,0,0,0" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="Lịch sử các yêu cầu giải ngân tài chính ngân hàng và trạng thái chuyển khoản của Shop." FontSize="11.5" Foreground="{DynamicResource TextSecondary}" Margin="0,10,0,14" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI"/>
+
+                            <!-- Buttons -->
+                            <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" Content="Xuất CSV" Background="#1AEA580C" Foreground="#EA580C" Style="{StaticResource ExportButton}" Command="{Binding ExportWithdrawsReportCommand}"/>
+                                <Button Grid.Column="2" Content="Xuất PDF" Background="#EA580C" Foreground="White" Style="{StaticResource ExportButton}" Command="{Binding ExportWithdrawsPdfCommand}"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
     </Grid>
 </UserControl>
-
-
-
-

@@ -17,6 +17,11 @@ namespace TMDT.ViewModels.Admin
         private string _searchText = "";
         private string _statusFilter = "All"; // All, Pending, Approved, Rejected
 
+        private int _totalProducts;
+        private int _pendingProducts;
+        private int _approvedProducts;
+        private int _rejectedProducts;
+
         public ObservableCollection<Product> Products
         {
             get => _products;
@@ -51,11 +56,40 @@ namespace TMDT.ViewModels.Admin
             }
         }
 
+        public int TotalProducts
+        {
+            get => _totalProducts;
+            set { _totalProducts = value; OnPropertyChanged(); }
+        }
+
+        public int PendingProducts
+        {
+            get => _pendingProducts;
+            set { _pendingProducts = value; OnPropertyChanged(); }
+        }
+
+        public int ApprovedProducts
+        {
+            get => _approvedProducts;
+            set { _approvedProducts = value; OnPropertyChanged(); }
+        }
+
+        public int RejectedProducts
+        {
+            get => _rejectedProducts;
+            set { _rejectedProducts = value; OnPropertyChanged(); }
+        }
+
+        // Events
+        public event Action ShowDetailRequest;
+        public event Action HideDetailRequest;
+
         // Commands
         public ICommand ApproveProductCommand { get; }
         public ICommand RejectProductCommand { get; }
         public ICommand FilterCommand { get; }
         public ICommand CloseDetailCommand { get; }
+        public ICommand ViewDetailCommand { get; }
 
         public AdminProductsViewModel()
         {
@@ -75,6 +109,7 @@ namespace TMDT.ViewModels.Admin
             RejectProductCommand = new RelayCommand(ExecuteRejectProduct, CanExecuteRejectProduct);
             FilterCommand = new RelayCommand(o => StatusFilter = o?.ToString() ?? "All");
             CloseDetailCommand = new RelayCommand(o => SelectedProduct = null);
+            ViewDetailCommand = new RelayCommand(o => ShowDetailRequest?.Invoke());
 
             LoadProducts();
         }
@@ -85,43 +120,53 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null && _context.Products.Any())
+                if (_context != null)
                 {
-                    var query = _context.Products
-                        .Include(p => p.Shop)
-                        .Include(p => p.Category)
-                        .AsQueryable();
+                    _context.ChangeTracker.Clear();
 
-                    // Apply Search
-                    if (!string.IsNullOrEmpty(SearchText))
+                    if (_context.Products.Any())
                     {
-                        query = query.Where(p => p.ProductName.Contains(SearchText) || 
-                                                 (p.ProductCode != null && p.ProductCode.Contains(SearchText)) ||
-                                                 (p.Shop != null && p.Shop.ShopName.Contains(SearchText)));
-                    }
+                        TotalProducts = _context.Products.Count();
+                        PendingProducts = _context.Products.Count(p => p.Status == "Pending" || string.IsNullOrEmpty(p.Status));
+                        ApprovedProducts = _context.Products.Count(p => p.Status == "Approved");
+                        RejectedProducts = _context.Products.Count(p => p.Status == "Rejected");
 
-                    // Apply Filter
-                    if (StatusFilter == "Pending")
-                    {
-                        query = query.Where(p => p.Status == "Pending" || string.IsNullOrEmpty(p.Status));
-                    }
-                    else if (StatusFilter == "Approved")
-                    {
-                        query = query.Where(p => p.Status == "Approved");
-                    }
-                    else if (StatusFilter == "Rejected")
-                    {
-                        query = query.Where(p => p.Status == "Rejected");
-                    }
+                        var query = _context.Products
+                            .Include(p => p.Shop)
+                            .Include(p => p.Category)
+                            .AsQueryable();
 
-                    var dbProducts = query.ToList();
-                    foreach (var prod in dbProducts)
-                    {
-                        Products.Add(prod);
-                    }
+                        // Apply Search
+                        if (!string.IsNullOrEmpty(SearchText))
+                        {
+                            query = query.Where(p => p.ProductName.Contains(SearchText) || 
+                                                     (p.ProductCode != null && p.ProductCode.Contains(SearchText)) ||
+                                                     (p.Shop != null && p.Shop.ShopName.Contains(SearchText)));
+                        }
 
-                    if (Products.Any())
-                        return;
+                        // Apply Filter
+                        if (StatusFilter == "Pending")
+                        {
+                            query = query.Where(p => p.Status == "Pending" || string.IsNullOrEmpty(p.Status));
+                        }
+                        else if (StatusFilter == "Approved")
+                        {
+                            query = query.Where(p => p.Status == "Approved");
+                        }
+                        else if (StatusFilter == "Rejected")
+                        {
+                            query = query.Where(p => p.Status == "Rejected");
+                        }
+
+                        var dbProducts = query.ToList();
+                        foreach (var prod in dbProducts)
+                        {
+                            Products.Add(prod);
+                        }
+
+                        if (Products.Any() || (string.IsNullOrEmpty(SearchText) && StatusFilter == "All"))
+                            return;
+                    }
                 }
             }
             catch (Exception ex)
@@ -234,6 +279,12 @@ namespace TMDT.ViewModels.Admin
                 Shop = new Shop { ShopName = "Organic Food & Fruits" }
             });
 
+            // Calculate stats for mock data
+            TotalProducts = mockProds.Count;
+            PendingProducts = mockProds.Count(p => p.Status == "Pending" || string.IsNullOrEmpty(p.Status));
+            ApprovedProducts = mockProds.Count(p => p.Status == "Approved");
+            RejectedProducts = mockProds.Count(p => p.Status == "Rejected");
+
             // Apply Filters to mock data
             var filtered = mockProds.AsQueryable();
             if (!string.IsNullOrEmpty(SearchText))
@@ -297,6 +348,7 @@ namespace TMDT.ViewModels.Admin
             MessageBox.Show($"Đã phê duyệt thành công! Sản phẩm '{SelectedProduct.ProductName}' hiện đã được hiển thị trên sàn.", 
                             "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             
+            HideDetailRequest?.Invoke();
             LoadProducts();
         }
 
@@ -331,6 +383,7 @@ namespace TMDT.ViewModels.Admin
             MessageBox.Show($"Đã từ chối đăng bán sản phẩm '{SelectedProduct.ProductName}'. Người bán sẽ nhận được thông báo điều chỉnh thông tin.", 
                             "Đã thực hiện", MessageBoxButton.OK, MessageBoxImage.Information);
 
+            HideDetailRequest?.Invoke();
             LoadProducts();
         }
     }
