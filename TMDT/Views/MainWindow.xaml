@@ -4,10 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TMDT.Views"
-        xmlns:local_buyer="clr-namespace:TMDT.Views.Buyer"
+        xmlns:buyer="clr-namespace:TMDT.Views.Buyer"
+        xmlns:vmBuyer="clr-namespace:TMDT.ViewModels.Buyer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Volox - Mua sắm thông minh" Height="750" Width="1280"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BackgroundBrush}">
+
+    <Window.DataContext>
+        <vmBuyer:BuyerMainViewModel/>
+    </Window.DataContext>
+
     <Grid>
-        <local_buyer:BuyerHomeView/>
+        <buyer:BuyerMainView/>
     </Grid>
 </Window>

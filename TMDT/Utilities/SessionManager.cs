@@ -5,6 +5,11 @@ namespace TMDT.Utilities
 {
     public static class SessionManager
     {
+        // Role name constants — dùng thay cho string literal
+        public const string RoleAdmin = "Admin";
+        public const string RoleSeller = "Seller";
+        public const string RoleBuyer = "Buyer";
+
         private static UserDto _currentUser;
 
         public static UserDto CurrentUser
@@ -15,11 +20,11 @@ namespace TMDT.Utilities
 
         public static bool IsLoggedIn => _currentUser != null;
 
-        public static bool IsAdmin => _currentUser?.RoleName == "Admin";
+        public static bool IsAdmin => _currentUser?.RoleName == RoleAdmin;
 
-        public static bool IsSeller => _currentUser?.RoleName == "Seller";
+        public static bool IsSeller => _currentUser?.RoleName == RoleSeller;
 
-        public static bool IsBuyer => _currentUser?.RoleName == "Buyer";
+        public static bool IsBuyer => _currentUser?.RoleName == RoleBuyer;
 
         public static void Clear()
         {

@@ -235,17 +235,20 @@ namespace TMDT.ViewModels.Seller
         {
             try
             {
-                if (_context != null)
-                {
-                    var shop = _context.Shops
-                        .Include(s => s.User)
-                        .FirstOrDefault(s => s.User != null && s.User.Email == "seller@myshop.com")
-                        ?? _context.Shops.FirstOrDefault();
-                    if (shop != null) return shop.ShopId;
-                }
+                if (SessionManager.CurrentUser == null) return 0;
+
+                var shop = _context.Shops
+                    .FirstOrDefault(s => s.UserId == SessionManager.CurrentUser.UserId);
+                if (shop != null) return shop.ShopId;
             }
-            catch {}
-            return 1;
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine("GetCurrentShopId failed: " + ex.Message); }
+            return 0;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) _context?.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

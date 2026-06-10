@@ -76,7 +76,7 @@ namespace TMDT.ViewModels.Admin
                     return;
                 }
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine("CalculateUserStats failed: " + ex.Message); }
 
             // Fallback for UI design time
             TotalOrdersCount = (user.UserId * 7) + 12;
@@ -354,6 +354,12 @@ namespace TMDT.ViewModels.Admin
 
             MessageBox.Show($"Đã đặt lại mật khẩu của người dùng thành công thành: '{NewPasswordText}'!", 
                             "Cài đặt lại thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) _context?.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

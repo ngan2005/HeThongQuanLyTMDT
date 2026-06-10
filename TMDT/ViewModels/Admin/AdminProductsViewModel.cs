@@ -386,5 +386,11 @@ namespace TMDT.ViewModels.Admin
             HideDetailRequest?.Invoke();
             LoadProducts();
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) _context?.Dispose();
+            base.Dispose(disposing);
+        }
     }
 }

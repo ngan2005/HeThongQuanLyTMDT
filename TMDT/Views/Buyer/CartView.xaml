@@ -1,0 +1,215 @@
+<UserControl x:Class="TMDT.Views.Buyer.CartView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:converters="clr-namespace:TMDT.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="900" d:DesignWidth="1920"
+             Background="{StaticResource BackgroundBrush}">
+
+    <UserControl.Resources>
+    </UserControl.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+            <Button Style="{StaticResource MaterialDesignFlatButton}"
+                    Command="{Binding BackCommand}"
+                    Foreground="{StaticResource TextBrush}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="ArrowLeft" Margin="0,0,5,0"/>
+                    <TextBlock Text="Quay lại"/>
+                </StackPanel>
+            </Button>
+            <TextBlock Text=" / " VerticalAlignment="Center" Foreground="{StaticResource TextMutedBrush}"/>
+            <TextBlock Text="Giỏ hàng" VerticalAlignment="Center"
+                       FontWeight="Bold" FontSize="20" Foreground="{StaticResource BrandPrimaryBrush}"/>
+        </StackPanel>
+
+        <!-- Cart Items -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                      Visibility="{Binding IsEmpty, Converter={StaticResource InverseBoolToVis}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="360"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Item List -->
+                <StackPanel>
+                    <!-- Clear All -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,10">
+                        <TextBlock Text="{Binding Items.Count, StringFormat={}{0} sản phẩm}"
+                                   VerticalAlignment="Center" Foreground="{StaticResource TextMutedBrush}"
+                                   Margin="0,0,12,0"/>
+                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                Content="Xóa tất cả"
+                                Command="{Binding ClearCartCommand}"
+                                Foreground="#EF4444" FontSize="13"/>
+                    </StackPanel>
+
+                    <ItemsControl ItemsSource="{Binding Items}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="White" CornerRadius="12" Margin="0,0,0,12"
+                                        Padding="16" Effect="{StaticResource CardShadow}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Product Image Placeholder -->
+                                        <Border Background="#F1F5F9" CornerRadius="8"
+                                                Width="80" Height="80" VerticalAlignment="Top">
+                                            <materialDesign:PackIcon Kind="ImageOutline" Width="36" Height="36"
+                                                                     HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                     Foreground="{StaticResource TextMutedBrush}"/>
+                                        </Border>
+
+                                        <!-- Info -->
+                                        <StackPanel Grid.Column="1" Margin="16,0">
+                                            <TextBlock Text="{Binding ProductName}" FontSize="16" FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextBrush}" TextWrapping="Wrap"
+                                                       Margin="0,0,0,8"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Price, StringFormat={}{0:N0}đ}"
+                                                           FontSize="16" FontWeight="Bold"
+                                                           Foreground="{StaticResource PriceBrush}"/>
+                                                <TextBlock Text="{Binding OriginalPrice, StringFormat={}{0:N0}đ}"
+                                                           FontSize="12" Foreground="{StaticResource TextMutedBrush}"
+                                                           TextDecorations="Strikethrough" VerticalAlignment="Bottom"
+                                                           Margin="8,0,0,2"/>
+                                            </StackPanel>
+
+                                            <!-- Quantity Controls -->
+                                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                                <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                                        Content="-" Width="32" Height="32"
+                                                        Command="{Binding DataContext.DecreaseCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        FontSize="16" Padding="0"/>
+                                                <TextBlock Text="{Binding Quantity}" Width="40" TextAlignment="Center"
+                                                           FontSize="16" FontWeight="SemiBold"
+                                                           VerticalAlignment="Center" Padding="0,8"/>
+                                                <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                                        Content="+" Width="32" Height="32"
+                                                        Command="{Binding DataContext.IncreaseCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        FontSize="16" Padding="0"/>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <!-- Right: Total + Remove -->
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Right">
+                                            <TextBlock Text="{Binding LineTotal, StringFormat={}{0:N0}đ}"
+                                                       FontSize="18" FontWeight="Bold"
+                                                       Foreground="{StaticResource BrandPrimaryBrush}"
+                                                       HorizontalAlignment="Right"/>
+                                            <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                                    Command="{Binding DataContext.RemoveItemCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Foreground="#EF4444" Margin="0,8,0,0" Padding="0">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <materialDesign:PackIcon Kind="DeleteOutline" Width="16" Height="16"/>
+                                                    <TextBlock Text="Xóa" FontSize="12" Margin="4,0,0,0"/>
+                                                </StackPanel>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Continue Shopping -->
+                    <Button Style="{StaticResource MaterialDesignFlatButton}"
+                            Content="← Tiếp tục mua sắm"
+                            Command="{Binding ContinueShoppingCommand}"
+                            Foreground="{StaticResource BrandPrimaryBrush}"
+                            HorizontalAlignment="Left" Margin="0,8,0,0"/>
+                </StackPanel>
+
+                <!-- Order Summary Panel -->
+                <Border Grid.Column="1" Background="White" CornerRadius="16" Padding="24"
+                        Effect="{StaticResource CardShadow}" Margin="20,0,0,0"
+                        VerticalAlignment="Top">
+                    <StackPanel>
+                        <TextBlock Text="TÓM TẮT ĐƠN HÀNG" FontSize="16" FontWeight="Bold"
+                                   Foreground="{StaticResource BrandPrimaryBrush}" Margin="0,0,0,20"/>
+
+                        <Grid Margin="0,0,0,8">
+                            <TextBlock Text="Tạm tính" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding TotalPrice, StringFormat={}{0:N0}đ}"
+                                       HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,8">
+                            <TextBlock Text="Phí vận chuyển" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding ShippingFee, StringFormat={}{0:N0}đ}"
+                                       HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                        </Grid>
+                        <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,4,0,16"/>
+
+                        <Grid Margin="0,0,0,20">
+                            <TextBlock Text="Tổng cộng" FontSize="18" FontWeight="Bold"
+                                       Foreground="{StaticResource TextBrush}"/>
+                            <TextBlock Text="{Binding TotalPayment, StringFormat={}{0:N0}đ}"
+                                       HorizontalAlignment="Right" FontSize="20" FontWeight="Bold"
+                                       Foreground="{StaticResource PriceBrush}"/>
+                        </Grid>
+
+                        <!-- Payment Method -->
+                        <TextBlock Text="Phương thức thanh toán" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextBrush}" Margin="0,0,0,10"/>
+                        <StackPanel Margin="0,0,0,20">
+                            <RadioButton Content="💵 Thanh toán khi nhận hàng (COD)"
+                                         IsChecked="{Binding SelectedPayment, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=0}"
+                                         Margin="0,4"/>
+                            <RadioButton Content="💳 VNPay"
+                                         IsChecked="{Binding SelectedPayment, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=1}"
+                                         Margin="0,4"/>
+                            <RadioButton Content="📱 MoMo"
+                                         IsChecked="{Binding SelectedPayment, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=2}"
+                                         Margin="0,4"/>
+                        </StackPanel>
+
+                        <Button Style="{StaticResource ModernButtonStyle}"
+                                Background="{StaticResource BrandSecondaryBrush}"
+                                Foreground="White"
+                                Content="ĐẶT HÀNG NGAY"
+                                Height="50" FontSize="16"
+                                Command="{Binding PlaceOrderCommand}"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Empty Cart -->
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                     Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}">
+            <materialDesign:PackIcon Kind="CartOutline" Width="120" Height="120"
+                                     Foreground="{StaticResource TextMutedBrush}"
+                                     HorizontalAlignment="Center"/>
+            <TextBlock Text="Giỏ hàng trống" FontSize="28" FontWeight="Bold"
+                       Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"
+                       Margin="0,16,0,8"/>
+            <TextBlock Text="Hãy thêm sản phẩm vào giỏ hàng để bắt đầu mua sắm!"
+                       Foreground="{StaticResource TextMutedBrush}" FontSize="16"
+                       HorizontalAlignment="Center" Margin="0,0,0,24"/>
+            <Button Style="{StaticResource ModernButtonStyle}"
+                    Background="{StaticResource BrandSecondaryBrush}"
+                    Foreground="White"
+                    Content="BẮT ĐẦU MUA SẮM"
+                    Width="200" Height="48"
+                    Command="{Binding ContinueShoppingCommand}"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

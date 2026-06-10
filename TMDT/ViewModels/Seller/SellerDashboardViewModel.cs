@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using TMDT.Models;
+using TMDT.Utilities;
 
 namespace TMDT.ViewModels.Seller
 {
@@ -41,6 +42,12 @@ namespace TMDT.ViewModels.Seller
             LoadRealData();
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) _context?.Dispose();
+            base.Dispose(disposing);
+        }
+
         private void LoadRealData()
         {
             try
@@ -48,11 +55,10 @@ namespace TMDT.ViewModels.Seller
                 _context = new TmdtContext();
                 if (_context != null && _context.Shops.Any())
                 {
-                    // Lấy Shop đầu tiên của hệ thống để demo hoặc shop của User "seller" (nếu có)
-                    // Failsafe: Tìm shop của user có email "seller@myshop.com" hoặc mặc định shop đầu tiên
+                    if (SessionManager.CurrentUser == null) return;
+
                     var shop = _context.Shops
-                        .Include(s => s.User)
-                        .FirstOrDefault(s => s.User != null && s.User.Email == "seller@myshop.com") 
+                        .FirstOrDefault(s => s.UserId == SessionManager.CurrentUser.UserId)
                         ?? _context.Shops.FirstOrDefault();
 
                     if (shop != null)

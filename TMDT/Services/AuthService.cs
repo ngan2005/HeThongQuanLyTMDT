@@ -6,6 +6,7 @@ using TMDT.DTOs;
 using TMDT.Models;
 using TMDT.Services.Interfaces;
 using TMDT.Helpers;
+using TMDT.Utilities;
 
 namespace TMDT.Services
 {
@@ -30,7 +31,7 @@ namespace TMDT.Services
             // Lấy ShopId + ShopName nếu là Seller
             int? shopId = null;
             string? shopName = null;
-            if (user.Role?.RoleName == "Seller")
+            if (user.Role?.RoleName == SessionManager.RoleSeller)
             {
                 var shop = await _context.Shops.FirstOrDefaultAsync(s => s.UserId == user.UserId);
                 if (shop != null)
@@ -53,12 +54,23 @@ namespace TMDT.Services
             };
         }
 
-        public async Task<bool> RegisterAsync(RegisterRequest request)
+        public async Task<(bool Success, string? ErrorMessage)> RegisterAsync(RegisterRequest request)
         {
+            // Kiểm tra email trùng
             if (await _context.Users.AnyAsync(u => u.Email == request.Email))
-                return false;
+                return (false, "Email này đã được đăng ký. Vui lòng sử dụng email khác.");
 
-            var defaultRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == "Buyer")
+            // Kiểm tra email hợp lệ
+            if (string.IsNullOrWhiteSpace(request.Email) ||
+                !request.Email.Contains('@') ||
+                !request.Email.Contains('.'))
+                return (false, "Email không hợp lệ. Vui lòng nhập đúng định dạng email.");
+
+            // Kiểm tra độ dài mật khẩu
+            if (string.IsNullOrWhiteSpace(request.Password) || request.Password.Length < 6)
+                return (false, "Mật khẩu phải có ít nhất 6 ký tự.");
+
+            var defaultRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == SessionManager.RoleBuyer)
                              ?? await _context.Roles.FirstOrDefaultAsync();
 
             var user = new User
@@ -74,7 +86,9 @@ namespace TMDT.Services
             };
 
             _context.Users.Add(user);
-            return await _context.SaveChangesAsync() > 0;
+            return await _context.SaveChangesAsync() > 0
+                ? (true, null)
+                : (false, "Đã xảy ra lỗi khi lưu. Vui lòng thử lại.");
         }
 
         public Task<bool> LogoutAsync()

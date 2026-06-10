@@ -119,7 +119,7 @@ namespace TMDT.ViewModels.Seller
 
         public SellerProfileViewModel()
         {
-            try { _context = new TmdtContext(); } catch { }
+            try { _context = new TmdtContext(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine("Init TmdtContext failed: " + ex.Message); }
 
             SaveProfileCommand = new RelayCommand(ExecuteSaveProfile);
             OpenProfileCommand = new RelayCommand(_ => OpenProfileRequest?.Invoke());
@@ -181,7 +181,7 @@ namespace TMDT.ViewModels.Seller
                     _context?.SaveChanges();
                 }
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine("ExecuteToggleVacation failed: " + ex.Message); }
 
             MessageBox.Show(VacationMode
                 ? "Đã bật chế độ tạm nghỉ. Khách hàng không thể đặt đơn hàng."
@@ -233,13 +233,19 @@ namespace TMDT.ViewModels.Seller
             try
             {
                 if (_context == null) return 0;
+                if (SessionManager.CurrentUser == null) return 0;
+
                 var shop = _context.Shops
-                    .Include(s => s.User)
-                    .FirstOrDefault(s => s.User != null && s.User.Email == "seller@myshop.com")
-                    ?? _context.Shops.FirstOrDefault();
+                    .FirstOrDefault(s => s.UserId == SessionManager.CurrentUser.UserId);
                 return shop?.ShopId ?? 0;
             }
             catch { return 0; }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) _context?.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

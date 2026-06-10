@@ -68,11 +68,16 @@ namespace TMDT.Views.Auth
                         sb?.Begin();
                     }
                 }
-                else if (e.PropertyName == nameof(LoginViewModel.IsLoginSuccess))
+                else if (e.PropertyName == nameof(LoginViewModel.IsLoginFailed))
                 {
-                    if (vm.IsLoginSuccess)
+                    if (vm.IsLoginFailed)
                     {
-                        var sb = this.Resources["SuccessFeedbackStoryboard"] as Storyboard;
+                        var sb = this.Resources["ErrorFeedbackStoryboard"] as Storyboard;
+                        sb?.Begin();
+                    }
+                    else
+                    {
+                        var sb = this.Resources["ErrorFeedbackResetStoryboard"] as Storyboard;
                         sb?.Begin();
                     }
                 }

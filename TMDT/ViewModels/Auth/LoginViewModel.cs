@@ -1,51 +1,36 @@
+using System;
 using System.Windows;
 using System.Windows.Input;
-using TMDT.Utilities;
+using TMDT.Services;
 using TMDT.Services.Interfaces;
 using TMDT.Models;
-using TMDT.Services;
+using TMDT.Utilities;
 
 namespace TMDT.ViewModels.Auth
 {
     public class LoginViewModel : ViewModelBase
     {
-        private string _username;
-        private string _password;
+        private string _email = "";
+        private string _password = "";
         private bool _isLoading;
         private bool _isLoginFailed;
-        private readonly IAuthService _authService;
 
-        public string Username
+        public string Email
         {
-            get => _username;
-            set
-            {
-                SetProperty(ref _username, value);
-                if (IsLoginFailed) IsLoginFailed = false;
-            }
+            get => _email;
+            set { SetProperty(ref _email, value); if (IsLoginFailed) IsLoginFailed = false; }
         }
 
         public string Password
         {
             get => _password;
-            set
-            {
-                SetProperty(ref _password, value);
-                if (IsLoginFailed) IsLoginFailed = false;
-            }
+            set { SetProperty(ref _password, value); if (IsLoginFailed) IsLoginFailed = false; }
         }
 
         public bool IsLoading
         {
             get => _isLoading;
             set => SetProperty(ref _isLoading, value);
-        }
-
-        private bool _isLoginSuccess;
-        public bool IsLoginSuccess
-        {
-            get => _isLoginSuccess;
-            set => SetProperty(ref _isLoginSuccess, value);
         }
 
         public bool IsLoginFailed
@@ -58,10 +43,13 @@ namespace TMDT.ViewModels.Auth
         public ICommand ShowRegisterCommand { get; }
         public ICommand ExitCommand { get; }
 
-        public LoginViewModel()
-        {
-            _authService = new AuthService(new TmdtContext());
+        private readonly IAuthService _authService;
 
+        public LoginViewModel() : this(new AuthService(new TmdtContext())) { }
+
+        public LoginViewModel(IAuthService authService)
+        {
+            _authService = authService;
             LoginCommand = new RelayCommand(ExecuteLogin);
             ShowRegisterCommand = new RelayCommand(ExecuteShowRegister);
             ExitCommand = new RelayCommand(ExecuteExit);
@@ -73,7 +61,7 @@ namespace TMDT.ViewModels.Auth
 
             IsLoginFailed = false;
 
-            if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password))
+            if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
             {
                 IsLoginFailed = true;
                 MessageBox.Show("Vui lòng nhập đầy đủ thông tin!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -84,11 +72,10 @@ namespace TMDT.ViewModels.Auth
 
             try
             {
-                var user = await _authService.LoginAsync(Username.Trim(), Password);
+                var user = await _authService.LoginAsync(Email.Trim(), Password);
 
                 if (user != null)
                 {
-                    // Lưu session
                     SessionManager.CurrentUser = user;
 
                     Window targetWindow = null;
@@ -96,15 +83,15 @@ namespace TMDT.ViewModels.Auth
 
                     switch (user.RoleName)
                     {
-                        case "Admin":
+                        case SessionManager.RoleAdmin:
                             targetWindow = new Views.Admin.AdminMainView();
                             redirectMsg = $"Chào Admin {user.FullName}!";
                             break;
-                        case "Seller":
+                        case SessionManager.RoleSeller:
                             targetWindow = new Views.Seller.SellerMainView();
                             redirectMsg = $"Chào Seller {user.FullName}!";
                             break;
-                        case "Buyer":
+                        case SessionManager.RoleBuyer:
                             targetWindow = new Views.MainWindow();
                             redirectMsg = $"Chào {user.FullName}!";
                             break;
@@ -114,7 +101,6 @@ namespace TMDT.ViewModels.Auth
                             return;
                     }
 
-                    // Đóng Login
                     foreach (Window win in Application.Current.Windows)
                     {
                         if (win is Views.Auth.LoginView)
@@ -124,7 +110,6 @@ namespace TMDT.ViewModels.Auth
                         }
                     }
 
-                    // Mở trang phù hợp
                     if (targetWindow != null)
                     {
                         MessageBox.Show(redirectMsg, "Đăng nhập thành công", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -137,7 +122,7 @@ namespace TMDT.ViewModels.Auth
                     MessageBox.Show("Email hoặc mật khẩu không đúng!", "Đăng nhập thất bại", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -149,7 +134,10 @@ namespace TMDT.ViewModels.Auth
 
         private void ExecuteShowRegister(object parameter)
         {
-            // TODO: navigation sang RegisterView
+            var loginWindow = Application.Current.MainWindow;
+            var register = new Views.Auth.RegisterView();
+            register.Show();
+            loginWindow?.Close();
         }
 
         private void ExecuteExit(object parameter)

@@ -3,8 +3,8 @@ using System.Windows.Input;
 using TMDT.Utilities;
 using TMDT.DTOs;
 using TMDT.Services.Interfaces;
-using TMDT.Models;
 using TMDT.Services;
+using TMDT.Models;
 
 namespace TMDT.ViewModels.Auth
 {
@@ -12,7 +12,6 @@ namespace TMDT.ViewModels.Auth
     {
         private string _fullName;
         private string _email;
-        private string _username;
         private string _password;
         private string _phone;
         private readonly IAuthService _authService;
@@ -27,12 +26,6 @@ namespace TMDT.ViewModels.Auth
         {
             get => _email;
             set => SetProperty(ref _email, value);
-        }
-
-        public string Username
-        {
-            get => _username;
-            set => SetProperty(ref _username, value);
         }
 
         public string Password
@@ -66,7 +59,7 @@ namespace TMDT.ViewModels.Auth
         {
             if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password) || string.IsNullOrEmpty(FullName))
             {
-                MessageBox.Show("Vui lòng điền đầy đủ thông tin!");
+                MessageBox.Show("Vui lòng điền đầy đủ thông tin!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -78,7 +71,7 @@ namespace TMDT.ViewModels.Auth
                 Phone = Phone ?? ""
             };
 
-            var success = await _authService.RegisterAsync(request);
+            var (success, errorMessage) = await _authService.RegisterAsync(request);
             if (success)
             {
                 MessageBox.Show("Đăng ký thành công! Vui lòng đăng nhập.", "Thành công",
@@ -87,7 +80,7 @@ namespace TMDT.ViewModels.Auth
             }
             else
             {
-                MessageBox.Show("Đăng ký thất bại. Email có thể đã tồn tại.", "Lỗi",
+                MessageBox.Show(errorMessage ?? "Đăng ký thất bại.", "Lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

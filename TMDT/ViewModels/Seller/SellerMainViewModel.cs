@@ -139,5 +139,11 @@ namespace TMDT.ViewModels.Seller
             SessionManager.Clear();
             Application.Current.Shutdown();
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) (_currentView as IDisposable)?.Dispose();
+            base.Dispose(disposing);
+        }
     }
 }

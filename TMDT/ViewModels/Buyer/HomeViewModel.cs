@@ -64,7 +64,7 @@ namespace TMDT.ViewModels.Buyer
                 foreach (var c in cats)
                     Categories.Add(c);
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine("LoadCategories failed: " + ex.Message); }
         }
 
         private void LoadFeaturedProducts()
@@ -81,7 +81,7 @@ namespace TMDT.ViewModels.Buyer
                 foreach (var p in products)
                     FeaturedProducts.Add(p);
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine("LoadFeaturedProducts failed: " + ex.Message); }
         }
 
         private void LoadBanners()
@@ -110,7 +110,7 @@ namespace TMDT.ViewModels.Buyer
                 foreach (var p in products)
                     FeaturedProducts.Add(p);
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine("SearchProducts failed: " + ex.Message); }
         }
 
         private void ExecuteProductClick(Product product)

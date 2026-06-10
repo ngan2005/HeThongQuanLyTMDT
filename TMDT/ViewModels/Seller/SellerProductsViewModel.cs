@@ -22,7 +22,7 @@ namespace TMDT.ViewModels.Seller
         private string _productNameInput;
         private string _productCodeInput;
         private decimal _priceInput;
-        private decimal _originalPriceInput;
+        private decimal? _originalPriceInput;
         private int _stockInput;
         private string _descriptionInput;
         private Category _selectedCategoryInput;
@@ -80,7 +80,7 @@ namespace TMDT.ViewModels.Seller
             get => _priceInput;
             set { _priceInput = value; OnPropertyChanged(); }
         }
-        public decimal OriginalPriceInput
+        public decimal? OriginalPriceInput
         {
             get => _originalPriceInput;
             set { _originalPriceInput = value; OnPropertyChanged(); }
@@ -135,7 +135,7 @@ namespace TMDT.ViewModels.Seller
 
         public SellerProductsViewModel()
         {
-            try { _context = new TmdtContext(); } catch { }
+            try { _context = new TmdtContext(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine("Init TmdtContext failed: " + ex.Message); }
 
             Products = new ObservableCollection<Product>();
             Categories = new ObservableCollection<Category>();
@@ -161,7 +161,7 @@ namespace TMDT.ViewModels.Seller
                         Categories.Add(cat);
                 }
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine("LoadCategories failed: " + ex.Message); }
 
             if (!Categories.Any())
             {
@@ -240,7 +240,7 @@ namespace TMDT.ViewModels.Seller
             ProductNameInput = "";
             ProductCodeInput = "";
             PriceInput = 0;
-            OriginalPriceInput = 0;
+            OriginalPriceInput = null;
             StockInput = 0;
             DescriptionInput = "";
             SelectedCategoryInput = Categories.FirstOrDefault();
@@ -261,6 +261,11 @@ namespace TMDT.ViewModels.Seller
                 MessageBox.Show("Giá bán phải lớn hơn 0!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
+            if (SelectedCategoryInput == null)
+            {
+                MessageBox.Show("Vui lòng chọn danh mục sản phẩm!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
             int currentShopId = GetCurrentShopId();
             if (currentShopId <= 0)
@@ -271,33 +276,32 @@ namespace TMDT.ViewModels.Seller
 
             if (IsEditMode && SelectedProduct != null)
             {
-                SelectedProduct.ProductName = ProductNameInput;
-                SelectedProduct.ProductCode = ProductCodeInput;
-                SelectedProduct.Price = PriceInput;
-                SelectedProduct.OriginalPrice = OriginalPriceInput > 0 ? OriginalPriceInput : PriceInput;
-                SelectedProduct.StockQuantity = StockInput;
-                SelectedProduct.Description = DescriptionInput;
-                SelectedProduct.CategoryId = SelectedCategoryInput?.CategoryId ?? 1;
-                SelectedProduct.Category = SelectedCategoryInput;
+                // Kiểm tra sản phẩm thuộc shop hiện tại
+                if (SelectedProduct.ShopId != currentShopId)
+                {
+                    MessageBox.Show("Bạn không có quyền sửa sản phẩm này.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
 
                 try
                 {
-                    var dbProd = await _context.Products.FindAsync(SelectedProduct.ProductId);
-                    if (dbProd != null)
-                    {
-                        dbProd.ProductName = ProductNameInput;
-                        dbProd.ProductCode = ProductCodeInput;
-                        dbProd.Price = PriceInput;
-                        dbProd.OriginalPrice = OriginalPriceInput > 0 ? OriginalPriceInput : PriceInput;
-                        dbProd.StockQuantity = StockInput;
-                        dbProd.Description = DescriptionInput;
-                        dbProd.CategoryId = SelectedCategoryInput?.CategoryId ?? 1;
-                        await _context.SaveChangesAsync();
-                    }
+                    // SelectedProduct đã được EF track, FindAsync trả về cùng object
+                    SelectedProduct.ProductName = ProductNameInput;
+                    SelectedProduct.ProductCode = ProductCodeInput;
+                    SelectedProduct.Price = PriceInput;
+                    SelectedProduct.OriginalPrice = OriginalPriceInput;
+                    SelectedProduct.StockQuantity = StockInput;
+                    SelectedProduct.Description = DescriptionInput;
+                    SelectedProduct.CategoryId = SelectedCategoryInput.CategoryId;
+                    SelectedProduct.Category = SelectedCategoryInput;
+
+                    await _context.SaveChangesAsync();
                 }
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine("Update product failed: " + ex.Message);
+                    MessageBox.Show("Lỗi khi cập nhật sản phẩm: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
                 }
 
                 AuditLogHelper.Log("UPDATE_PRODUCT", $"Sửa '{ProductNameInput}' (ID:{SelectedProduct.ProductId})", "Product", "Normal");
@@ -313,10 +317,10 @@ namespace TMDT.ViewModels.Seller
                         ? "PROD-" + Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper()
                         : ProductCodeInput,
                     Price = PriceInput,
-                    OriginalPrice = OriginalPriceInput > 0 ? OriginalPriceInput : PriceInput,
+                    OriginalPrice = OriginalPriceInput,
                     StockQuantity = StockInput,
                     Description = DescriptionInput,
-                    CategoryId = SelectedCategoryInput?.CategoryId ?? 1,
+                    CategoryId = SelectedCategoryInput.CategoryId,
                     Status = "Pending",
                     CreatedAt = DateTime.Now,
                     SoldCount = 0,
@@ -332,7 +336,8 @@ namespace TMDT.ViewModels.Seller
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine("Insert product failed: " + ex.Message);
-                    newProd.ProductId = new Random().Next(8000, 9999);
+                    MessageBox.Show("Lỗi khi thêm sản phẩm: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
                 }
 
                 AuditLogHelper.Log("ADD_PRODUCT", $"Thêm '{ProductNameInput}' (Code:{newProd.ProductCode})", "Product", "Normal");
@@ -346,6 +351,14 @@ namespace TMDT.ViewModels.Seller
         private async void ExecuteDeleteProduct()
         {
             if (SelectedProduct == null) return;
+
+            // Kiểm tra sản phẩm thuộc shop hiện tại
+            int currentShopId = GetCurrentShopId();
+            if (SelectedProduct.ShopId != currentShopId)
+            {
+                MessageBox.Show("Bạn không có quyền xóa sản phẩm này.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
             var result = MessageBox.Show(
                 $"Xóa sản phẩm '{SelectedProduct.ProductName}'?\nSản phẩm sẽ được chuyển vào thùng rác.",
@@ -377,13 +390,19 @@ namespace TMDT.ViewModels.Seller
             try
             {
                 if (_context == null) return 0;
+                if (SessionManager.CurrentUser == null) return 0;
+
                 var shop = _context.Shops
-                    .Include(s => s.User)
-                    .FirstOrDefault(s => s.User != null && s.User.Email == "seller@myshop.com")
-                    ?? _context.Shops.FirstOrDefault();
+                    .FirstOrDefault(s => s.UserId == SessionManager.CurrentUser.UserId);
                 return shop?.ShopId ?? 0;
             }
             catch { return 0; }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) _context?.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

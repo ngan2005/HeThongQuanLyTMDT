@@ -1,5 +1,5 @@
 using System.Windows;
-using TMDT.Utilities;
+using TMDT.ViewModels.Buyer;
 
 namespace TMDT.Views
 {
@@ -8,15 +8,13 @@ namespace TMDT.Views
         public MainWindow()
         {
             InitializeComponent();
+        }
 
-            // Chỉ Buyer mới được vào trang này
-            if (!SessionManager.IsBuyer)
-            {
-                MessageBox.Show("Bạn không có quyền truy cập trang này.", "Cảnh báo",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                Close();
-                return;
-            }
+        protected override void OnClosed(EventArgs e)
+        {
+            if (DataContext is BuyerMainViewModel vm)
+                vm.Dispose();
+            base.OnClosed(e);
         }
     }
 }

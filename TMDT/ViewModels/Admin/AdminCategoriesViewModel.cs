@@ -266,5 +266,10 @@ namespace TMDT.ViewModels.Admin
             ClearInputs();
             HideDetailRequest?.Invoke();
         }
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) _context?.Dispose();
+            base.Dispose(disposing);
+        }
     }
 }

@@ -9,7 +9,7 @@ namespace TMDT.ViewModels.Admin
 {
     public class AdminDashboardViewModel : ViewModelBase
     {
-        private TmdtContext _context;
+
 
         private int _totalUsers;
         public int TotalUsers { get => _totalUsers; set { _totalUsers = value; OnPropertyChanged(); } }
@@ -52,32 +52,39 @@ namespace TMDT.ViewModels.Admin
             LoadRealData();
         }
 
+        // Không giữ context làm field — dùng using var cục bộ trong LoadRealData
+
         private void LoadRealData()
         {
             try
             {
-                _context = new TmdtContext();
+                // ✅ using var — tự đóng kết nối DB sau khi xong
+                using var ctx = new TmdtContext();
 
-                TotalUsers = _context.Users.Count();
-                TotalShops = _context.Shops.Count();
-                PendingShops = _context.Shops.Count(s => s.IsActive == null);
+                // ── Thống kê tổng quan (1 query mỗi cái) ─────────────────────
+                TotalUsers   = ctx.Users.Count();
+                TotalShops   = ctx.Shops.Count();
+                PendingShops = ctx.Shops.Count(s => s.IsActive == null);
 
-                TotalProducts = _context.Products.Count();
-                PendingProducts = _context.Products.Count(p => p.Status == "Pending" || p.ApprovedAt == null);
+                TotalProducts   = ctx.Products.Count();
+                PendingProducts = ctx.Products.Count(p => p.Status == "Pending" || p.ApprovedAt == null);
 
                 var currentMonth = DateTime.Now.Month;
-                var currentYear = DateTime.Now.Year;
+                var currentYear  = DateTime.Now.Year;
 
-                var monthlyOrders = _context.Orders
-                    .Where(o => o.OrderDate.HasValue && o.OrderDate.Value.Month == currentMonth && o.OrderDate.Value.Year == currentYear)
+                var monthlyOrders = ctx.Orders
+                    .Where(o => o.OrderDate.HasValue
+                             && o.OrderDate.Value.Month == currentMonth
+                             && o.OrderDate.Value.Year  == currentYear)
                     .ToList();
 
-                MonthlyRevenue = monthlyOrders.Sum(o => o.TotalAmount ?? 0);
+                MonthlyRevenue    = monthlyOrders.Sum(o => o.TotalAmount ?? 0);
                 CommissionsEarned = monthlyOrders.Sum(o => o.PlatformFee ?? 0);
 
-                WithdrawPendingCount = _context.WithdrawRequests.Count(w => w.Status == "Pending");
+                WithdrawPendingCount = ctx.WithdrawRequests.Count(w => w.Status == "Pending");
 
-                var recentOrders = _context.Orders
+                // ── 5 đơn hàng mới nhất ───────────────────────────────────────
+                var recentOrders = ctx.Orders
                     .Include(o => o.Buyer)
                     .Include(o => o.Shop)
                     .OrderByDescending(o => o.OrderDate)
@@ -85,67 +92,83 @@ namespace TMDT.ViewModels.Admin
                     .ToList();
 
                 foreach (var order in recentOrders)
-                {
                     RecentOrders.Add(new OrderSummary
                     {
-                        OrderId = order.OrderCode ?? $"ORD-{order.OrderId}",
-                        BuyerName = order.Buyer?.FullName ?? "Khách hàng",
-                        ShopName = order.Shop?.ShopName ?? "Cửa hàng",
-                        TotalAmount = order.TotalAmount ?? 0,
-                        Commission = order.PlatformFee ?? 0,
+                        OrderId       = order.OrderCode ?? $"ORD-{order.OrderId}",
+                        BuyerName     = order.Buyer?.FullName ?? "Khách hàng",
+                        ShopName      = order.Shop?.ShopName  ?? "Cửa hàng",
+                        TotalAmount   = order.TotalAmount  ?? 0,
+                        Commission    = order.PlatformFee  ?? 0,
                         PaymentMethod = order.PaymentMethod ?? "Online",
-                        Status = order.OrderStatus ?? "Hoàn thành"
+                        Status        = order.OrderStatus  ?? "Hoàn thành"
                     });
-                }
 
-                var topShops = _context.Shops
-                    .OrderByDescending(s => s.WalletBalance)
+                // ── Top shops theo DOANH THU THỰC (tổng TotalAmount từ Orders) ─
+                // ✅ Sửa: không dùng WalletBalance (số dư ví chưa rút)
+                var topShops = ctx.Orders
+                    .Where(o => o.ShopId != null && o.TotalAmount != null)
+                    .GroupBy(o => o.ShopId)
+                    .Select(g => new
+                    {
+                        ShopId     = g.Key,
+                        TotalSales = g.Sum(o => o.TotalAmount ?? 0)
+                    })
+                    .OrderByDescending(x => x.TotalSales)
                     .Take(4)
                     .ToList();
 
-                foreach (var shop in topShops)
+                foreach (var ts in topShops)
                 {
-                    TopShops.Add(new ShopSummary
-                    {
-                        ShopName = shop.ShopName,
-                        TotalSales = shop.WalletBalance ?? 0,
-                        Category = "Đa ngành"
-                    });
+                    var shop = ctx.Shops.Find(ts.ShopId);
+                    if (shop != null)
+                        TopShops.Add(new ShopSummary
+                        {
+                            ShopName   = shop.ShopName,
+                            TotalSales = ts.TotalSales,
+                            Category   = "Đa ngành"
+                        });
                 }
 
-                var last7Days = Enumerable.Range(0, 7).Select(i => DateTime.Now.Date.AddDays(-i)).Reverse().ToList();
-                var rawTrend = new List<RevenueTrendPoint>();
+                // ── Revenue trend 7 ngày — 1 QUERY DUY NHẤT thay vì 7 ─────────
+                var since     = DateTime.Now.Date.AddDays(-6);
+                // Lấy tất cả đơn trong 7 ngày, group bên C# (tránh Date() trên SQL Server)
+                var weekOrders = ctx.Orders
+                    .Where(o => o.OrderDate.HasValue && o.OrderDate.Value >= since)
+                    .Select(o => new { o.OrderDate, o.TotalAmount, o.PlatformFee })
+                    .ToList();
 
-                foreach (var date in last7Days)
+                var last7Days = Enumerable.Range(0, 7)
+                    .Select(i => DateTime.Now.Date.AddDays(-6 + i))
+                    .ToList();
+
+                var rawTrend = last7Days.Select(date => new RevenueTrendPoint
                 {
-                    var dailyOrders = _context.Orders
-                        .Where(o => o.OrderDate.HasValue && o.OrderDate.Value.Date == date)
-                        .ToList();
+                    DayName     = GetVietnameseDayOfWeek(date.DayOfWeek),
+                    TotalAmount = weekOrders
+                        .Where(o => o.OrderDate!.Value.Date == date)
+                        .Sum(o => o.TotalAmount ?? 0),
+                    Commission  = weekOrders
+                        .Where(o => o.OrderDate!.Value.Date == date)
+                        .Sum(o => o.PlatformFee ?? 0)
+                }).ToList();
 
-                    rawTrend.Add(new RevenueTrendPoint
-                    {
-                        DayName = GetVietnameseDayOfWeek(date.DayOfWeek),
-                        TotalAmount = dailyOrders.Sum(o => o.TotalAmount ?? 0),
-                        Commission = dailyOrders.Sum(o => o.PlatformFee ?? 0)
-                    });
-                }
-
-                decimal maxAmount = rawTrend.Any() ? rawTrend.Max(t => t.TotalAmount) : 0;
-                decimal maxCommission = rawTrend.Any() ? rawTrend.Max(t => t.Commission) : 0;
-                if (maxAmount == 0) maxAmount = 1;
+                decimal maxAmount     = rawTrend.Any() ? rawTrend.Max(t => t.TotalAmount) : 0;
+                decimal maxCommission = rawTrend.Any() ? rawTrend.Max(t => t.Commission)  : 0;
+                if (maxAmount     == 0) maxAmount     = 1;
                 if (maxCommission == 0) maxCommission = 1;
 
                 foreach (var p in rawTrend)
                 {
-                    p.AmountHeight = p.TotalAmount > 0 ? (double)(p.TotalAmount / maxAmount * 150) : 5;
-                    p.CommissionHeight = p.Commission > 0 ? (double)(p.Commission / maxCommission * 150) : 5;
+                    p.AmountHeight     = p.TotalAmount > 0 ? (double)(p.TotalAmount / maxAmount     * 150) : 5;
+                    p.CommissionHeight = p.Commission  > 0 ? (double)(p.Commission  / maxCommission * 150) : 5;
                     RevenueTrend.Add(p);
                 }
 
-                var topCategories = _context.Products
+                // ── Phân bổ danh mục ─────────────────────────────────────────
+                var topCategories = ctx.Products
                     .Include(p => p.Category)
                     .Where(p => p.Category != null)
-                    .GroupBy(p => p.Category.CategoryName)
+                    .GroupBy(p => p.Category!.CategoryName)
                     .Select(g => new { CategoryName = g.Key, Count = g.Count() })
                     .OrderByDescending(x => x.Count)
                     .Take(4)
@@ -157,21 +180,20 @@ namespace TMDT.ViewModels.Admin
                 string[] colors = { "#593AD8", "#10B981", "#EA580C", "#EC4899" };
                 for (int i = 0; i < topCategories.Count; i++)
                 {
-                    var cat = topCategories[i];
-                    double percentage = Math.Round((cat.Count / totalProductsWithCat) * 100);
-
+                    var cat        = topCategories[i];
+                    double pct     = Math.Round((cat.Count / totalProductsWithCat) * 100);
                     CategoryShares.Add(new CategorySharePoint
                     {
                         CategoryName = cat.CategoryName,
-                        Percentage = percentage,
-                        DisplayValue = $"{percentage}% ({cat.Count})",
-                        ColorHex = colors[i % colors.Length]
+                        Percentage   = pct,
+                        DisplayValue = $"{pct}% ({cat.Count})",
+                        ColorHex     = colors[i % colors.Length]
                     });
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error loading dashboard data: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[Dashboard] LoadRealData error: {ex.Message}");
             }
         }
 

@@ -1,9 +1,10 @@
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace TMDT.ViewModels
 {
-    public abstract class ViewModelBase : INotifyPropertyChanged
+    public abstract class ViewModelBase : INotifyPropertyChanged, IDisposable
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -19,5 +20,13 @@ namespace TMDT.ViewModels
             OnPropertyChanged(propertyName);
             return true;
         }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing) { }
     }
 }

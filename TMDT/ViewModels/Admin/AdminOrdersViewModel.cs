@@ -299,5 +299,11 @@ namespace TMDT.ViewModels.Admin
                 SelectedOrder = FilteredOrders.FirstOrDefault(o => o.OrderId == selectedId.Value);
             }
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) _context?.Dispose();
+            base.Dispose(disposing);
+        }
     }
 }

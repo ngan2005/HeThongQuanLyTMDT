@@ -4,10 +4,14 @@
     
     <conv:BooleanToVisibilityConverter x:Key="BoolToVis"/>
     <conv:InverseBooleanConverter x:Key="InverseBool"/>
+    <conv:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis"/>
     <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
     <conv:HexToCharConverter x:Key="HexToCharConverter"/>
     <conv:EqualityToBooleanConverter x:Key="EqualityToBooleanConverter"/>
     <conv:Base64ToImageConverter x:Key="Base64ToImageConverter"/>
     <conv:StringNullOrEmptyToBoolConverter x:Key="StringNullOrEmptyToBool"/>
+    <conv:GreaterThanZeroToVisibilityConverter x:Key="GreaterThanZeroToVis"/>
+    <conv:CountToVisibilityConverter x:Key="CountToVis"/>
+    <conv:InitialLetterConverter x:Key="InitialLetterConverter"/>
     
 </ResourceDictionary>

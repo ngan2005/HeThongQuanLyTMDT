@@ -1,50 +1,82 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!-- ===== ADMIN LIGHT THEME ===== -->
+    <!-- ===== ADMIN LIGHT THEME — Pearl Indigo Palette ===== -->
 
-    <!-- Keys matching existing views -->
+    <!-- ── Typography Colors ── -->
     <SolidColorBrush x:Key="TextPrimary"        Color="#0F172A"/>
-    <SolidColorBrush x:Key="TextSecondary"       Color="#64748B"/>
+    <SolidColorBrush x:Key="TextSecondary"       Color="#475569"/>
+    <SolidColorBrush x:Key="TextMuted"           Color="#94A3B8"/>
+
+    <!-- ── Brand / Accent (Indigo-Violet) ── -->
     <SolidColorBrush x:Key="BrandPurple"         Color="#4F46E5"/>
+    <SolidColorBrush x:Key="BrandAccent"         Color="#6366F1"/>
+    <SolidColorBrush x:Key="BrandAccentLight"    Color="#C7D2FE"/>
 
-    <!-- Main backgrounds -->
+    <!-- ── Main Backgrounds ── -->
     <SolidColorBrush x:Key="AppBackground"       Color="#F1F5F9"/>
-    <SolidColorBrush x:Key="SidebarBg"           Color="#FFFFFF"/>
     <SolidColorBrush x:Key="BgMain"              Color="#F1F5F9"/>
+    <SolidColorBrush x:Key="SidebarBg"           Color="#FFFFFF"/>
     <SolidColorBrush x:Key="BgWhite"             Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="SurfaceHigh"         Color="#F8FAFC"/>
 
-    <!-- Brand -->
-    <SolidColorBrush x:Key="BrandActiveBg"       Color="#EEF2FF"/>
-    <SolidColorBrush x:Key="BrandHoverBg"        Color="#F8FAFC"/>
+    <!-- ── Surface Levels ── -->
+    <SolidColorBrush x:Key="SurfaceLow"          Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="SurfaceMid"          Color="#F8FAFC"/>
+    <SolidColorBrush x:Key="SurfaceHigh"         Color="#F1F5F9"/>
+    <SolidColorBrush x:Key="SurfaceCard"         Color="#FFFFFF"/>
 
-    <!-- Borders -->
+    <!-- ── Borders ── -->
     <SolidColorBrush x:Key="BorderSlate"         Color="#E2E8F0"/>
+    <SolidColorBrush x:Key="BorderSubtle"        Color="#F1F5F9"/>
 
-    <!-- DataGrid -->
+    <!-- ── Brand States ── -->
+    <SolidColorBrush x:Key="BrandActiveBg"       Color="#EEF2FF"/>
+    <SolidColorBrush x:Key="BrandHoverBg"        Color="#F5F3FF"/>
+
+    <!-- ── DataGrid ── -->
     <SolidColorBrush x:Key="GridRowBg"           Color="#FFFFFF"/>
     <SolidColorBrush x:Key="GridAltRowBg"        Color="#F8FAFC"/>
-    <SolidColorBrush x:Key="GridHeaderBg"        Color="#F8FAFC"/>
+    <SolidColorBrush x:Key="GridHeaderBg"        Color="#EEF2FF"/>
+    <SolidColorBrush x:Key="GridSelectedBg"      Color="#E0E7FF"/>
 
-    <!-- Action buttons -->
-    <SolidColorBrush x:Key="ActionBtnBg"         Color="#EFF3FF"/>
-    <SolidColorBrush x:Key="ActionBtnHoverBg"    Color="#DFE9FD"/>
+    <!-- ── Action Buttons ── -->
+    <SolidColorBrush x:Key="ActionBtnBg"         Color="#4F46E5"/>
+    <SolidColorBrush x:Key="ActionBtnHoverBg"    Color="#4338CA"/>
+    <SolidColorBrush x:Key="PrimaryBtnText"      Color="#FFFFFF"/>
 
-    <!-- Semantic colors -->
-    <SolidColorBrush x:Key="PrimaryBtnText"     Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="DangerRed"           Color="#EF4444"/>
+    <!-- ── Semantic — Danger ── -->
+    <SolidColorBrush x:Key="DangerRed"           Color="#DC2626"/>
     <SolidColorBrush x:Key="DangerRedBg"         Color="#FEF2F2"/>
     <SolidColorBrush x:Key="DangerRedBorder"     Color="#FECACA"/>
 
-    <!-- Sidebar (Light) -->
-    <SolidColorBrush x:Key="SidebarTextDefault"  Color="#414750"/>
-    <SolidColorBrush x:Key="SidebarTextSelected" Color="#004277"/>
-    <SolidColorBrush x:Key="SidebarBorder"       Color="#C1C7D2"/>
-    <SolidColorBrush x:Key="SidebarHoverBg"      Color="#E6E2DE"/>
-    <SolidColorBrush x:Key="SidebarActiveBg"      Color="#D3E4FF"/>
-    <SolidColorBrush x:Key="SidebarActiveText"   Color="#001C38"/>
+    <!-- ── Semantic — Success ── -->
+    <SolidColorBrush x:Key="SuccessGreen"        Color="#059669"/>
+    <SolidColorBrush x:Key="SuccessGreenBg"      Color="#ECFDF5"/>
 
-    <!-- Cards / Lightbox -->
+    <!-- ── Semantic — Warning ── -->
+    <SolidColorBrush x:Key="WarningOrange"       Color="#D97706"/>
+    <SolidColorBrush x:Key="WarningBg"           Color="#FFFBEB"/>
+
+    <!-- ── Sidebar (Light) ── -->
+    <SolidColorBrush x:Key="SidebarTextDefault"  Color="#475569"/>
+    <SolidColorBrush x:Key="SidebarTextSelected" Color="#1E1B4B"/>
+    <SolidColorBrush x:Key="SidebarBorder"       Color="#E2E8F0"/>
+    <SolidColorBrush x:Key="SidebarHoverBg"      Color="#EEF2FF"/>
+    <SolidColorBrush x:Key="SidebarActiveBg"     Color="#E0E7FF"/>
+    <SolidColorBrush x:Key="SidebarActiveText"   Color="#3730A3"/>
+
+    <!-- ── Cards / Lightbox ── -->
     <SolidColorBrush x:Key="CardBg"              Color="#FFFFFF"/>
     <SolidColorBrush x:Key="ProfileCardBg"       Color="#F8FAFC"/>
+
+    <!-- ── Gradients ── -->
+    <LinearGradientBrush x:Key="BrandGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#4F46E5" Offset="0"/>
+        <GradientStop Color="#7C3AED" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="CardHeaderGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#EEF2FF" Offset="0"/>
+        <GradientStop Color="#E0E7FF" Offset="1"/>
+    </LinearGradientBrush>
+
 </ResourceDictionary>

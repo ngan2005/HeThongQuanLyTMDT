@@ -375,13 +375,8 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <Border Grid.Row="0" CornerRadius="16,16,0,0" Padding="32,28,32,24" ClipToBounds="True">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                <GradientStop Color="{DynamicResource BgMain.Color}" Offset="0"/>
-                                <GradientStop Color="{DynamicResource SurfaceHigh.Color}" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
+                    <Border Grid.Row="0" CornerRadius="16,16,0,0" Padding="32,28,32,24" ClipToBounds="True"
+                            Background="{DynamicResource CardHeaderGradient}">
 
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -750,7 +745,7 @@
                     <Border Grid.Row="3" CornerRadius="0,0,16,16" BorderThickness="0,1,0,0"
                             BorderBrush="{DynamicResource BorderSlate}" Padding="32,12" Margin="0,16,0,0">
                         <Border.Background>
-                            <SolidColorBrush Color="#0A0E1A" Opacity="0.5"/>
+                            <SolidColorBrush Color="{DynamicResource BgMain.Color}" Opacity="0.5"/>
                         </Border.Background>
                         <Grid>
                             <TextBlock HorizontalAlignment="Left" FontSize="9.5" FontWeight="SemiBold"

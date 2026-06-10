@@ -524,5 +524,11 @@ namespace TMDT.ViewModels.Admin
             if (string.IsNullOrEmpty(text)) return "";
             return text.Replace("\"", "\"\"");
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) _context?.Dispose();
+            base.Dispose(disposing);
+        }
     }
 }

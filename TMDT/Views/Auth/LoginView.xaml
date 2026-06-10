@@ -862,8 +862,8 @@
                                     <Grid.RenderTransform>
                                         <TranslateTransform x:Name="RevealUsernameTransform" Y="15"/>
                                     </Grid.RenderTransform>
-                                    <TextBox x:Name="txtUsername" Style="{StaticResource ModernTextBox}" Tag="Tên đăng nhập hoặc Email"
-                                             Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBox x:Name="txtUsername" Style="{StaticResource ModernTextBox}" Tag="Email"
+                                             Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
                                     <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#94A3B8" Opacity="0.5" Margin="15,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
                                 </Grid>
 

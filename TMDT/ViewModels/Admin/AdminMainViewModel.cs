@@ -14,8 +14,9 @@ namespace TMDT.ViewModels.Admin
             set { _currentView = value; OnPropertyChanged(); }
         }
 
-        public string AdminName => SessionManager.CurrentUser?.FullName ?? "Administrator";
-        public string AdminRole => SessionManager.CurrentUser?.RoleName ?? "Admin";
+        public string AdminName   => SessionManager.CurrentUser?.FullName ?? "Administrator";
+        public string AdminRole   => SessionManager.CurrentUser?.RoleName ?? "Admin";
+        public string AdminAvatar => SessionManager.CurrentUser?.Avatar   ?? "";
 
         private string _activeMenu = "Dashboard";
         public string ActiveMenu
@@ -70,9 +71,9 @@ namespace TMDT.ViewModels.Admin
             ShowMarketingCommand = new RelayCommand(o => { CurrentView = new AdminMarketingViewModel(); ActiveMenu = "Marketing"; });
             ShowCategoriesCommand = new RelayCommand(o => { CurrentView = new AdminCategoriesViewModel(); ActiveMenu = "Categories"; });
             ShowReportsCommand = new RelayCommand(o => { CurrentView = new AdminReportsViewModel(); ActiveMenu = "Reports"; });
-            ShowAdminsCommand = new RelayCommand(o => { CurrentView = new AdminUsersViewModel("Admin"); ActiveMenu = "Admins"; });
-            ShowSellersCommand = new RelayCommand(o => { CurrentView = new AdminUsersViewModel("Seller"); ActiveMenu = "Sellers"; });
-            ShowBuyersCommand = new RelayCommand(o => { CurrentView = new AdminUsersViewModel("Buyer"); ActiveMenu = "Buyers"; });
+            ShowAdminsCommand = new RelayCommand(o => { CurrentView = new AdminUsersViewModel(SessionManager.RoleAdmin); ActiveMenu = "Admins"; });
+            ShowSellersCommand = new RelayCommand(o => { CurrentView = new AdminUsersViewModel(SessionManager.RoleSeller); ActiveMenu = "Sellers"; });
+            ShowBuyersCommand = new RelayCommand(o => { CurrentView = new AdminUsersViewModel(SessionManager.RoleBuyer); ActiveMenu = "Buyers"; });
             ShowSettingsCommand = new RelayCommand(o => { CurrentView = new AdminSettingsViewModel(); ActiveMenu = "Settings"; });
             ShowAuditLogsCommand = new RelayCommand(o => { CurrentView = new AdminAuditLogsViewModel(); ActiveMenu = "AuditLogs"; });
             ShowProfileCommand = new RelayCommand(o =>

@@ -66,14 +66,7 @@
             <views:AdminProfileView/>
         </DataTemplate>
 
-        <!-- Design System Colors — LogisticsPro Warm MD3 Palette -->
-        <SolidColorBrush x:Key="SidebarBg" Color="#0F1524"/>
-        <SolidColorBrush x:Key="BrandPurple" Color="#7DD3FC"/>
-        <SolidColorBrush x:Key="BgWhite" Color="#141C2E"/>
-        <SolidColorBrush x:Key="BgMain" Color="#0A0E1A"/>
-        <SolidColorBrush x:Key="TextPrimary" Color="#E0E8F0"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#A0B4C4"/>
-        <SolidColorBrush x:Key="BorderSlate" Color="#2A3A48"/>
+        <!-- ⚠️ Colors are defined in AdminDarkTheme.xaml / AdminLightTheme.xaml — do NOT hardcode here -->
 
         <!-- Sidebar RadioButton Style — LogisticsPro Warm MD3 Light Sidebar -->
         <Style x:Key="SidebarButton" TargetType="RadioButton">
@@ -197,7 +190,7 @@
         <!-- Window Control Button Styles -->
         <Style x:Key="WindowNavButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Width" Value="32"/>
             <Setter Property="Height" Value="32"/>
@@ -220,7 +213,7 @@
 
         <Style x:Key="WindowCloseButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Width" Value="32"/>
             <Setter Property="Height" Value="32"/>
@@ -245,7 +238,7 @@
 
     <Grid>
         <!-- Main Window Container -->
-        <Border x:Name="MainBorder" Background="{StaticResource BgMain}" CornerRadius="16" BorderBrush="{StaticResource BorderSlate}" BorderThickness="1">
+        <Border x:Name="MainBorder" Background="{DynamicResource BgMain}" CornerRadius="16" BorderBrush="{DynamicResource BorderSlate}" BorderThickness="1">
             <Border.Effect>
                 <DropShadowEffect BlurRadius="30" Color="#2B1B69" Direction="270" ShadowDepth="4" Opacity="0.10"/>
             </Border.Effect>
@@ -262,7 +255,7 @@
             <!-- ========================================== -->
             <!-- COLUMN 0: SIDEBAR (DARK INDIGO THEME) -->
             <!-- ========================================== -->
-            <Border x:Name="SidebarBorder" Grid.Column="0" Background="{StaticResource SidebarBg}" BorderBrush="{StaticResource BorderSlate}" BorderThickness="0,0,1,0" CornerRadius="15,0,0,15" Width="240" ClipToBounds="True">
+            <Border x:Name="SidebarBorder" Grid.Column="0" Background="{DynamicResource SidebarBg}" BorderBrush="{DynamicResource BorderSlate}" BorderThickness="0,0,1,0" CornerRadius="15,0,0,15" Width="240" ClipToBounds="True">
                 <Grid Margin="8,16">
                     <Grid.RowDefinitions>
                         <!-- Brand logo & System tag -->
@@ -502,9 +495,57 @@
                                                     <ColumnDefinition Width="Auto"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <!-- Avatar Circle -->
-                                                <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16" Background="{StaticResource BrandPurple}">
-                                                    <TextBlock Text="A" Foreground="{DynamicResource TextPrimary}" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                <!-- Avatar Circle — hiển thị ảnh thật hoặc fallback chữ cái -->
+                                                <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18"
+                                                        Background="{DynamicResource BrandActiveBg}"
+                                                        BorderThickness="2" BorderBrush="{DynamicResource BrandPurple}">
+                                                    <Grid>
+                                                        <!-- Ảnh đại diện thật (hiện khi có avatar) -->
+                                                        <Border CornerRadius="16" ClipToBounds="True">
+                                                            <Image Source="{Binding DataContext.AdminAvatar,
+                                                                           RelativeSource={RelativeSource AncestorType=Window},
+                                                                           Converter={StaticResource Base64ToImageConverter}}"
+                                                                   Stretch="UniformToFill"
+                                                                   RenderOptions.BitmapScalingMode="HighQuality">
+                                                                <Image.Style>
+                                                                    <Style TargetType="Image">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding DataContext.AdminAvatar,
+                                                                                                  RelativeSource={RelativeSource AncestorType=Window},
+                                                                                                  Converter={StaticResource StringNullOrEmptyToBool}}"
+                                                                                         Value="True">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Image.Style>
+                                                            </Image>
+                                                        </Border>
+
+                                                        <!-- Fallback: chữ cái đầu của tên (hiện khi chưa có avatar) -->
+                                                        <TextBlock Text="{Binding DataContext.AdminName,
+                                                                          RelativeSource={RelativeSource AncestorType=Window},
+                                                                          Converter={StaticResource InitialLetterConverter}}"
+                                                                   Foreground="{DynamicResource BrandPurple}"
+                                                                   FontWeight="Bold" FontSize="14"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                   FontFamily="Be Vietnam Pro, Segoe UI">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding DataContext.AdminAvatar,
+                                                                                              RelativeSource={RelativeSource AncestorType=Window},
+                                                                                              Converter={StaticResource StringNullOrEmptyToBool}}"
+                                                                                     Value="True">
+                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Grid>
                                                 </Border>
 
                                                 <!-- Admin details (hidden when collapsed) -->
@@ -563,6 +604,43 @@
 
                      <!-- Top Window action controls -->
                      <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+
+                         <!-- ☀️/🌙 Theme Toggle Button -->
+                         <Button x:Name="ThemeToggleBtn"
+                                 Click="ThemeToggle_Click"
+                                 Margin="0,0,6,0"
+                                 ToolTip="Chuyển chế độ Sáng / Tối"
+                                 Cursor="Hand"
+                                 Width="32" Height="32"
+                                 BorderThickness="0">
+                             <Button.Template>
+                                 <ControlTemplate TargetType="Button">
+                                     <Border x:Name="toggleBd"
+                                             Background="Transparent"
+                                             CornerRadius="8"
+                                             BorderThickness="1"
+                                             BorderBrush="{DynamicResource BorderSlate}">
+                                         <TextBlock x:Name="ThemeIcon"
+                                                    Text="&#xE708;"
+                                                    FontFamily="Segoe MDL2 Assets"
+                                                    FontSize="13"
+                                                    Foreground="{DynamicResource BrandPurple}"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"/>
+                                     </Border>
+                                     <ControlTemplate.Triggers>
+                                         <Trigger Property="IsMouseOver" Value="True">
+                                             <Setter TargetName="toggleBd" Property="Background" Value="{DynamicResource BrandActiveBg}"/>
+                                             <Setter TargetName="toggleBd" Property="BorderBrush" Value="{DynamicResource BrandPurple}"/>
+                                         </Trigger>
+                                     </ControlTemplate.Triggers>
+                                 </ControlTemplate>
+                             </Button.Template>
+                         </Button>
+
+                         <!-- Divider -->
+                         <Border Width="1" Height="16" Background="{DynamicResource BorderSlate}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+
                          <Button Style="{StaticResource WindowNavButton}" Click="MinimizeButton_Click" Margin="0,0,4,0" ToolTip="Thu nhỏ">
                              <TextBlock Text="&#xE921;" FontFamily="Segoe MDL2 Assets" FontSize="10" FontWeight="Bold"/>
                          </Button>

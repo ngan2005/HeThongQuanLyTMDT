@@ -15,6 +15,7 @@ namespace TMDT.Views.Admin
         private const double CollapsedWidth = 68;
         private DateTime _lastClickTime = DateTime.MinValue;
         private bool _isDarkMode = true; // Dark by default (matches App.xaml)
+        private System.Windows.Controls.TextBlock _themeIcon;
 
         private const string DarkThemeUri  = "Resources/Themes/AdminDarkTheme.xaml";
         private const string LightThemeUri = "Resources/Themes/AdminLightTheme.xaml";
@@ -22,6 +23,11 @@ namespace TMDT.Views.Admin
         public AdminMainView()
         {
             InitializeComponent();
+            Loaded += (s, e) =>
+            {
+                // Lấy TextBlock icon từ bên trong ControlTemplate của ThemeToggleBtn
+                _themeIcon = FindVisualChild<System.Windows.Controls.TextBlock>(ThemeToggleBtn);
+            };
         }
 
         private void SidebarToggle_Click(object sender, RoutedEventArgs e)
@@ -144,6 +150,14 @@ namespace TMDT.Views.Admin
 
                 // Load and add the new theme dict
                 appDicts.Add(new System.Windows.ResourceDictionary { Source = relativeUri });
+
+                // Update theme icon: moon = dark mode, sun = light mode
+                if (_themeIcon != null)
+                    _themeIcon.Text = _isDarkMode ? "\uE708" : "\uE706"; // Moon / Brightness (Segoe MDL2)
+
+                // Update tooltip
+                if (ThemeToggleBtn != null)
+                    ThemeToggleBtn.ToolTip = _isDarkMode ? "Chuyển sang chế độ Sáng" : "Chuyển sang chế độ Tối";
             }
             catch (Exception ex)
             {
@@ -151,6 +165,20 @@ namespace TMDT.Views.Admin
                 // Revert state if failed
                 _isDarkMode = !_isDarkMode;
             }
+        }
+
+        // Helper: tìm visual child theo type
+        private static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) return null;
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T t) return t;
+                var result = FindVisualChild<T>(child);
+                if (result != null) return result;
+            }
+            return null;
         }
 
         private void Logout_Click(object sender, RoutedEventArgs e)

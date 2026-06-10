@@ -71,6 +71,8 @@ public partial class TmdtContext : DbContext
 
     public virtual DbSet<WithdrawRequest> WithdrawRequests { get; set; }
 
+    public virtual DbSet<SystemConfig> SystemConfigs { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("workstation id=nhom8tmdt.mssql.somee.com;packet size=4096;user id=LuuThiKimNgan_SQLLogin_1;pwd=2mso97g2lj;data source=nhom8tmdt.mssql.somee.com;persist security info=False;initial catalog=nhom8tmdt;TrustServerCertificate=True;");
@@ -761,6 +763,30 @@ public partial class TmdtContext : DbContext
             entity.HasOne(d => d.Shop).WithMany(p => p.WithdrawRequests)
                 .HasForeignKey(d => d.ShopId)
                 .HasConstraintName("FK__WithdrawR__ShopI__1F98B2C1");
+        });
+
+        modelBuilder.Entity<SystemConfig>(entity =>
+        {
+            entity.HasKey(e => e.ConfigId);
+
+            entity.ToTable("SystemConfig");
+
+            entity.HasIndex(e => e.ConfigKey).IsUnique();
+
+            entity.Property(e => e.ConfigKey)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .IsRequired();
+
+            entity.Property(e => e.ConfigValue)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.Description)
+                .HasMaxLength(200);
+
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -65,7 +65,7 @@ namespace TMDT.ViewModels.Admin
 
         public AdminShopsViewModel()
         {
-            try { _context = new TmdtContext(); } catch { }
+            try { _context = new TmdtContext(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine("Init TmdtContext failed: " + ex.Message); }
 
             Shops = new ObservableCollection<Shop>();
 
@@ -132,7 +132,7 @@ namespace TMDT.ViewModels.Admin
                     var user = await _context.Users.FindAsync(dbShop.UserId);
                     if (user != null)
                     {
-                        var sellerRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == "Seller");
+                        var sellerRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == SessionManager.RoleSeller);
                         if (sellerRole != null && user.RoleId != sellerRole.RoleId)
                             user.RoleId = sellerRole.RoleId;
                     }
@@ -207,6 +207,12 @@ namespace TMDT.ViewModels.Admin
             MessageBox.Show($"Đã kích hoạt '{SelectedShop.ShopName}'.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             HideDetailRequest?.Invoke();
             LoadShops();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) _context?.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

@@ -25,6 +25,25 @@ namespace TMDT.Helpers
                 }
                 context.SaveChanges();
 
+                // Seed SystemConfig — cấu hình mặc định lưu vào DB
+                void UpsertConfig(string key, string value, string desc)
+                {
+                    if (!context.SystemConfigs.Any(c => c.ConfigKey == key))
+                        context.SystemConfigs.Add(new SystemConfig
+                        {
+                            ConfigKey   = key,
+                            ConfigValue = value,
+                            Description = desc,
+                            UpdatedAt   = DateTime.Now
+                        });
+                }
+                UpsertConfig("PlatformCommissionRate", "5",                  "Tỷ lệ hoa hồng nền tảng (%)");
+                UpsertConfig("MinWithdrawAmount",      "100000",              "Số tiền rút tối thiểu (VNĐ)");
+                UpsertConfig("MaintenanceMode",        "False",               "Chế độ bảo trì hệ thống");
+                UpsertConfig("RequireProductApproval", "True",                "Bắt buộc duyệt sản phẩm trước khi hiển thị");
+                UpsertConfig("SupportEmail",           "support@myshop.vn",   "Email hỗ trợ khách hàng");
+                context.SaveChanges();
+
                 // Seed Admin User
                 var adminEmail = "admin@myshop.com";
                 if (!context.Users.Any(u => u.Email == adminEmail))

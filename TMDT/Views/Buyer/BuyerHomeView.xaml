@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:components="clr-namespace:TMDT.Views.Components"
-             xmlns:vm="clr-namespace:TMDT.ViewModels.Buyer"
+             xmlns:vmBuyer="clr-namespace:TMDT.ViewModels.Buyer"
              xmlns:converters="clr-namespace:TMDT.Converters"
              mc:Ignorable="d"
              d:DesignHeight="1080" d:DesignWidth="1920"
@@ -15,10 +15,6 @@
         <converters:BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <converters:InverseBooleanToVisibilityConverter x:Key="BoolToVisInverse"/>
     </UserControl.Resources>
-
-    <UserControl.DataContext>
-        <vm:HomeViewModel/>
-    </UserControl.DataContext>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel>

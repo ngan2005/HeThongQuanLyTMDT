@@ -157,4 +157,69 @@ namespace TMDT.Converters
             throw new NotImplementedException();
         }
     }
+
+    public class GreaterThanZeroToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int i) return i > 0 ? Visibility.Visible : Visibility.Collapsed;
+            if (value is decimal d) return d > 0 ? Visibility.Visible : Visibility.Collapsed;
+            if (value is double dbl) return dbl > 0 ? Visibility.Visible : Visibility.Collapsed;
+            return Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class IntToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int i && parameter is string s && int.TryParse(s, out int param))
+                return i == param;
+            return false;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is bool b && b && parameter != null && int.TryParse(parameter.ToString(), out int param))
+                return param;
+            return Binding.DoNothing;
+        }
+    }
+
+    public class CountToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            bool isEmpty = (value as int? ?? 0) == 0;
+            bool showWhenEmpty = parameter?.ToString() == "Empty";
+            bool result = showWhenEmpty ? isEmpty : !isEmpty;
+            return result ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>Lấy ký tự đầu tiên (viết hoa) của chuỗi — dùng làm fallback avatar.</summary>
+    public class InitialLetterConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string s && !string.IsNullOrWhiteSpace(s))
+                return s.Trim()[0].ToString().ToUpper();
+            return "?";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
