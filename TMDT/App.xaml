@@ -9,8 +9,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <!-- 1. Cấu hình Theme và Màu sắc (Không bọc trong ResourceDictionary khác) -->
                 <materialDesign:BundledTheme BaseTheme="Light" 
-                                             PrimaryColor="DeepPurple" 
-                                             SecondaryColor="Lime" />
+                                             PrimaryColor="Indigo" 
+                                             SecondaryColor="Teal" />
 
                 <!-- 2. Thư viện Style mặc định của Material Design 3 -->
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />

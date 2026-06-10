@@ -14,7 +14,7 @@ namespace TMDT.ViewModels.Admin
 {
     public class AdminReportsViewModel : ViewModelBase
     {
-        private readonly TmdtContext _context;
+        private readonly TmdtContext _context = null!;
         private string _reportPeriod = "Month"; // Month, Quarter, Year
         private decimal _totalSystemRevenue = 0;
         private decimal _totalCommissionEarned = 0;
@@ -57,14 +57,14 @@ namespace TMDT.ViewModels.Admin
         }
 
         // Commands for CSV
-        public ICommand ExportShopsReportCommand { get; }
-        public ICommand ExportTransactionsReportCommand { get; }
-        public ICommand ExportWithdrawsReportCommand { get; }
+        public ICommand ExportShopsReportCommand { get; } = null!;
+        public ICommand ExportTransactionsReportCommand { get; } = null!;
+        public ICommand ExportWithdrawsReportCommand { get; } = null!;
 
         // Commands for PDF
-        public ICommand ExportShopsPdfCommand { get; }
-        public ICommand ExportTransactionsPdfCommand { get; }
-        public ICommand ExportWithdrawsPdfCommand { get; }
+        public ICommand ExportShopsPdfCommand { get; } = null!;
+        public ICommand ExportTransactionsPdfCommand { get; } = null!;
+        public ICommand ExportWithdrawsPdfCommand { get; } = null!;
 
         public AdminReportsViewModel()
         {
@@ -97,7 +97,7 @@ namespace TMDT.ViewModels.Admin
                 if (_context != null)
                 {
                     TotalActiveShopsCount = _context.Shops.Count(s => s.IsActive == true);
-                    var completedOrders = _context.Orders.Where(o => o.OrderStatus == "Completed" || o.OrderStatus == "Delivered").ToList();
+                    var completedOrders = _context.Orders.Where(o => o.OrderStatus == "Hoàn thành").ToList();
                     TotalOrdersProcessed = completedOrders.Count;
                     TotalSystemRevenue = completedOrders.Sum(o => o.TotalAmount ?? 0);
                     TotalCommissionEarned = TotalSystemRevenue * 0.05m; // 5% fee sàn
@@ -112,7 +112,7 @@ namespace TMDT.ViewModels.Admin
 
         // --- CSV EXPORT METHODS ---
 
-        private void ExecuteExportShopsReport(object obj)
+        private void ExecuteExportShopsReport(object? obj)
         {
             var sfd = new SaveFileDialog
             {
@@ -154,7 +154,7 @@ namespace TMDT.ViewModels.Admin
             }
         }
 
-        private void ExecuteExportTransactionsReport(object obj)
+        private void ExecuteExportTransactionsReport(object? obj)
         {
             var sfd = new SaveFileDialog
             {
@@ -197,7 +197,7 @@ namespace TMDT.ViewModels.Admin
             }
         }
 
-        private void ExecuteExportWithdrawsReport(object obj)
+        private void ExecuteExportWithdrawsReport(object? obj)
         {
             var sfd = new SaveFileDialog
             {
@@ -239,7 +239,7 @@ namespace TMDT.ViewModels.Admin
 
         // --- PDF EXPORT METHODS (NATIVE WPF PRINT TO PDF) ---
 
-        private void ExecuteExportShopsPdf(object obj)
+        private void ExecuteExportShopsPdf(object? obj)
         {
             try
             {
@@ -312,7 +312,7 @@ namespace TMDT.ViewModels.Admin
             }
         }
 
-        private void ExecuteExportTransactionsPdf(object obj)
+        private void ExecuteExportTransactionsPdf(object? obj)
         {
             try
             {
@@ -396,7 +396,7 @@ namespace TMDT.ViewModels.Admin
             }
         }
 
-        private void ExecuteExportWithdrawsPdf(object obj)
+        private void ExecuteExportWithdrawsPdf(object? obj)
         {
             try
             {

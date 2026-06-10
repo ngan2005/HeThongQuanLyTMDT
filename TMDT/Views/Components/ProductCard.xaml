@@ -67,7 +67,7 @@
                     <materialDesign:PackIcon Kind="Star" Foreground="{StaticResource RatingBrush}" Width="15" Height="15"/>
                     <materialDesign:PackIcon Kind="Star" Foreground="{StaticResource RatingBrush}" Width="15" Height="15"/>
                     <materialDesign:PackIcon Kind="StarHalf" Foreground="{StaticResource RatingBrush}" Width="15" Height="15"/>
-                    <TextBlock Text="(128)" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="5,0,0,0"/>
+                    <TextBlock Text="{Binding SoldCount, TargetNullValue=0, StringFormat='({0} đã bán)'}" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="5,0,0,0"/>
                 </StackPanel>
             </StackPanel>
         </Grid>

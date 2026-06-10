@@ -76,6 +76,13 @@ namespace TMDT.ViewModels.Auth
 
                 if (user != null)
                 {
+                    if (SystemSettingsHelper.Current.MaintenanceMode && user.RoleName != SessionManager.RoleAdmin)
+                    {
+                        MessageBox.Show("Hệ thống đang được bảo trì để nâng cấp. Vui lòng quay lại sau!", "Bảo trì hệ thống", MessageBoxButton.OK, MessageBoxImage.Information);
+                        IsLoading = false;
+                        return;
+                    }
+
                     SessionManager.CurrentUser = user;
 
                     Window targetWindow = null;

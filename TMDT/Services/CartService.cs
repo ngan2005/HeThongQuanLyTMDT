@@ -41,7 +41,11 @@ namespace TMDT.Services
                 var existing = Items.FirstOrDefault(i => i.ProductId == product.ProductId);
                 if (existing != null)
                 {
-                    existing.Quantity += quantity;
+                    int newQuantity = existing.Quantity + quantity;
+                    if (newQuantity > (product.StockQuantity ?? 0))
+                        newQuantity = product.StockQuantity ?? 0;
+                    
+                    existing.Quantity = newQuantity;
                 }
                 else
                 {
@@ -81,7 +85,11 @@ namespace TMDT.Services
                 if (quantity <= 0)
                     Items.Remove(item);
                 else
+                {
+                    if (quantity > item.StockQuantity)
+                        quantity = item.StockQuantity;
                     item.Quantity = quantity;
+                }
             }
             OnCartChanged();
         }

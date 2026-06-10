@@ -71,8 +71,9 @@ namespace TMDT.ViewModels.Admin
         public ICommand RefundOrderCommand { get; }
         public ICommand ViewOrderCommand { get; }
 
-        public AdminOrdersViewModel()
+        public AdminOrdersViewModel(string initialStatus = "Tất cả")
         {
+            _selectedStatus = initialStatus;
             _context = new TmdtContext();
             _filteredOrders = new ObservableCollection<Order>();
 
@@ -100,7 +101,7 @@ namespace TMDT.ViewModels.Admin
                 TotalOrders = allOrders.Count;
                 PendingOrders = allOrders.Count(o => o.OrderStatus == "Chờ xác nhận");
                 ShippingOrders = allOrders.Count(o => o.OrderStatus == "Đang giao hàng");
-                TotalRevenue = allOrders.Where(o => o.OrderStatus == "Hoàn thành").Sum(o => o.TotalAmount ?? 0);
+                TotalRevenue = allOrders.Where(o => o.OrderStatus == "Hoàn thành" || o.OrderStatus == "Đã giao hàng").Sum(o => o.TotalAmount ?? 0);
 
                 FilteredOrders = new ObservableCollection<Order>(allOrders);
 
@@ -183,11 +184,24 @@ namespace TMDT.ViewModels.Admin
             {
                 try
                 {
-                    var dbOrder = _context.Orders.Find(SelectedOrder.OrderId);
+                    var dbOrder = _context.Orders
+                        .Include(o => o.OrderDetails)
+                        .FirstOrDefault(o => o.OrderId == SelectedOrder.OrderId);
                     if (dbOrder == null)
                     {
                         MessageBox.Show("Không tìm thấy đơn hàng trong cơ sở dữ liệu.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
+                    }
+
+                    // Hoàn trả lại số lượng tồn kho
+                    foreach (var detail in dbOrder.OrderDetails)
+                    {
+                        if (detail.ProductId.HasValue && detail.Quantity.HasValue)
+                        {
+                            var product = _context.Products.Find(detail.ProductId.Value);
+                            if (product != null)
+                                product.StockQuantity = (product.StockQuantity ?? 0) + detail.Quantity.Value;
+                        }
                     }
 
                     dbOrder.OrderStatus = "Đã hủy";
@@ -242,30 +256,46 @@ namespace TMDT.ViewModels.Admin
             {
                 try
                 {
-                    var dbOrder = _context.Orders.Find(SelectedOrder.OrderId);
+                    var dbOrder = _context.Orders
+                        .Include(o => o.OrderDetails)
+                        .FirstOrDefault(o => o.OrderId == SelectedOrder.OrderId);
                     if (dbOrder == null)
+                        throw new Exception("Không tìm thấy đơn hàng trong cơ sở dữ liệu.");
+
+                    if (!dbOrder.BuyerId.HasValue)
+                        throw new Exception("Đơn hàng không có thông tin người mua.");
+
+                    var buyer = _context.Users.Find(dbOrder.BuyerId.Value);
+                    if (buyer == null)
+                        throw new Exception("Không tìm thấy thông tin người mua để hoàn tiền.");
+
+                    // Trừ tiền của Shop nếu đơn hàng đã "Hoàn thành" (Shop đã nhận tiền)
+                    if (dbOrder.OrderStatus == "Hoàn thành" && dbOrder.ShopId.HasValue)
                     {
-                        MessageBox.Show("Không tìm thấy đơn hàng trong cơ sở dữ liệu.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
+                        var shop = _context.Shops.Find(dbOrder.ShopId.Value);
+                        if (shop != null)
+                        {
+                            var revenue = (dbOrder.TotalAmount ?? 0) - (dbOrder.PlatformFee ?? 0);
+                            shop.WalletBalance = (shop.WalletBalance ?? 0) - revenue;
+                            
+                            // Trừ phí sàn khỏi ví tổng hệ thống
+                            SystemSettingsHelper.AddSystemWalletBalance(-(dbOrder.PlatformFee ?? 0));
+                        }
+                    }
+
+                    // Hoàn trả Tồn kho
+                    foreach (var detail in dbOrder.OrderDetails)
+                    {
+                        if (detail.ProductId.HasValue && detail.Quantity.HasValue)
+                        {
+                            var product = _context.Products.Find(detail.ProductId.Value);
+                            if (product != null)
+                                product.StockQuantity = (product.StockQuantity ?? 0) + detail.Quantity.Value;
+                        }
                     }
 
                     // Hoàn tiền vào ví người mua
-                    if (dbOrder.BuyerId.HasValue)
-                    {
-                        var buyer = _context.Users.Find(dbOrder.BuyerId.Value);
-                        if (buyer == null)
-                        {
-                            MessageBox.Show("Không tìm thấy thông tin người mua để hoàn tiền.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
-                        buyer.WalletBalance = (buyer.WalletBalance ?? 0) + (dbOrder.TotalAmount ?? 0);
-                    }
-                    else
-                    {
-                        MessageBox.Show("Đơn hàng không có thông tin người mua.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
-
+                    buyer.WalletBalance = (buyer.WalletBalance ?? 0) + (dbOrder.TotalAmount ?? 0);
                     dbOrder.OrderStatus = "Hoàn tiền";
                     _context.OrderStatusHistories.Add(new OrderStatusHistory
                     {
@@ -277,7 +307,6 @@ namespace TMDT.ViewModels.Admin
 
                     _context.SaveChanges();
                     transaction.Commit();
-
                     SelectedOrder.OrderStatus = "Hoàn tiền";
                 }
                 catch (Exception ex)

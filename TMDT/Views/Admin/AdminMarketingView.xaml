@@ -280,9 +280,10 @@
             <!-- Tab list switcher -->
             <Border Grid.Column="0" Background="{DynamicResource SurfaceLow}" CornerRadius="10" Padding="6" HorizontalAlignment="Left" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}">
                 <StackPanel Orientation="Horizontal">
-                    <RadioButton Content="Banners quảng cáo" Style="{StaticResource TabRadioButton}" IsChecked="True" Command="{Binding SelectTabCommand}" CommandParameter="Banners"/>
-                    <RadioButton Content="Vouchers toàn sàn" Style="{StaticResource TabRadioButton}" Command="{Binding SelectTabCommand}" CommandParameter="Vouchers"/>
-                    <RadioButton Content="Cấu hình Flash Sale" Style="{StaticResource TabRadioButton}" Command="{Binding SelectTabCommand}" CommandParameter="FlashSales"/>
+                    <RadioButton Content="Banners quảng cáo" Style="{StaticResource TabRadioButton}" IsChecked="{Binding ActiveTab, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Banners, Mode=OneWay}" Command="{Binding SelectTabCommand}" CommandParameter="Banners"/>
+                    <RadioButton Content="Vouchers toàn sàn" Style="{StaticResource TabRadioButton}" IsChecked="{Binding ActiveTab, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Vouchers, Mode=OneWay}" Command="{Binding SelectTabCommand}" CommandParameter="Vouchers"/>
+                    <RadioButton Content="Cấu hình Flash Sale" Style="{StaticResource TabRadioButton}" IsChecked="{Binding ActiveTab, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=FlashSales, Mode=OneWay}" Command="{Binding SelectTabCommand}" CommandParameter="FlashSales"/>
+                    <RadioButton Content="✍️ AI Content Writer" Style="{StaticResource TabRadioButton}" IsChecked="{Binding ActiveTab, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=AiWriter, Mode=OneWay}" Command="{Binding SelectTabCommand}" CommandParameter="AiWriter"/>
                 </StackPanel>
             </Border>
             
@@ -646,6 +647,91 @@
                         </StackPanel>
                     </Border>
                 </Grid>
+        </Grid>
+
+            <!-- ============================================== -->
+            <!-- SUB-TAB D: AI CONTENT WRITER -->
+            <!-- ============================================== -->
+            <Grid>
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ActiveTab}" Value="AiWriter">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                
+                <Grid>
+                    <Border Background="{DynamicResource CardBg}" CornerRadius="14" BorderThickness="1" BorderBrush="{DynamicResource BrandPurple}" Effect="{StaticResource CardShadow}" Padding="32">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <Grid Grid.Row="0" Margin="0,0,0,24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <Border Grid.Column="0" Background="{DynamicResource SurfaceLow}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="16,12">
+                                    <TextBox Text="{Binding AiPrompt, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextPrimary}" CaretBrush="{DynamicResource TextPrimary}" FontSize="14" FontFamily="Be Vietnam Pro, Segoe UI" TextWrapping="Wrap" AcceptsReturn="True" Height="60" Tag="Nhập ý tưởng của bạn. VD: Cuối tuần xả kho áo mùa đông giảm 50%..." VerticalScrollBarVisibility="Auto"/>
+                                </Border>
+                                
+                                <Button Grid.Column="2" Command="{Binding GenerateAiContentCommand}" Background="{DynamicResource BrandPurple}" BorderThickness="0" Padding="24,0" Cursor="Hand" Height="86">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="12">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                    <StackPanel>
+                                        <TextBlock Text="&#xE916;" FontFamily="Segoe MDL2 Assets" FontSize="24" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,8" Visibility="{Binding IsAiGenerating, Converter={StaticResource BoolToVis}}"/>
+                                        <TextBlock Text="&#xE71C;" FontFamily="Segoe MDL2 Assets" FontSize="24" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,8">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsAiGenerating}" Value="True">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <TextBlock Text="Nhờ AI Viết Content" Foreground="White" FontSize="13" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                            
+                            <Border Grid.Row="1" Background="{DynamicResource SurfaceHigh}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Padding="24">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <TextBlock Text="{Binding AiResultText}" FontSize="13.5" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" TextWrapping="Wrap" LineHeight="24">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding AiResultText}" Value="">
+                                                        <Setter Property="Text" Value="Kết quả AI sẽ hiển thị ở đây. Bao gồm 3 mẫu câu với phong cách khác nhau để bạn chọn lựa."/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextMuted}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding AiResultText}" Value="{x:Null}">
+                                                        <Setter Property="Text" Value="Kết quả AI sẽ hiển thị ở đây. Bao gồm 3 mẫu câu với phong cách khác nhau để bạn chọn lựa."/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextMuted}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </ScrollViewer>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
             </Grid>
         </Grid>
 
@@ -871,7 +957,7 @@
                                 <TextBlock Text="THỨ TỰ HIỂN THỊ" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
                                 <TextBox Text="{Binding BannerSortOrder, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}" Margin="0,0,0,24"/>
 
-                                <!-- Add / Confirm Button -->
+                                <!-- Add Button (chỉ hiện khi tạo mới) -->
                                 <Button Command="{Binding AddBannerCommand}" Height="40" Margin="0,0,0,10">
                                     <Button.Style>
                                         <Style TargetType="Button">
@@ -887,13 +973,42 @@
                                         <ControlTemplate TargetType="Button">
                                             <Border x:Name="bd" Background="#4F46E5" CornerRadius="8">
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    <TextBlock Text="&#xE109;" FontFamily="Segoe MDL2 Assets" FontSize="11.5" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                    <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="11.5" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                                     <TextBlock Text="Kích hoạt Banner" Foreground="White" FontSize="12.5" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                                 </StackPanel>
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
                                                     <Setter TargetName="bd" Property="Background" Value="#4338CA"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <!-- Save Button (chỉ hiện khi đang sửa) -->
+                                <Button Command="{Binding SaveBannerCommand}" Height="40" Margin="0,0,0,10">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedBanner}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="bd" Background="#059669" CornerRadius="8">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="11.5" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                    <TextBlock Text="Lưu thay đổi" Foreground="White" FontSize="12.5" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bd" Property="Background" Value="#047857"/>
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
@@ -960,7 +1075,7 @@
                                 <TextBlock Text="SỐ LƯỢNG PHÁT HÀNH" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
                                 <TextBox Text="{Binding VoucherTotalQuantity, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}" Margin="0,0,0,24"/>
 
-                                <!-- Add / Confirm Button -->
+                                <!-- Add Button (chỉ hiện khi tạo mới) -->
                                 <Button Command="{Binding AddVoucherCommand}" Height="40" Margin="0,0,0,10">
                                     <Button.Style>
                                         <Style TargetType="Button">
@@ -976,13 +1091,42 @@
                                         <ControlTemplate TargetType="Button">
                                             <Border x:Name="bd" Background="#059669" CornerRadius="8">
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    <TextBlock Text="&#xE109;" FontFamily="Segoe MDL2 Assets" FontSize="11.5" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                    <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="11.5" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                                     <TextBlock Text="Kích hoạt Voucher" Foreground="White" FontSize="12.5" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                                 </StackPanel>
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
                                                     <Setter TargetName="bd" Property="Background" Value="#047857"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <!-- Save Button (chỉ hiện khi đang sửa) -->
+                                <Button Command="{Binding SaveVoucherCommand}" Height="40" Margin="0,0,0,10">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedVoucher}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="bd" Background="#4F46E5" CornerRadius="8">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="11.5" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                    <TextBlock Text="Lưu thay đổi" Foreground="White" FontSize="12.5" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bd" Property="Background" Value="#4338CA"/>
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
@@ -1047,7 +1191,7 @@
                                 <TextBlock Text="GIỚI HẠN TỒN KHO" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
                                 <TextBox Text="{Binding FlashStockLimit, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}" Margin="0,0,0,24"/>
 
-                                <!-- Add / Confirm Button -->
+                                <!-- Add Button (chỉ hiện khi tạo mới) -->
                                 <Button Command="{Binding AddFlashSaleCommand}" Height="40" Margin="0,0,0,10">
                                     <Button.Style>
                                         <Style TargetType="Button">
@@ -1063,13 +1207,42 @@
                                         <ControlTemplate TargetType="Button">
                                             <Border x:Name="bd" Background="#EA580C" CornerRadius="8">
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    <TextBlock Text="&#xE109;" FontFamily="Segoe MDL2 Assets" FontSize="11.5" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                    <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="11.5" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                                     <TextBlock Text="Kích hoạt Flash Sale" Foreground="White" FontSize="12.5" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                                 </StackPanel>
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
                                                     <Setter TargetName="bd" Property="Background" Value="#C2410C"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <!-- Save Button (chỉ hiện khi đang sửa) -->
+                                <Button Command="{Binding SaveFlashSaleCommand}" Height="40" Margin="0,0,0,10">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedFlashSale}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="bd" Background="#4F46E5" CornerRadius="8">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="11.5" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                    <TextBlock Text="Lưu thay đổi" Foreground="White" FontSize="12.5" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bd" Property="Background" Value="#4338CA"/>
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>

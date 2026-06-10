@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Input;
 using Microsoft.EntityFrameworkCore;
 using TMDT.Models;
+using TMDT.Helpers;
 using TMDT.Utilities;
 
 namespace TMDT.ViewModels.Admin
@@ -22,12 +23,18 @@ namespace TMDT.ViewModels.Admin
         private string _searchText = "";
         private string _roleFilter = "All"; // All, Admin, Buyer, Seller
         private string _statusFilter = "All"; // All, Active, Locked
-        private string _newPasswordText = "123456@a";
+        private string _newPasswordText = "";
 
         public ObservableCollection<User> FilteredUsers
         {
             get => _filteredUsers;
             set { _filteredUsers = value; OnPropertyChanged(); }
+        }
+
+        public string NewPasswordText
+        {
+            get => _newPasswordText;
+            set { _newPasswordText = value; OnPropertyChanged(); }
         }
 
         public ObservableCollection<Role> Roles
@@ -122,12 +129,6 @@ namespace TMDT.ViewModels.Admin
             }
         }
 
-        public string NewPasswordText
-        {
-            get => _newPasswordText;
-            set { _newPasswordText = value; OnPropertyChanged(); }
-        }
-
         // Commands
         public ICommand ToggleUserStatusCommand { get; }
         public ICommand UpdateUserRoleCommand { get; }
@@ -179,8 +180,6 @@ namespace TMDT.ViewModels.Admin
             {
                 // Failsafe: DB không có roles, không tải gì thêm
             }
-
-            _users = new ObservableCollection<User>();
 
             LoadUsers();
         }
@@ -253,6 +252,12 @@ namespace TMDT.ViewModels.Admin
         {
             if (SelectedUser == null) return;
 
+            if (SelectedUser.Role?.RoleName == SessionManager.RoleAdmin)
+            {
+                MessageBox.Show("Không thể thay đổi trạng thái của tài khoản Quản trị viên!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             string actionName = (SelectedUser.IsActive == true) ? "khóa" : "mở khóa";
             var result = MessageBox.Show($"Xác nhận {actionName} tài khoản người dùng '{SelectedUser.FullName ?? SelectedUser.Email}'?", 
                                          "Xác nhận thay đổi", MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -290,6 +295,12 @@ namespace TMDT.ViewModels.Admin
             if (SelectedUser.RoleId == SelectedRoleForUser.RoleId)
             {
                 MessageBox.Show("Người dùng đã có sẵn vai trò này!", "Thông tin", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (SelectedUser.UserId == SessionManager.CurrentUser?.UserId)
+            {
+                MessageBox.Show("Không thể tự thay đổi vai trò của chính mình!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -341,8 +352,7 @@ namespace TMDT.ViewModels.Admin
                     var dbUser = await _context.Users.FindAsync(SelectedUser.UserId);
                     if (dbUser != null)
                     {
-                        // In a real application, you'd hash the password here (e.g. BCrypt)
-                        dbUser.Password = NewPasswordText;
+                        dbUser.Password = PasswordHelper.HashPassword(NewPasswordText);
                         await _context.SaveChangesAsync();
                     }
                 }
@@ -352,8 +362,8 @@ namespace TMDT.ViewModels.Admin
                 System.Diagnostics.Debug.WriteLine("Database reset password failed: " + ex.Message);
             }
 
-            MessageBox.Show($"Đã đặt lại mật khẩu của người dùng thành công thành: '{NewPasswordText}'!", 
-                            "Cài đặt lại thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show($"Đã đặt lại mật khẩu cho '{SelectedUser.FullName ?? SelectedUser.Email}' thành công!",
+                            "Đặt lại thành công", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         protected override void Dispose(bool disposing)

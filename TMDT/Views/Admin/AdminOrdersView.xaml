@@ -5,10 +5,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:TMDT.Views.Admin"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:converters="clr-namespace:TMDT.Converters"
              mc:Ignorable="d"
              d:DesignHeight="700" d:DesignWidth="1100">
 
     <UserControl.Resources>
+        <converters:EqualityToBooleanConverter x:Key="EqualityToBooleanConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <DropShadowEffect x:Key="CardShadow" BlurRadius="16" ShadowDepth="2" Opacity="0.07" Color="#000" Direction="270"/>
 
@@ -113,13 +115,13 @@
 
                     <!-- Filter Pills -->
                     <StackPanel Grid.Column="0" Orientation="Horizontal">
-                        <RadioButton Content="Tất cả" Style="{StaticResource FilterPill}" IsChecked="True" Click="FilterPill_Click" Tag="Tất cả"/>
-                        <RadioButton Content="Chờ xác nhận" Style="{StaticResource FilterPill}" Click="FilterPill_Click" Tag="Chờ xác nhận" Margin="6,0,0,0"/>
-                        <RadioButton Content="Đang xử lý" Style="{StaticResource FilterPill}" Click="FilterPill_Click" Tag="Đang xử lý" Margin="6,0,0,0"/>
-                        <RadioButton Content="Đang giao" Style="{StaticResource FilterPill}" Click="FilterPill_Click" Tag="Đang giao hàng" Margin="6,0,0,0"/>
-                        <RadioButton Content="Hoàn thành" Style="{StaticResource FilterPill}" Click="FilterPill_Click" Tag="Hoàn thành" Margin="6,0,0,0"/>
-                        <RadioButton Content="Đã hủy" Style="{StaticResource FilterPill}" Click="FilterPill_Click" Tag="Đã hủy" Margin="6,0,0,0"/>
-                        <RadioButton Content="Hoàn tiền" Style="{StaticResource FilterPill}" Click="FilterPill_Click" Tag="Hoàn tiền" Margin="6,0,0,0"/>
+                        <RadioButton Content="Tất cả" Style="{StaticResource FilterPill}" IsChecked="{Binding SelectedStatus, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter='Tất cả', Mode=OneWay}" Click="FilterPill_Click" Tag="Tất cả"/>
+                        <RadioButton Content="Chờ xác nhận" Style="{StaticResource FilterPill}" IsChecked="{Binding SelectedStatus, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter='Chờ xác nhận', Mode=OneWay}" Click="FilterPill_Click" Tag="Chờ xác nhận" Margin="6,0,0,0"/>
+                        <RadioButton Content="Đang xử lý" Style="{StaticResource FilterPill}" IsChecked="{Binding SelectedStatus, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter='Đang xử lý', Mode=OneWay}" Click="FilterPill_Click" Tag="Đang xử lý" Margin="6,0,0,0"/>
+                        <RadioButton Content="Đang giao" Style="{StaticResource FilterPill}" IsChecked="{Binding SelectedStatus, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter='Đang giao hàng', Mode=OneWay}" Click="FilterPill_Click" Tag="Đang giao hàng" Margin="6,0,0,0"/>
+                        <RadioButton Content="Hoàn thành" Style="{StaticResource FilterPill}" IsChecked="{Binding SelectedStatus, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter='Hoàn thành', Mode=OneWay}" Click="FilterPill_Click" Tag="Hoàn thành" Margin="6,0,0,0"/>
+                        <RadioButton Content="Đã hủy" Style="{StaticResource FilterPill}" IsChecked="{Binding SelectedStatus, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter='Đã hủy', Mode=OneWay}" Click="FilterPill_Click" Tag="Đã hủy" Margin="6,0,0,0"/>
+                        <RadioButton Content="Hoàn tiền" Style="{StaticResource FilterPill}" IsChecked="{Binding SelectedStatus, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter='Hoàn tiền', Mode=OneWay}" Click="FilterPill_Click" Tag="Hoàn tiền" Margin="6,0,0,0"/>
                     </StackPanel>
 
                     <!-- Search -->

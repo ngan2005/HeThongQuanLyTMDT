@@ -293,41 +293,135 @@
                                 </StackPanel>
                             </RadioButton>
 
-                            <!-- Orders -->
-                            <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowOrdersCommand}" 
-                                         IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Orders, Mode=OneWay}"
-                                         ToolTip="Quản lý Đơn hàng">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE8D5;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{DynamicResource BrandPurple}" Width="24" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Quản lý Đơn hàng" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
-                                        <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-                                    </TextBlock>
+                            <!-- Orders Accordion Menu -->
+                            <StackPanel Margin="0,2">
+                                <CheckBox x:Name="OrdersExpander" Style="{StaticResource SidebarCategoryHeader}" IsChecked="False">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE8D5;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{DynamicResource BrandPurple}" Width="24" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Quản lý Đơn hàng" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
+                                            <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </CheckBox>
+                                <StackPanel Visibility="{Binding IsChecked, ElementName=OrdersExpander, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,0">
+                                    <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowOrdersCommand}" IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Orders, Mode=OneWay}" ToolTip="Tất cả đơn hàng" Margin="0,1">
+                                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                            <TextBlock Text="&#xE81C;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource BrandPurple}" Width="20" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Tất cả đơn hàng" FontSize="11.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowOrdersPendingCommand}" IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=OrdersPending, Mode=OneWay}" ToolTip="Chờ xác nhận" Margin="0,1">
+                                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                            <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource BrandPurple}" Width="20" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Chờ xác nhận" FontSize="11.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowOrdersShippingCommand}" IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=OrdersShipping, Mode=OneWay}" ToolTip="Đang giao hàng" Margin="0,1">
+                                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                            <TextBlock Text="&#xE8F3;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource BrandPurple}" Width="20" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Đang giao hàng" FontSize="11.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowOrdersRefundCommand}" IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=OrdersRefund, Mode=OneWay}" ToolTip="Hoàn tiền / Trả hàng" Margin="0,1">
+                                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                            <TextBlock Text="&#xE1A1;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource BrandPurple}" Width="20" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Hoàn tiền / Trả hàng" FontSize="11.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </RadioButton>
                                 </StackPanel>
-                            </RadioButton>
+                            </StackPanel>
 
-                            <!-- Shops -->
-                            <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowShopsCommand}" 
-                                         IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Shops, Mode=OneWay}"
-                                         ToolTip="Duyệt cửa hàng">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE719;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{DynamicResource BrandPurple}" Width="24" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Duyệt cửa hàng" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
-                                        <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-                                    </TextBlock>
+                            <!-- Shops Accordion Menu -->
+                            <StackPanel Margin="0,2">
+                                <CheckBox x:Name="ShopsExpander" Style="{StaticResource SidebarCategoryHeader}" IsChecked="False">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE719;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{DynamicResource BrandPurple}" Width="24" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Duyệt cửa hàng" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
+                                            <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </CheckBox>
+                                <StackPanel Visibility="{Binding IsChecked, ElementName=ShopsExpander, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,0">
+                                    <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowShopsCommand}" IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Shops, Mode=OneWay}" ToolTip="Tất cả cửa hàng" Margin="0,1">
+                                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                            <TextBlock Text="&#xE81C;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource BrandPurple}" Width="20" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Tất cả cửa hàng" FontSize="11.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowShopsPendingCommand}" IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=ShopsPending, Mode=OneWay}" ToolTip="Chờ duyệt" Margin="0,1">
+                                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                            <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource BrandPurple}" Width="20" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Chờ duyệt" FontSize="11.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowShopsActiveCommand}" IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=ShopsActive, Mode=OneWay}" ToolTip="Đang hoạt động" Margin="0,1">
+                                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                            <TextBlock Text="&#xE8F3;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource BrandPurple}" Width="20" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Đang hoạt động" FontSize="11.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowShopsSuspendedCommand}" IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=ShopsSuspended, Mode=OneWay}" ToolTip="Tạm khóa / Vi phạm" Margin="0,1">
+                                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                            <TextBlock Text="&#xE1A1;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource BrandPurple}" Width="20" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Tạm khóa / Vi phạm" FontSize="11.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </RadioButton>
                                 </StackPanel>
-                            </RadioButton>
+                            </StackPanel>
 
-                            <!-- Products -->
-                            <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowProductsCommand}" 
-                                         IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Products, Mode=OneWay}"
-                                         ToolTip="Duyệt sản phẩm">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE179;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{DynamicResource BrandPurple}" Width="24" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Duyệt sản phẩm" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
-                                        <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-                                    </TextBlock>
+                            <!-- Products Accordion Menu -->
+                            <StackPanel Margin="0,2">
+                                <CheckBox x:Name="ProductsExpander" Style="{StaticResource SidebarCategoryHeader}" IsChecked="False">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE179;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{DynamicResource BrandPurple}" Width="24" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Duyệt sản phẩm" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
+                                            <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </CheckBox>
+                                <StackPanel Visibility="{Binding IsChecked, ElementName=ProductsExpander, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,0">
+                                    <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowProductsPendingCommand}" IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=ProductsPending, Mode=OneWay}" ToolTip="Sản phẩm chờ duyệt" Margin="0,1">
+                                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                            <TextBlock Text="&#xE81C;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource BrandPurple}" Width="20" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Sản phẩm chờ duyệt" FontSize="11.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowProductsActiveCommand}" IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=ProductsActive, Mode=OneWay}" ToolTip="Sản phẩm đang bán" Margin="0,1">
+                                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                            <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource BrandPurple}" Width="20" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Sản phẩm đang bán" FontSize="11.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowProductsReviewsCommand}" IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=ProductsReviews, Mode=OneWay}" ToolTip="Quản lý đánh giá" Margin="0,1">
+                                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                            <TextBlock Text="&#xE8F3;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource BrandPurple}" Width="20" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Quản lý đánh giá" FontSize="11.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </RadioButton>
                                 </StackPanel>
-                            </RadioButton>
+                            </StackPanel>
 
                             <!-- Withdraws -->
                             <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowWithdrawsCommand}" 
@@ -353,17 +447,43 @@
                                 </StackPanel>
                             </RadioButton>
 
-                            <!-- Marketing -->
-                            <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowMarketingCommand}" 
-                                         IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Marketing, Mode=OneWay}"
-                                         ToolTip="Kênh Marketing">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE724;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{DynamicResource BrandPurple}" Width="24" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Kênh Marketing" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
-                                        <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-                                    </TextBlock>
+                            <!-- Marketing Accordion Menu -->
+                            <StackPanel Margin="0,2">
+                                <CheckBox x:Name="MarketingExpander" Style="{StaticResource SidebarCategoryHeader}" IsChecked="False">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE724;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{DynamicResource BrandPurple}" Width="24" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Kênh Marketing" FontSize="12.5" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
+                                            <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </CheckBox>
+                                <StackPanel Visibility="{Binding IsChecked, ElementName=MarketingExpander, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,0">
+                                    <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowMarketingBannersCommand}" IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=MarketingBanners, Mode=OneWay}" ToolTip="Quản lý Banner" Margin="0,1">
+                                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                            <TextBlock Text="&#xE8B9;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource BrandPurple}" Width="20" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Quản lý Banner" FontSize="11.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowMarketingVouchersCommand}" IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=MarketingVouchers, Mode=OneWay}" ToolTip="Quản lý Voucher sàn" Margin="0,1">
+                                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                            <TextBlock Text="&#xE1A1;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource BrandPurple}" Width="20" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Quản lý Voucher sàn" FontSize="11.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowMarketingFlashSalesCommand}" IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=MarketingFlashSales, Mode=OneWay}" ToolTip="Quản lý Flash Sale" Margin="0,1">
+                                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                            <TextBlock Text="&#xE945;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource BrandPurple}" Width="20" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Quản lý Flash Sale" FontSize="11.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </RadioButton>
                                 </StackPanel>
-                            </RadioButton>
+                            </StackPanel>
 
                             <!-- Categories -->
                             <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowCategoriesCommand}" 
@@ -501,27 +621,21 @@
                                                         BorderThickness="2" BorderBrush="{DynamicResource BrandPurple}">
                                                     <Grid>
                                                         <!-- Ảnh đại diện thật (hiện khi có avatar) -->
-                                                        <Border CornerRadius="16" ClipToBounds="True">
-                                                            <Image Source="{Binding DataContext.AdminAvatar,
-                                                                           RelativeSource={RelativeSource AncestorType=Window},
-                                                                           Converter={StaticResource Base64ToImageConverter}}"
-                                                                   Stretch="UniformToFill"
-                                                                   RenderOptions.BitmapScalingMode="HighQuality">
-                                                                <Image.Style>
-                                                                    <Style TargetType="Image">
-                                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding DataContext.AdminAvatar,
-                                                                                                  RelativeSource={RelativeSource AncestorType=Window},
-                                                                                                  Converter={StaticResource StringNullOrEmptyToBool}}"
-                                                                                         Value="True">
-                                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </Image.Style>
-                                                            </Image>
-                                                        </Border>
+                                                        <Ellipse Width="32" Height="32">
+                                                            <Ellipse.Fill>
+                                                                <ImageBrush ImageSource="{Binding DataContext.AdminAvatar, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource Base64ToImageConverter}}" Stretch="UniformToFill"/>
+                                                            </Ellipse.Fill>
+                                                            <Ellipse.Style>
+                                                                <Style TargetType="Ellipse">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding DataContext.AdminAvatar, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource StringNullOrEmptyToBool}}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Ellipse.Style>
+                                                        </Ellipse>
 
                                                         <!-- Fallback: chữ cái đầu của tên (hiện khi chưa có avatar) -->
                                                         <TextBlock Text="{Binding DataContext.AdminName,
@@ -654,8 +768,11 @@
                  </Grid>
 
                  <!-- DYNAMIC CONTENT BODY -->
-                 <ContentControl Grid.Row="1" Content="{Binding CurrentView}"/>
-             </Grid>
-         </Grid>
-     </Grid>
- </Window>
+                <ContentControl Grid.Row="1" Content="{Binding CurrentView}"/>
+            </Grid>
+        </Grid>
+        
+        <!-- FLOATING CHAT WIDGET -->
+        <views:AdminChatWidget DataContext="{Binding ChatViewModel}"/>
+    </Grid>
+</Window>

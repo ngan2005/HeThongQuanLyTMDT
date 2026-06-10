@@ -15,6 +15,7 @@ namespace TMDT.Utilities
         public const string MaintenanceMode        = "MaintenanceMode";
         public const string RequireProductApproval = "RequireProductApproval";
         public const string SupportEmail           = "SupportEmail";
+        public const string SystemWalletBalance    = "SystemWalletBalance";
     }
 
     public class SystemSettings
@@ -24,6 +25,7 @@ namespace TMDT.Utilities
         public bool    MaintenanceMode        { get; set; } = false;
         public bool    RequireProductApproval { get; set; } = true;
         public string  SupportEmail           { get; set; } = "support@myshop.vn";
+        public decimal SystemWalletBalance    { get; set; } = 0m;
     }
 
     /// <summary>
@@ -81,6 +83,11 @@ namespace TMDT.Utilities
                         case ConfigKeys.SupportEmail:
                             _cache.SupportEmail = row.ConfigValue ?? "support@myshop.vn";
                             break;
+
+                        case ConfigKeys.SystemWalletBalance:
+                            if (decimal.TryParse(row.ConfigValue, out var bal))
+                                _cache.SystemWalletBalance = bal;
+                            break;
                     }
                 }
             }
@@ -120,10 +127,14 @@ namespace TMDT.Utilities
                     _cache.SupportEmail,
                     "Email hỗ trợ khách hàng");
 
+                UpsertConfig(ctx, ConfigKeys.SystemWalletBalance,
+                    _cache.SystemWalletBalance.ToString(),
+                    "Số dư ví tổng của hệ thống (lợi nhuận thực)");
+
                 ctx.SaveChanges();
 
-                // Buộc load lại cache từ DB lần sau
-                _cache = null;
+                // Re-load from DB so cache stays in sync
+                LoadSettings();
             }
             catch (Exception ex)
             {
@@ -150,6 +161,36 @@ namespace TMDT.Utilities
             {
                 existing.ConfigValue = value;
                 existing.UpdatedAt   = DateTime.Now;
+            }
+        }
+
+        /// <summary>Cộng hoặc trừ số dư ví tổng ngay lập tức.</summary>
+        public static void AddSystemWalletBalance(decimal amount)
+        {
+            try
+            {
+                using var ctx = new TmdtContext();
+                var existing = ctx.SystemConfigs.FirstOrDefault(c => c.ConfigKey == ConfigKeys.SystemWalletBalance);
+                decimal currentVal = 0m;
+
+                if (existing != null && decimal.TryParse(existing.ConfigValue, out var parsed))
+                {
+                    currentVal = parsed;
+                }
+
+                currentVal += amount;
+
+                UpsertConfig(ctx, ConfigKeys.SystemWalletBalance, currentVal.ToString(), "Số dư ví tổng của hệ thống (lợi nhuận thực)");
+                ctx.SaveChanges();
+
+                if (_cache != null)
+                {
+                    _cache.SystemWalletBalance = currentVal;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SystemSettings] AddSystemWalletBalance failed: {ex.Message}");
             }
         }
     }

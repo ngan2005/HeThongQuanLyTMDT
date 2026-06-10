@@ -63,8 +63,9 @@ namespace TMDT.ViewModels.Admin
         public ICommand FilterCommand { get; }
         public ICommand ViewDetailCommand { get; }
 
-        public AdminShopsViewModel()
+        public AdminShopsViewModel(string initialStatus = "All")
         {
+            _statusFilter = initialStatus;
             try { _context = new TmdtContext(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine("Init TmdtContext failed: " + ex.Message); }
 
             Shops = new ObservableCollection<Shop>();
@@ -95,8 +96,10 @@ namespace TMDT.ViewModels.Admin
 
                 if (!string.IsNullOrEmpty(SearchText))
                 {
-                    query = query.Where(s => s.ShopName.Contains(SearchText) ||
-                                            (s.User != null && s.User.FullName.Contains(SearchText)));
+                    string term = SearchText.Trim().ToLower();
+                    query = query.Where(s =>
+                        (s.ShopName != null && EF.Functions.Like(s.ShopName, $"%{term}%")) ||
+                        (s.User != null && s.User.FullName != null && EF.Functions.Like(s.User.FullName, $"%{SearchText}%")));
                 }
 
                 if (StatusFilter == "Pending") query = query.Where(s => s.IsActive == null);

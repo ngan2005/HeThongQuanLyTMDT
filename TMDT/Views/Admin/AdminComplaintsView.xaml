@@ -103,6 +103,78 @@
                     </Border>
                 </UniformGrid>
 
+                <!-- AI SUMMARIZER BANNER -->
+                <Border Background="{DynamicResource SurfaceHigh}" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource BrandPurple}" Margin="0,0,0,24" Padding="20">
+                    <Border.Effect>
+                        <DropShadowEffect Color="{DynamicResource BrandPurple.Color}" BlurRadius="20" ShadowDepth="0" Opacity="0.15"/>
+                    </Border.Effect>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Border Grid.Column="0" Width="48" Height="48" Background="{DynamicResource BrandActiveBg}" CornerRadius="12" Margin="0,0,16,0" VerticalAlignment="Top">
+                            <TextBlock Text="&#xE8B3;" FontFamily="Segoe MDL2 Assets" FontSize="24" Foreground="{DynamicResource BrandPurple}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,24,0">
+                            <TextBlock Text="AI Tóm tắt Khiếu nại" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource BrandPurple}" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,6"/>
+                            
+                            <TextBlock Text="Bấm 'AI Tóm tắt' để hệ thống đọc toàn bộ khiếu nại đang lọc bên dưới và rút ra xu hướng chung." FontSize="12.5" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" TextWrapping="Wrap">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding AiSummary}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding AiSummary}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            
+                            <TextBlock Text="{Binding AiSummary}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" TextWrapping="Wrap" LineHeight="20">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding AiSummary}" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding AiSummary}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                        
+                        <Button Grid.Column="2" Command="{Binding SummarizeComplaintsCommand}" Background="{DynamicResource BrandPurple}" BorderThickness="0" Height="40" Padding="16,0" Cursor="Hand" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE916;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="White" Margin="0,0,8,0" VerticalAlignment="Center" Visibility="{Binding IsAiSummarizing, Converter={StaticResource BoolToVis}}"/>
+                                <TextBlock Text="&#xE71C;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="White" Margin="0,0,8,0" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsAiSummarizing}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Text="AI Tóm tắt" Foreground="White" FontSize="12.5" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </Border>
+
                 <!-- Toolbar -->
                 <Grid Margin="0,0,0,16">
                     <Grid.ColumnDefinitions>

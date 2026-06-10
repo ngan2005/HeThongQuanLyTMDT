@@ -11,7 +11,7 @@ namespace TMDT.ViewModels.Admin
         private decimal _minWithdrawAmount;
         private bool _maintenanceMode;
         private bool _requireProductApproval;
-        private string _supportEmail;
+        private string _supportEmail = "";
 
         public decimal PlatformCommissionRate
         {
@@ -44,8 +44,8 @@ namespace TMDT.ViewModels.Admin
         }
 
         // Commands
-        public ICommand SaveSettingsCommand { get; }
-        public ICommand ResetSettingsCommand { get; }
+        public ICommand SaveSettingsCommand { get; } = null!;
+        public ICommand ResetSettingsCommand { get; } = null!;
 
         public AdminSettingsViewModel()
         {
@@ -67,7 +67,7 @@ namespace TMDT.ViewModels.Admin
             SupportEmail = settings.SupportEmail;
         }
 
-        private void ExecuteSaveSettings(object obj)
+        private void ExecuteSaveSettings(object? obj)
         {
             if (PlatformCommissionRate < 0 || PlatformCommissionRate > 100)
             {
@@ -95,7 +95,15 @@ namespace TMDT.ViewModels.Admin
             settings.RequireProductApproval = RequireProductApproval;
             settings.SupportEmail = SupportEmail;
 
-            SystemSettingsHelper.SaveSettings();
+            try
+            {
+                SystemSettingsHelper.SaveSettings();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi lưu cấu hình: {ex.Message}", "Lỗi cơ sở dữ liệu", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
             string statusMsg = "Lưu cấu hình hệ thống thành công!";
             if (MaintenanceMode)
@@ -106,7 +114,7 @@ namespace TMDT.ViewModels.Admin
             MessageBox.Show(statusMsg, "Cấu hình thành công", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private void ExecuteResetSettings(object obj)
+        private void ExecuteResetSettings(object? obj)
         {
             var result = MessageBox.Show("Bạn có chắc chắn muốn đặt lại tất cả tham số hệ thống về mặc định ban đầu?", 
                                          "Xác nhận đặt lại", MessageBoxButton.YesNo, MessageBoxImage.Question);

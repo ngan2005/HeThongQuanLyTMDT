@@ -11,21 +11,21 @@ namespace TMDT.ViewModels.Seller
 {
     public class SellerProductsViewModel : ViewModelBase
     {
-        private readonly TmdtContext _context;
-        private ObservableCollection<Product> _products;
-        private ObservableCollection<Category> _categories;
-        private Product _selectedProduct;
+        private readonly TmdtContext _context = null!;
+        private ObservableCollection<Product> _products = new();
+        private ObservableCollection<Category> _categories = new();
+        private Product? _selectedProduct;
         private string _searchText = "";
         private string _statusFilter = "All";
 
         // Inspector fields
-        private string _productNameInput;
-        private string _productCodeInput;
+        private string _productNameInput = "";
+        private string _productCodeInput = "";
         private decimal _priceInput;
         private decimal? _originalPriceInput;
         private int _stockInput;
-        private string _descriptionInput;
-        private Category _selectedCategoryInput;
+        private string _descriptionInput = "";
+        private Category? _selectedCategoryInput;
         private bool _isEditMode;
 
         public ObservableCollection<Product> Products
@@ -40,7 +40,7 @@ namespace TMDT.ViewModels.Seller
             set { _categories = value; OnPropertyChanged(); }
         }
 
-        public Product SelectedProduct
+        public Product? SelectedProduct
         {
             get => _selectedProduct;
             set
@@ -95,7 +95,7 @@ namespace TMDT.ViewModels.Seller
             get => _descriptionInput;
             set { _descriptionInput = value; OnPropertyChanged(); }
         }
-        public Category SelectedCategoryInput
+        public Category? SelectedCategoryInput
         {
             get => _selectedCategoryInput;
             set { _selectedCategoryInput = value; OnPropertyChanged(); }
@@ -128,10 +128,10 @@ namespace TMDT.ViewModels.Seller
         #endregion
 
         // Commands
-        public ICommand SaveProductCommand { get; }
-        public ICommand ResetFieldsCommand { get; }
-        public ICommand DeleteProductCommand { get; }
-        public ICommand SetFilterCommand { get; }
+        public ICommand SaveProductCommand { get; } = null!;
+        public ICommand ResetFieldsCommand { get; } = null!;
+        public ICommand DeleteProductCommand { get; } = null!;
+        public ICommand SetFilterCommand { get; } = null!;
 
         public SellerProductsViewModel()
         {
@@ -321,7 +321,7 @@ namespace TMDT.ViewModels.Seller
                     StockQuantity = StockInput,
                     Description = DescriptionInput,
                     CategoryId = SelectedCategoryInput.CategoryId,
-                    Status = "Pending",
+                    Status = SystemSettingsHelper.Current.RequireProductApproval ? "Pending" : "Approved",
                     CreatedAt = DateTime.Now,
                     SoldCount = 0,
                     Rating = 0,

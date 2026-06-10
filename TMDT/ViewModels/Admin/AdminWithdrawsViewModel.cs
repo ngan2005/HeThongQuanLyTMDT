@@ -122,8 +122,10 @@ namespace TMDT.ViewModels.Admin
                         // Apply Search
                         if (!string.IsNullOrEmpty(SearchText))
                         {
-                            query = query.Where(w => w.BankName.Contains(SearchText) || 
-                                                     (w.Shop != null && w.Shop.ShopName.Contains(SearchText)));
+                            string term = SearchText.Trim().ToLower();
+                            query = query.Where(w =>
+                                (w.BankName != null && EF.Functions.Like(w.BankName, $"%{term}%")) ||
+                                (w.Shop != null && w.Shop.ShopName != null && EF.Functions.Like(w.Shop.ShopName, $"%{SearchText}%")));
                         }
 
                         // Apply Filter
@@ -153,95 +155,8 @@ namespace TMDT.ViewModels.Admin
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("EF query for WithdrawRequests failed, loading mocks. " + ex.Message);
-            }
-
-            LoadMockRequests();
-        }
-
-        private void LoadMockRequests()
-        {
-            var mockReqs = new ObservableCollection<WithdrawRequest>();
-
-            mockReqs.Add(new WithdrawRequest
-            {
-                WithdrawId = 801,
-                ShopId = 1,
-                Amount = 1500000,
-                BankName = "Vietcombank",
-                AccountNumber = "0071000888999",
-                Status = "Pending",
-                RequestedAt = DateTime.Now.AddHours(-3),
-                Shop = new Shop { ShopName = "Tech World Store", WalletBalance = 2400000 }
-            });
-
-            mockReqs.Add(new WithdrawRequest
-            {
-                WithdrawId = 802,
-                ShopId = 2,
-                Amount = 5000000,
-                BankName = "Techcombank",
-                AccountNumber = "1903456789012",
-                Status = "Pending",
-                RequestedAt = DateTime.Now.AddDays(-1),
-                Shop = new Shop { ShopName = "Fashion Center", WalletBalance = 8500000 }
-            });
-
-            mockReqs.Add(new WithdrawRequest
-            {
-                WithdrawId = 803,
-                ShopId = 3,
-                Amount = 300000,
-                BankName = "MB Bank",
-                AccountNumber = "97042292019283",
-                Status = "Approved",
-                RequestedAt = DateTime.Now.AddDays(-5),
-                ProcessedAt = DateTime.Now.AddDays(-5).AddHours(2),
-                Shop = new Shop { ShopName = "Gia Dung Smart", WalletBalance = 120000 }
-            });
-
-            mockReqs.Add(new WithdrawRequest
-            {
-                WithdrawId = 804,
-                ShopId = 1,
-                Amount = 10000000,
-                BankName = "VietinBank",
-                AccountNumber = "101009999888",
-                Status = "Rejected",
-                RequestedAt = DateTime.Now.AddDays(-10),
-                ProcessedAt = DateTime.Now.AddDays(-10).AddHours(4),
-                Shop = new Shop { ShopName = "Tech World Store", WalletBalance = 2400000 }
-            });
-
-            TotalWithdraws = mockReqs.Count;
-            PendingWithdraws = mockReqs.Count(r => r.Status == "Pending" || string.IsNullOrEmpty(r.Status));
-            ApprovedWithdraws = mockReqs.Count(r => r.Status == "Approved");
-            RejectedWithdraws = mockReqs.Count(r => r.Status == "Rejected");
-            TotalApprovedAmount = mockReqs.Where(r => r.Status == "Approved").Sum(r => r.Amount ?? 0);
-
-            var filtered = mockReqs.AsQueryable();
-            if (!string.IsNullOrEmpty(SearchText))
-            {
-                filtered = filtered.Where(r => r.BankName.ToLower().Contains(SearchText.ToLower()) || 
-                                               r.Shop.ShopName.ToLower().Contains(SearchText.ToLower()));
-            }
-
-            if (StatusFilter == "Pending")
-            {
-                filtered = filtered.Where(r => r.Status == "Pending" || string.IsNullOrEmpty(r.Status));
-            }
-            else if (StatusFilter == "Approved")
-            {
-                filtered = filtered.Where(r => r.Status == "Approved");
-            }
-            else if (StatusFilter == "Rejected")
-            {
-                filtered = filtered.Where(r => r.Status == "Rejected");
-            }
-
-            foreach (var req in filtered.ToList())
-            {
-                WithdrawRequests.Add(req);
+                System.Diagnostics.Debug.WriteLine("EF query for WithdrawRequests failed: " + ex.Message);
+                MessageBox.Show("Không thể tải danh sách yêu cầu rút tiền: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -253,46 +168,40 @@ namespace TMDT.ViewModels.Admin
             if (SelectedRequest == null) return;
 
             var amountVal = SelectedRequest.Amount ?? 0;
-            var shopBalance = SelectedRequest.Shop?.WalletBalance ?? 0;
 
-            if (shopBalance < amountVal)
-            {
-                MessageBox.Show($"Không thể duyệt! Số dư ví của Shop ({shopBalance:N0} đ) nhỏ hơn số tiền yêu cầu rút ({amountVal:N0} đ).", 
-                                "Lỗi số dư không đủ", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            var result = MessageBox.Show($"Xác nhận phê duyệt và chuyển khoản số tiền {amountVal:N0} đ đến tài khoản {SelectedRequest.AccountNumber} ({SelectedRequest.BankName})?\n\nSố tiền này sẽ được trừ trực tiếp vào ví của cửa hàng.", 
+            var result = MessageBox.Show($"Xác nhận phê duyệt và giải ngân số tiền {amountVal:N0} đ đến tài khoản {SelectedRequest.AccountNumber} ({SelectedRequest.BankName})?",
                                          "Xác nhận phê duyệt rút tiền", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result != MessageBoxResult.Yes) return;
-
-            SelectedRequest.Status = "Approved";
-            SelectedRequest.ProcessedAt = DateTime.Now;
-            if (SelectedRequest.Shop != null)
-            {
-                SelectedRequest.Shop.WalletBalance -= amountVal;
-            }
 
             try
             {
                 if (_context != null)
                 {
-                    var dbReq = await _context.WithdrawRequests.Include(r => r.Shop).FirstOrDefaultAsync(r => r.WithdrawId == SelectedRequest.WithdrawId);
-                    if (dbReq != null)
+                    using var transaction = await _context.Database.BeginTransactionAsync();
+                    try
                     {
-                        dbReq.Status = "Approved";
-                        dbReq.ProcessedAt = DateTime.Now;
-                        if (dbReq.Shop != null)
+                        var dbReq = await _context.WithdrawRequests.Include(r => r.Shop).FirstOrDefaultAsync(r => r.WithdrawId == SelectedRequest.WithdrawId);
+                        if (dbReq != null)
                         {
-                            dbReq.Shop.WalletBalance = (dbReq.Shop.WalletBalance ?? 0) - amountVal;
+                            dbReq.Status = "Approved";
+                            dbReq.ProcessedAt = DateTime.Now;
+                            // Tiền đã được trừ ở bước tạo Request, Admin duyệt thì không trừ nữa
+                            await _context.SaveChangesAsync();
+                            await transaction.CommitAsync();
                         }
-                        await _context.SaveChangesAsync();
+                    }
+                    catch
+                    {
+                        await transaction.RollbackAsync();
+                        throw;
                     }
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Database update failed: " + ex.Message);
+                MessageBox.Show($"Lỗi khi phê duyệt rút tiền: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
 
             MessageBox.Show($"Đã phê duyệt yêu cầu rút tiền thành công! Đã khấu trừ {amountVal:N0} đ từ ví của Shop '{SelectedRequest.Shop?.ShopName}'.", 
@@ -307,6 +216,7 @@ namespace TMDT.ViewModels.Admin
         {
             if (SelectedRequest == null) return;
 
+            var amountVal = SelectedRequest.Amount ?? 0;
             var result = MessageBox.Show($"Bạn có chắc chắn muốn TỪ CHỐI yêu cầu rút tiền mã số #{SelectedRequest.WithdrawId} của shop '{SelectedRequest.Shop?.ShopName}'?", 
                                          "Xác nhận từ chối", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes) return;
@@ -318,12 +228,29 @@ namespace TMDT.ViewModels.Admin
             {
                 if (_context != null)
                 {
-                    var dbReq = await _context.WithdrawRequests.FindAsync(SelectedRequest.WithdrawId);
-                    if (dbReq != null)
+                    using var transaction = await _context.Database.BeginTransactionAsync();
+                    try
                     {
-                        dbReq.Status = "Rejected";
-                        dbReq.ProcessedAt = DateTime.Now;
-                        await _context.SaveChangesAsync();
+                        var dbReq = await _context.WithdrawRequests.Include(r => r.Shop).FirstOrDefaultAsync(r => r.WithdrawId == SelectedRequest.WithdrawId);
+                        if (dbReq != null)
+                        {
+                            dbReq.Status = "Rejected";
+                            dbReq.ProcessedAt = DateTime.Now;
+                            
+                            // Hoàn tiền lại cho Shop vì yêu cầu bị từ chối
+                            if (dbReq.Shop != null)
+                            {
+                                dbReq.Shop.WalletBalance = (dbReq.Shop.WalletBalance ?? 0) + amountVal;
+                            }
+                            
+                            await _context.SaveChangesAsync();
+                            await transaction.CommitAsync();
+                        }
+                    }
+                    catch
+                    {
+                        await transaction.RollbackAsync();
+                        throw;
                     }
                 }
             }

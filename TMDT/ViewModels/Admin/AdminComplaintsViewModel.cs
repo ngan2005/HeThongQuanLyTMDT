@@ -23,6 +23,13 @@ namespace TMDT.ViewModels.Admin
         private int _resolvedComplaints;
         private int _dismissedComplaints;
 
+        private readonly AiService _aiService;
+        private string _aiSummary = "";
+        private bool _isAiSummarizing;
+
+        public string AiSummary { get => _aiSummary; set { _aiSummary = value; OnPropertyChanged(); } }
+        public bool IsAiSummarizing { get => _isAiSummarizing; set { _isAiSummarizing = value; OnPropertyChanged(); } }
+
         public ObservableCollection<Complaint> Complaints
         {
             get => _complaints;
@@ -91,6 +98,7 @@ namespace TMDT.ViewModels.Admin
         public ICommand FilterCommand { get; }
         public ICommand CloseDetailCommand { get; }
         public ICommand ViewDetailCommand { get; }
+        public ICommand SummarizeComplaintsCommand { get; }
 
         public AdminComplaintsViewModel()
         {
@@ -111,8 +119,33 @@ namespace TMDT.ViewModels.Admin
             FilterCommand = new RelayCommand(o => StatusFilter = o?.ToString() ?? "All");
             CloseDetailCommand = new RelayCommand(o => SelectedComplaint = null);
             ViewDetailCommand = new RelayCommand(o => ShowDetailRequest?.Invoke());
+            SummarizeComplaintsCommand = new RelayCommand(ExecuteSummarizeComplaints, o => !IsAiSummarizing);
+
+            _aiService = new AiService();
 
             LoadComplaints();
+        }
+
+        private async void ExecuteSummarizeComplaints(object? obj)
+        {
+            if (Complaints == null || Complaints.Count == 0)
+            {
+                AiSummary = "Không có khiếu nại nào để tóm tắt.";
+                return;
+            }
+
+            IsAiSummarizing = true;
+            AiSummary = "Đang đọc và phân tích các khiếu nại...";
+
+            try
+            {
+                var contentList = Complaints.Where(c => !string.IsNullOrWhiteSpace(c.Content)).Select(c => c.Content!).ToList();
+                AiSummary = await _aiService.SummarizeComplaintsAsync(contentList);
+            }
+            finally
+            {
+                IsAiSummarizing = false;
+            }
         }
 
         private void LoadComplaints()
@@ -136,8 +169,10 @@ namespace TMDT.ViewModels.Admin
                     // Apply Search
                     if (!string.IsNullOrEmpty(SearchText))
                     {
-                        query = query.Where(c => c.Content.Contains(SearchText) || 
-                                                 (c.Buyer != null && c.Buyer.FullName.Contains(SearchText)));
+                        string term = SearchText.Trim().ToLower();
+                        query = query.Where(c =>
+                            (c.Content != null && EF.Functions.Like(c.Content, $"%{term}%")) ||
+                            (c.Buyer != null && c.Buyer.FullName != null && EF.Functions.Like(c.Buyer.FullName, $"%{SearchText}%")));
                     }
 
                     // Apply Filter

@@ -11,21 +11,22 @@ namespace TMDT.ViewModels.Admin
 {
     public class AdminMarketingViewModel : ViewModelBase
     {
-        private readonly TmdtContext _context;
-        private string _activeTab = "Banners"; // Banners, Vouchers, FlashSales
+        private readonly TmdtContext _context = null!;
+        private readonly AiService _aiService;
+        private string _activeTab = "Banners"; // Banners, Vouchers, FlashSales, AiWriter
 
         // Collections
-        public ObservableCollection<Banner> Banners { get; set; }
-        public ObservableCollection<Voucher> Vouchers { get; set; }
-        public ObservableCollection<FlashSale> FlashSales { get; set; }
-        public ObservableCollection<Product> AvailableProducts { get; set; }
+        public ObservableCollection<Banner> Banners { get; set; } = new();
+        public ObservableCollection<Voucher> Vouchers { get; set; } = new();
+        public ObservableCollection<FlashSale> FlashSales { get; set; } = new();
+        public ObservableCollection<Product> AvailableProducts { get; set; } = new();
 
         // Selected Items
-        private Banner _selectedBanner;
-        private Voucher _selectedVoucher;
-        private FlashSale _selectedFlashSale;
+        private Banner? _selectedBanner;
+        private Voucher? _selectedVoucher;
+        private FlashSale? _selectedFlashSale;
 
-        public Banner SelectedBanner
+        public Banner? SelectedBanner
         {
             get => _selectedBanner;
             set 
@@ -43,7 +44,7 @@ namespace TMDT.ViewModels.Admin
             }
         }
 
-        public Voucher SelectedVoucher
+        public Voucher? SelectedVoucher
         {
             get => _selectedVoucher;
             set 
@@ -62,7 +63,7 @@ namespace TMDT.ViewModels.Admin
             }
         }
 
-        public FlashSale SelectedFlashSale
+        public FlashSale? SelectedFlashSale
         {
             get => _selectedFlashSale;
             set 
@@ -149,7 +150,7 @@ namespace TMDT.ViewModels.Admin
 
         // New Input fields for FlashSale
         private string _flashCampaignName = "";
-        private Product _flashSelectedProduct;
+        private Product? _flashSelectedProduct;
         private decimal _flashPrice = 10000;
         private int _flashStockLimit = 10;
 
@@ -159,7 +160,7 @@ namespace TMDT.ViewModels.Admin
             set { _flashCampaignName = value; OnPropertyChanged(); }
         }
 
-        public Product FlashSelectedProduct
+        public Product? FlashSelectedProduct
         {
             get => _flashSelectedProduct;
             set { _flashSelectedProduct = value; OnPropertyChanged(); }
@@ -177,6 +178,29 @@ namespace TMDT.ViewModels.Admin
             set { _flashStockLimit = value; OnPropertyChanged(); }
         }
 
+        // New Input fields for AI Writer
+        private string _aiPrompt = "";
+        private string _aiResultText = "";
+        private bool _isAiGenerating;
+
+        public string AiPrompt
+        {
+            get => _aiPrompt;
+            set { _aiPrompt = value; OnPropertyChanged(); }
+        }
+
+        public string AiResultText
+        {
+            get => _aiResultText;
+            set { _aiResultText = value; OnPropertyChanged(); }
+        }
+
+        public bool IsAiGenerating
+        {
+            get => _isAiGenerating;
+            set { _isAiGenerating = value; OnPropertyChanged(); }
+        }
+
         public string ActiveTab
         {
             get => _activeTab;
@@ -187,30 +211,38 @@ namespace TMDT.ViewModels.Admin
                 OnPropertyChanged(nameof(IsBannersActive));
                 OnPropertyChanged(nameof(IsVouchersActive));
                 OnPropertyChanged(nameof(IsFlashSalesActive));
+                OnPropertyChanged(nameof(IsAiWriterActive));
             }
         }
 
         public bool IsBannersActive => ActiveTab == "Banners";
         public bool IsVouchersActive => ActiveTab == "Vouchers";
         public bool IsFlashSalesActive => ActiveTab == "FlashSales";
+        public bool IsAiWriterActive => ActiveTab == "AiWriter";
 
         // Events
-        public event Action ShowDetailRequest;
-        public event Action HideDetailRequest;
+        public event Action? ShowDetailRequest;
+        public event Action? HideDetailRequest;
 
         // Commands
-        public ICommand SelectTabCommand { get; }
-        public ICommand AddBannerCommand { get; }
-        public ICommand DeleteBannerCommand { get; }
-        public ICommand AddVoucherCommand { get; }
-        public ICommand DeleteVoucherCommand { get; }
-        public ICommand AddFlashSaleCommand { get; }
-        public ICommand DeleteFlashSaleCommand { get; }
-        public ICommand CreateNewCommand { get; }
-        public ICommand CloseDetailCommand { get; }
+        public ICommand SelectTabCommand { get; } = null!;
+        public ICommand AddBannerCommand { get; } = null!;
+        public ICommand SaveBannerCommand { get; } = null!;
+        public ICommand DeleteBannerCommand { get; } = null!;
+        public ICommand AddVoucherCommand { get; } = null!;
+        public ICommand SaveVoucherCommand { get; } = null!;
+        public ICommand DeleteVoucherCommand { get; } = null!;
+        public ICommand AddFlashSaleCommand { get; } = null!;
+        public ICommand SaveFlashSaleCommand { get; } = null!;
+        public ICommand DeleteFlashSaleCommand { get; } = null!;
+        public ICommand CreateNewCommand { get; } = null!;
+        public ICommand CloseDetailCommand { get; } = null!;
+        public ICommand GenerateAiContentCommand { get; } = null!;
 
-        public AdminMarketingViewModel()
+        public AdminMarketingViewModel(string initialTab = "Banners")
         {
+            _activeTab = initialTab;
+            _aiService = new AiService();
             try
             {
                 _context = new TmdtContext();
@@ -229,12 +261,15 @@ namespace TMDT.ViewModels.Admin
             SelectTabCommand = new RelayCommand(o => ActiveTab = o?.ToString() ?? "Banners");
             
             AddBannerCommand = new RelayCommand(ExecuteAddBanner);
+            SaveBannerCommand = new RelayCommand(ExecuteSaveBanner);
             DeleteBannerCommand = new RelayCommand(ExecuteDeleteBanner);
             
             AddVoucherCommand = new RelayCommand(ExecuteAddVoucher);
+            SaveVoucherCommand = new RelayCommand(ExecuteSaveVoucher);
             DeleteVoucherCommand = new RelayCommand(ExecuteDeleteVoucher);
             
             AddFlashSaleCommand = new RelayCommand(ExecuteAddFlashSale);
+            SaveFlashSaleCommand = new RelayCommand(ExecuteSaveFlashSale);
             DeleteFlashSaleCommand = new RelayCommand(ExecuteDeleteFlashSale);
 
             CreateNewCommand = new RelayCommand(ExecuteCreateNew);
@@ -242,13 +277,39 @@ namespace TMDT.ViewModels.Admin
                 SelectedBanner = null;
                 SelectedVoucher = null;
                 SelectedFlashSale = null;
-                HideDetailRequest?.Invoke();
             });
+            GenerateAiContentCommand = new RelayCommand(ExecuteGenerateAiContent, o => !IsAiGenerating);
 
+            LoadData();
+        }
+
+        private async void ExecuteGenerateAiContent(object? obj)
+        {
+            if (string.IsNullOrWhiteSpace(AiPrompt))
+            {
+                AiResultText = "Vui lòng nhập ý tưởng trước!";
+                return;
+            }
+
+            IsAiGenerating = true;
+            AiResultText = "Đang nặn chữ... AI đang vận công suy nghĩ...";
+
+            try
+            {
+                AiResultText = await _aiService.GenerateMarketingContentAsync(AiPrompt);
+            }
+            finally
+            {
+                IsAiGenerating = false;
+            }
+        }
+
+        private void LoadData()
+        {
             LoadMarketingData();
         }
 
-        private void ExecuteCreateNew(object obj)
+        private void ExecuteCreateNew(object? obj)
         {
             _selectedBanner = null;
             _selectedVoucher = null;
@@ -325,7 +386,7 @@ namespace TMDT.ViewModels.Admin
 
         // --- Commands Implementations ---
 
-        private async void ExecuteAddBanner(object obj)
+        private async void ExecuteAddBanner(object? obj)
         {
             if (string.IsNullOrWhiteSpace(BannerTitle) || string.IsNullOrWhiteSpace(BannerImageUrl))
             {
@@ -354,7 +415,8 @@ namespace TMDT.ViewModels.Admin
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Database insert failed: " + ex.Message);
+                MessageBox.Show($"Lỗi lưu Banner: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
 
             Banners.Add(newBanner);
@@ -370,7 +432,51 @@ namespace TMDT.ViewModels.Admin
             MessageBox.Show("Đã thêm Banner quảng cáo toàn sàn thành công! Trang chủ người mua đã tự động cập nhật.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private async void ExecuteDeleteBanner(object obj)
+        private async void ExecuteSaveBanner(object? obj)
+        {
+            if (SelectedBanner == null) return;
+
+            if (string.IsNullOrWhiteSpace(BannerTitle) || string.IsNullOrWhiteSpace(BannerImageUrl))
+            {
+                MessageBox.Show("Vui lòng nhập tiêu đề và đường dẫn hình ảnh cho Banner!", "Thông tin trống", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                if (_context != null)
+                {
+                    var dbBanner = await _context.Banners.FindAsync(SelectedBanner.BannerId);
+                    if (dbBanner != null)
+                    {
+                        dbBanner.Title = BannerTitle;
+                        dbBanner.ImageUrl = BannerImageUrl;
+                        dbBanner.LinkUrl = BannerLinkUrl;
+                        dbBanner.SortOrder = BannerSortOrder;
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                // Update in-memory object
+                SelectedBanner.Title = BannerTitle;
+                SelectedBanner.ImageUrl = BannerImageUrl;
+                SelectedBanner.LinkUrl = BannerLinkUrl;
+                SelectedBanner.SortOrder = BannerSortOrder;
+                var index = Banners.IndexOf(SelectedBanner);
+                if (index >= 0) Banners[index] = SelectedBanner;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi cập nhật Banner: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            OnPropertyChanged(nameof(Banners));
+            HideDetailRequest?.Invoke();
+            MessageBox.Show("Đã cập nhật Banner thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private async void ExecuteDeleteBanner(object? obj)
         {
             if (SelectedBanner == null) return;
 
@@ -400,11 +506,23 @@ namespace TMDT.ViewModels.Admin
             HideDetailRequest?.Invoke();
         }
 
-        private async void ExecuteAddVoucher(object obj)
+        private async void ExecuteAddVoucher(object? obj)
         {
             if (string.IsNullOrWhiteSpace(VoucherCode) || string.IsNullOrWhiteSpace(VoucherName))
             {
                 MessageBox.Show("Vui lòng nhập Mã Voucher và Tên Voucher kích cầu!", "Thông tin trống", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (VoucherDiscountValue <= 0 || VoucherMinOrderValue <= 0 || VoucherTotalQuantity <= 0)
+            {
+                MessageBox.Show("Số tiền giảm, đơn tối thiểu và số lượng phải lớn hơn 0!", "Lỗi logic", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (VoucherDiscountValue >= VoucherMinOrderValue)
+            {
+                MessageBox.Show("Số tiền giảm giá không được lớn hơn hoặc bằng giá trị đơn hàng tối thiểu!", "Lỗi logic", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -432,7 +550,8 @@ namespace TMDT.ViewModels.Admin
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Database insert failed: " + ex.Message);
+                MessageBox.Show($"Lỗi lưu Voucher: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
 
             Vouchers.Add(newVoucher);
@@ -449,7 +568,64 @@ namespace TMDT.ViewModels.Admin
             MessageBox.Show("Đã tạo thành công Mã giảm giá toàn sàn do Sàn tài trợ!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private async void ExecuteDeleteVoucher(object obj)
+        private async void ExecuteSaveVoucher(object? obj)
+        {
+            if (SelectedVoucher == null) return;
+
+            if (string.IsNullOrWhiteSpace(VoucherCode) || string.IsNullOrWhiteSpace(VoucherName))
+            {
+                MessageBox.Show("Vui lòng nhập Mã Voucher và Tên Voucher kích cầu!", "Thông tin trống", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (VoucherDiscountValue <= 0 || VoucherMinOrderValue <= 0 || VoucherTotalQuantity <= 0)
+            {
+                MessageBox.Show("Số tiền giảm, đơn tối thiểu và số lượng phải lớn hơn 0!", "Lỗi logic", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (VoucherDiscountValue >= VoucherMinOrderValue)
+            {
+                MessageBox.Show("Số tiền giảm giá không được lớn hơn hoặc bằng giá trị đơn hàng tối thiểu!", "Lỗi logic", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                if (_context != null)
+                {
+                    var dbVoucher = await _context.Vouchers.FindAsync(SelectedVoucher.VoucherId);
+                    if (dbVoucher != null)
+                    {
+                        dbVoucher.VoucherCode = VoucherCode.ToUpper();
+                        dbVoucher.VoucherName = VoucherName;
+                        dbVoucher.DiscountValue = VoucherDiscountValue;
+                        dbVoucher.MinOrderValue = VoucherMinOrderValue;
+                        dbVoucher.TotalQuantity = VoucherTotalQuantity;
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                SelectedVoucher.VoucherCode = VoucherCode.ToUpper();
+                SelectedVoucher.VoucherName = VoucherName;
+                SelectedVoucher.DiscountValue = VoucherDiscountValue;
+                SelectedVoucher.MinOrderValue = VoucherMinOrderValue;
+                SelectedVoucher.TotalQuantity = VoucherTotalQuantity;
+                var index = Vouchers.IndexOf(SelectedVoucher);
+                if (index >= 0) Vouchers[index] = SelectedVoucher;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi cập nhật Voucher: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            OnPropertyChanged(nameof(Vouchers));
+            HideDetailRequest?.Invoke();
+            MessageBox.Show("Đã cập nhật Voucher thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private async void ExecuteDeleteVoucher(object? obj)
         {
             if (SelectedVoucher == null) return;
 
@@ -480,11 +656,23 @@ namespace TMDT.ViewModels.Admin
             HideDetailRequest?.Invoke();
         }
 
-        private async void ExecuteAddFlashSale(object obj)
+        private async void ExecuteAddFlashSale(object? obj)
         {
             if (FlashSelectedProduct == null || string.IsNullOrWhiteSpace(FlashCampaignName))
             {
                 MessageBox.Show("Vui lòng nhập tên đợt sale và chọn sản phẩm tham gia Flash Sale!", "Thông tin trống", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (FlashPrice <= 0 || FlashPrice >= FlashSelectedProduct.Price)
+            {
+                MessageBox.Show($"Giá Flash Sale phải lớn hơn 0 và nhỏ hơn giá gốc của sản phẩm ({FlashSelectedProduct.Price:N0} đ)!", "Lỗi logic", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (FlashStockLimit <= 0 || FlashStockLimit > (FlashSelectedProduct.StockQuantity ?? 0))
+            {
+                MessageBox.Show($"Số lượng giới hạn Flash Sale phải lớn hơn 0 và không được vượt quá số lượng tồn kho thực tế ({FlashSelectedProduct.StockQuantity ?? 0})!", "Lỗi logic", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -511,7 +699,8 @@ namespace TMDT.ViewModels.Admin
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Database insert failed: " + ex.Message);
+                MessageBox.Show($"Lỗi lưu Flash Sale: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
 
             FlashSales.Add(newFlash);
@@ -526,7 +715,63 @@ namespace TMDT.ViewModels.Admin
             MessageBox.Show("Đã đưa sản phẩm tham gia chương trình Flash Sale thành công! Đếm ngược giờ vàng đã được kích hoạt.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private async void ExecuteDeleteFlashSale(object obj)
+        private async void ExecuteSaveFlashSale(object? obj)
+        {
+            if (SelectedFlashSale == null) return;
+
+            if (FlashSelectedProduct == null || string.IsNullOrWhiteSpace(FlashCampaignName))
+            {
+                MessageBox.Show("Vui lòng nhập tên đợt sale và chọn sản phẩm tham gia Flash Sale!", "Thông tin trống", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (FlashPrice <= 0 || FlashPrice >= FlashSelectedProduct.Price)
+            {
+                MessageBox.Show($"Giá Flash Sale phải lớn hơn 0 và nhỏ hơn giá gốc của sản phẩm ({FlashSelectedProduct.Price:N0} đ)!", "Lỗi logic", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (FlashStockLimit <= 0 || FlashStockLimit > (FlashSelectedProduct.StockQuantity ?? 0))
+            {
+                MessageBox.Show($"Số lượng giới hạn Flash Sale phải lớn hơn 0 và không được vượt quá số lượng tồn kho thực tế ({FlashSelectedProduct.StockQuantity ?? 0})!", "Lỗi logic", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                if (_context != null)
+                {
+                    var dbFlash = await _context.FlashSales.FindAsync(SelectedFlashSale.FlashSaleId);
+                    if (dbFlash != null)
+                    {
+                        dbFlash.CampaignName = FlashCampaignName;
+                        dbFlash.ProductId = FlashSelectedProduct.ProductId;
+                        dbFlash.FlashPrice = FlashPrice;
+                        dbFlash.StockLimit = FlashStockLimit;
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                SelectedFlashSale.CampaignName = FlashCampaignName;
+                SelectedFlashSale.ProductId = FlashSelectedProduct.ProductId;
+                SelectedFlashSale.FlashPrice = FlashPrice;
+                SelectedFlashSale.StockLimit = FlashStockLimit;
+                SelectedFlashSale.Product = FlashSelectedProduct;
+                var index = FlashSales.IndexOf(SelectedFlashSale);
+                if (index >= 0) FlashSales[index] = SelectedFlashSale;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi cập nhật Flash Sale: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            OnPropertyChanged(nameof(FlashSales));
+            HideDetailRequest?.Invoke();
+            MessageBox.Show("Đã cập nhật Flash Sale thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private async void ExecuteDeleteFlashSale(object? obj)
         {
             if (SelectedFlashSale == null) return;
 

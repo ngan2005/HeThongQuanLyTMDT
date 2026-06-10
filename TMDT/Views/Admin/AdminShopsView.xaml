@@ -5,10 +5,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:TMDT.Views.Admin"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:converters="clr-namespace:TMDT.Converters"
              mc:Ignorable="d"
              d:DesignHeight="700" d:DesignWidth="1100">
 
     <UserControl.Resources>
+        <converters:EqualityToBooleanConverter x:Key="EqualityToBooleanConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <DropShadowEffect x:Key="CardShadow" BlurRadius="16" ShadowDepth="2" Opacity="0.07" Color="#000" Direction="270"/>
 
@@ -106,10 +108,10 @@
 
                     <!-- Filter Pills -->
                     <StackPanel Grid.Column="0" Orientation="Horizontal">
-                        <RadioButton Content="Tất cả" Style="{StaticResource FilterPill}" IsChecked="True" Command="{Binding FilterCommand}" CommandParameter="All"/>
-                        <RadioButton Content="Chờ duyệt" Style="{StaticResource FilterPill}" Command="{Binding FilterCommand}" CommandParameter="Pending" Margin="6,0,0,0"/>
-                        <RadioButton Content="Đang bán" Style="{StaticResource FilterPill}" Command="{Binding FilterCommand}" CommandParameter="Active" Margin="6,0,0,0"/>
-                        <RadioButton Content="Tạm khóa" Style="{StaticResource FilterPill}" Command="{Binding FilterCommand}" CommandParameter="Suspended" Margin="6,0,0,0"/>
+                        <RadioButton Content="Tất cả" Style="{StaticResource FilterPill}" IsChecked="{Binding StatusFilter, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter='All', Mode=OneWay}" Command="{Binding FilterCommand}" CommandParameter="All"/>
+                        <RadioButton Content="Chờ duyệt" Style="{StaticResource FilterPill}" IsChecked="{Binding StatusFilter, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter='Pending', Mode=OneWay}" Command="{Binding FilterCommand}" CommandParameter="Pending" Margin="6,0,0,0"/>
+                        <RadioButton Content="Đang bán" Style="{StaticResource FilterPill}" IsChecked="{Binding StatusFilter, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter='Active', Mode=OneWay}" Command="{Binding FilterCommand}" CommandParameter="Active" Margin="6,0,0,0"/>
+                        <RadioButton Content="Tạm khóa" Style="{StaticResource FilterPill}" IsChecked="{Binding StatusFilter, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter='Suspended', Mode=OneWay}" Command="{Binding FilterCommand}" CommandParameter="Suspended" Margin="6,0,0,0"/>
                     </StackPanel>
 
                     <!-- Search -->

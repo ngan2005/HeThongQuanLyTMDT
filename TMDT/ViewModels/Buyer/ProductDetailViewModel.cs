@@ -13,7 +13,6 @@ namespace TMDT.ViewModels.Buyer
         private readonly Product _product;
 
         private int _quantity = 1;
-        private string _selectedImageUrl = "";
 
         public Product Product => _product;
         public string ProductName => _product.ProductName;
@@ -44,10 +43,10 @@ namespace TMDT.ViewModels.Buyer
 
         public bool IsInStock => StockQuantity > 0;
 
-        public ICommand AddToCartCommand { get; }
-        public ICommand BackCommand { get; }
-        public ICommand IncreaseCommand { get; }
-        public ICommand DecreaseCommand { get; }
+        public ICommand AddToCartCommand { get; } = null!;
+        public ICommand BackCommand { get; } = null!;
+        public ICommand IncreaseCommand { get; } = null!;
+        public ICommand DecreaseCommand { get; } = null!;
 
         public event Action? AddedToCart;
 

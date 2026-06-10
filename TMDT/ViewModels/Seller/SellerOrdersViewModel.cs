@@ -157,6 +157,9 @@ namespace TMDT.ViewModels.Seller
                             {
                                 var revenue = (dbOrder.TotalAmount ?? 0) - (dbOrder.PlatformFee ?? 0);
                                 shop.WalletBalance = (shop.WalletBalance ?? 0) + revenue;
+                                
+                                // Cộng phí sàn vào ví tổng hệ thống
+                                SystemSettingsHelper.AddSystemWalletBalance(dbOrder.PlatformFee ?? 0);
                             }
 
                             await _context.SaveChangesAsync();

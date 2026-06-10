@@ -8,6 +8,7 @@ using TMDT.Models;
 using TMDT.Services;
 using TMDT.Services.Interfaces;
 using TMDT.Utilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace TMDT.ViewModels.Buyer
 {
@@ -73,7 +74,8 @@ namespace TMDT.ViewModels.Buyer
             {
                 using var context = new TmdtContext();
                 var products = context.Products
-                    .Where(p => p.Status == "Approved")
+                    .Include(p => p.Shop)
+                    .Where(p => p.Status == "Approved" && (p.Shop == null || p.Shop.IsActive == true))
                     .OrderByDescending(p => p.SoldCount)
                     .Take(10)
                     .ToList();
@@ -95,7 +97,10 @@ namespace TMDT.ViewModels.Buyer
             try
             {
                 using var context = new TmdtContext();
-                var query = context.Products.Where(p => p.Status == "Approved").AsQueryable();
+                var query = context.Products
+                    .Include(p => p.Shop)
+                    .Where(p => p.Status == "Approved" && (p.Shop == null || p.Shop.IsActive == true))
+                    .AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(_searchQuery))
                 {

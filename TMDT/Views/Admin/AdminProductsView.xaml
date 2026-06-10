@@ -104,10 +104,10 @@
 
                     <!-- Filter Pills -->
                     <StackPanel Grid.Column="0" Orientation="Horizontal">
-                        <RadioButton Content="Tất cả" Style="{StaticResource FilterPill}" IsChecked="True" Tag="All" Click="FilterPill_Click"/>
-                        <RadioButton Content="Chờ duyệt" Style="{StaticResource FilterPill}" Tag="Pending" Click="FilterPill_Click" Margin="6,0,0,0"/>
-                        <RadioButton Content="Đang bán" Style="{StaticResource FilterPill}" Tag="Approved" Click="FilterPill_Click" Margin="6,0,0,0"/>
-                        <RadioButton Content="Bị từ chối" Style="{StaticResource FilterPill}" Tag="Rejected" Click="FilterPill_Click" Margin="6,0,0,0"/>
+                        <RadioButton Content="Tất cả" Style="{StaticResource FilterPill}" IsChecked="{Binding StatusFilter, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=All, Mode=OneWay}" Tag="All" Click="FilterPill_Click"/>
+                        <RadioButton Content="Chờ duyệt" Style="{StaticResource FilterPill}" IsChecked="{Binding StatusFilter, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Pending, Mode=OneWay}" Tag="Pending" Click="FilterPill_Click" Margin="6,0,0,0"/>
+                        <RadioButton Content="Đang bán" Style="{StaticResource FilterPill}" IsChecked="{Binding StatusFilter, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Approved, Mode=OneWay}" Tag="Approved" Click="FilterPill_Click" Margin="6,0,0,0"/>
+                        <RadioButton Content="Bị từ chối" Style="{StaticResource FilterPill}" IsChecked="{Binding StatusFilter, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Rejected, Mode=OneWay}" Tag="Rejected" Click="FilterPill_Click" Margin="6,0,0,0"/>
                     </StackPanel>
 
                     <!-- Search -->
@@ -618,6 +618,48 @@
                                 <TextBlock Text="Vui lòng kiểm tra kỹ nội dung, giá bán và xuất xứ sản phẩm trước khi phê duyệt hiển thị."
                                            FontSize="11.5" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"
                                            FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,16"/>
+
+                                <!-- AI Moderation Panel -->
+                                <Border Background="{DynamicResource SurfaceLow}" CornerRadius="8" Padding="12" Margin="0,0,0,16" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}">
+                                    <StackPanel>
+                                        <Button Command="{Binding AiAnalyzeCommand}" Background="{DynamicResource SurfaceMid}" BorderThickness="0" Padding="8,6" Cursor="Hand" Margin="0,0,0,8" ToolTip="AI đọc và tìm lỗi vi phạm">
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <!-- Loading Icon -->
+                                                <TextBlock Text="&#xE916;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{DynamicResource BrandPurple}" VerticalAlignment="Center" Margin="0,0,6,0" Visibility="{Binding IsAiAnalyzing, Converter={StaticResource BoolToVis}}"/>
+                                                <!-- Robot Icon -->
+                                                <TextBlock Text="&#xE8B3;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{DynamicResource BrandPurple}" VerticalAlignment="Center" Margin="0,0,6,0">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsAiAnalyzing}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                
+                                                <TextBlock Text="Cố vấn AI Phân Tích" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Button>
+                                        
+                                        <TextBlock Text="{Binding AiAnalysisResult}" FontSize="11" Foreground="{DynamicResource TextPrimary}" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding AiAnalysisResult}" Value="">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding AiAnalysisResult}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
 
                                 <!-- Approve Button -->
                                 <Button Command="{Binding ApproveProductCommand}" Background="{DynamicResource SuccessGreen}" BorderThickness="0"

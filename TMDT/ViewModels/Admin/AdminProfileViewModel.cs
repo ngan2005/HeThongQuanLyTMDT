@@ -258,11 +258,12 @@ namespace TMDT.ViewModels.Admin
                 });
 
                 using var ctx = new TmdtContext();
-                ctx.Database.ExecuteSqlRaw(
-                    "ALTER TABLE [User] ALTER COLUMN [Avatar] nvarchar(max)");
-                ctx.Database.ExecuteSqlRaw(
-                    "UPDATE [User] SET [Avatar] = {0} WHERE [UserId] = {1}",
-                    base64, _userId);
+                var dbUser = await ctx.Users.FindAsync(_userId);
+                if (dbUser != null)
+                {
+                    dbUser.Avatar = base64;
+                    await ctx.SaveChangesAsync();
+                }
 
                 Avatar = base64;
 

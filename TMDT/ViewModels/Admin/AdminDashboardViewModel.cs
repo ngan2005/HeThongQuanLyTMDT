@@ -4,11 +4,22 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using TMDT.Models;
+using TMDT.Utilities;
+using System.Windows.Input;
+using System.Threading.Tasks;
 
 namespace TMDT.ViewModels.Admin
 {
     public class AdminDashboardViewModel : ViewModelBase
     {
+        private readonly AiService _aiService;
+        private string _aiReport = "";
+        private bool _isAiGenerating;
+
+        public string AiReport { get => _aiReport; set { _aiReport = value; OnPropertyChanged(); } }
+        public bool IsAiGenerating { get => _isAiGenerating; set { _isAiGenerating = value; OnPropertyChanged(); } }
+
+        public ICommand GenerateAiReportCommand { get; }
 
 
         private int _totalUsers;
@@ -44,12 +55,38 @@ namespace TMDT.ViewModels.Admin
 
         public AdminDashboardViewModel()
         {
+            _aiService = new AiService();
+
             RecentOrders = new ObservableCollection<OrderSummary>();
             TopShops = new ObservableCollection<ShopSummary>();
             RevenueTrend = new ObservableCollection<RevenueTrendPoint>();
             CategoryShares = new ObservableCollection<CategorySharePoint>();
 
+            GenerateAiReportCommand = new RelayCommand(ExecuteGenerateAiReport, o => !IsAiGenerating);
+
             LoadRealData();
+        }
+
+        private async void ExecuteGenerateAiReport(object? obj)
+        {
+            IsAiGenerating = true;
+            AiReport = "Đang tổng hợp dữ liệu và phân tích...";
+
+            try
+            {
+                AiReport = await _aiService.AnalyzeDashboardAsync(
+                    MonthlyRevenue,
+                    CommissionsEarned,
+                    TotalShops,
+                    PendingShops,
+                    TotalProducts,
+                    PendingProducts,
+                    TotalUsers);
+            }
+            finally
+            {
+                IsAiGenerating = false;
+            }
         }
 
         // Không giữ context làm field — dùng using var cục bộ trong LoadRealData
@@ -75,7 +112,8 @@ namespace TMDT.ViewModels.Admin
                 var monthlyOrders = ctx.Orders
                     .Where(o => o.OrderDate.HasValue
                              && o.OrderDate.Value.Month == currentMonth
-                             && o.OrderDate.Value.Year  == currentYear)
+                             && o.OrderDate.Value.Year  == currentYear
+                             && (o.OrderStatus == "Hoàn thành" || o.OrderStatus == "Đã giao hàng"))
                     .ToList();
 
                 MonthlyRevenue    = monthlyOrders.Sum(o => o.TotalAmount ?? 0);
@@ -104,13 +142,13 @@ namespace TMDT.ViewModels.Admin
                     });
 
                 // ── Top shops theo DOANH THU THỰC (tổng TotalAmount từ Orders) ─
-                // ✅ Sửa: không dùng WalletBalance (số dư ví chưa rút)
                 var topShops = ctx.Orders
                     .Where(o => o.ShopId != null && o.TotalAmount != null)
                     .GroupBy(o => o.ShopId)
                     .Select(g => new
                     {
                         ShopId     = g.Key,
+                        ShopName   = g.First().Shop!.ShopName,
                         TotalSales = g.Sum(o => o.TotalAmount ?? 0)
                     })
                     .OrderByDescending(x => x.TotalSales)
@@ -119,21 +157,19 @@ namespace TMDT.ViewModels.Admin
 
                 foreach (var ts in topShops)
                 {
-                    var shop = ctx.Shops.Find(ts.ShopId);
-                    if (shop != null)
-                        TopShops.Add(new ShopSummary
-                        {
-                            ShopName   = shop.ShopName,
-                            TotalSales = ts.TotalSales,
-                            Category   = "Đa ngành"
-                        });
+                    TopShops.Add(new ShopSummary
+                    {
+                        ShopName   = ts.ShopName,
+                        TotalSales = ts.TotalSales,
+                        Category   = "Đa ngành"
+                    });
                 }
 
                 // ── Revenue trend 7 ngày — 1 QUERY DUY NHẤT thay vì 7 ─────────
                 var since     = DateTime.Now.Date.AddDays(-6);
                 // Lấy tất cả đơn trong 7 ngày, group bên C# (tránh Date() trên SQL Server)
                 var weekOrders = ctx.Orders
-                    .Where(o => o.OrderDate.HasValue && o.OrderDate.Value >= since)
+                    .Where(o => o.OrderDate.HasValue && o.OrderDate.Value >= since && o.OrderStatus == "Hoàn thành")
                     .Select(o => new { o.OrderDate, o.TotalAmount, o.PlatformFee })
                     .ToList();
 

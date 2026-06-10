@@ -1,0 +1,341 @@
+<UserControl x:Class="TMDT.Views.Admin.AdminChatWidget"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TMDT.Views.Admin"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <DropShadowEffect x:Key="WidgetShadow" BlurRadius="30" ShadowDepth="4" Opacity="0.15" Color="#000" Direction="270"/>
+
+        <!-- ScrollViewer Style -->
+        <Style x:Key="ChatScroll" TargetType="ScrollViewer">
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollViewer">
+                        <Grid>
+                            <ScrollContentPresenter x:Name="PART_ScrollContentPresenter"/>
+                            <ScrollBar x:Name="PART_VerticalScrollBar" HorizontalAlignment="Right"
+                                       Value="{TemplateBinding VerticalOffset}" Maximum="{TemplateBinding ScrollableHeight}"
+                                       ViewportSize="{TemplateBinding ViewportHeight}" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
+                                       Width="4" Opacity="0.5" Background="Transparent"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,30,30">
+        <!-- Chat Window -->
+        <Border x:Name="ChatWindow" Width="700" Height="500" Background="{DynamicResource AppBackground}" 
+                CornerRadius="16" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}"
+                Effect="{StaticResource WidgetShadow}" Margin="0,0,0,70"
+                Visibility="{Binding IsOpen, Converter={StaticResource BoolToVis}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/> <!-- Contact List -->
+                    <ColumnDefinition Width="1"/>   <!-- Divider -->
+                    <ColumnDefinition Width="*"/>   <!-- Chat Area -->
+                </Grid.ColumnDefinitions>
+
+                <!-- LEFT PANE: CONTACTS -->
+                <Grid Grid.Column="0" Background="{DynamicResource CardBg}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Contacts Header -->
+                    <Border Grid.Row="0" Padding="16,20,16,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource BorderSlate}">
+                        <StackPanel>
+                            <TextBlock Text="Tin nhắn &amp; Hỗ trợ" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <!-- Search -->
+                            <Border Background="{DynamicResource SurfaceHigh}" CornerRadius="8" Margin="0,12,0,0" Padding="10,6">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Column="1" Text="Tìm kiếm..." Foreground="{DynamicResource TextMuted}" BorderThickness="0" Background="Transparent" Padding="8,0,0,0" FontSize="12" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Contact List -->
+                    <ListBox Grid.Row="1" ItemsSource="{Binding Contacts}" SelectedItem="{Binding SelectedContact}"
+                             Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="16,12"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="{DynamicResource SurfaceLow}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter Property="Background" Value="{DynamicResource SurfaceMid}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="40" Height="40" CornerRadius="20" Background="{DynamicResource BrandActiveBg}">
+                                        <TextBlock Text="&#xE719;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource BrandPurple}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                                        <Grid>
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                            <TextBlock Text="{Binding TimeDisplay}" FontSize="10" Foreground="{DynamicResource TextMuted}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                        </Grid>
+                                        <TextBlock Text="{Binding LastMessage}" FontSize="11.5" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" TextTrimming="CharacterEllipsis" MaxWidth="170" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+
+                <Border Grid.Column="1" Background="{DynamicResource BorderSlate}"/>
+
+                <!-- RIGHT PANE: ACTIVE CHAT -->
+                <Grid Grid.Column="2" Background="{DynamicResource AppBackground}">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedContact}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Hidden"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Chat Header -->
+                    <Border Grid.Row="0" Background="{DynamicResource CardBg}" Padding="20,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource BorderSlate}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Border Width="36" Height="36" CornerRadius="18" Background="{DynamicResource SurfaceHigh}">
+                                <TextBlock Text="&#xE719;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            
+                            <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding SelectedContact.Name}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                    <Ellipse Width="6" Height="6" Fill="{DynamicResource SuccessGreen}" Margin="0,0,4,0"/>
+                                    <TextBlock Text="Đang hoạt động" FontSize="10.5" Foreground="{DynamicResource SuccessGreen}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                </StackPanel>
+                            </StackPanel>
+                            
+                            <!-- Close button (optional inner close) -->
+                            <Button Grid.Column="2" Command="{Binding ToggleChatCommand}" Background="Transparent" BorderThickness="0" Padding="6" Cursor="Hand">
+                                <TextBlock Text="&#xE106;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="{DynamicResource TextSecondary}"/>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- Chat Messages -->
+                    <ScrollViewer x:Name="MessagesScrollViewer" Grid.Row="1" Style="{StaticResource ChatScroll}" Padding="20,10">
+                        <ItemsControl ItemsSource="{Binding Messages}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,6">
+                                        <!-- Mine (Admin) -->
+                                        <StackPanel HorizontalAlignment="Right" Visibility="{Binding IsMine, Converter={StaticResource BoolToVis}}">
+                                            <Border Background="{DynamicResource BrandPurple}" CornerRadius="14,14,2,14" Padding="12,8" MaxWidth="280">
+                                                <TextBlock Text="{Binding Content}" Foreground="{DynamicResource PrimaryBtnText}" FontSize="13" FontFamily="Be Vietnam Pro, Segoe UI" TextWrapping="Wrap"/>
+                                            </Border>
+                                            <TextBlock Text="{Binding TimeDisplay}" FontSize="9.5" Foreground="{DynamicResource TextMuted}" HorizontalAlignment="Right" Margin="0,4,4,0"/>
+                                        </StackPanel>
+                                        
+                                        <!-- Theirs (Shop/User) -->
+                                        <StackPanel HorizontalAlignment="Left">
+                                            <StackPanel.Style>
+                                                <Style TargetType="StackPanel">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsMine}" Value="True">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </StackPanel.Style>
+                                            <Border Background="{DynamicResource CardBg}" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" CornerRadius="14,14,14,2" Padding="12,8" MaxWidth="280">
+                                                <TextBlock Text="{Binding Content}" Foreground="{DynamicResource TextPrimary}" FontSize="13" FontFamily="Be Vietnam Pro, Segoe UI" TextWrapping="Wrap"/>
+                                            </Border>
+                                            <TextBlock Text="{Binding TimeDisplay}" FontSize="9.5" Foreground="{DynamicResource TextMuted}" HorizontalAlignment="Left" Margin="4,4,0,0"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <!-- Empty State for Chat Area -->
+                    <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,-20,0,0">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Messages.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <TextBlock Text="&#xE733;" FontFamily="Segoe MDL2 Assets" FontSize="36" Foreground="{DynamicResource BorderSlate}" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                        <TextBlock Text="Gửi tin nhắn đầu tiên" FontSize="13" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Message Input Box -->
+                    <Border Grid.Row="2" Background="{DynamicResource CardBg}" Padding="16" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderSlate}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                <Button Background="Transparent" BorderThickness="0" Padding="8" ToolTip="Đính kèm ảnh">
+                                    <TextBlock Text="&#xE71A;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource TextSecondary}"/>
+                                </Button>
+                                <Button Command="{Binding AiSuggestCommand}" Background="Transparent" BorderThickness="0" Padding="8" ToolTip="AI Gợi ý câu trả lời">
+                                    <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource BrandPurple}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="&#xE8B3;"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsAiLoading}" Value="True">
+                                                        <Setter Property="Text" Value="&#xE916;"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Button>
+                            </StackPanel>
+                            
+                            <Border Grid.Column="1" Background="{DynamicResource AppBackground}" CornerRadius="20" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Margin="8,0">
+                                <TextBox Text="{Binding MessageText, UpdateSourceTrigger=PropertyChanged}" 
+                                         Background="Transparent" BorderThickness="0" Padding="14,8"
+                                         FontSize="13" FontFamily="Be Vietnam Pro, Segoe UI" Foreground="{DynamicResource TextPrimary}"
+                                         CaretBrush="{DynamicResource BrandPurple}"
+                                         VerticalAlignment="Center">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Enter" Command="{Binding SendMessageCommand}"/>
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                            </Border>
+
+                            <Button Grid.Column="2" Command="{Binding SendMessageCommand}" Width="36" Height="36" Background="{DynamicResource BrandPurple}" BorderThickness="0" Foreground="{DynamicResource PrimaryBtnText}" Cursor="Hand">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="18" Padding="10">
+                                            <TextBlock Text="&#xE122;" FontFamily="Segoe MDL2 Assets" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Initial Empty State (When No Contact Selected) -->
+                <Grid Grid.Column="1" Grid.ColumnSpan="2" Background="{DynamicResource AppBackground}">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedContact}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,-20,0,0">
+                        <Border Width="80" Height="80" CornerRadius="40" Background="{DynamicResource CardBg}" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Margin="0,0,0,20">
+                            <TextBlock Text="&#xE8F2;" FontFamily="Segoe MDL2 Assets" FontSize="32" Foreground="{DynamicResource BrandPurple}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="Trung tâm Tin nhắn" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                        <TextBlock Text="Chọn một cửa hàng để bắt đầu hỗ trợ" FontSize="13" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- Floating Button -->
+        <Button Command="{Binding ToggleChatCommand}" Width="60" Height="60" 
+                Background="{DynamicResource BrandPurple}" BorderThickness="0" Foreground="{DynamicResource PrimaryBtnText}"
+                Cursor="Hand" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+            <Button.Effect>
+                <DropShadowEffect BlurRadius="20" ShadowDepth="4" Opacity="0.3" Color="{DynamicResource BrandPurple.Color}"/>
+            </Button.Effect>
+            <Button.Template>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="30">
+                        <Grid>
+                            <TextBlock x:Name="icon" Text="&#xE8F2;" FontFamily="Segoe MDL2 Assets" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsOpen}" Value="True">
+                                                <Setter Property="Text" Value="&#xE106;"/>
+                                                <Setter Property="FontSize" Value="18"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource BrandAccent}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="bd" Property="RenderTransform">
+                                <Setter.Value>
+                                    <ScaleTransform ScaleX="0.95" ScaleY="0.95" CenterX="30" CenterY="30"/>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
+    </Grid>
+</UserControl>

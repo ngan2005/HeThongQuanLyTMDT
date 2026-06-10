@@ -164,6 +164,19 @@ namespace TMDT.ViewModels.Buyer
 
                 foreach (var group in Items.GroupBy(i => i.ShopId))
                 {
+                    // Kiểm tra xem Shop có bị khóa không
+                    var shopId = group.Key;
+                    if (shopId > 0)
+                    {
+                        var shop = await context.Shops.FindAsync(shopId);
+                        if (shop != null && shop.IsActive == false)
+                        {
+                            await transaction.RollbackAsync();
+                            MessageBox.Show($"Cửa hàng '{shop.ShopName}' hiện đang bị tạm khóa. Bạn không thể đặt hàng từ cửa hàng này. Vui lòng điều chỉnh lại giỏ hàng.", "Lỗi đặt hàng", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
+                    }
+
                     var order = new Order
                     {
                         OrderCode = "ORD-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
@@ -173,7 +186,7 @@ namespace TMDT.ViewModels.Buyer
                         ShippingFee = ShippingFee,
                         Discount = 0,
                         TotalAmount = group.Sum(i => i.LineTotal) + ShippingFee,
-                        PlatformFee = (group.Sum(i => i.LineTotal) + ShippingFee) * 0.05m,
+                        PlatformFee = (group.Sum(i => i.LineTotal) + ShippingFee) * (SystemSettingsHelper.Current.PlatformCommissionRate / 100m),
                         PaymentMethod = paymentMethod,
                         OrderStatus = "Pending",
                         OrderDate = DateTime.Now,
@@ -198,7 +211,15 @@ namespace TMDT.ViewModels.Buyer
 
                         var product = await context.Products.FindAsync(item.ProductId);
                         if (product != null)
+                        {
+                            if ((product.StockQuantity ?? 0) < item.Quantity)
+                            {
+                                await transaction.RollbackAsync();
+                                MessageBox.Show($"Sản phẩm '{product.ProductName}' không đủ số lượng tồn kho. (Còn lại: {product.StockQuantity ?? 0}). Vui lòng điều chỉnh lại giỏ hàng.", "Hết hàng", MessageBoxButton.OK, MessageBoxImage.Error);
+                                return;
+                            }
                             product.StockQuantity = (product.StockQuantity ?? 0) - item.Quantity;
+                        }
                     }
 
                     await context.SaveChangesAsync();
