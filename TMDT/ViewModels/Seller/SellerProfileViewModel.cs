@@ -21,6 +21,14 @@ namespace TMDT.ViewModels.Seller
         private bool _vacationMode;
         private string _openedAtDisplay;
 
+        private System.Collections.ObjectModel.ObservableCollection<Province> _provinces;
+        private System.Collections.ObjectModel.ObservableCollection<District> _districts;
+        private System.Collections.ObjectModel.ObservableCollection<Ward> _wards;
+        private Province _selectedProvince;
+        private District _selectedDistrict;
+        private Ward _selectedWard;
+        private string _houseNumberInput;
+
         private int _totalProducts;
         private int _totalOrders;
         private decimal _walletBalance;
@@ -47,6 +55,109 @@ namespace TMDT.ViewModels.Seller
         {
             get => _warehouseAddressInput;
             set { _warehouseAddressInput = value; OnPropertyChanged(); }
+        }
+
+        public System.Collections.ObjectModel.ObservableCollection<Province> Provinces
+        {
+            get => _provinces;
+            set { _provinces = value; OnPropertyChanged(); }
+        }
+
+        public System.Collections.ObjectModel.ObservableCollection<District> Districts
+        {
+            get => _districts;
+            set { _districts = value; OnPropertyChanged(); }
+        }
+
+        public System.Collections.ObjectModel.ObservableCollection<Ward> Wards
+        {
+            get => _wards;
+            set { _wards = value; OnPropertyChanged(); }
+        }
+
+        public Province SelectedProvince
+        {
+            get => _selectedProvince;
+            set
+            {
+                _selectedProvince = value;
+                OnPropertyChanged();
+                _ = LoadDistrictsAsync();
+                UpdateWarehouseAddressInput();
+            }
+        }
+
+        public District SelectedDistrict
+        {
+            get => _selectedDistrict;
+            set
+            {
+                _selectedDistrict = value;
+                OnPropertyChanged();
+                _ = LoadWardsAsync();
+                UpdateWarehouseAddressInput();
+            }
+        }
+
+        public Ward SelectedWard
+        {
+            get => _selectedWard;
+            set
+            {
+                _selectedWard = value;
+                OnPropertyChanged();
+                UpdateWarehouseAddressInput();
+            }
+        }
+
+        public string HouseNumberInput
+        {
+            get => _houseNumberInput;
+            set
+            {
+                _houseNumberInput = value;
+                OnPropertyChanged();
+                UpdateWarehouseAddressInput();
+            }
+        }
+
+        private void UpdateWarehouseAddressInput()
+        {
+            var parts = new System.Collections.Generic.List<string>();
+            if (!string.IsNullOrWhiteSpace(HouseNumberInput)) parts.Add(HouseNumberInput.Trim());
+            if (SelectedWard != null) parts.Add(SelectedWard.Name);
+            if (SelectedDistrict != null) parts.Add(SelectedDistrict.Name);
+            if (SelectedProvince != null) parts.Add(SelectedProvince.Name);
+
+            WarehouseAddressInput = string.Join(", ", parts);
+        }
+
+        private async System.Threading.Tasks.Task LoadProvincesAsync()
+        {
+            var provinces = await LocationService.GetProvincesAsync();
+            Provinces = new System.Collections.ObjectModel.ObservableCollection<Province>(provinces);
+        }
+
+        private async System.Threading.Tasks.Task LoadDistrictsAsync()
+        {
+            if (SelectedProvince == null)
+            {
+                Districts = new System.Collections.ObjectModel.ObservableCollection<District>();
+                return;
+            }
+            var districts = await LocationService.GetDistrictsAsync(SelectedProvince.Code);
+            Districts = new System.Collections.ObjectModel.ObservableCollection<District>(districts);
+        }
+
+        private async System.Threading.Tasks.Task LoadWardsAsync()
+        {
+            if (SelectedDistrict == null)
+            {
+                Wards = new System.Collections.ObjectModel.ObservableCollection<Ward>();
+                return;
+            }
+            var wards = await LocationService.GetWardsAsync(SelectedDistrict.Code);
+            Wards = new System.Collections.ObjectModel.ObservableCollection<Ward>(wards);
         }
         public decimal CommissionRate
         {
@@ -127,6 +238,7 @@ namespace TMDT.ViewModels.Seller
             WithdrawCommand = new RelayCommand(_ => MessageBox.Show("Tính năng rút tiền đang được phát triển.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information));
 
             LoadShopProfile();
+            _ = LoadProvincesAsync();
         }
 
         private void LoadShopProfile()
@@ -162,6 +274,7 @@ namespace TMDT.ViewModels.Seller
             ShopNameInput = Shop.ShopName;
             LogoInput = Shop.Logo;
             WarehouseAddressInput = Shop.WarehouseAddress;
+            HouseNumberInput = Shop.WarehouseAddress; // Khởi tạo tạm
             CommissionRate = Shop.CommissionRate ?? 3.0m;
             VacationMode = Shop.VacationMode ?? false;
             OpenedAtDisplay = Shop.OpenedAt.HasValue ? Shop.OpenedAt.Value.ToString("dd/MM/yyyy") : DateTime.Now.ToString("dd/MM/yyyy");

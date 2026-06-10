@@ -97,6 +97,30 @@ namespace TMDT.ViewModels.Admin
             set { _isAiAnalyzing = value; OnPropertyChanged(); }
         }
 
+        private string _aiFraudReportText = "";
+        private bool _isAiFraudScanning;
+        private bool _isAiCategorizing;
+
+        public string AiFraudReportText
+        {
+            get => _aiFraudReportText;
+            set { _aiFraudReportText = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsAiFraudReportVisible)); }
+        }
+
+        public bool IsAiFraudScanning
+        {
+            get => _isAiFraudScanning;
+            set { _isAiFraudScanning = value; OnPropertyChanged(); }
+        }
+
+        public bool IsAiCategorizing
+        {
+            get => _isAiCategorizing;
+            set { _isAiCategorizing = value; OnPropertyChanged(); }
+        }
+
+        public bool IsAiFraudReportVisible => !string.IsNullOrEmpty(AiFraudReportText);
+
         // Events
         public event Action? ShowDetailRequest;
         public event Action? HideDetailRequest;
@@ -108,6 +132,8 @@ namespace TMDT.ViewModels.Admin
         public ICommand CloseDetailCommand { get; }
         public ICommand ViewDetailCommand { get; }
         public ICommand AiAnalyzeCommand { get; }
+        public ICommand ScanFraudCommand { get; }
+        public ICommand AiCategorizeCommand { get; }
 
         public AdminProductsViewModel(string initialFilter = "All")
         {
@@ -140,8 +166,91 @@ namespace TMDT.ViewModels.Admin
                 ShowDetailRequest?.Invoke(); 
             });
             AiAnalyzeCommand = new RelayCommand(ExecuteAiAnalyze, CanExecuteAiAnalyze);
+            ScanFraudCommand = new RelayCommand(ExecuteScanFraud, _ => !IsAiFraudScanning);
+            AiCategorizeCommand = new RelayCommand(ExecuteAiCategorize, _ => SelectedProduct != null && !IsAiCategorizing);
 
             LoadProducts();
+        }
+
+        private async void ExecuteAiCategorize(object? obj)
+        {
+            if (SelectedProduct == null || _context == null) return;
+
+            IsAiCategorizing = true;
+            try
+            {
+                var categoriesDict = _context.Categories.ToDictionary(c => c.CategoryId, c => c.CategoryName ?? "Unknown");
+                int suggestedId = await _aiService.SuggestCategoryAsync(
+                    SelectedProduct.ProductName ?? "",
+                    SelectedProduct.Description ?? "",
+                    categoriesDict);
+
+                if (suggestedId > 0 && suggestedId != SelectedProduct.CategoryId)
+                {
+                    // AI found a better category
+                    var newCat = _context.Categories.FirstOrDefault(c => c.CategoryId == suggestedId);
+                    if (newCat != null)
+                    {
+                        var dbProd = await _context.Products.FindAsync(SelectedProduct.ProductId);
+                        if (dbProd != null)
+                        {
+                            dbProd.CategoryId = suggestedId;
+                            await _context.SaveChangesAsync();
+                            
+                            // Update UI
+                            SelectedProduct.CategoryId = suggestedId;
+                            SelectedProduct.Category = newCat;
+                            OnPropertyChanged(nameof(SelectedProduct)); // trigger UI refresh
+                            
+                            MessageBox.Show($"AI đã tự động phân loại sản phẩm này vào danh mục: {newCat.CategoryName}", "Phân loại thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                    }
+                }
+                else if (suggestedId == SelectedProduct.CategoryId)
+                {
+                    MessageBox.Show("AI đánh giá danh mục hiện tại đã chính xác.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("AI không thể xác định được danh mục phù hợp.", "Lỗi phân loại", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("ExecuteAiCategorize Error: " + ex.Message);
+            }
+            finally
+            {
+                IsAiCategorizing = false;
+            }
+        }
+
+        private async void ExecuteScanFraud(object? obj)
+        {
+            if (Products.Count == 0)
+            {
+                AiFraudReportText = "Không có sản phẩm nào để quét.";
+                return;
+            }
+
+            IsAiFraudScanning = true;
+            AiFraudReportText = "🤖 AI đang quét danh sách sản phẩm. Đang rà soát giá tiền và từ khóa cấm...";
+
+            try
+            {
+                // Lấy tối đa 30 sản phẩm đang hiển thị để quét (tránh quá tải)
+                var productInfos = Products
+                    .Take(30)
+                    .Select(p => $"- {p.ProductName} | Giá: {p.Price:N0}đ")
+                    .ToList();
+
+                string report = await _aiService.ScanFraudProductsAsync(productInfos);
+                AiFraudReportText = report;
+            }
+            finally
+            {
+                IsAiFraudScanning = false;
+            }
         }
 
         private void LoadProducts()

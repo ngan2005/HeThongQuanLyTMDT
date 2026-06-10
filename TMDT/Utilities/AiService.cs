@@ -9,8 +9,24 @@ namespace TMDT.Utilities
 {
     public class AiService
     {
-        // Thay YOUR_API_KEY bằng API Key lấy từ Google AI Studio
-        private const string ApiKey = "YOUR_API_KEY";
+        private string ApiKey
+        {
+            get
+            {
+                try
+                {
+                    string keyPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "AiKey.txt");
+                    if (System.IO.File.Exists(keyPath))
+                    {
+                        var key = System.IO.File.ReadAllText(keyPath).Trim();
+                        if (!string.IsNullOrEmpty(key) && key != "YOUR_API_KEY") 
+                            return key;
+                    }
+                }
+                catch { }
+                return "YOUR_API_KEY";
+            }
+        }
         private const string ApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
         public async Task<string> GenerateReplyAsync(string chatHistory)
@@ -299,6 +315,120 @@ Trình bày rõ ràng theo từng Option. Có sử dụng Emoji phù hợp.
                 {
                     System.Diagnostics.Debug.WriteLine("AI Marketing Error: " + ex.Message);
                     return "Lỗi kết nối máy chủ AI khi tạo Content Marketing.";
+                }
+            }
+        }
+
+        public async Task<string> ScanFraudProductsAsync(List<string> productInfos)
+        {
+            if (ApiKey == "YOUR_API_KEY")
+            {
+                return "Vui lòng nhập API Key để sử dụng AI.";
+            }
+
+            if (productInfos == null || productInfos.Count == 0)
+            {
+                return "Không có sản phẩm nào để quét.";
+            }
+
+            string systemPrompt = @"Bạn là Chuyên gia Kiểm duyệt An ninh mạng của Sàn thương mại điện tử Volox.
+Nhiệm vụ của bạn là quét danh sách Tên sản phẩm và Giá bán để phát hiện dấu hiệu GIAN LẬN hoặc VI PHẠM:
+1. Hàng cấm/Hàng nguy hiểm: Vũ khí (súng, dao găm, kiếm), chất cấm, pháo nổ, nội dung đồi trụy.
+2. Hàng giả/Lừa đảo (Fake/Scam): Các sản phẩm thương hiệu lớn (iPhone, Samsung, Rolex, Macbook, PS5...) nhưng giá RẤT RẺ một cách phi lý (Ví dụ: iPhone 15 giá 2 triệu, Laptop Gaming giá 1 triệu).
+
+Hãy phân tích kỹ từng sản phẩm trong danh sách và chỉ trả về Báo cáo Cảnh báo cho những sản phẩm vi phạm.
+- Nếu CÓ vi phạm: Liệt kê rõ tên sản phẩm, lý do nghi ngờ.
+- Nếu KHÔNG có sản phẩm nào vi phạm: Trả về chính xác câu: ""Không phát hiện sản phẩm gian lận hoặc vi phạm nào trong danh sách.""
+
+Danh sách sản phẩm (Định dạng: Tên sản phẩm | Giá tiền):
+";
+
+            string joinedProducts = string.Join("\n", productInfos);
+            string fullPrompt = systemPrompt + joinedProducts;
+
+            using (var client = new HttpClient())
+            {
+                var requestBody = new
+                {
+                    contents = new[] { new { parts = new[] { new { text = fullPrompt } } } }
+                };
+
+                string jsonContent = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                try
+                {
+                    var response = await client.PostAsync($"{ApiUrl}?key={ApiKey}", content);
+                    response.EnsureSuccessStatusCode();
+
+                    string responseString = await response.Content.ReadAsStringAsync();
+                    var responseObject = JObject.Parse(responseString);
+                    var generatedText = responseObject["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.ToString();
+                    
+                    return generatedText?.Trim() ?? "Không thể phân tích. Vui lòng thử lại.";
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("AI Fraud Scan Error: " + ex.Message);
+                    return "Lỗi kết nối máy chủ AI khi quét gian lận.";
+                }
+            }
+        }
+
+        public async Task<int> SuggestCategoryAsync(string productName, string description, Dictionary<int, string> categories)
+        {
+            if (ApiKey == "YOUR_API_KEY" || categories == null || categories.Count == 0)
+            {
+                return -1;
+            }
+
+            string categoryListStr = string.Join("\n", categories.Select(kv => $"{kv.Key}: {kv.Value}"));
+
+            string systemPrompt = @"Bạn là AI Thủ Thư của Sàn thương mại điện tử Volox.
+Nhiệm vụ của bạn là đọc Tên và Mô tả sản phẩm, sau đó đối chiếu với Danh sách Danh mục hiện có trong hệ thống và chọn ra 1 Danh mục phù hợp nhất.
+BẠN CHỈ ĐƯỢC PHÉP TRẢ VỀ DUY NHẤT MỘT CON SỐ (ID CỦA DANH MỤC), KHÔNG ĐƯỢC GIẢI THÍCH HAY VIẾT THÊM BẤT KỲ CHỮ NÀO KHÁC.
+
+Danh sách các Danh mục hợp lệ (Định dạng: ID: Tên danh mục):
+" + categoryListStr + @"
+
+Thông tin sản phẩm:
+- Tên sản phẩm: " + productName + @"
+- Mô tả: " + description + @"
+
+Trả về ID (số nguyên) của danh mục chuẩn nhất:";
+
+            using (var client = new HttpClient())
+            {
+                var requestBody = new
+                {
+                    contents = new[] { new { parts = new[] { new { text = systemPrompt } } } }
+                };
+
+                string jsonContent = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                try
+                {
+                    var response = await client.PostAsync($"{ApiUrl}?key={ApiKey}", content);
+                    response.EnsureSuccessStatusCode();
+
+                    string responseString = await response.Content.ReadAsStringAsync();
+                    var responseObject = JObject.Parse(responseString);
+                    var generatedText = responseObject["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.ToString();
+                    
+                    if (int.TryParse(generatedText?.Trim(), out int categoryId))
+                    {
+                        if (categories.ContainsKey(categoryId))
+                        {
+                            return categoryId;
+                        }
+                    }
+                    return -1;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("AI Category Error: " + ex.Message);
+                    return -1;
                 }
             }
         }

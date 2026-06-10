@@ -497,7 +497,25 @@
 
                                 <!-- Warehouse Address -->
                                 <TextBlock Style="{StaticResource InputLabel}" Text="Địa chỉ kho hàng (Nơi nhận/gửi vận chuyển) *"/>
-                                <TextBox Style="{StaticResource FormInput}" Text="{Binding WarehouseAddressInput, UpdateSourceTrigger=PropertyChanged}" Height="54" AcceptsReturn="True" TextWrapping="Wrap" Margin="0,0,0,16"/>
+                                <Grid Margin="0,0,0,16">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <ComboBox Grid.Row="0" Grid.Column="0" ItemsSource="{Binding Provinces}" SelectedItem="{Binding SelectedProvince}" DisplayMemberPath="Name" Height="36" Margin="0,0,0,8"/>
+                                    <ComboBox Grid.Row="0" Grid.Column="2" ItemsSource="{Binding Districts}" SelectedItem="{Binding SelectedDistrict}" DisplayMemberPath="Name" Height="36" Margin="0,0,0,8"/>
+                                    <ComboBox Grid.Row="0" Grid.Column="4" ItemsSource="{Binding Wards}" SelectedItem="{Binding SelectedWard}" DisplayMemberPath="Name" Height="36" Margin="0,0,0,8"/>
+                                    
+                                    <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Style="{StaticResource FormInput}" Text="{Binding HouseNumberInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0" TextWrapping="Wrap" MaxLength="150" ToolTip="Nhập Số nhà, Tên đường..."/>
+                                </Grid>
 
                                 <!-- Metadata info grid -->
                                 <Grid Margin="0,0,0,16">
