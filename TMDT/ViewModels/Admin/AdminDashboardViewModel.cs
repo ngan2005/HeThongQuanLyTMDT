@@ -64,7 +64,7 @@ namespace TMDT.ViewModels.Admin
 
             GenerateAiReportCommand = new RelayCommand(ExecuteGenerateAiReport, o => !IsAiGenerating);
 
-            LoadRealData();
+            _ = LoadRealDataAsync();
         }
 
         private async void ExecuteGenerateAiReport(object? obj)
@@ -91,43 +91,40 @@ namespace TMDT.ViewModels.Admin
 
         // Không giữ context làm field — dùng using var cục bộ trong LoadRealData
 
-        private void LoadRealData()
+        private async Task LoadRealDataAsync()
         {
             try
             {
-                // ✅ using var — tự đóng kết nối DB sau khi xong
                 using var ctx = new TmdtContext();
 
-                // ── Thống kê tổng quan (1 query mỗi cái) ─────────────────────
-                TotalUsers   = ctx.Users.Count();
-                TotalShops   = ctx.Shops.Count();
-                PendingShops = ctx.Shops.Count(s => s.IsActive == null);
+                TotalUsers   = await ctx.Users.CountAsync();
+                TotalShops   = await ctx.Shops.CountAsync();
+                PendingShops = await ctx.Shops.CountAsync(s => s.IsActive == null);
 
-                TotalProducts   = ctx.Products.Count();
-                PendingProducts = ctx.Products.Count(p => p.Status == "Pending" || p.ApprovedAt == null);
+                TotalProducts   = await ctx.Products.CountAsync();
+                PendingProducts = await ctx.Products.CountAsync(p => p.Status == "Pending" || p.ApprovedAt == null);
 
                 var currentMonth = DateTime.Now.Month;
                 var currentYear  = DateTime.Now.Year;
 
-                var monthlyOrders = ctx.Orders
+                var monthlyOrders = await ctx.Orders.AsNoTracking()
                     .Where(o => o.OrderDate.HasValue
                              && o.OrderDate.Value.Month == currentMonth
                              && o.OrderDate.Value.Year  == currentYear
                              && (o.OrderStatus == "Hoàn thành" || o.OrderStatus == "Đã giao hàng"))
-                    .ToList();
+                    .ToListAsync();
 
                 MonthlyRevenue    = monthlyOrders.Sum(o => o.TotalAmount ?? 0);
                 CommissionsEarned = monthlyOrders.Sum(o => o.PlatformFee ?? 0);
 
-                WithdrawPendingCount = ctx.WithdrawRequests.Count(w => w.Status == "Pending");
+                WithdrawPendingCount = await ctx.WithdrawRequests.CountAsync(w => w.Status == "Pending");
 
-                // ── 5 đơn hàng mới nhất ───────────────────────────────────────
-                var recentOrders = ctx.Orders
+                var recentOrders = await ctx.Orders.AsNoTracking()
                     .Include(o => o.Buyer)
                     .Include(o => o.Shop)
                     .OrderByDescending(o => o.OrderDate)
                     .Take(5)
-                    .ToList();
+                    .ToListAsync();
 
                 foreach (var order in recentOrders)
                     RecentOrders.Add(new OrderSummary
@@ -142,7 +139,7 @@ namespace TMDT.ViewModels.Admin
                     });
 
                 // ── Top shops theo DOANH THU THỰC (tổng TotalAmount từ Orders) ─
-                var topShops = ctx.Orders
+                var topShops = await ctx.Orders.AsNoTracking()
                     .Where(o => o.ShopId != null && o.TotalAmount != null)
                     .GroupBy(o => o.ShopId)
                     .Select(g => new
@@ -153,7 +150,7 @@ namespace TMDT.ViewModels.Admin
                     })
                     .OrderByDescending(x => x.TotalSales)
                     .Take(4)
-                    .ToList();
+                    .ToListAsync();
 
                 foreach (var ts in topShops)
                 {
@@ -168,10 +165,10 @@ namespace TMDT.ViewModels.Admin
                 // ── Revenue trend 7 ngày — 1 QUERY DUY NHẤT thay vì 7 ─────────
                 var since     = DateTime.Now.Date.AddDays(-6);
                 // Lấy tất cả đơn trong 7 ngày, group bên C# (tránh Date() trên SQL Server)
-                var weekOrders = ctx.Orders
+                var weekOrders = await ctx.Orders.AsNoTracking()
                     .Where(o => o.OrderDate.HasValue && o.OrderDate.Value >= since && o.OrderStatus == "Hoàn thành")
                     .Select(o => new { o.OrderDate, o.TotalAmount, o.PlatformFee })
-                    .ToList();
+                    .ToListAsync();
 
                 var last7Days = Enumerable.Range(0, 7)
                     .Select(i => DateTime.Now.Date.AddDays(-6 + i))
@@ -201,14 +198,14 @@ namespace TMDT.ViewModels.Admin
                 }
 
                 // ── Phân bổ danh mục ─────────────────────────────────────────
-                var topCategories = ctx.Products
+                var topCategories = await ctx.Products.AsNoTracking()
                     .Include(p => p.Category)
                     .Where(p => p.Category != null)
                     .GroupBy(p => p.Category!.CategoryName)
                     .Select(g => new { CategoryName = g.Key, Count = g.Count() })
                     .OrderByDescending(x => x.Count)
                     .Take(4)
-                    .ToList();
+                    .ToListAsync();
 
                 double totalProductsWithCat = topCategories.Sum(c => c.Count);
                 if (totalProductsWithCat == 0) totalProductsWithCat = 1;

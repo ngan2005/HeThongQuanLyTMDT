@@ -54,7 +54,10 @@ namespace TMDT.ViewModels.Seller
         public ICommand ShowDashboardCommand { get; }
         public ICommand ShowProductsCommand { get; }
         public ICommand ShowOrdersCommand { get; }
+        public ICommand ShowReturnRequestsCommand { get; }
         public ICommand ShowVouchersCommand { get; }
+        public ICommand ShowReviewsCommand { get; }
+        public ICommand ShowChatCommand { get; }
         public ICommand ShowWalletCommand { get; }
         public ICommand ShowProfileCommand { get; }
         public ICommand RegisterShopCommand { get; }
@@ -87,7 +90,10 @@ namespace TMDT.ViewModels.Seller
             ShowDashboardCommand = new RelayCommand(o => { CurrentView = new SellerDashboardViewModel(); ActiveMenu = "Dashboard"; });
             ShowProductsCommand = new RelayCommand(o => { CurrentView = new SellerProductsViewModel(); ActiveMenu = "Products"; }, _ => HasShop);
             ShowOrdersCommand = new RelayCommand(o => { CurrentView = new SellerOrdersViewModel(); ActiveMenu = "Orders"; }, _ => HasShop);
+            ShowReturnRequestsCommand = new RelayCommand(o => { CurrentView = new SellerReturnRequestsViewModel(); ActiveMenu = "ReturnRequests"; }, _ => HasShop);
             ShowVouchersCommand = new RelayCommand(o => { CurrentView = new SellerVouchersViewModel(); ActiveMenu = "Vouchers"; }, _ => HasShop);
+            ShowReviewsCommand = new RelayCommand(o => { CurrentView = new SellerReviewsViewModel(); ActiveMenu = "Reviews"; }, _ => HasShop);
+            ShowChatCommand = new RelayCommand(o => { CurrentView = new SellerChatViewModel(); ActiveMenu = "Chat"; }, _ => HasShop);
             ShowWalletCommand = new RelayCommand(o => { CurrentView = new SellerWalletViewModel(); ActiveMenu = "Wallet"; }, _ => HasShop);
             ShowProfileCommand = new RelayCommand(o => { CurrentView = new SellerProfileViewModel(); ActiveMenu = "Profile"; });
             RegisterShopCommand = new RelayCommand(_ => ExecuteRegisterShop());
@@ -102,8 +108,8 @@ namespace TMDT.ViewModels.Seller
             {
                 var user = SessionManager.CurrentUser;
                 if (user == null) return false;
-                var service = new ShopService(new Models.TmdtContext());
-                return service.HasShopForUserAsync(user.UserId).GetAwaiter().GetResult();
+                using var ctx = new Models.TmdtContext();
+                return System.Linq.Queryable.Any(ctx.Shops, s => s.UserId == user.UserId);
             }
             catch { return false; }
         }
@@ -121,8 +127,8 @@ namespace TMDT.ViewModels.Seller
                 var user = SessionManager.CurrentUser;
                 if (user != null)
                 {
-                    var service = new ShopService(new Models.TmdtContext());
-                    var hasShop = service.HasShopForUserAsync(user.UserId).GetAwaiter().GetResult();
+                    using var ctx = new Models.TmdtContext();
+                    var hasShop = System.Linq.Queryable.Any(ctx.Shops, s => s.UserId == user.UserId);
                     if (hasShop)
                     {
                         MessageBox.Show(
@@ -137,7 +143,22 @@ namespace TMDT.ViewModels.Seller
         private void ExecuteLogout()
         {
             SessionManager.Clear();
-            Application.Current.Shutdown();
+            var mainWindow = new Views.MainWindow();
+            mainWindow.Show();
+
+            var windowsToClose = new System.Collections.Generic.List<Window>();
+            foreach (Window win in Application.Current.Windows)
+            {
+                if (win is Views.Seller.SellerMainView)
+                {
+                    windowsToClose.Add(win);
+                }
+            }
+
+            foreach (var win in windowsToClose)
+            {
+                win.Close();
+            }
         }
 
         protected override void Dispose(bool disposing)

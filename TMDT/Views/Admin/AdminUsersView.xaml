@@ -65,7 +65,8 @@
                                           BorderBrush="{TemplateBinding BorderBrush}" 
                                           Background="{TemplateBinding Background}" 
                                           Foreground="{TemplateBinding Foreground}"
-                                          Grid.Column="2" 
+                                          HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Stretch"
                                           Focusable="false"
                                           IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" 
                                           ClickMode="Press">

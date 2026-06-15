@@ -11,7 +11,7 @@ namespace TMDT.ViewModels.Admin
 {
     public class AdminWithdrawsViewModel : ViewModelBase
     {
-        private readonly TmdtContext _context;
+        // Removed long-lived _context for async safety
         private ObservableCollection<WithdrawRequest> _withdrawRequests;
         private WithdrawRequest _selectedRequest;
         private string _searchText = "";
@@ -42,7 +42,7 @@ namespace TMDT.ViewModels.Admin
             { 
                 _searchText = value; 
                 OnPropertyChanged(); 
-                LoadRequests(); 
+                _ = LoadRequestsAsync(); 
             }
         }
 
@@ -53,7 +53,7 @@ namespace TMDT.ViewModels.Admin
             {
                 _statusFilter = value;
                 OnPropertyChanged();
-                LoadRequests();
+                _ = LoadRequestsAsync();
             }
         }
 
@@ -76,14 +76,6 @@ namespace TMDT.ViewModels.Admin
 
         public AdminWithdrawsViewModel()
         {
-            try
-            {
-                _context = new TmdtContext();
-            }
-            catch
-            {
-                // Failsafe
-            }
 
             WithdrawRequests = new ObservableCollection<WithdrawRequest>();
 
@@ -94,63 +86,63 @@ namespace TMDT.ViewModels.Admin
             CloseDetailCommand = new RelayCommand(o => SelectedRequest = null);
             ViewDetailCommand = new RelayCommand(o => ShowDetailRequest?.Invoke());
 
-            LoadRequests();
+            _ = LoadRequestsAsync();
         }
 
-        private void LoadRequests()
+        private async Task LoadRequestsAsync()
         {
-            WithdrawRequests.Clear();
-
             try
             {
-                if (_context != null)
+                using var context = new TmdtContext();
+
+                if (await context.WithdrawRequests.AnyAsync())
                 {
-                    _context.ChangeTracker.Clear();
+                    TotalWithdraws = await context.WithdrawRequests.CountAsync();
+                    PendingWithdraws = await context.WithdrawRequests.CountAsync(w => w.Status == "Pending" || string.IsNullOrEmpty(w.Status));
+                    ApprovedWithdraws = await context.WithdrawRequests.CountAsync(w => w.Status == "Approved");
+                    RejectedWithdraws = await context.WithdrawRequests.CountAsync(w => w.Status == "Rejected");
+                    TotalApprovedAmount = await context.WithdrawRequests.Where(w => w.Status == "Approved").SumAsync(w => w.Amount ?? 0);
 
-                    if (_context.WithdrawRequests.Any())
+                    var query = context.WithdrawRequests.AsNoTracking()
+                        .Include(w => w.Shop)
+                        .AsQueryable();
+
+                    // Apply Search
+                    if (!string.IsNullOrEmpty(SearchText))
                     {
-                        TotalWithdraws = _context.WithdrawRequests.Count();
-                        PendingWithdraws = _context.WithdrawRequests.Count(w => w.Status == "Pending" || string.IsNullOrEmpty(w.Status));
-                        ApprovedWithdraws = _context.WithdrawRequests.Count(w => w.Status == "Approved");
-                        RejectedWithdraws = _context.WithdrawRequests.Count(w => w.Status == "Rejected");
-                        TotalApprovedAmount = _context.WithdrawRequests.Where(w => w.Status == "Approved").Sum(w => w.Amount ?? 0);
+                        string term = SearchText.Trim().ToLower();
+                        query = query.Where(w =>
+                            (w.BankName != null && EF.Functions.Like(w.BankName, $"%{term}%")) ||
+                            (w.Shop != null && w.Shop.ShopName != null && EF.Functions.Like(w.Shop.ShopName, $"%{term}%")));
+                    }
 
-                        var query = _context.WithdrawRequests
-                            .Include(w => w.Shop)
-                            .AsQueryable();
+                    // Apply Filter
+                    if (StatusFilter == "Pending")
+                    {
+                        query = query.Where(w => w.Status == "Pending" || string.IsNullOrEmpty(w.Status));
+                    }
+                    else if (StatusFilter == "Approved")
+                    {
+                        query = query.Where(w => w.Status == "Approved");
+                    }
+                    else if (StatusFilter == "Rejected")
+                    {
+                        query = query.Where(w => w.Status == "Rejected");
+                    }
 
-                        // Apply Search
-                        if (!string.IsNullOrEmpty(SearchText))
-                        {
-                            string term = SearchText.Trim().ToLower();
-                            query = query.Where(w =>
-                                (w.BankName != null && EF.Functions.Like(w.BankName, $"%{term}%")) ||
-                                (w.Shop != null && w.Shop.ShopName != null && EF.Functions.Like(w.Shop.ShopName, $"%{SearchText}%")));
-                        }
-
-                        // Apply Filter
-                        if (StatusFilter == "Pending")
-                        {
-                            query = query.Where(w => w.Status == "Pending" || string.IsNullOrEmpty(w.Status));
-                        }
-                        else if (StatusFilter == "Approved")
-                        {
-                            query = query.Where(w => w.Status == "Approved");
-                        }
-                        else if (StatusFilter == "Rejected")
-                        {
-                            query = query.Where(w => w.Status == "Rejected");
-                        }
-
-                        var dbRequests = query.ToList();
+                    var dbRequests = await query.ToListAsync();
+                    
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        WithdrawRequests.Clear();
                         foreach (var req in dbRequests)
                         {
                             WithdrawRequests.Add(req);
                         }
+                    });
 
-                        if (WithdrawRequests.Any() || (string.IsNullOrEmpty(SearchText) && StatusFilter == "All"))
-                            return;
-                    }
+                    if (dbRequests.Any() || (string.IsNullOrEmpty(SearchText) && StatusFilter == "All"))
+                        return;
                 }
             }
             catch (Exception ex)
@@ -175,26 +167,24 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null)
+                using var context = new TmdtContext();
+                using var transaction = await context.Database.BeginTransactionAsync();
+                try
                 {
-                    using var transaction = await _context.Database.BeginTransactionAsync();
-                    try
+                    var dbReq = await context.WithdrawRequests.Include(r => r.Shop).FirstOrDefaultAsync(r => r.WithdrawId == SelectedRequest.WithdrawId);
+                    if (dbReq != null)
                     {
-                        var dbReq = await _context.WithdrawRequests.Include(r => r.Shop).FirstOrDefaultAsync(r => r.WithdrawId == SelectedRequest.WithdrawId);
-                        if (dbReq != null)
-                        {
-                            dbReq.Status = "Approved";
-                            dbReq.ProcessedAt = DateTime.Now;
-                            // Tiền đã được trừ ở bước tạo Request, Admin duyệt thì không trừ nữa
-                            await _context.SaveChangesAsync();
-                            await transaction.CommitAsync();
-                        }
+                        dbReq.Status = "Approved";
+                        dbReq.ProcessedAt = DateTime.Now;
+                        // Tiền đã được trừ ở bước tạo Request, Admin duyệt thì không trừ nữa
+                        await context.SaveChangesAsync();
+                        await transaction.CommitAsync();
                     }
-                    catch
-                    {
-                        await transaction.RollbackAsync();
-                        throw;
-                    }
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
                 }
             }
             catch (Exception ex)
@@ -208,7 +198,7 @@ namespace TMDT.ViewModels.Admin
                             "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             
             HideDetailRequest?.Invoke();
-            LoadRequests();
+            _ = LoadRequestsAsync();
         }
 
         private bool CanExecuteRejectWithdraw(object obj) => SelectedRequest != null && (SelectedRequest.Status == "Pending" || string.IsNullOrEmpty(SelectedRequest.Status));
@@ -226,32 +216,30 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null)
+                using var context = new TmdtContext();
+                using var transaction = await context.Database.BeginTransactionAsync();
+                try
                 {
-                    using var transaction = await _context.Database.BeginTransactionAsync();
-                    try
+                    var dbReq = await context.WithdrawRequests.Include(r => r.Shop).FirstOrDefaultAsync(r => r.WithdrawId == SelectedRequest.WithdrawId);
+                    if (dbReq != null)
                     {
-                        var dbReq = await _context.WithdrawRequests.Include(r => r.Shop).FirstOrDefaultAsync(r => r.WithdrawId == SelectedRequest.WithdrawId);
-                        if (dbReq != null)
+                        dbReq.Status = "Rejected";
+                        dbReq.ProcessedAt = DateTime.Now;
+                        
+                        // Hoàn tiền lại cho Shop vì yêu cầu bị từ chối
+                        if (dbReq.Shop != null)
                         {
-                            dbReq.Status = "Rejected";
-                            dbReq.ProcessedAt = DateTime.Now;
-                            
-                            // Hoàn tiền lại cho Shop vì yêu cầu bị từ chối
-                            if (dbReq.Shop != null)
-                            {
-                                dbReq.Shop.WalletBalance = (dbReq.Shop.WalletBalance ?? 0) + amountVal;
-                            }
-                            
-                            await _context.SaveChangesAsync();
-                            await transaction.CommitAsync();
+                            dbReq.Shop.WalletBalance = (dbReq.Shop.WalletBalance ?? 0) + amountVal;
                         }
+                        
+                        await context.SaveChangesAsync();
+                        await transaction.CommitAsync();
                     }
-                    catch
-                    {
-                        await transaction.RollbackAsync();
-                        throw;
-                    }
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
                 }
             }
             catch (Exception ex)
@@ -263,12 +251,11 @@ namespace TMDT.ViewModels.Admin
                             "Đã thực hiện", MessageBoxButton.OK, MessageBoxImage.Information);
 
             HideDetailRequest?.Invoke();
-            LoadRequests();
+            _ = LoadRequestsAsync();
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) _context?.Dispose();
             base.Dispose(disposing);
         }
     }

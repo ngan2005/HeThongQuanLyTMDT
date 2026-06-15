@@ -40,6 +40,7 @@ namespace TMDT.ViewModels.Auth
         }
 
         public ICommand LoginCommand { get; }
+        public ICommand LoginWithGoogleCommand { get; }
         public ICommand ShowRegisterCommand { get; }
         public ICommand ExitCommand { get; }
 
@@ -51,6 +52,7 @@ namespace TMDT.ViewModels.Auth
         {
             _authService = authService;
             LoginCommand = new RelayCommand(ExecuteLogin);
+            LoginWithGoogleCommand = new RelayCommand(ExecuteLoginWithGoogle);
             ShowRegisterCommand = new RelayCommand(ExecuteShowRegister);
             ExitCommand = new RelayCommand(ExecuteExit);
         }
@@ -108,20 +110,27 @@ namespace TMDT.ViewModels.Auth
                             return;
                     }
 
+                    if (targetWindow != null) targetWindow.Show();
+
+                    var windowsToClose = new System.Collections.Generic.List<Window>();
                     foreach (Window win in Application.Current.Windows)
                     {
                         if (win is Views.Auth.LoginView)
                         {
-                            win.Close();
-                            break;
+                            windowsToClose.Add(win);
+                        }
+                        else if (win is Views.MainWindow && win != targetWindow)
+                        {
+                            windowsToClose.Add(win);
                         }
                     }
 
-                    if (targetWindow != null)
+                    foreach (var win in windowsToClose)
                     {
-                        MessageBox.Show(redirectMsg, "Đăng nhập thành công", MessageBoxButton.OK, MessageBoxImage.Information);
-                        targetWindow.Show();
+                        win.Close();
                     }
+
+                    MessageBox.Show(redirectMsg, "Đăng nhập thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
@@ -132,6 +141,79 @@ namespace TMDT.ViewModels.Auth
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private async void ExecuteLoginWithGoogle(object parameter)
+        {
+            if (IsLoading) return;
+            IsLoading = true;
+            IsLoginFailed = false;
+
+            try
+            {
+                var googleUser = await GoogleAuthService.LoginAsync();
+                if (googleUser == null)
+                {
+                    IsLoading = false;
+                    return; // Người dùng hủy hoặc lỗi
+                }
+
+                var user = await _authService.LoginWithGoogleAsync(googleUser.Email, googleUser.FullName, googleUser.AvatarUrl);
+
+                if (user == null)
+                {
+                    MessageBox.Show("Tài khoản chưa được đăng ký hoặc đã bị khóa. Vui lòng đăng ký trước!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    IsLoading = false;
+                    ExecuteShowRegister(null);
+                    return;
+                }
+
+                // Thực hiện logic sau khi đăng nhập
+                SessionManager.CurrentUser = user;
+
+                Window targetWindow = null;
+                string redirectMsg = "";
+
+                switch (user.RoleName)
+                {
+                    case SessionManager.RoleAdmin:
+                        targetWindow = new Views.Admin.AdminMainView();
+                        redirectMsg = $"Chào Admin {user.FullName}!";
+                        break;
+                    case SessionManager.RoleSeller:
+                        targetWindow = new Views.Seller.SellerMainView();
+                        redirectMsg = $"Chào Seller {user.FullName}!";
+                        break;
+                    case SessionManager.RoleBuyer:
+                        targetWindow = new Views.MainWindow();
+                        redirectMsg = $"Chào {user.FullName}!";
+                        break;
+                    default:
+                        MessageBox.Show("Tài khoản không có quyền truy cập hệ thống.", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        IsLoading = false;
+                        return;
+                }
+
+                if (targetWindow != null) targetWindow.Show();
+
+                var windowsToClose = new System.Collections.Generic.List<Window>();
+                foreach (Window win in Application.Current.Windows)
+                {
+                    if (win is Views.Auth.LoginView) windowsToClose.Add(win);
+                    else if (win is Views.MainWindow && win != targetWindow) windowsToClose.Add(win);
+                }
+                foreach (var win in windowsToClose) win.Close();
+
+                MessageBox.Show(redirectMsg, "Đăng nhập Google thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi Đăng nhập Google: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {

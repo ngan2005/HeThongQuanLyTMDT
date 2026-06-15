@@ -182,8 +182,16 @@
                                                         Command="{Binding DataContext.CancelOrderCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                         CommandParameter="{Binding}"
                                                         Foreground="#EF4444" BorderBrush="#EF4444"
-                                                        FontSize="12" Height="32"
+                                                        FontSize="12" Height="32" Margin="0,0,8,0"
                                                         Visibility="{Binding OrderStatus, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Pending}"/>
+                                                
+                                                <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                                        Content="Đã Nhận Hàng"
+                                                        Command="{Binding DataContext.ReceiveOrderCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        Background="#059669" Foreground="White"
+                                                        FontSize="12" FontWeight="Bold" Height="32"
+                                                        Visibility="{Binding OrderStatus, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Shipping}"/>
                                             </StackPanel>
                                         </Grid>
                                     </Border>

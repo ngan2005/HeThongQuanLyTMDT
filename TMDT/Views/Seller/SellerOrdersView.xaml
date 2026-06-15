@@ -327,6 +327,25 @@
                                 <TextBlock Style="{StaticResource LabelHeader}" Text="Ghi Chú Đơn Hàng"/>
                                 <TextBlock Style="{StaticResource ValueText}" Text="{Binding SelectedOrder.Note}" FontStyle="Italic"/>
 
+                                <!-- Shipping Provider Selection (Only for Pending) -->
+                                <StackPanel Margin="0,16,0,0">
+                                    <StackPanel.Style>
+                                        <Style TargetType="StackPanel">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Pending">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+                                    <TextBlock Style="{StaticResource LabelHeader}" Text="Đơn Vị Vận Chuyển (Chọn trước khi giao hàng)" Foreground="#0D9488"/>
+                                    <ComboBox ItemsSource="{Binding AvailableShippingProviders}" 
+                                              SelectedItem="{Binding SelectedShippingProvider, Mode=TwoWay}"
+                                              Margin="0,4,0,0" Padding="8,6" FontSize="13" FontFamily="Be Vietnam Pro, Segoe UI"
+                                              Background="White" BorderBrush="#E2E8F0" BorderThickness="1"/>
+                                </StackPanel>
+
                                 <!-- Separator -->
                                 <Border BorderThickness="0,0,0,1" BorderBrush="#F1F5F9" Margin="0,4,0,14"/>
 
@@ -433,16 +452,16 @@
                                             
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Shipping">
-                                                    <Setter Property="Background" Value="#2563EB"/>
+                                                    <Setter Property="Background" Value="#F1F5F9"/>
+                                                    <Setter Property="IsEnabled" Value="False"/>
                                                     <Setter Property="Content">
                                                         <Setter.Value>
                                                             <StackPanel Orientation="Horizontal">
-                                                                <TextBlock Text="&#xE930;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                                                <TextBlock Text=" Giao Hàng Thành Công" FontSize="12.5" Foreground="#FFFFFF" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                                <TextBlock Text="&#xE81C;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                                                <TextBlock Text=" Đang chờ khách nhận hàng..." FontSize="12.5" Foreground="#64748B" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                                             </StackPanel>
                                                         </Setter.Value>
                                                     </Setter>
-                                                    <Setter Property="Command" Value="{Binding CompleteOrderCommand}"/>
                                                 </DataTrigger>
                                                 <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Completed">
                                                     <Setter Property="Visibility" Value="Collapsed"/>

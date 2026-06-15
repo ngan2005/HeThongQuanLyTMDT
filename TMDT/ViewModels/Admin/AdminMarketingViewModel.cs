@@ -11,7 +11,7 @@ namespace TMDT.ViewModels.Admin
 {
     public class AdminMarketingViewModel : ViewModelBase
     {
-        private readonly TmdtContext _context = null!;
+        // Removed long-lived _context for async safety
         private readonly AiService _aiService;
         private string _activeTab = "Banners"; // Banners, Vouchers, FlashSales, AiWriter
 
@@ -243,15 +243,6 @@ namespace TMDT.ViewModels.Admin
         {
             _activeTab = initialTab;
             _aiService = new AiService();
-            try
-            {
-                _context = new TmdtContext();
-            }
-            catch
-            {
-                // Failsafe
-            }
-
             Banners = new ObservableCollection<Banner>();
             Vouchers = new ObservableCollection<Voucher>();
             FlashSales = new ObservableCollection<FlashSale>();
@@ -280,7 +271,7 @@ namespace TMDT.ViewModels.Admin
             });
             GenerateAiContentCommand = new RelayCommand(ExecuteGenerateAiContent, o => !IsAiGenerating);
 
-            LoadData();
+            _ = LoadMarketingDataAsync();
         }
 
         private async void ExecuteGenerateAiContent(object? obj)
@@ -306,7 +297,7 @@ namespace TMDT.ViewModels.Admin
 
         private void LoadData()
         {
-            LoadMarketingData();
+            _ = LoadMarketingDataAsync();
         }
 
         private void ExecuteCreateNew(object? obj)
@@ -338,7 +329,7 @@ namespace TMDT.ViewModels.Admin
             ShowDetailRequest?.Invoke();
         }
 
-        private void LoadMarketingData()
+        private async Task LoadMarketingDataAsync()
         {
             Banners.Clear();
             Vouchers.Clear();
@@ -347,35 +338,34 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null)
+                using var ctx = new TmdtContext();
+
+                // Load Banners
+                if (await ctx.Banners.AnyAsync())
                 {
-                    // Load Banners
-                    if (_context.Banners.Any())
-                    {
-                        foreach (var b in _context.Banners.ToList())
-                            Banners.Add(b);
-                    }
+                    var banners = await ctx.Banners.ToListAsync();
+                    foreach (var b in banners) Banners.Add(b);
+                }
 
-                    // Load Vouchers
-                    if (_context.Vouchers.Any())
-                    {
-                        foreach (var v in _context.Vouchers.Include(v => v.Shop).ToList())
-                            Vouchers.Add(v);
-                    }
+                // Load Vouchers
+                if (await ctx.Vouchers.AnyAsync())
+                {
+                    var vouchers = await ctx.Vouchers.Include(v => v.Shop).ToListAsync();
+                    foreach (var v in vouchers) Vouchers.Add(v);
+                }
 
-                    // Load Flash Sales
-                    if (_context.FlashSales.Any())
-                    {
-                        foreach (var f in _context.FlashSales.Include(f => f.Product).Include(f => f.Shop).ToList())
-                            FlashSales.Add(f);
-                    }
+                // Load Flash Sales
+                if (await ctx.FlashSales.AnyAsync())
+                {
+                    var flashSales = await ctx.FlashSales.Include(f => f.Product).Include(f => f.Shop).ToListAsync();
+                    foreach (var f in flashSales) FlashSales.Add(f);
+                }
 
-                    // Load available products for setting flashsale
-                    if (_context.Products.Any())
-                    {
-                        foreach (var p in _context.Products.Where(p => p.Status == "Approved").ToList())
-                            AvailableProducts.Add(p);
-                    }
+                // Load available products for setting flashsale
+                if (await ctx.Products.AnyAsync())
+                {
+                    var products = await ctx.Products.Where(p => p.Status == "Approved").ToListAsync();
+                    foreach (var p in products) AvailableProducts.Add(p);
                 }
             }
             catch (Exception ex)
@@ -407,11 +397,9 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null)
-                {
-                    _context.Banners.Add(newBanner);
-                    await _context.SaveChangesAsync();
-                }
+                using var ctx = new TmdtContext();
+                ctx.Banners.Add(newBanner);
+                await ctx.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -444,17 +432,15 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null)
+                using var ctx = new TmdtContext();
+                var dbBanner = await ctx.Banners.FindAsync(SelectedBanner.BannerId);
+                if (dbBanner != null)
                 {
-                    var dbBanner = await _context.Banners.FindAsync(SelectedBanner.BannerId);
-                    if (dbBanner != null)
-                    {
-                        dbBanner.Title = BannerTitle;
-                        dbBanner.ImageUrl = BannerImageUrl;
-                        dbBanner.LinkUrl = BannerLinkUrl;
-                        dbBanner.SortOrder = BannerSortOrder;
-                        await _context.SaveChangesAsync();
-                    }
+                    dbBanner.Title = BannerTitle;
+                    dbBanner.ImageUrl = BannerImageUrl;
+                    dbBanner.LinkUrl = BannerLinkUrl;
+                    dbBanner.SortOrder = BannerSortOrder;
+                    await ctx.SaveChangesAsync();
                 }
 
                 // Update in-memory object
@@ -486,14 +472,12 @@ namespace TMDT.ViewModels.Admin
             var toRemove = SelectedBanner;
             try
             {
-                if (_context != null)
+                using var ctx = new TmdtContext();
+                var dbBanner = await ctx.Banners.FindAsync(toRemove.BannerId);
+                if (dbBanner != null)
                 {
-                    var dbBanner = await _context.Banners.FindAsync(toRemove.BannerId);
-                    if (dbBanner != null)
-                    {
-                        _context.Banners.Remove(dbBanner);
-                        await _context.SaveChangesAsync();
-                    }
+                    ctx.Banners.Remove(dbBanner);
+                    await ctx.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -542,11 +526,9 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null)
-                {
-                    _context.Vouchers.Add(newVoucher);
-                    await _context.SaveChangesAsync();
-                }
+                using var ctx = new TmdtContext();
+                ctx.Vouchers.Add(newVoucher);
+                await ctx.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -592,18 +574,16 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null)
+                using var ctx = new TmdtContext();
+                var dbVoucher = await ctx.Vouchers.FindAsync(SelectedVoucher.VoucherId);
+                if (dbVoucher != null)
                 {
-                    var dbVoucher = await _context.Vouchers.FindAsync(SelectedVoucher.VoucherId);
-                    if (dbVoucher != null)
-                    {
-                        dbVoucher.VoucherCode = VoucherCode.ToUpper();
-                        dbVoucher.VoucherName = VoucherName;
-                        dbVoucher.DiscountValue = VoucherDiscountValue;
-                        dbVoucher.MinOrderValue = VoucherMinOrderValue;
-                        dbVoucher.TotalQuantity = VoucherTotalQuantity;
-                        await _context.SaveChangesAsync();
-                    }
+                    dbVoucher.VoucherCode = VoucherCode.ToUpper();
+                    dbVoucher.VoucherName = VoucherName;
+                    dbVoucher.DiscountValue = VoucherDiscountValue;
+                    dbVoucher.MinOrderValue = VoucherMinOrderValue;
+                    dbVoucher.TotalQuantity = VoucherTotalQuantity;
+                    await ctx.SaveChangesAsync();
                 }
 
                 SelectedVoucher.VoucherCode = VoucherCode.ToUpper();
@@ -637,14 +617,12 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null)
+                using var ctx = new TmdtContext();
+                var dbVoucher = await ctx.Vouchers.FindAsync(toDisable.VoucherId);
+                if (dbVoucher != null)
                 {
-                    var dbVoucher = await _context.Vouchers.FindAsync(toDisable.VoucherId);
-                    if (dbVoucher != null)
-                    {
-                        dbVoucher.IsActive = false;
-                        await _context.SaveChangesAsync();
-                    }
+                    dbVoucher.IsActive = false;
+                    await ctx.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -691,11 +669,9 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null)
-                {
-                    _context.FlashSales.Add(newFlash);
-                    await _context.SaveChangesAsync();
-                }
+                using var ctx = new TmdtContext();
+                ctx.FlashSales.Add(newFlash);
+                await ctx.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -739,17 +715,15 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null)
+                using var ctx = new TmdtContext();
+                var dbFlash = await ctx.FlashSales.FindAsync(SelectedFlashSale.FlashSaleId);
+                if (dbFlash != null)
                 {
-                    var dbFlash = await _context.FlashSales.FindAsync(SelectedFlashSale.FlashSaleId);
-                    if (dbFlash != null)
-                    {
-                        dbFlash.CampaignName = FlashCampaignName;
-                        dbFlash.ProductId = FlashSelectedProduct.ProductId;
-                        dbFlash.FlashPrice = FlashPrice;
-                        dbFlash.StockLimit = FlashStockLimit;
-                        await _context.SaveChangesAsync();
-                    }
+                    dbFlash.CampaignName = FlashCampaignName;
+                    dbFlash.ProductId = FlashSelectedProduct.ProductId;
+                    dbFlash.FlashPrice = FlashPrice;
+                    dbFlash.StockLimit = FlashStockLimit;
+                    await ctx.SaveChangesAsync();
                 }
 
                 SelectedFlashSale.CampaignName = FlashCampaignName;
@@ -781,14 +755,12 @@ namespace TMDT.ViewModels.Admin
             var toRemove = SelectedFlashSale;
             try
             {
-                if (_context != null)
+                using var ctx = new TmdtContext();
+                var dbFlash = await ctx.FlashSales.FindAsync(toRemove.FlashSaleId);
+                if (dbFlash != null)
                 {
-                    var dbFlash = await _context.FlashSales.FindAsync(toRemove.FlashSaleId);
-                    if (dbFlash != null)
-                    {
-                        _context.FlashSales.Remove(dbFlash);
-                        await _context.SaveChangesAsync();
-                    }
+                    ctx.FlashSales.Remove(dbFlash);
+                    await ctx.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -803,7 +775,6 @@ namespace TMDT.ViewModels.Admin
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) _context?.Dispose();
             base.Dispose(disposing);
         }
     }

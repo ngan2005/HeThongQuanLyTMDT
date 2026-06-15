@@ -73,7 +73,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- LEFT: Stats Dashboard -->
-            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Padding="0,0,20,0">
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Hidden" Padding="0,0,20,0">
                 <StackPanel Margin="0,0,0,20">
 
                     <TextBlock Text="Hồ Sơ Cửa Hàng" FontSize="18" FontWeight="Bold"
@@ -368,13 +368,22 @@
                     <TextBlock Text="Quản lý nhanh" FontSize="14.5" FontWeight="Bold" Foreground="#1E293B" Margin="0,8,0,16" FontFamily="Be Vietnam Pro, Segoe UI"/>
 
                     <!-- Chỉnh sửa hồ sơ button -->
-                    <Button Command="{Binding OpenProfileCommand}" HorizontalContentAlignment="Left" Padding="12,12"
+                    <Button Command="{Binding OpenProfileCommand}" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Padding="12,12" Height="Auto"
                             Background="#F8FAFC" BorderThickness="1" BorderBrush="#E2E8F0" Margin="0,0,0,10" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="0.8"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
                                         BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10" Padding="{TemplateBinding Padding}">
-                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                                 </Border>
                             </ControlTemplate>
                         </Button.Template>
@@ -390,13 +399,22 @@
                     </Button>
 
                     <!-- Chế độ tạm nghỉ button -->
-                    <Button Command="{Binding ToggleVacationCommand}" HorizontalContentAlignment="Left" Padding="12,12"
+                    <Button Command="{Binding ToggleVacationCommand}" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Padding="12,12" Height="Auto"
                             Background="#F8FAFC" BorderThickness="1" BorderBrush="#E2E8F0" Margin="0,0,0,10" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="0.8"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
                                         BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10" Padding="{TemplateBinding Padding}">
-                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                                 </Border>
                             </ControlTemplate>
                         </Button.Template>
@@ -412,13 +430,22 @@
                     </Button>
 
                     <!-- Rút tiền button -->
-                    <Button Command="{Binding WithdrawCommand}" HorizontalContentAlignment="Left" Padding="12,12"
+                    <Button Command="{Binding WithdrawCommand}" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Padding="12,12" Height="Auto"
                             Background="#F8FAFC" BorderThickness="1" BorderBrush="#E2E8F0" Margin="0,0,0,10" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="0.8"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
                                         BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10" Padding="{TemplateBinding Padding}">
-                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                                 </Border>
                             </ControlTemplate>
                         </Button.Template>
@@ -473,19 +500,19 @@
                         </Grid.RowDefinitions>
 
                         <!-- Header -->
-                        <Border Grid.Row="0" Background="#0D9488" CornerRadius="16,16,0,0" Padding="24,18">
+                        <Border Grid.Row="0" Background="#FFFFFF" BorderBrush="#F1F5F9" BorderThickness="0,0,0,1" CornerRadius="16,16,0,0" Padding="24,18">
                             <Grid>
-                                <TextBlock Text="Chỉnh Sửa Hồ Sơ Cửa Hàng" FontSize="15" FontWeight="Bold"
-                                           Foreground="White" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="Chỉnh Sửa Hồ Sơ Cửa Hàng" FontSize="16" FontWeight="Bold"
+                                           Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                 <Button HorizontalAlignment="Right" Background="Transparent" BorderThickness="0"
                                         Cursor="Hand" Click="CloseLightbox" Padding="4" VerticalAlignment="Center">
-                                    <TextBlock Text="&#xE10A;" FontFamily="Segoe MDL2 Assets" FontSize="12.5" Foreground="#FFFFFF"/>
+                                    <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#94A3B8" FontWeight="Bold"/>
                                 </Button>
                             </Grid>
                         </Border>
 
                         <!-- Form Content -->
-                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MaxHeight="400" Padding="24,20">
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden" MaxHeight="400" Padding="24,20">
                             <StackPanel>
                                 <!-- Shop Name -->
                                 <TextBlock Style="{StaticResource InputLabel}" Text="Tên cửa hàng *"/>
@@ -510,9 +537,15 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     
-                                    <ComboBox Grid.Row="0" Grid.Column="0" ItemsSource="{Binding Provinces}" SelectedItem="{Binding SelectedProvince}" DisplayMemberPath="Name" Height="36" Margin="0,0,0,8"/>
-                                    <ComboBox Grid.Row="0" Grid.Column="2" ItemsSource="{Binding Districts}" SelectedItem="{Binding SelectedDistrict}" DisplayMemberPath="Name" Height="36" Margin="0,0,0,8"/>
-                                    <ComboBox Grid.Row="0" Grid.Column="4" ItemsSource="{Binding Wards}" SelectedItem="{Binding SelectedWard}" DisplayMemberPath="Name" Height="36" Margin="0,0,0,8"/>
+                                    <Border Grid.Row="0" Grid.Column="0" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Margin="0,0,0,8" Height="36">
+                                        <ComboBox ItemsSource="{Binding Provinces}" SelectedItem="{Binding SelectedProvince}" DisplayMemberPath="Name" BorderThickness="0" Background="Transparent" Padding="10,0" VerticalContentAlignment="Center"/>
+                                    </Border>
+                                    <Border Grid.Row="0" Grid.Column="2" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Margin="0,0,0,8" Height="36">
+                                        <ComboBox ItemsSource="{Binding Districts}" SelectedItem="{Binding SelectedDistrict}" DisplayMemberPath="Name" BorderThickness="0" Background="Transparent" Padding="10,0" VerticalContentAlignment="Center"/>
+                                    </Border>
+                                    <Border Grid.Row="0" Grid.Column="4" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Margin="0,0,0,8" Height="36">
+                                        <ComboBox ItemsSource="{Binding Wards}" SelectedItem="{Binding SelectedWard}" DisplayMemberPath="Name" BorderThickness="0" Background="Transparent" Padding="10,0" VerticalContentAlignment="Center"/>
+                                    </Border>
                                     
                                     <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Style="{StaticResource FormInput}" Text="{Binding HouseNumberInput, UpdateSourceTrigger=PropertyChanged}" Height="36" Margin="0" TextWrapping="Wrap" MaxLength="150" ToolTip="Nhập Số nhà, Tên đường..."/>
                                 </Grid>

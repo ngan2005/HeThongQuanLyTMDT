@@ -13,6 +13,9 @@ namespace TMDT.ViewModels.Seller
     {
         private readonly TmdtContext _context;
         private decimal _walletBalance;
+        private decimal _pendingPayouts;
+        private decimal _withdrawnYTD;
+        private bool _isWithdrawDialogOpen;
         private ObservableCollection<WithdrawRequest> _withdrawRequests;
 
         // Input fields for a new request
@@ -24,6 +27,24 @@ namespace TMDT.ViewModels.Seller
         {
             get => _walletBalance;
             set { _walletBalance = value; OnPropertyChanged(); }
+        }
+
+        public decimal PendingPayouts
+        {
+            get => _pendingPayouts;
+            set { _pendingPayouts = value; OnPropertyChanged(); }
+        }
+
+        public decimal WithdrawnYTD
+        {
+            get => _withdrawnYTD;
+            set { _withdrawnYTD = value; OnPropertyChanged(); }
+        }
+
+        public bool IsWithdrawDialogOpen
+        {
+            get => _isWithdrawDialogOpen;
+            set { _isWithdrawDialogOpen = value; OnPropertyChanged(); }
         }
 
         public ObservableCollection<WithdrawRequest> WithdrawRequests
@@ -53,6 +74,8 @@ namespace TMDT.ViewModels.Seller
         // Commands
         public ICommand SendWithdrawRequestCommand { get; }
         public ICommand ResetFieldsCommand { get; }
+        public ICommand OpenDialogCommand { get; }
+        public ICommand CloseDialogCommand { get; }
 
         public SellerWalletViewModel()
         {
@@ -66,6 +89,8 @@ namespace TMDT.ViewModels.Seller
 
             SendWithdrawRequestCommand = new RelayCommand(ExecuteSendWithdrawRequest);
             ResetFieldsCommand = new RelayCommand(o => ResetInputs());
+            OpenDialogCommand = new RelayCommand(o => IsWithdrawDialogOpen = true);
+            CloseDialogCommand = new RelayCommand(o => { IsWithdrawDialogOpen = false; ResetInputs(); });
 
             LoadWalletInfo();
             ResetInputs();
@@ -93,9 +118,14 @@ namespace TMDT.ViewModels.Seller
                             .ToList();
 
                         WithdrawRequests.Clear();
+                        PendingPayouts = 0;
+                        WithdrawnYTD = 0;
+
                         foreach (var req in dbRequests)
                         {
                             WithdrawRequests.Add(req);
+                            if (req.Status == "Pending") PendingPayouts += req.Amount ?? 0;
+                            if (req.Status == "Approved") WithdrawnYTD += req.Amount ?? 0;
                         }
 
                         if (WithdrawRequests.Any()) return;
@@ -172,6 +202,9 @@ namespace TMDT.ViewModels.Seller
             }
 
             WithdrawRequests.Insert(0, newReq);
+            PendingPayouts += AmountInput;
+            IsWithdrawDialogOpen = false;
+            
             MessageBox.Show("Yêu cầu rút tiền đã được gửi đi! Số dư ví tạm khấu trừ, đang chờ Admin phê duyệt giải ngân.", "Gửi yêu cầu thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             ResetInputs();
         }

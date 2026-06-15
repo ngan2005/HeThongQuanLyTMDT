@@ -12,7 +12,7 @@ namespace TMDT.ViewModels.Admin
 {
     public class AdminUsersViewModel : ViewModelBase
     {
-        private readonly TmdtContext _context;
+        // Removed long-lived _context for async safety
         
         private ObservableCollection<User> _users;
         private ObservableCollection<User> _filteredUsers;
@@ -53,7 +53,7 @@ namespace TMDT.ViewModels.Admin
                 if (value != null)
                 {
                     SelectedRoleForUser = Roles.FirstOrDefault(r => r.RoleId == value.RoleId);
-                    CalculateUserStats(value);
+                    _ = CalculateUserStatsAsync(value);
                 }
             }
         }
@@ -72,16 +72,14 @@ namespace TMDT.ViewModels.Admin
             set { _totalSpentAmount = value; OnPropertyChanged(); }
         }
 
-        private void CalculateUserStats(User user)
+        private async Task CalculateUserStatsAsync(User user)
         {
             try
             {
-                if (_context != null)
-                {
-                    TotalOrdersCount = _context.Orders.Count(o => o.BuyerId == user.UserId);
-                    TotalSpentAmount = _context.Orders.Where(o => o.BuyerId == user.UserId).Sum(o => o.TotalAmount) ?? 0m;
-                    return;
-                }
+                using var ctx = new TmdtContext();
+                TotalOrdersCount = await ctx.Orders.CountAsync(o => o.BuyerId == user.UserId);
+                TotalSpentAmount = await ctx.Orders.Where(o => o.BuyerId == user.UserId).SumAsync(o => o.TotalAmount) ?? 0m;
+                return;
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine("CalculateUserStats failed: " + ex.Message); }
 
@@ -139,15 +137,6 @@ namespace TMDT.ViewModels.Admin
         {
             _roleFilter = initialRoleFilter;
 
-            try
-            {
-                _context = new TmdtContext();
-            }
-            catch
-            {
-                // Failsafe
-            }
-
             _users = new ObservableCollection<User>();
             FilteredUsers = new ObservableCollection<User>();
             Roles = new ObservableCollection<Role>();
@@ -158,21 +147,23 @@ namespace TMDT.ViewModels.Admin
             ResetPasswordCommand = new RelayCommand(ExecuteResetPassword);
             CloseDetailCommand = new RelayCommand(o => SelectedUser = null);
 
-            LoadRoles();
-            LoadUsers();
+            _ = LoadRolesAsync();
         }
 
-        private void LoadRoles()
+        private async Task LoadRolesAsync()
         {
             Roles.Clear();
             try
             {
-                if (_context != null && _context.Roles.Any())
+                using var ctx = new TmdtContext();
+                if (await ctx.Roles.AnyAsync())
                 {
-                    foreach (var r in _context.Roles.ToList())
+                    var dbRoles = await ctx.Roles.ToListAsync();
+                    foreach (var r in dbRoles)
                     {
                         Roles.Add(r);
                     }
+                    _ = LoadUsersAsync();
                     return;
                 }
             }
@@ -181,17 +172,18 @@ namespace TMDT.ViewModels.Admin
                 // Failsafe: DB không có roles, không tải gì thêm
             }
 
-            LoadUsers();
+            _ = LoadUsersAsync();
         }
 
-        private void LoadUsers()
+        private async Task LoadUsersAsync()
         {
             _users.Clear();
             try
             {
-                if (_context != null && _context.Users.Any())
+                using var ctx = new TmdtContext();
+                if (await ctx.Users.AnyAsync())
                 {
-                    var dbUsers = _context.Users.Include(u => u.Role).ToList();
+                    var dbUsers = await ctx.Users.Include(u => u.Role).ToListAsync();
                     foreach (var u in dbUsers)
                     {
                         _users.Add(u);
@@ -267,14 +259,12 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null)
+                using var ctx = new TmdtContext();
+                var dbUser = await ctx.Users.FindAsync(SelectedUser.UserId);
+                if (dbUser != null)
                 {
-                    var dbUser = await _context.Users.FindAsync(SelectedUser.UserId);
-                    if (dbUser != null)
-                    {
-                        dbUser.IsActive = SelectedUser.IsActive;
-                        await _context.SaveChangesAsync();
-                    }
+                    dbUser.IsActive = SelectedUser.IsActive;
+                    await ctx.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -285,7 +275,7 @@ namespace TMDT.ViewModels.Admin
             MessageBox.Show($"Đã {actionName} tài khoản '{SelectedUser.FullName ?? SelectedUser.Email}' thành công!", 
                             "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             
-            LoadUsers();
+            _ = LoadUsersAsync();
         }
 
         private async void ExecuteUpdateUserRole(object obj)
@@ -310,14 +300,12 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null)
+                using var ctx = new TmdtContext();
+                var dbUser = await ctx.Users.FindAsync(SelectedUser.UserId);
+                if (dbUser != null)
                 {
-                    var dbUser = await _context.Users.FindAsync(SelectedUser.UserId);
-                    if (dbUser != null)
-                    {
-                        dbUser.RoleId = SelectedRoleForUser.RoleId;
-                        await _context.SaveChangesAsync();
-                    }
+                    dbUser.RoleId = SelectedRoleForUser.RoleId;
+                    await ctx.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -328,7 +316,7 @@ namespace TMDT.ViewModels.Admin
             MessageBox.Show($"Thay đổi vai trò sang '{SelectedRoleForUser.RoleName}' thành công!", 
                             "Thay đổi thành công", MessageBoxButton.OK, MessageBoxImage.Information);
 
-            LoadUsers();
+            _ = LoadUsersAsync();
         }
 
         private async void ExecuteResetPassword(object obj)
@@ -347,14 +335,12 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null)
+                using var ctx = new TmdtContext();
+                var dbUser = await ctx.Users.FindAsync(SelectedUser.UserId);
+                if (dbUser != null)
                 {
-                    var dbUser = await _context.Users.FindAsync(SelectedUser.UserId);
-                    if (dbUser != null)
-                    {
-                        dbUser.Password = PasswordHelper.HashPassword(NewPasswordText);
-                        await _context.SaveChangesAsync();
-                    }
+                    dbUser.Password = PasswordHelper.HashPassword(NewPasswordText);
+                    await ctx.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -368,7 +354,6 @@ namespace TMDT.ViewModels.Admin
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) _context?.Dispose();
             base.Dispose(disposing);
         }
     }

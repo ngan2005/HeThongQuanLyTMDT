@@ -11,7 +11,7 @@ namespace TMDT.ViewModels.Admin
 {
     public class AdminShopsViewModel : ViewModelBase
     {
-        private readonly TmdtContext _context;
+        // Removed long-lived _context for async safety
         private ObservableCollection<Shop> _shops;
         private Shop _selectedShop;
         private string _searchText = "";
@@ -38,13 +38,13 @@ namespace TMDT.ViewModels.Admin
         public string SearchText
         {
             get => _searchText;
-            set { _searchText = value; OnPropertyChanged(); LoadShops(); }
+            set { _searchText = value; OnPropertyChanged(); _ = LoadShopsAsync(); }
         }
 
         public string StatusFilter
         {
             get => _statusFilter;
-            set { _statusFilter = value; OnPropertyChanged(); LoadShops(); }
+            set { _statusFilter = value; OnPropertyChanged(); _ = LoadShopsAsync(); }
         }
 
         public int TotalShops { get => _totalShops; set { _totalShops = value; OnPropertyChanged(); } }
@@ -66,7 +66,6 @@ namespace TMDT.ViewModels.Admin
         public AdminShopsViewModel(string initialStatus = "All")
         {
             _statusFilter = initialStatus;
-            try { _context = new TmdtContext(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine("Init TmdtContext failed: " + ex.Message); }
 
             Shops = new ObservableCollection<Shop>();
 
@@ -76,23 +75,22 @@ namespace TMDT.ViewModels.Admin
             FilterCommand = new RelayCommand(o => StatusFilter = o?.ToString() ?? "All");
             ViewDetailCommand = new RelayCommand(o => ShowDetailRequest?.Invoke());
 
-            LoadShops();
+            _ = LoadShopsAsync();
         }
 
-        private void LoadShops()
+        private async Task LoadShopsAsync()
         {
-            Shops.Clear();
             try
             {
-                if (_context == null) return;
+                using var context = new TmdtContext();
 
                 // Load stats
-                TotalShops = _context.Shops.Count();
-                PendingShops = _context.Shops.Count(s => s.IsActive == null);
-                ActiveShops = _context.Shops.Count(s => s.IsActive == true);
-                TotalRevenue = _context.Shops.Sum(s => s.WalletBalance ?? 0);
+                TotalShops = await context.Shops.CountAsync();
+                PendingShops = await context.Shops.CountAsync(s => s.IsActive == null);
+                ActiveShops = await context.Shops.CountAsync(s => s.IsActive == true);
+                TotalRevenue = await context.Shops.SumAsync(s => s.WalletBalance ?? 0);
 
-                var query = _context.Shops.Include(s => s.User).AsQueryable();
+                var query = context.Shops.AsNoTracking().Include(s => s.User).AsQueryable();
 
                 if (!string.IsNullOrEmpty(SearchText))
                 {
@@ -106,8 +104,13 @@ namespace TMDT.ViewModels.Admin
                 else if (StatusFilter == "Active") query = query.Where(s => s.IsActive == true);
                 else if (StatusFilter == "Suspended") query = query.Where(s => s.IsActive == false);
 
-                foreach (var shop in query.ToList())
-                    Shops.Add(shop);
+                var list = await query.ToListAsync();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Shops.Clear();
+                    foreach (var shop in list)
+                        Shops.Add(shop);
+                });
             }
             catch (Exception ex)
             {
@@ -126,21 +129,22 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                var dbShop = await _context.Shops.FindAsync(SelectedShop.ShopId);
+                using var context = new TmdtContext();
+                var dbShop = await context.Shops.FindAsync(SelectedShop.ShopId);
                 if (dbShop != null)
                 {
                     dbShop.IsActive = true;
                     dbShop.OpenedAt = DateTime.Now;
 
-                    var user = await _context.Users.FindAsync(dbShop.UserId);
+                    var user = await context.Users.FindAsync(dbShop.UserId);
                     if (user != null)
                     {
-                        var sellerRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == SessionManager.RoleSeller);
+                        var sellerRole = await context.Roles.FirstOrDefaultAsync(r => r.RoleName == SessionManager.RoleSeller);
                         if (sellerRole != null && user.RoleId != sellerRole.RoleId)
                             user.RoleId = sellerRole.RoleId;
                     }
 
-                    await _context.SaveChangesAsync();
+                    await context.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -151,7 +155,7 @@ namespace TMDT.ViewModels.Admin
             AuditLogHelper.Log("APPROVE_SHOP", $"Duyệt '{SelectedShop.ShopName}' (ID:{SelectedShop.ShopId})", "Shop", "Normal");
             MessageBox.Show($"Đã duyệt '{SelectedShop.ShopName}'!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             HideDetailRequest?.Invoke();
-            LoadShops();
+            _ = LoadShopsAsync();
         }
 
         private async void ExecuteSuspendShop(object obj)
@@ -165,11 +169,12 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                var dbShop = await _context.Shops.FindAsync(SelectedShop.ShopId);
+                using var context = new TmdtContext();
+                var dbShop = await context.Shops.FindAsync(SelectedShop.ShopId);
                 if (dbShop != null)
                 {
                     dbShop.IsActive = false;
-                    await _context.SaveChangesAsync();
+                    await context.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -180,7 +185,7 @@ namespace TMDT.ViewModels.Admin
             AuditLogHelper.Log("SUSPEND_SHOP", $"Khóa '{SelectedShop.ShopName}' (ID:{SelectedShop.ShopId})", "Shop", "Warning");
             MessageBox.Show($"Đã khóa '{SelectedShop.ShopName}'.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
             HideDetailRequest?.Invoke();
-            LoadShops();
+            _ = LoadShopsAsync();
         }
 
         private async void ExecuteActivateShop(object obj)
@@ -194,11 +199,12 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                var dbShop = await _context.Shops.FindAsync(SelectedShop.ShopId);
+                using var context = new TmdtContext();
+                var dbShop = await context.Shops.FindAsync(SelectedShop.ShopId);
                 if (dbShop != null)
                 {
                     dbShop.IsActive = true;
-                    await _context.SaveChangesAsync();
+                    await context.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -209,12 +215,11 @@ namespace TMDT.ViewModels.Admin
             AuditLogHelper.Log("ACTIVATE_SHOP", $"Kích hoạt '{SelectedShop.ShopName}' (ID:{SelectedShop.ShopId})", "Shop", "Normal");
             MessageBox.Show($"Đã kích hoạt '{SelectedShop.ShopName}'.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             HideDetailRequest?.Invoke();
-            LoadShops();
+            _ = LoadShopsAsync();
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) _context?.Dispose();
             base.Dispose(disposing);
         }
     }

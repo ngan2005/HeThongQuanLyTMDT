@@ -18,7 +18,7 @@ namespace TMDT.ViewModels.Buyer
         public string SearchQuery
         {
             get => _searchQuery;
-            set { _searchQuery = value; OnPropertyChanged(); SearchProducts(); }
+            set { _searchQuery = value; OnPropertyChanged(); _ = SearchProductsAsync(); }
         }
 
         public ObservableCollection<Category> Categories { get; set; }
@@ -47,41 +47,49 @@ namespace TMDT.ViewModels.Buyer
             LogoutCommand = new RelayCommand(_ => ExecuteLogout());
             BecomeSellerCommand = new RelayCommand(_ => ExecuteBecomeSeller(), _ => IsLoggedIn && IsBuyer);
             OpenSellerPortalCommand = new RelayCommand(_ => ExecuteOpenSellerPortal(), _ => IsLoggedIn && IsSeller);
-            SearchCommand = new RelayCommand(_ => SearchProducts());
+            SearchCommand = new RelayCommand(_ => _ = SearchProductsAsync());
             ProductClickCommand = new RelayCommand(p => ExecuteProductClick(p as Product));
 
-            LoadCategories();
-            LoadFeaturedProducts();
+            _ = LoadCategoriesAsync();
+            _ = LoadFeaturedProductsAsync();
             LoadBanners();
         }
 
-        private void LoadCategories()
+        private async Task LoadCategoriesAsync()
         {
             try
             {
                 using var context = new TmdtContext();
-                var cats = context.Categories.Where(c => c.IsActive == true).OrderBy(c => c.SortOrder).Take(8).ToList();
-                Categories.Clear();
-                foreach (var c in cats)
-                    Categories.Add(c);
+                var cats = await context.Categories.AsNoTracking().Where(c => c.IsActive == true).OrderBy(c => c.SortOrder).Take(8).ToListAsync();
+                
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Categories.Clear();
+                    foreach (var c in cats)
+                        Categories.Add(c);
+                });
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine("LoadCategories failed: " + ex.Message); }
         }
 
-        private void LoadFeaturedProducts()
+        private async Task LoadFeaturedProductsAsync()
         {
             try
             {
                 using var context = new TmdtContext();
-                var products = context.Products
+                var products = await context.Products.AsNoTracking()
                     .Include(p => p.Shop)
                     .Where(p => p.Status == "Approved" && (p.Shop == null || p.Shop.IsActive == true))
                     .OrderByDescending(p => p.SoldCount)
                     .Take(10)
-                    .ToList();
-                FeaturedProducts.Clear();
-                foreach (var p in products)
-                    FeaturedProducts.Add(p);
+                    .ToListAsync();
+                
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    FeaturedProducts.Clear();
+                    foreach (var p in products)
+                        FeaturedProducts.Add(p);
+                });
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine("LoadFeaturedProducts failed: " + ex.Message); }
         }
@@ -92,28 +100,32 @@ namespace TMDT.ViewModels.Buyer
             // For now keep empty; can be extended with Banner table.
         }
 
-        private void SearchProducts()
+        private async Task SearchProductsAsync()
         {
             try
             {
                 using var context = new TmdtContext();
-                var query = context.Products
+                var query = context.Products.AsNoTracking()
                     .Include(p => p.Shop)
                     .Where(p => p.Status == "Approved" && (p.Shop == null || p.Shop.IsActive == true))
                     .AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(_searchQuery))
                 {
-                    var term = _searchQuery.Trim().ToLower();
+                    var term = _searchQuery.Trim();
                     query = query.Where(p =>
-                        (p.ProductName != null && p.ProductName.ToLower().Contains(term)) ||
-                        (p.Description != null && p.Description.ToLower().Contains(term)));
+                        (p.ProductName != null && EF.Functions.Like(p.ProductName, $"%{term}%")) ||
+                        (p.Description != null && EF.Functions.Like(p.Description, $"%{term}%")));
                 }
 
-                var products = query.OrderByDescending(p => p.SoldCount).Take(10).ToList();
-                FeaturedProducts.Clear();
-                foreach (var p in products)
-                    FeaturedProducts.Add(p);
+                var products = await query.OrderByDescending(p => p.SoldCount).Take(10).ToListAsync();
+                
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    FeaturedProducts.Clear();
+                    foreach (var p in products)
+                        FeaturedProducts.Add(p);
+                });
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine("SearchProducts failed: " + ex.Message); }
         }

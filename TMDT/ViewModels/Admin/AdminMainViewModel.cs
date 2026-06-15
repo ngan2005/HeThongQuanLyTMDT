@@ -127,7 +127,22 @@ namespace TMDT.ViewModels.Admin
         private void ExecuteLogout()
         {
             SessionManager.Clear();
-            Application.Current.Shutdown();
+            var mainWindow = new Views.MainWindow();
+            mainWindow.Show();
+
+            var windowsToClose = new System.Collections.Generic.List<Window>();
+            foreach (Window win in Application.Current.Windows)
+            {
+                if (win is Views.Admin.AdminMainView)
+                {
+                    windowsToClose.Add(win);
+                }
+            }
+
+            foreach (var win in windowsToClose)
+            {
+                win.Close();
+            }
         }
     }
 }

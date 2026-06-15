@@ -11,7 +11,7 @@ namespace TMDT.ViewModels.Admin
 {
     public class AdminCategoriesViewModel : ViewModelBase
     {
-        private readonly TmdtContext _context;
+        // Removed long-lived _context for async safety
         private ObservableCollection<Category> _categories;
         private Category _selectedCategory;
 
@@ -82,14 +82,6 @@ namespace TMDT.ViewModels.Admin
 
         public AdminCategoriesViewModel()
         {
-            try
-            {
-                _context = new TmdtContext();
-            }
-            catch
-            {
-                // Failsafe
-            }
 
             Categories = new ObservableCollection<Category>();
 
@@ -100,29 +92,29 @@ namespace TMDT.ViewModels.Admin
             CreateNewCommand = new RelayCommand(ExecuteCreateNew);
             CloseDetailCommand = new RelayCommand(ExecuteCloseDetail);
 
-            LoadCategories();
+            _ = LoadCategoriesAsync();
         }
 
-        private void LoadCategories()
+        private async Task LoadCategoriesAsync()
         {
-            Categories.Clear();
-
             try
             {
-                if (_context != null && _context.Categories.Any())
+                using var context = new TmdtContext();
+                if (await context.Categories.AnyAsync())
                 {
-                    var dbCategories = _context.Categories
+                    var dbCategories = await context.Categories.AsNoTracking()
                         .Include(c => c.Products)
                         .OrderBy(c => c.SortOrder)
-                        .ToList();
+                        .ToListAsync();
 
-                    foreach (var cat in dbCategories)
+                    Application.Current.Dispatcher.Invoke(() =>
                     {
-                        Categories.Add(cat);
-                    }
-
-                    if (Categories.Any())
-                        return;
+                        Categories.Clear();
+                        foreach (var cat in dbCategories)
+                        {
+                            Categories.Add(cat);
+                        }
+                    });
                 }
             }
             catch (Exception ex)
@@ -179,16 +171,14 @@ namespace TMDT.ViewModels.Admin
 
                 try
                 {
-                    if (_context != null)
+                    using var context = new TmdtContext();
+                    var dbCat = await context.Categories.FindAsync(SelectedCategory.CategoryId);
+                    if (dbCat != null)
                     {
-                        var dbCat = await _context.Categories.FindAsync(SelectedCategory.CategoryId);
-                        if (dbCat != null)
-                        {
-                            dbCat.CategoryName = CategoryName;
-                            dbCat.Icon = CategoryIcon;
-                            dbCat.SortOrder = CategorySortOrder;
-                            await _context.SaveChangesAsync();
-                        }
+                        dbCat.CategoryName = CategoryName;
+                        dbCat.Icon = CategoryIcon;
+                        dbCat.SortOrder = CategorySortOrder;
+                        await context.SaveChangesAsync();
                     }
                 }
                 catch (Exception ex)
@@ -211,11 +201,9 @@ namespace TMDT.ViewModels.Admin
 
                 try
                 {
-                    if (_context != null)
-                    {
-                        _context.Categories.Add(newCat);
-                        await _context.SaveChangesAsync();
-                    }
+                    using var context = new TmdtContext();
+                    context.Categories.Add(newCat);
+                    await context.SaveChangesAsync();
                 }
                 catch (Exception ex)
                 {
@@ -226,7 +214,7 @@ namespace TMDT.ViewModels.Admin
                 MessageBox.Show("Thêm danh mục mới thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             }
 
-            LoadCategories();
+            _ = LoadCategoriesAsync();
             ClearInputs();
             HideDetailRequest?.Invoke();
         }
@@ -244,14 +232,12 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null)
+                using var context = new TmdtContext();
+                var dbCat = await context.Categories.FindAsync(SelectedCategory.CategoryId);
+                if (dbCat != null)
                 {
-                    var dbCat = await _context.Categories.FindAsync(SelectedCategory.CategoryId);
-                    if (dbCat != null)
-                    {
-                        dbCat.IsActive = SelectedCategory.IsActive;
-                        await _context.SaveChangesAsync();
-                    }
+                    dbCat.IsActive = SelectedCategory.IsActive;
+                    await context.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -262,13 +248,12 @@ namespace TMDT.ViewModels.Admin
             MessageBox.Show($"Đã cập nhật trạng thái hoạt động danh mục '{SelectedCategory.CategoryName}' thành công!", 
                             "Đã thực hiện", MessageBoxButton.OK, MessageBoxImage.Information);
 
-            LoadCategories();
+            _ = LoadCategoriesAsync();
             ClearInputs();
             HideDetailRequest?.Invoke();
         }
         protected override void Dispose(bool disposing)
         {
-            if (disposing) _context?.Dispose();
             base.Dispose(disposing);
         }
     }

@@ -70,8 +70,8 @@ namespace TMDT.ViewModels.Buyer
             OpenSellerPortalCommand = new RelayCommand(_ => ExecuteOpenSellerPortal());
             SearchCommand = new RelayCommand(term => SearchProducts(term?.ToString() ?? ""));
 
-            LoadCategories();
-            LoadFeaturedProducts();
+            _ = LoadCategoriesAsync();
+            _ = LoadFeaturedProductsAsync();
             UpdateCartBadge();
         }
 
@@ -109,23 +109,28 @@ namespace TMDT.ViewModels.Buyer
 
         public void SearchProducts(string term)
         {
+            _ = SearchProductsAsync(term);
+        }
+
+        public async Task SearchProductsAsync(string term)
+        {
             try
             {
                 using var context = new TmdtContext();
-                var query = context.Products
+                var query = context.Products.AsNoTracking()
                     .Include(p => p.Shop)
                     .Where(p => p.Status == "Approved" && (p.Shop == null || p.Shop.IsActive == true))
                     .AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(term))
                 {
-                    var t = term.Trim().ToLower();
+                    var t = term.Trim();
                     query = query.Where(p =>
-                        (p.ProductName != null && p.ProductName.ToLower().Contains(t)) ||
-                        (p.Description != null && p.Description.ToLower().Contains(t)));
+                        (p.ProductName != null && EF.Functions.Like(p.ProductName, $"%{t}%")) ||
+                        (p.Description != null && EF.Functions.Like(p.Description, $"%{t}%")));
                 }
 
-                var items = query.OrderByDescending(p => p.SoldCount).Take(20).ToList();
+                var items = await query.OrderByDescending(p => p.SoldCount).Take(20).ToListAsync();
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -140,12 +145,12 @@ namespace TMDT.ViewModels.Buyer
             }
         }
 
-        private void LoadCategories()
+        private async Task LoadCategoriesAsync()
         {
             try
             {
                 using var context = new TmdtContext();
-                var cats = context.Categories.Where(c => c.IsActive == true).OrderBy(c => c.SortOrder).ToList();
+                var cats = await context.Categories.AsNoTracking().Where(c => c.IsActive == true).OrderBy(c => c.SortOrder).ToListAsync();
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -160,17 +165,17 @@ namespace TMDT.ViewModels.Buyer
             }
         }
 
-        private void LoadFeaturedProducts()
+        private async Task LoadFeaturedProductsAsync()
         {
             try
             {
                 using var context = new TmdtContext();
-                var items = context.Products
+                var items = await context.Products.AsNoTracking()
                     .Include(p => p.Shop)
                     .Where(p => p.Status == "Approved" && (p.Shop == null || p.Shop.IsActive == true))
                     .OrderByDescending(p => p.SoldCount)
                     .Take(10)
-                    .ToList();
+                    .ToListAsync();
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -197,6 +202,7 @@ namespace TMDT.ViewModels.Buyer
         {
             SessionManager.Clear();
             CartService.Instance.Clear();
+            GoogleAuthService.Logout(); // Xóa bộ nhớ đệm của Google
             OnPropertyChanged(nameof(IsLoggedIn));
             OnPropertyChanged(nameof(UserName));
             NavigateHome();

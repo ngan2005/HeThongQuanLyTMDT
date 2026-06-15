@@ -135,6 +135,76 @@ Thông tin sản phẩm cần duyệt:
             }
         }
 
+        public async Task<string> AnalyzeProductWithImageAsync(string productName, string description, decimal price, string base64Image)
+        {
+            if (ApiKey == "YOUR_API_KEY")
+            {
+                return "Vui lòng nhập API Key để sử dụng AI.";
+            }
+
+            string systemPrompt = @"Bạn là AI Kiểm duyệt Sản phẩm đa phương tiện (Multi-modal) của sàn thương mại điện tử Volox.
+Nhiệm vụ của bạn là đọc Thông tin Sản phẩm (Tên, Mô tả, Giá) và QUAN SÁT HÌNH ẢNH đính kèm để đánh giá xem sản phẩm này có vi phạm chính sách không.
+Các vi phạm bao gồm: Vũ khí, ma túy, chất cấm, hàng giả/nhái (chứa logo Gucci, Chanel, Nike... fake), nội dung đồi trụy, thô tục.
+Đặc biệt chú ý xem hình ảnh có chứa yếu tố cấm hoặc không khớp với mô tả hay không.
+Hãy trả về ĐÚNG MỘT TRONG HAI KẾT QUẢ SAU (không dài dòng):
+1. '✅ HỢP LỆ (Đã soi ảnh): Sản phẩm và hình ảnh an toàn.' (Nếu không có vi phạm)
+2. '⚠️ CẢNH BÁO: [Lý do ngắn gọn phát hiện từ ảnh/text] Đề xuất: TỪ CHỐI.' (Nếu thấy có dấu hiệu vi phạm)
+
+Thông tin sản phẩm cần duyệt:
+";
+
+            string productInfo = $"- Tên sản phẩm: {productName}\n- Giá: {price:N0} VNĐ\n- Mô tả: {description}";
+            string fullPrompt = systemPrompt + productInfo;
+
+            // Xử lý base64 (cắt bỏ phần prefix data:image/jpeg;base64, nếu có)
+            string cleanBase64 = base64Image.Contains(",") ? base64Image.Split(',')[1] : base64Image;
+
+            using (var client = new HttpClient())
+            {
+                var requestBody = new
+                {
+                    contents = new[]
+                    {
+                        new
+                        {
+                            parts = new object[]
+                            {
+                                new { text = fullPrompt },
+                                new
+                                {
+                                    inline_data = new
+                                    {
+                                        mime_type = "image/jpeg",
+                                        data = cleanBase64
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+
+                string jsonContent = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                try
+                {
+                    var response = await client.PostAsync($"{ApiUrl}?key={ApiKey}", content);
+                    response.EnsureSuccessStatusCode();
+
+                    string responseString = await response.Content.ReadAsStringAsync();
+                    var responseObject = JObject.Parse(responseString);
+                    var generatedText = responseObject["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.ToString();
+                    
+                    return generatedText?.Trim() ?? "Không thể phân tích hình ảnh.";
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("AI Error (Vision): " + ex.Message);
+                    return "Lỗi kết nối AI khi phân tích ảnh. " + ex.Message;
+                }
+            }
+        }
+
         public async Task<string> AnalyzeDashboardAsync(
             decimal monthlyRevenue, 
             decimal commissionsEarned, 
@@ -429,6 +499,59 @@ Trả về ID (số nguyên) của danh mục chuẩn nhất:";
                 {
                     System.Diagnostics.Debug.WriteLine("AI Category Error: " + ex.Message);
                     return -1;
+                }
+            }
+        }
+
+        public async Task<string> SuggestChatRepliesAsync(string customerMessage)
+        {
+            if (ApiKey == "YOUR_API_KEY")
+            {
+                return "Dạ, vâng ạ.|Chào bạn, sản phẩm này hiện còn hàng ạ.|Xin lỗi, hiện tại shop chưa thể hỗ trợ ngay.";
+            }
+
+            if (string.IsNullOrWhiteSpace(customerMessage))
+            {
+                return "Chào bạn, mình có thể giúp gì cho bạn?|Dạ, bạn cần tư vấn thêm về sản phẩm nào ạ?|Xin chào, cảm ơn bạn đã quan tâm đến shop!";
+            }
+
+            string systemPrompt = @"Bạn là trợ lý AI thông minh cho Chủ Cửa Hàng (Seller) trên sàn thương mại điện tử Volox.
+Nhiệm vụ của bạn là đọc tin nhắn mới nhất của khách hàng và đề xuất 3 câu trả lời ngắn gọn, lịch sự, thân thiện và mang tính chốt sale để người bán có thể chọn nhanh.
+Yêu cầu bắt buộc:
+- LUÔN LUÔN trả về đúng 3 câu gợi ý.
+- Các câu gợi ý phải được phân tách bằng ký tự '|' (Pipe). KHÔNG CÓ KÝ TỰ XUỐNG DÒNG, KHÔNG ĐÁNH SỐ THỨ TỰ.
+- Ví dụ trả về chuẩn: Dạ còn ạ, bạn đặt hàng ngay nhé!|Xin chào, shop có thể giúp gì cho bạn?|Dạ sản phẩm này vừa hết hàng ạ.
+
+Tin nhắn của khách hàng:
+";
+
+            string fullPrompt = systemPrompt + customerMessage;
+
+            using (var client = new HttpClient())
+            {
+                var requestBody = new
+                {
+                    contents = new[] { new { parts = new[] { new { text = fullPrompt } } } }
+                };
+
+                string jsonContent = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                try
+                {
+                    var response = await client.PostAsync($"{ApiUrl}?key={ApiKey}", content);
+                    response.EnsureSuccessStatusCode();
+
+                    string responseString = await response.Content.ReadAsStringAsync();
+                    var responseObject = JObject.Parse(responseString);
+                    var generatedText = responseObject["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.ToString();
+                    
+                    return generatedText?.Trim().Replace("\n", "").Replace("\r", "") ?? "Dạ vâng ạ.|Xin chào!|Shop xin lỗi ạ.";
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("AI Chat Suggestion Error: " + ex.Message);
+                    return "Chào bạn!|Dạ vâng ạ.|Cảm ơn bạn đã liên hệ.";
                 }
             }
         }

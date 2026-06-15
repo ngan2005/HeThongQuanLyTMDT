@@ -13,14 +13,14 @@ namespace TMDT.ViewModels.Buyer
     public class CartViewModel : ViewModelBase
     {
         private readonly BuyerMainViewModel _mainVm;
-        private ObservableCollection<CartItem> _items;
+        private ObservableCollection<TMDT.Services.CartItem> _items;
         private decimal _totalPrice;
         private decimal _shippingFee = 25000m;
         private decimal _totalPayment;
         private int _selectedPayment = 0;
         private Address? _selectedAddress;
 
-        public ObservableCollection<CartItem> Items
+        public ObservableCollection<TMDT.Services.CartItem> Items
         {
             get => _items;
             set { SetProperty(ref _items, value); }
@@ -71,9 +71,9 @@ namespace TMDT.ViewModels.Buyer
             _mainVm = mainVm;
             _items = CartService.Instance.Items;
 
-            RemoveItemCommand = new RelayCommand(p => ExecuteRemove(p as CartItem));
-            IncreaseCommand = new RelayCommand(p => ExecuteIncrease(p as CartItem));
-            DecreaseCommand = new RelayCommand(p => ExecuteDecrease(p as CartItem));
+            RemoveItemCommand = new RelayCommand(p => ExecuteRemove(p as TMDT.Services.CartItem));
+            IncreaseCommand = new RelayCommand(p => ExecuteIncrease(p as TMDT.Services.CartItem));
+            DecreaseCommand = new RelayCommand(p => ExecuteDecrease(p as TMDT.Services.CartItem));
             PlaceOrderCommand = new RelayCommand(_ => ExecutePlaceOrder(), _ => !IsEmpty && SessionManager.IsLoggedIn);
             BackCommand = new RelayCommand(_ => _mainVm.NavigateHome());
             ContinueShoppingCommand = new RelayCommand(_ => _mainVm.NavigateHome());
@@ -104,7 +104,7 @@ namespace TMDT.ViewModels.Buyer
             OnPropertyChanged(nameof(IsEmpty));
         }
 
-        private void ExecuteRemove(CartItem? item)
+        private void ExecuteRemove(TMDT.Services.CartItem? item)
         {
             if (item == null) return;
             var result = MessageBox.Show($"Xóa '{item.ProductName}' khỏi giỏ hàng?",
@@ -114,14 +114,14 @@ namespace TMDT.ViewModels.Buyer
             Recalculate();
         }
 
-        private void ExecuteIncrease(CartItem? item)
+        private void ExecuteIncrease(TMDT.Services.CartItem? item)
         {
             if (item == null) return;
             CartService.Instance.UpdateQuantity(item.ProductId, item.Quantity + 1);
             Recalculate();
         }
 
-        private void ExecuteDecrease(CartItem? item)
+        private void ExecuteDecrease(TMDT.Services.CartItem? item)
         {
             if (item == null || item.Quantity <= 1) return;
             CartService.Instance.UpdateQuantity(item.ProductId, item.Quantity - 1);

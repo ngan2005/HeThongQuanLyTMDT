@@ -1,17 +1,23 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Win32;
 using TMDT.Models;
 using TMDT.Utilities;
+using TMDT.Services;
+using TMDT.Services.Interfaces;
 
 namespace TMDT.ViewModels.Seller
 {
     public class SellerProductsViewModel : ViewModelBase
     {
-        private readonly TmdtContext _context = null!;
+        // Removed long-lived _context for async safety
+        private readonly IImageUploadService _imageUploadService;
         private ObservableCollection<Product> _products = new();
         private ObservableCollection<Category> _categories = new();
         private Product? _selectedProduct;
@@ -27,6 +33,54 @@ namespace TMDT.ViewModels.Seller
         private string _descriptionInput = "";
         private Category? _selectedCategoryInput;
         private bool _isEditMode;
+
+        private ObservableCollection<ProductImage> _productImagesPreview = new();
+        public ObservableCollection<ProductImage> ProductImagesPreview
+        {
+            get => _productImagesPreview;
+            set { _productImagesPreview = value; OnPropertyChanged(); }
+        }
+
+        private ObservableCollection<ProductVariant> _productVariantsPreview = new();
+        public ObservableCollection<ProductVariant> ProductVariantsPreview
+        {
+            get => _productVariantsPreview;
+            set { _productVariantsPreview = value; OnPropertyChanged(); }
+        }
+
+        // Variant Input Fields
+        private string _variantNameInput = "";
+        private decimal _variantExtraPriceInput;
+        private int _variantQuantityInput;
+        private string _variantSkuInput = "";
+
+        public string VariantNameInput
+        {
+            get => _variantNameInput;
+            set { _variantNameInput = value; OnPropertyChanged(); }
+        }
+        public decimal VariantExtraPriceInput
+        {
+            get => _variantExtraPriceInput;
+            set { _variantExtraPriceInput = value; OnPropertyChanged(); }
+        }
+        public int VariantQuantityInput
+        {
+            get => _variantQuantityInput;
+            set { _variantQuantityInput = value; OnPropertyChanged(); }
+        }
+        public string VariantSkuInput
+        {
+            get => _variantSkuInput;
+            set { _variantSkuInput = value; OnPropertyChanged(); }
+        }
+
+        private List<string> _selectedLocalImagePaths = new();
+        public List<string> SelectedLocalImagePaths
+        {
+            get => _selectedLocalImagePaths;
+            set { _selectedLocalImagePaths = value; OnPropertyChanged(); }
+        }
 
         public ObservableCollection<Product> Products
         {
@@ -55,13 +109,13 @@ namespace TMDT.ViewModels.Seller
         public string SearchText
         {
             get => _searchText;
-            set { _searchText = value; OnPropertyChanged(); LoadProducts(); }
+            set { _searchText = value; OnPropertyChanged(); _ = LoadProductsAsync(); }
         }
 
         public string StatusFilter
         {
             get => _statusFilter;
-            set { _statusFilter = value; OnPropertyChanged(); LoadProducts(); }
+            set { _statusFilter = value; OnPropertyChanged(); _ = LoadProductsAsync(); }
         }
 
         #region Inspector Properties
@@ -132,10 +186,14 @@ namespace TMDT.ViewModels.Seller
         public ICommand ResetFieldsCommand { get; } = null!;
         public ICommand DeleteProductCommand { get; } = null!;
         public ICommand SetFilterCommand { get; } = null!;
+        public ICommand SelectImageCommand { get; } = null!;
+        public ICommand ClearImagesCommand { get; } = null!;
+        public ICommand AddVariantCommand { get; } = null!;
+        public ICommand RemoveVariantCommand { get; } = null!;
 
         public SellerProductsViewModel()
         {
-            try { _context = new TmdtContext(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine("Init TmdtContext failed: " + ex.Message); }
+            _imageUploadService = new CloudinaryService();
 
             Products = new ObservableCollection<Product>();
             Categories = new ObservableCollection<Category>();
@@ -144,20 +202,89 @@ namespace TMDT.ViewModels.Seller
             ResetFieldsCommand = new RelayCommand(_ => ResetInspector());
             DeleteProductCommand = new RelayCommand(_ => ExecuteDeleteProduct(), _ => SelectedProduct != null && SelectedProduct.Status != "Deleted");
             SetFilterCommand = new RelayCommand(o => StatusFilter = o?.ToString() ?? "All");
+            SelectImageCommand = new RelayCommand(_ => ExecuteSelectImages());
+            ClearImagesCommand = new RelayCommand(_ => ExecuteClearImages());
+            AddVariantCommand = new RelayCommand(_ => ExecuteAddVariant());
+            RemoveVariantCommand = new RelayCommand(o => ExecuteRemoveVariant(o as ProductVariant));
 
-            LoadCategories();
-            LoadProducts();
+            _ = LoadCategoriesAsync();
+            _ = LoadProductsAsync();
             ResetInspector();
         }
 
-        private void LoadCategories()
+        private void ExecuteSelectImages()
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Title = "Chọn hình ảnh sản phẩm",
+                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.webp",
+                Multiselect = true
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                foreach (string file in openFileDialog.FileNames)
+                {
+                    SelectedLocalImagePaths.Add(file);
+                    ProductImagesPreview.Add(new ProductImage
+                    {
+                        ImageUrl = file,
+                        IsMain = ProductImagesPreview.Count == 0 // Ảnh đầu tiên là ảnh bìa
+                    });
+                }
+            }
+        }
+
+        private void ExecuteClearImages()
+        {
+            SelectedLocalImagePaths.Clear();
+            ProductImagesPreview.Clear();
+            
+            // Nếu đang sửa sản phẩm, chúng ta sẽ xóa các ảnh trên Database khi bấm Lưu
+            // Hoặc có thể tự xóa ngay lập tức nhưng an toàn hơn là để lúc Lưu
+        }
+
+        private void ExecuteAddVariant()
+        {
+            if (string.IsNullOrWhiteSpace(VariantNameInput))
+            {
+                MessageBox.Show("Vui lòng nhập tên phân loại!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            ProductVariantsPreview.Add(new ProductVariant
+            {
+                VariantName = VariantNameInput.Trim(),
+                ExtraPrice = VariantExtraPriceInput,
+                Quantity = VariantQuantityInput,
+                Sku = string.IsNullOrWhiteSpace(VariantSkuInput) ? $"VAR-{Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper()}" : VariantSkuInput.Trim()
+            });
+
+            // Reset variant input fields
+            VariantNameInput = "";
+            VariantExtraPriceInput = 0;
+            VariantQuantityInput = 0;
+            VariantSkuInput = "";
+        }
+
+        private void ExecuteRemoveVariant(ProductVariant? variant)
+        {
+            if (variant != null && ProductVariantsPreview.Contains(variant))
+            {
+                ProductVariantsPreview.Remove(variant);
+            }
+        }
+
+        private async Task LoadCategoriesAsync()
         {
             Categories.Clear();
             try
             {
-                if (_context != null && _context.Categories.Any())
+                using var ctx = new TmdtContext();
+                if (await ctx.Categories.AnyAsync())
                 {
-                    foreach (var cat in _context.Categories.ToList())
+                    var cats = await ctx.Categories.ToListAsync();
+                    foreach (var cat in cats)
                         Categories.Add(cat);
                 }
             }
@@ -172,25 +299,28 @@ namespace TMDT.ViewModels.Seller
             }
         }
 
-        private void LoadProducts()
+        private async Task LoadProductsAsync()
         {
             Products.Clear();
-            int currentShopId = GetCurrentShopId();
+            int currentShopId = await GetCurrentShopIdAsync();
             if (currentShopId <= 0) return;
 
             try
             {
-                if (_context == null) return;
+                using var ctx = new TmdtContext();
 
-                var query = _context.Products
+                var query = ctx.Products
                     .Include(p => p.Category)
+                    .Include(p => p.ProductImages)
+                    .Include(p => p.ProductVariants)
                     .Where(p => p.ShopId == currentShopId)
                     .AsQueryable();
 
                 if (!string.IsNullOrEmpty(SearchText))
                 {
-                    query = query.Where(p => p.ProductName.Contains(SearchText) ||
-                                            (p.ProductCode != null && p.ProductCode.Contains(SearchText)));
+                    string keyword = SearchText.Trim();
+                    query = query.Where(p => EF.Functions.Like(p.ProductName, $"%{keyword}%") ||
+                                            (p.ProductCode != null && EF.Functions.Like(p.ProductCode, $"%{keyword}%")));
                 }
 
                 if (StatusFilter == "Pending")
@@ -204,7 +334,8 @@ namespace TMDT.ViewModels.Seller
                 else
                     query = query.Where(p => p.Status != "Deleted");
 
-                foreach (var prod in query.ToList())
+                var prods = await query.ToListAsync();
+                foreach (var prod in prods)
                     Products.Add(prod);
             }
             catch (Exception ex)
@@ -224,6 +355,41 @@ namespace TMDT.ViewModels.Seller
                 StockInput = SelectedProduct.StockQuantity ?? 0;
                 DescriptionInput = SelectedProduct.Description;
                 SelectedCategoryInput = Categories.FirstOrDefault(c => c.CategoryId == SelectedProduct.CategoryId) ?? Categories.FirstOrDefault();
+                
+                ProductImagesPreview.Clear();
+                SelectedLocalImagePaths.Clear();
+                if (SelectedProduct.ProductImages != null)
+                {
+                    foreach (var img in SelectedProduct.ProductImages.OrderBy(i => i.SortOrder))
+                    {
+                        ProductImagesPreview.Add(new ProductImage
+                        {
+                            ImageId = img.ImageId,
+                            ProductId = img.ProductId,
+                            ImageUrl = img.ImageUrl,
+                            IsMain = img.IsMain,
+                            SortOrder = img.SortOrder
+                        });
+                    }
+                }
+
+                ProductVariantsPreview.Clear();
+                if (SelectedProduct.ProductVariants != null)
+                {
+                    foreach (var variant in SelectedProduct.ProductVariants)
+                    {
+                        ProductVariantsPreview.Add(new ProductVariant
+                        {
+                            VariantId = variant.VariantId,
+                            ProductId = variant.ProductId,
+                            VariantName = variant.VariantName,
+                            ExtraPrice = variant.ExtraPrice,
+                            Quantity = variant.Quantity,
+                            Sku = variant.Sku
+                        });
+                    }
+                }
+
                 IsEditMode = true;
                 OnPropertyChanged(nameof(FormStatusBadge));
             }
@@ -244,6 +410,13 @@ namespace TMDT.ViewModels.Seller
             StockInput = 0;
             DescriptionInput = "";
             SelectedCategoryInput = Categories.FirstOrDefault();
+            ProductImagesPreview.Clear();
+            SelectedLocalImagePaths.Clear();
+            ProductVariantsPreview.Clear();
+            VariantNameInput = "";
+            VariantExtraPriceInput = 0;
+            VariantQuantityInput = 0;
+            VariantSkuInput = "";
             IsEditMode = false;
             OnPropertyChanged(nameof(FormTitle));
             OnPropertyChanged(nameof(FormStatusBadge));
@@ -267,7 +440,7 @@ namespace TMDT.ViewModels.Seller
                 return;
             }
 
-            int currentShopId = GetCurrentShopId();
+            int currentShopId = await GetCurrentShopIdAsync();
             if (currentShopId <= 0)
             {
                 MessageBox.Show("Không tìm thấy cửa hàng. Vui lòng đăng nhập lại.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -282,70 +455,137 @@ namespace TMDT.ViewModels.Seller
                     MessageBox.Show("Bạn không có quyền sửa sản phẩm này.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
+            }
 
-                try
+            try
+            {
+                using var ctx = new TmdtContext();
+                Product targetProd;
+
+                if (IsEditMode && SelectedProduct != null)
                 {
-                    // SelectedProduct đã được EF track, FindAsync trả về cùng object
-                    SelectedProduct.ProductName = ProductNameInput;
+                    targetProd = await ctx.Products.FindAsync(SelectedProduct.ProductId) ?? SelectedProduct;
+                    targetProd.ProductName = ProductNameInput;
                     SelectedProduct.ProductCode = ProductCodeInput;
                     SelectedProduct.Price = PriceInput;
                     SelectedProduct.OriginalPrice = OriginalPriceInput;
                     SelectedProduct.StockQuantity = StockInput;
                     SelectedProduct.Description = DescriptionInput;
-                    SelectedProduct.CategoryId = SelectedCategoryInput.CategoryId;
-                    SelectedProduct.Category = SelectedCategoryInput;
-
-                    await _context.SaveChangesAsync();
+                    targetProd.CategoryId = SelectedCategoryInput.CategoryId;
                 }
-                catch (Exception ex)
+                else
                 {
-                    System.Diagnostics.Debug.WriteLine("Update product failed: " + ex.Message);
-                    MessageBox.Show("Lỗi khi cập nhật sản phẩm: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
+                    targetProd = new Product
+                    {
+                        ShopId = currentShopId,
+                        ProductName = ProductNameInput,
+                        ProductCode = string.IsNullOrWhiteSpace(ProductCodeInput)
+                            ? "PROD-" + Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper()
+                            : ProductCodeInput,
+                        Price = PriceInput,
+                        OriginalPrice = OriginalPriceInput,
+                        StockQuantity = StockInput,
+                        Description = DescriptionInput,
+                        CategoryId = SelectedCategoryInput.CategoryId,
+                        Status = SystemSettingsHelper.Current.RequireProductApproval ? "Pending" : "Approved",
+                        CreatedAt = DateTime.Now,
+                        SoldCount = 0,
+                        Rating = 0,
+                        Category = SelectedCategoryInput
+                    };
+                    ctx.Products.Add(targetProd);
                 }
 
-                AuditLogHelper.Log("UPDATE_PRODUCT", $"Sửa '{ProductNameInput}' (ID:{SelectedProduct.ProductId})", "Product", "Normal");
-                MessageBox.Show("Đã cập nhật sản phẩm thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                // Lưu Product trước để có ProductId
+                await ctx.SaveChangesAsync();
+
+                // Cập nhật ProductImages
+                var oldImages = await ctx.ProductImages.Where(i => i.ProductId == targetProd.ProductId).ToListAsync();
+                ctx.ProductImages.RemoveRange(oldImages);
+                
+                var finalImages = new List<ProductImage>();
+                int sortOrder = 0;
+
+                foreach (var img in ProductImagesPreview)
+                {
+                    if (string.IsNullOrEmpty(img.ImageUrl)) continue;
+
+                    if (!SelectedLocalImagePaths.Contains(img.ImageUrl))
+                    {
+                        // Ảnh cũ (đã có URL từ Cloudinary)
+                        finalImages.Add(new ProductImage
+                        {
+                            ProductId = targetProd.ProductId,
+                            ImageUrl = img.ImageUrl,
+                            IsMain = sortOrder == 0,
+                            SortOrder = sortOrder++
+                        });
+                    }
+                    else
+                    {
+                        // Upload ảnh mới
+                        string uploadedUrl = await _imageUploadService.UploadImageAsync(img.ImageUrl);
+                        if (!string.IsNullOrEmpty(uploadedUrl))
+                        {
+                            finalImages.Add(new ProductImage
+                            {
+                                ProductId = targetProd.ProductId,
+                                ImageUrl = uploadedUrl,
+                                IsMain = sortOrder == 0,
+                                SortOrder = sortOrder++
+                            });
+                        }
+                    }
+                }
+
+                if (finalImages.Any())
+                {
+                    ctx.ProductImages.AddRange(finalImages);
+                    await ctx.SaveChangesAsync();
+                }
+
+                // Cập nhật ProductVariants
+                var oldVariants = await ctx.ProductVariants.Where(v => v.ProductId == targetProd.ProductId).ToListAsync();
+                ctx.ProductVariants.RemoveRange(oldVariants);
+
+                var finalVariants = new List<ProductVariant>();
+                foreach (var variant in ProductVariantsPreview)
+                {
+                    finalVariants.Add(new ProductVariant
+                    {
+                        ProductId = targetProd.ProductId,
+                        VariantName = variant.VariantName,
+                        ExtraPrice = variant.ExtraPrice,
+                        Quantity = variant.Quantity,
+                        Sku = variant.Sku
+                    });
+                }
+
+                if (finalVariants.Any())
+                {
+                    ctx.ProductVariants.AddRange(finalVariants);
+                    await ctx.SaveChangesAsync();
+                }
+
+                if (IsEditMode)
+                {
+                    AuditLogHelper.Log("UPDATE_PRODUCT", $"Sửa '{ProductNameInput}' (ID:{targetProd.ProductId})", "Product", "Normal");
+                    MessageBox.Show("Đã cập nhật sản phẩm thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    AuditLogHelper.Log("ADD_PRODUCT", $"Thêm '{ProductNameInput}' (Code:{targetProd.ProductCode})", "Product", "Normal");
+                    MessageBox.Show("Đã thêm sản phẩm! Vui lòng chờ Admin phê duyệt.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+
+                _ = LoadProductsAsync();
+                ResetInspector();
             }
-            else
+            catch (Exception ex)
             {
-                var newProd = new Product
-                {
-                    ShopId = currentShopId,
-                    ProductName = ProductNameInput,
-                    ProductCode = string.IsNullOrWhiteSpace(ProductCodeInput)
-                        ? "PROD-" + Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper()
-                        : ProductCodeInput,
-                    Price = PriceInput,
-                    OriginalPrice = OriginalPriceInput,
-                    StockQuantity = StockInput,
-                    Description = DescriptionInput,
-                    CategoryId = SelectedCategoryInput.CategoryId,
-                    Status = SystemSettingsHelper.Current.RequireProductApproval ? "Pending" : "Approved",
-                    CreatedAt = DateTime.Now,
-                    SoldCount = 0,
-                    Rating = 0,
-                    Category = SelectedCategoryInput
-                };
-
-                try
-                {
-                    _context.Products.Add(newProd);
-                    await _context.SaveChangesAsync();
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine("Insert product failed: " + ex.Message);
-                    MessageBox.Show("Lỗi khi thêm sản phẩm: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                AuditLogHelper.Log("ADD_PRODUCT", $"Thêm '{ProductNameInput}' (Code:{newProd.ProductCode})", "Product", "Normal");
-                MessageBox.Show("Đã thêm sản phẩm! Vui lòng chờ Admin phê duyệt để hiển thị trên sàn.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                System.Diagnostics.Debug.WriteLine("Save product failed: " + ex.Message);
+                MessageBox.Show("Lỗi khi lưu sản phẩm: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
-            LoadProducts();
-            ResetInspector();
         }
 
         private async void ExecuteDeleteProduct()
@@ -353,7 +593,7 @@ namespace TMDT.ViewModels.Seller
             if (SelectedProduct == null) return;
 
             // Kiểm tra sản phẩm thuộc shop hiện tại
-            int currentShopId = GetCurrentShopId();
+            int currentShopId = await GetCurrentShopIdAsync();
             if (SelectedProduct.ShopId != currentShopId)
             {
                 MessageBox.Show("Bạn không có quyền xóa sản phẩm này.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -367,11 +607,12 @@ namespace TMDT.ViewModels.Seller
 
             try
             {
-                var dbProd = await _context.Products.FindAsync(SelectedProduct.ProductId);
+                using var ctx = new TmdtContext();
+                var dbProd = await ctx.Products.FindAsync(SelectedProduct.ProductId);
                 if (dbProd != null)
                 {
                     dbProd.Status = "Deleted";           // Soft delete
-                    await _context.SaveChangesAsync();
+                    await ctx.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -385,15 +626,15 @@ namespace TMDT.ViewModels.Seller
             MessageBox.Show("Đã xóa sản phẩm!", "Xóa thành công", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private int GetCurrentShopId()
+        private async Task<int> GetCurrentShopIdAsync()
         {
             try
             {
-                if (_context == null) return 0;
                 if (SessionManager.CurrentUser == null) return 0;
 
-                var shop = _context.Shops
-                    .FirstOrDefault(s => s.UserId == SessionManager.CurrentUser.UserId);
+                using var ctx = new TmdtContext();
+                var shop = await ctx.Shops
+                    .FirstOrDefaultAsync(s => s.UserId == SessionManager.CurrentUser.UserId);
                 return shop?.ShopId ?? 0;
             }
             catch { return 0; }
@@ -401,7 +642,6 @@ namespace TMDT.ViewModels.Seller
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) _context?.Dispose();
             base.Dispose(disposing);
         }
     }

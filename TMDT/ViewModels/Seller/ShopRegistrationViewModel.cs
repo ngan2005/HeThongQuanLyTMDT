@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using Microsoft.EntityFrameworkCore;
 using TMDT.Services;
 using TMDT.Services.Interfaces;
 using TMDT.Utilities;
@@ -20,7 +22,7 @@ namespace TMDT.ViewModels.Seller
         public string WarehouseAddress
         {
             get => _warehouseAddress;
-            set => _warehouseAddress = value;
+            set { _warehouseAddress = value; OnPropertyChanged(); }
         }
 
         private string _errorMessage = "";
@@ -46,6 +48,28 @@ namespace TMDT.ViewModels.Seller
         {
             SubmitCommand = new RelayCommand(async _ => await ExecuteSubmit());
             CancelCommand = new RelayCommand(_ => RequestClose?.Invoke(false));
+
+            _ = LoadUserAddressAsync();
+        }
+
+        private async System.Threading.Tasks.Task LoadUserAddressAsync()
+        {
+            try
+            {
+                using var ctx = new Models.TmdtContext();
+                var userId = SessionManager.CurrentUser?.UserId;
+                if (userId != null)
+                {
+                    var defaultAddress = await ctx.Addresses.FirstOrDefaultAsync(a => a.UserId == userId && a.IsDefault == true)
+                                      ?? await ctx.Addresses.FirstOrDefaultAsync(a => a.UserId == userId);
+
+                    if (defaultAddress != null && !string.IsNullOrWhiteSpace(defaultAddress.FullAddress))
+                    {
+                        WarehouseAddress = defaultAddress.FullAddress;
+                    }
+                }
+            }
+            catch { }
         }
 
         private async System.Threading.Tasks.Task ExecuteSubmit()

@@ -14,7 +14,7 @@ namespace TMDT.ViewModels.Admin
 {
     public class AdminReportsViewModel : ViewModelBase
     {
-        private readonly TmdtContext _context = null!;
+        // Removed long-lived _context to use local contexts for async safety
         private string _reportPeriod = "Month"; // Month, Quarter, Year
         private decimal _totalSystemRevenue = 0;
         private decimal _totalCommissionEarned = 0;
@@ -28,7 +28,7 @@ namespace TMDT.ViewModels.Admin
             {
                 _reportPeriod = value;
                 OnPropertyChanged();
-                CalculateSummary();
+                CalculateSummaryAsync();
             }
         }
 
@@ -68,15 +68,6 @@ namespace TMDT.ViewModels.Admin
 
         public AdminReportsViewModel()
         {
-            try
-            {
-                _context = new TmdtContext();
-            }
-            catch
-            {
-                // Failsafe
-            }
-
             // Setup Commands for CSV
             ExportShopsReportCommand = new RelayCommand(ExecuteExportShopsReport);
             ExportTransactionsReportCommand = new RelayCommand(ExecuteExportTransactionsReport);
@@ -87,22 +78,19 @@ namespace TMDT.ViewModels.Admin
             ExportTransactionsPdfCommand = new RelayCommand(ExecuteExportTransactionsPdf);
             ExportWithdrawsPdfCommand = new RelayCommand(ExecuteExportWithdrawsPdf);
 
-            CalculateSummary();
+            CalculateSummaryAsync();
         }
 
-        private void CalculateSummary()
+        private async void CalculateSummaryAsync()
         {
             try
             {
-                if (_context != null)
-                {
-                    TotalActiveShopsCount = _context.Shops.Count(s => s.IsActive == true);
-                    var completedOrders = _context.Orders.Where(o => o.OrderStatus == "Hoàn thành").ToList();
-                    TotalOrdersProcessed = completedOrders.Count;
-                    TotalSystemRevenue = completedOrders.Sum(o => o.TotalAmount ?? 0);
-                    TotalCommissionEarned = TotalSystemRevenue * 0.05m; // 5% fee sàn
-                    return;
-                }
+                using var ctx = new TmdtContext();
+                TotalActiveShopsCount = await ctx.Shops.CountAsync(s => s.IsActive == true);
+                var completedOrders = await ctx.Orders.AsNoTracking().Where(o => o.OrderStatus == "Hoàn thành").ToListAsync();
+                TotalOrdersProcessed = completedOrders.Count;
+                TotalSystemRevenue = completedOrders.Sum(o => o.TotalAmount ?? 0);
+                TotalCommissionEarned = TotalSystemRevenue * 0.05m; // 5% fee sàn
             }
             catch
             {
@@ -112,7 +100,7 @@ namespace TMDT.ViewModels.Admin
 
         // --- CSV EXPORT METHODS ---
 
-        private void ExecuteExportShopsReport(object? obj)
+        private async void ExecuteExportShopsReport(object? obj)
         {
             var sfd = new SaveFileDialog
             {
@@ -129,9 +117,10 @@ namespace TMDT.ViewModels.Admin
                 sb.Append('\uFEFF');
                 sb.AppendLine("Mã Cửa Hàng,Tên Cửa Hàng,Số Điện Thoại,Địa Chỉ Kho,Số Dư Ví (đ),Trạng Thái");
 
-                if (_context != null && _context.Shops.Any())
+                using var ctx = new TmdtContext();
+                if (await ctx.Shops.AnyAsync())
                 {
-                    var shops = _context.Shops.Include(s => s.User).ToList();
+                    var shops = await ctx.Shops.AsNoTracking().Include(s => s.User).ToListAsync();
                     foreach (var s in shops)
                     {
                         string statusText = (s.IsActive == true) ? "Active" : "Locked";
@@ -154,7 +143,7 @@ namespace TMDT.ViewModels.Admin
             }
         }
 
-        private void ExecuteExportTransactionsReport(object? obj)
+        private async void ExecuteExportTransactionsReport(object? obj)
         {
             var sfd = new SaveFileDialog
             {
@@ -171,9 +160,10 @@ namespace TMDT.ViewModels.Admin
                 sb.Append('\uFEFF');
                 sb.AppendLine("Mã Đơn,Người Mua,Ngày Đặt,Tổng Giá Trị (đ),Phí Sàn 5% (đ),Trạng Thái");
 
-                if (_context != null && _context.Orders.Any())
+                using var ctx = new TmdtContext();
+                if (await ctx.Orders.AnyAsync())
                 {
-                    var orders = _context.Orders.Include(o => o.Buyer).ToList();
+                    var orders = await ctx.Orders.AsNoTracking().Include(o => o.Buyer).ToListAsync();
                     foreach (var o in orders)
                     {
                         decimal amount = o.TotalAmount ?? 0;
@@ -197,7 +187,7 @@ namespace TMDT.ViewModels.Admin
             }
         }
 
-        private void ExecuteExportWithdrawsReport(object? obj)
+        private async void ExecuteExportWithdrawsReport(object? obj)
         {
             var sfd = new SaveFileDialog
             {
@@ -214,9 +204,10 @@ namespace TMDT.ViewModels.Admin
                 sb.Append('\uFEFF');
                 sb.AppendLine("Mã Yêu Cầu,Cửa Hàng,Ngân Hàng,Số Tài Khoản,Số Tiền Rút (đ),Ngày Gửi,Trạng Thái");
 
-                if (_context != null && _context.WithdrawRequests.Any())
+                using var ctx = new TmdtContext();
+                if (await ctx.WithdrawRequests.AnyAsync())
                 {
-                    var requests = _context.WithdrawRequests.Include(r => r.Shop).ToList();
+                    var requests = await ctx.WithdrawRequests.AsNoTracking().Include(r => r.Shop).ToListAsync();
                     foreach (var r in requests)
                     {
                         sb.AppendLine($"{r.WithdrawId},\"{EscapeCsv(r.Shop?.ShopName ?? "N/A")}\",\"{EscapeCsv(r.BankName ?? "")}\",\"{r.AccountNumber ?? ""}\",{r.Amount ?? 0},\"{r.RequestedAt:dd/MM/yyyy}\",\"{r.Status ?? ""}\"");
@@ -239,7 +230,7 @@ namespace TMDT.ViewModels.Admin
 
         // --- PDF EXPORT METHODS (NATIVE WPF PRINT TO PDF) ---
 
-        private void ExecuteExportShopsPdf(object? obj)
+        private async void ExecuteExportShopsPdf(object? obj)
         {
             try
             {
@@ -272,9 +263,10 @@ namespace TMDT.ViewModels.Admin
                 hRow.Cells.Add(new TableCell(new Paragraph(new Run("Số Dư Ví"))) { Padding = new Thickness(6) });
                 rowGroup.Rows.Add(hRow);
 
-                if (_context != null && _context.Shops.Any())
+                using var ctx = new TmdtContext();
+                if (await ctx.Shops.AnyAsync())
                 {
-                    var shops = _context.Shops.Include(s => s.User).ToList();
+                    var shops = await ctx.Shops.AsNoTracking().Include(s => s.User).ToListAsync();
                     foreach (var s in shops)
                     {
                         var r = new TableRow();
@@ -312,7 +304,7 @@ namespace TMDT.ViewModels.Admin
             }
         }
 
-        private void ExecuteExportTransactionsPdf(object? obj)
+        private async void ExecuteExportTransactionsPdf(object? obj)
         {
             try
             {
@@ -354,9 +346,10 @@ namespace TMDT.ViewModels.Admin
                 hRow.Cells.Add(new TableCell(new Paragraph(new Run("Hoa Hồng 5%"))) { Padding = new Thickness(6) });
                 rowGroup.Rows.Add(hRow);
 
-                if (_context != null && _context.Orders.Any())
+                using var ctx = new TmdtContext();
+                if (await ctx.Orders.AnyAsync())
                 {
-                    var orders = _context.Orders.Include(o => o.Buyer).ToList();
+                    var orders = await ctx.Orders.AsNoTracking().Include(o => o.Buyer).ToListAsync();
                     foreach (var o in orders)
                     {
                         decimal amount = o.TotalAmount ?? 0;
@@ -396,7 +389,7 @@ namespace TMDT.ViewModels.Admin
             }
         }
 
-        private void ExecuteExportWithdrawsPdf(object? obj)
+        private async void ExecuteExportWithdrawsPdf(object? obj)
         {
             try
             {
@@ -431,9 +424,10 @@ namespace TMDT.ViewModels.Admin
                 hRow.Cells.Add(new TableCell(new Paragraph(new Run("Ngày Gửi"))) { Padding = new Thickness(6) });
                 rowGroup.Rows.Add(hRow);
 
-                if (_context != null && _context.WithdrawRequests.Any())
+                using var ctx = new TmdtContext();
+                if (await ctx.WithdrawRequests.AnyAsync())
                 {
-                    var requests = _context.WithdrawRequests.Include(r => r.Shop).ToList();
+                    var requests = await ctx.WithdrawRequests.AsNoTracking().Include(r => r.Shop).ToListAsync();
                     foreach (var r in requests)
                     {
                         var row = new TableRow();
@@ -527,7 +521,6 @@ namespace TMDT.ViewModels.Admin
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) _context?.Dispose();
             base.Dispose(disposing);
         }
     }

@@ -11,7 +11,7 @@ namespace TMDT.ViewModels.Admin
 {
     public class AdminProductsViewModel : ViewModelBase
     {
-        private readonly TmdtContext _context = null!;
+        // Removed long-lived _context for async safety
         private ObservableCollection<Product> _products = new();
         private Product? _selectedProduct;
         private string _searchText = "";
@@ -46,7 +46,7 @@ namespace TMDT.ViewModels.Admin
             { 
                 _searchText = value; 
                 OnPropertyChanged(); 
-                LoadProducts(); 
+                _ = LoadProductsAsync(); 
             }
         }
 
@@ -57,7 +57,7 @@ namespace TMDT.ViewModels.Admin
             {
                 _statusFilter = value;
                 OnPropertyChanged();
-                LoadProducts();
+                _ = LoadProductsAsync();
             }
         }
 
@@ -138,14 +138,6 @@ namespace TMDT.ViewModels.Admin
         public AdminProductsViewModel(string initialFilter = "All")
         {
             _statusFilter = initialFilter;
-            try
-            {
-                _context = new TmdtContext();
-            }
-            catch
-            {
-                // Failsafe
-            }
 
             Products = new ObservableCollection<Product>();
 
@@ -169,17 +161,18 @@ namespace TMDT.ViewModels.Admin
             ScanFraudCommand = new RelayCommand(ExecuteScanFraud, _ => !IsAiFraudScanning);
             AiCategorizeCommand = new RelayCommand(ExecuteAiCategorize, _ => SelectedProduct != null && !IsAiCategorizing);
 
-            LoadProducts();
+            _ = LoadProductsAsync();
         }
 
         private async void ExecuteAiCategorize(object? obj)
         {
-            if (SelectedProduct == null || _context == null) return;
+            if (SelectedProduct == null) return;
 
             IsAiCategorizing = true;
             try
             {
-                var categoriesDict = _context.Categories.ToDictionary(c => c.CategoryId, c => c.CategoryName ?? "Unknown");
+                using var ctx = new TmdtContext();
+                var categoriesDict = await ctx.Categories.ToDictionaryAsync(c => c.CategoryId, c => c.CategoryName ?? "Unknown");
                 int suggestedId = await _aiService.SuggestCategoryAsync(
                     SelectedProduct.ProductName ?? "",
                     SelectedProduct.Description ?? "",
@@ -188,14 +181,14 @@ namespace TMDT.ViewModels.Admin
                 if (suggestedId > 0 && suggestedId != SelectedProduct.CategoryId)
                 {
                     // AI found a better category
-                    var newCat = _context.Categories.FirstOrDefault(c => c.CategoryId == suggestedId);
+                    var newCat = await ctx.Categories.FirstOrDefaultAsync(c => c.CategoryId == suggestedId);
                     if (newCat != null)
                     {
-                        var dbProd = await _context.Products.FindAsync(SelectedProduct.ProductId);
+                        var dbProd = await ctx.Products.FindAsync(SelectedProduct.ProductId);
                         if (dbProd != null)
                         {
                             dbProd.CategoryId = suggestedId;
-                            await _context.SaveChangesAsync();
+                            await ctx.SaveChangesAsync();
                             
                             // Update UI
                             SelectedProduct.CategoryId = suggestedId;
@@ -253,26 +246,26 @@ namespace TMDT.ViewModels.Admin
             }
         }
 
-        private void LoadProducts()
+        private async Task LoadProductsAsync()
         {
             Products.Clear();
 
             try
             {
-                if (_context != null)
-                {
-                    _context.ChangeTracker.Clear();
+                using var ctx = new TmdtContext();
+                ctx.ChangeTracker.Clear();
 
-                    if (_context.Products.Any())
+                if (await ctx.Products.AnyAsync())
                     {
-                        TotalProducts = _context.Products.Count(p => p.Status != "Deleted");
-                        PendingProducts = _context.Products.Count(p => p.Status != "Deleted" && (p.Status == "Pending" || string.IsNullOrEmpty(p.Status)));
-                        ApprovedProducts = _context.Products.Count(p => p.Status == "Approved");
-                        RejectedProducts = _context.Products.Count(p => p.Status == "Rejected");
+                        TotalProducts = await ctx.Products.CountAsync(p => p.Status != "Deleted");
+                        PendingProducts = await ctx.Products.CountAsync(p => p.Status != "Deleted" && (p.Status == "Pending" || string.IsNullOrEmpty(p.Status)));
+                        ApprovedProducts = await ctx.Products.CountAsync(p => p.Status == "Approved");
+                        RejectedProducts = await ctx.Products.CountAsync(p => p.Status == "Rejected");
 
-                        var query = _context.Products
+                        var query = ctx.Products
                             .Include(p => p.Shop)
                             .Include(p => p.Category)
+                            .Include(p => p.ProductImages)
                             .Where(p => p.Status != "Deleted")
                             .AsQueryable();
 
@@ -300,7 +293,7 @@ namespace TMDT.ViewModels.Admin
                             query = query.Where(p => p.Status == "Rejected");
                         }
 
-                        var dbProducts = query.ToList();
+                        var dbProducts = await query.ToListAsync();
                         foreach (var prod in dbProducts)
                         {
                             Products.Add(prod);
@@ -309,7 +302,6 @@ namespace TMDT.ViewModels.Admin
                         if (Products.Any() || (string.IsNullOrEmpty(SearchText) && StatusFilter == "All"))
                             return;
                     }
-                }
             }
             catch (Exception ex)
             {
@@ -336,15 +328,13 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null)
+                using var ctx = new TmdtContext();
+                var dbProd = await ctx.Products.FindAsync(SelectedProduct.ProductId);
+                if (dbProd != null)
                 {
-                    var dbProd = await _context.Products.FindAsync(SelectedProduct.ProductId);
-                    if (dbProd != null)
-                    {
-                        dbProd.Status = "Approved";
-                        dbProd.ApprovedAt = DateTime.Now;
-                        await _context.SaveChangesAsync();
-                    }
+                    dbProd.Status = "Approved";
+                    dbProd.ApprovedAt = DateTime.Now;
+                    await ctx.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -356,7 +346,7 @@ namespace TMDT.ViewModels.Admin
                             "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             
             HideDetailRequest?.Invoke();
-            LoadProducts();
+            _ = LoadProductsAsync();
         }
 
         private bool CanExecuteRejectProduct(object? obj) => SelectedProduct != null && (SelectedProduct.Status == "Pending" || SelectedProduct.Status == "Approved" || string.IsNullOrEmpty(SelectedProduct.Status));
@@ -372,14 +362,12 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                if (_context != null)
+                using var ctx = new TmdtContext();
+                var dbProd = await ctx.Products.FindAsync(SelectedProduct.ProductId);
+                if (dbProd != null)
                 {
-                    var dbProd = await _context.Products.FindAsync(SelectedProduct.ProductId);
-                    if (dbProd != null)
-                    {
-                        dbProd.Status = "Rejected";
-                        await _context.SaveChangesAsync();
-                    }
+                    dbProd.Status = "Rejected";
+                    await ctx.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -391,7 +379,7 @@ namespace TMDT.ViewModels.Admin
                             "Đã thực hiện", MessageBoxButton.OK, MessageBoxImage.Information);
 
             HideDetailRequest?.Invoke();
-            LoadProducts();
+            _ = LoadProductsAsync();
         }
 
         private bool CanExecuteAiAnalyze(object? obj) => SelectedProduct != null && !IsAiAnalyzing;
@@ -404,10 +392,24 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                AiAnalysisResult = await _aiService.AnalyzeProductAsync(
-                    SelectedProduct.ProductName ?? "",
-                    SelectedProduct.Description ?? "",
-                    SelectedProduct.Price);
+                var mainImage = SelectedProduct.ProductImages?.FirstOrDefault(img => img.IsMain == true) 
+                             ?? SelectedProduct.ProductImages?.FirstOrDefault();
+
+                if (mainImage != null && !string.IsNullOrWhiteSpace(mainImage.ImageUrl))
+                {
+                    AiAnalysisResult = await _aiService.AnalyzeProductWithImageAsync(
+                        SelectedProduct.ProductName ?? "",
+                        SelectedProduct.Description ?? "",
+                        SelectedProduct.Price,
+                        mainImage.ImageUrl);
+                }
+                else
+                {
+                    AiAnalysisResult = await _aiService.AnalyzeProductAsync(
+                        SelectedProduct.ProductName ?? "",
+                        SelectedProduct.Description ?? "",
+                        SelectedProduct.Price);
+                }
             }
             finally
             {
@@ -417,7 +419,6 @@ namespace TMDT.ViewModels.Admin
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) _context?.Dispose();
             base.Dispose(disposing);
         }
     }

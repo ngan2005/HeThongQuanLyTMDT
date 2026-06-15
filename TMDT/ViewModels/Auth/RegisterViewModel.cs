@@ -42,6 +42,7 @@ namespace TMDT.ViewModels.Auth
 
         // Commands
         public ICommand RegisterCommand { get; }
+        public ICommand LoginWithGoogleCommand { get; }
         public ICommand ShowLoginCommand { get; }
         public ICommand ExitCommand { get; }
 
@@ -51,6 +52,7 @@ namespace TMDT.ViewModels.Auth
             _authService = new AuthService(new TmdtContext());
 
             RegisterCommand = new RelayCommand(ExecuteRegister);
+            LoginWithGoogleCommand = new RelayCommand(ExecuteLoginWithGoogle);
             ShowLoginCommand = new RelayCommand(ExecuteShowLogin);
             ExitCommand = new RelayCommand(ExecuteExit);
         }
@@ -82,6 +84,34 @@ namespace TMDT.ViewModels.Auth
             {
                 MessageBox.Show(errorMessage ?? "Đăng ký thất bại.", "Lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async void ExecuteLoginWithGoogle(object parameter)
+        {
+            try
+            {
+                var googleUser = await GoogleAuthService.LoginAsync();
+                if (googleUser == null) return;
+
+                using var context = new TmdtContext();
+                bool exists = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.AnyAsync(context.Users, u => u.Email == googleUser.Email);
+
+                if (exists)
+                {
+                    MessageBox.Show("Email này đã được đăng ký. Vui lòng đăng nhập!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    ExecuteShowLogin(null);
+                    return;
+                }
+
+                Email = googleUser.Email;
+                FullName = googleUser.FullName;
+                
+                MessageBox.Show("Đã lấy thông tin từ Google. Vui lòng nhập mật khẩu và bấm 'Đăng ký' để hoàn tất!", "Hoàn tất đăng ký", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show($"Lỗi Đăng nhập Google: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

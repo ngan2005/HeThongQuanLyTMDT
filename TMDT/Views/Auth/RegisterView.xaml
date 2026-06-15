@@ -26,8 +26,8 @@
         
         <!-- Modern TextBox Style with Focus Glow -->
         <Style x:Key="ModernTextBox" TargetType="TextBox">
-            <Setter Property="Background" Value="#2A1F72"/>
-            <Setter Property="Foreground" Value="#F0F4FF"/>
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="Foreground" Value="#1E293B"/>
             <Setter Property="BorderBrush" Value="#5B5CEB"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontSize" Value="13"/>
@@ -47,7 +47,7 @@
 
                             <!-- Main Border -->
                             <Border x:Name="border" Background="{TemplateBinding Background}" 
-                                    BorderBrush="#8080C0" Opacity="0.35"
+                                    BorderBrush="#CBD5E1" Opacity="1.0"
                                     BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8"/>
 
                             <!-- Content Grid -->
@@ -98,8 +98,8 @@
 
         <!-- Modern PasswordBox Style -->
         <Style x:Key="ModernPasswordBox" TargetType="PasswordBox">
-            <Setter Property="Background" Value="#2A1F72"/>
-            <Setter Property="Foreground" Value="#F0F4FF"/>
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="Foreground" Value="#1E293B"/>
             <Setter Property="BorderBrush" Value="#5B5CEB"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontSize" Value="13"/>
@@ -119,7 +119,7 @@
 
                             <!-- Main Border -->
                             <Border x:Name="border" Background="{TemplateBinding Background}" 
-                                    BorderBrush="#8080C0" Opacity="0.35"
+                                    BorderBrush="#CBD5E1" Opacity="1.0"
                                     BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8"/>
 
                             <!-- Content Grid -->
@@ -237,6 +237,50 @@
                                         <Storyboard>
                                             <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="1.0" Duration="0:0:0.08"/>
                                             <DoubleAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="1.0" Duration="0:0:0.08"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Social Login Button Style with Glassmorphic design -->
+        <Style x:Key="SocialButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#F1F5F9"/>
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                            <Border.RenderTransform>
+                                <ScaleTransform x:Name="scale" ScaleX="1.0" ScaleY="1.0" CenterX="20" CenterY="19"/>
+                            </Border.RenderTransform>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.8"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="1.05" Duration="0:0:0.12"/>
+                                            <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="1.05" Duration="0:0:0.12"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="1.0" Duration="0:0:0.12"/>
+                                            <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="1.0" Duration="0:0:0.12"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.ExitActions>
@@ -384,9 +428,9 @@
         <Grid Panel.ZIndex="0">
             <Grid.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#1F1445" Offset="0"/>
-                    <GradientStop Color="#2B1B69" Offset="0.6"/>
-                    <GradientStop Color="#3A2A82" Offset="1"/>
+                    <GradientStop Color="#F1F5F9" Offset="0"/>
+                    <GradientStop Color="#E2E8F0" Offset="0.6"/>
+                    <GradientStop Color="#CBD5E1" Offset="1"/>
                 </LinearGradientBrush>
             </Grid.Background>
             
@@ -438,16 +482,16 @@
                 <!-- GLASSMORPHISM CONTAINER (CARD REDESIGN) -->
                 <Border Width="740" Height="370" CornerRadius="20" BorderThickness="1.2">
                     <Border.Background>
-                        <SolidColorBrush Color="#241A68" Opacity="0.75"/>
+                        <SolidColorBrush Color="#FFFFFF" Opacity="0.95"/>
                     </Border.Background>
                     <Border.BorderBrush>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#7B72FF" Offset="0" />
-                            <GradientStop Color="#4C3FAA" Offset="1" />
+                            <GradientStop Color="#E2E8F0" Offset="0" />
+                            <GradientStop Color="#CBD5E1" Offset="1" />
                         </LinearGradientBrush>
                     </Border.BorderBrush>
                     <Border.Effect>
-                        <DropShadowEffect BlurRadius="40" Color="#2B1B69" Direction="270" ShadowDepth="8" Opacity="0.5"/>
+                        <DropShadowEffect BlurRadius="40" Color="#000000" Direction="270" ShadowDepth="8" Opacity="0.08"/>
                     </Border.Effect>
 
                     <Grid>
@@ -462,21 +506,21 @@
                         <Border Grid.Column="0" CornerRadius="19,0,0,19" BorderThickness="0,0,1.2,0" BorderBrush="#30FFFFFF">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="#2C1F6D" Offset="0"/>
-                                    <GradientStop Color="#3D2D8A" Offset="0.6"/>
-                                    <GradientStop Color="#5B5CEB" Offset="1"/>
+                                    <GradientStop Color="#EFF6FF" Offset="0"/>
+                                    <GradientStop Color="#DBEAFE" Offset="0.6"/>
+                                    <GradientStop Color="#BFDBFE" Offset="1"/>
                                 </LinearGradientBrush>
                             </Border.Background>
                             
                             <Grid Margin="16">
                                 <!-- Top Branding -->
                                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,8,0,0">
-                                    <TextBlock Text="Volox AI" FontSize="16" FontWeight="ExtraBold" Foreground="#FFFFFF" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI">
+                                    <TextBlock Text="Volox AI" FontSize="16" FontWeight="ExtraBold" Foreground="#1E293B" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI">
                                         <TextBlock.Effect>
                                             <DropShadowEffect Color="#5B5CEB" BlurRadius="10" Opacity="0.6" ShadowDepth="0"/>
                                         </TextBlock.Effect>
                                     </TextBlock>
-                                    <TextBlock Text="Trợ lý đăng ký thông minh" FontSize="9.5" Foreground="#D4D8FF" Opacity="0.85" FontWeight="Medium" Margin="0,2,0,0" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Trợ lý đăng ký thông minh" FontSize="9.5" Foreground="#475569" Opacity="0.85" FontWeight="Medium" Margin="0,2,0,0" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                 </StackPanel>
 
                                 <!-- Mascot Container (Floating) -->
@@ -615,8 +659,8 @@
                                     <StackPanel.RenderTransform>
                                         <TranslateTransform x:Name="RevealTitleTransform" Y="15"/>
                                     </StackPanel.RenderTransform>
-                                    <TextBlock Text="Đăng ký tài khoản" FontSize="22" FontWeight="Bold" Foreground="#F0F4FF" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    <TextBlock Text="Tham gia hệ thống phân phối thông minh Volox" FontSize="12" Foreground="#A3AED0" Margin="0,3,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Đăng ký tài khoản" FontSize="22" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Tham gia hệ thống phân phối thông minh Volox" FontSize="12" Foreground="#64748B" Margin="0,3,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
                                 </StackPanel>
 
                                 <!-- Stagger 2: Fields Grid -->
@@ -687,13 +731,50 @@
                                     </StackPanel>
                                 </Grid>
 
-                                <!-- Stagger 3: Submit Button -->
+                                <!-- Stagger 3: Buttons (Submit & Socials) -->
                                 <Grid x:Name="RevealButton" Opacity="0">
                                     <Grid.RenderTransform>
                                         <TranslateTransform x:Name="RevealButtonTransform" Y="15"/>
                                     </Grid.RenderTransform>
-                                    <Button Content="Đăng ký tài khoản" Style="{StaticResource AccentButtonStyle}" Height="38"
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Submit Button -->
+                                    <Button Grid.Column="0" Content="Đăng ký tài khoản" Style="{StaticResource AccentButtonStyle}" Height="38"
                                             Command="{Binding RegisterCommand}"/>
+
+                                    <!-- Social Logins -->
+                                    <Grid Grid.Column="2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="8"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Google -->
+                                        <Button Style="{StaticResource SocialButtonStyle}" Height="38" Command="{Binding LoginWithGoogleCommand}">
+                                            <Viewbox Width="15" Height="15">
+                                                <Canvas Width="24" Height="24">
+                                                    <Path Fill="#EA4335" Data="M12 5.04c1.67 0 3.17.58 4.35 1.71l3.25-3.25C17.65 1.58 15.01 1 12 1 7.37 1 3.4 3.63 1.48 7.48l3.79 2.94C6.21 7.15 8.87 5.04 12 5.04z"/>
+                                                    <Path Fill="#4285F4" Data="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.29 1.48-1.14 2.73-2.42 3.58v2.98h3.91c2.28-2.1 3.54-5.19 3.54-8.71z"/>
+                                                    <Path Fill="#FBBC05" Data="M5.27 14.58c-.24-.71-.37-1.47-.37-2.26s.13-1.55.37-2.26L1.48 7.12C.67 8.74.2 10.56.2 12.5s.47 3.76 1.28 5.38l3.79-2.94C5.14 16.13 5.14 15.22 5.27 14.58z"/>
+                                                    <Path Fill="#34A853" Data="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.91-2.98c-1.08.72-2.48 1.15-4.05 1.15-3.13 0-5.79-2.11-6.73-4.94l-3.79 2.94C3.4 20.37 7.37 23 12 23z"/>
+                                                </Canvas>
+                                            </Viewbox>
+                                        </Button>
+
+                                        <!-- Facebook -->
+                                        <Button Grid.Column="2" Style="{StaticResource SocialButtonStyle}" Height="38">
+                                            <Viewbox Width="15" Height="15">
+                                                <Canvas Width="24" Height="24">
+                                                    <Path Fill="#1877F2" Data="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                                </Canvas>
+                                            </Viewbox>
+                                        </Button>
+                                    </Grid>
                                 </Grid>
 
                                 <!-- Stagger 4: Navigation Link -->

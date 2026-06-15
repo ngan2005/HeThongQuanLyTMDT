@@ -47,7 +47,7 @@ namespace TMDT.Views.Admin
             SidebarBorder.BeginAnimation(WidthProperty, widthAnim);
 
             ToggleArrow.Text = vm.IsSidebarExpanded ? "\uE76B" : "\uE76C";
-            BrandTitle.Visibility = vm.IsSidebarExpanded ? Visibility.Visible : Visibility.Collapsed;
+            BrandLogo.Visibility = vm.IsSidebarExpanded ? Visibility.Visible : Visibility.Collapsed;
             BrandSubtitle.Visibility = vm.IsSidebarExpanded ? Visibility.Visible : Visibility.Collapsed;
         }
 

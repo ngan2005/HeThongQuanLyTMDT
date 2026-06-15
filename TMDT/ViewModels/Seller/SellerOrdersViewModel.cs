@@ -11,7 +11,7 @@ namespace TMDT.ViewModels.Seller
 {
     public class SellerOrdersViewModel : ViewModelBase
     {
-        private readonly TmdtContext _context;
+        // Removed long-lived _context for async safety
         private ObservableCollection<Order> _orders;
         private Order _selectedOrder;
         private string _statusFilter = "All"; // All, Pending, Shipping, Completed, Cancelled
@@ -20,6 +20,22 @@ namespace TMDT.ViewModels.Seller
         {
             get => _orders;
             set { _orders = value; OnPropertyChanged(); }
+        }
+
+        public ObservableCollection<string> AvailableShippingProviders { get; } = new ObservableCollection<string>
+        {
+            "Shopee Express",
+            "Giao Hàng Tiết Kiệm",
+            "Viettel Post",
+            "Giao Hàng Nhanh",
+            "J&T Express"
+        };
+
+        private string _selectedShippingProvider = "Shopee Express";
+        public string SelectedShippingProvider
+        {
+            get => _selectedShippingProvider;
+            set { _selectedShippingProvider = value; OnPropertyChanged(); }
         }
 
         public Order SelectedOrder
@@ -31,43 +47,37 @@ namespace TMDT.ViewModels.Seller
         public string StatusFilter
         {
             get => _statusFilter;
-            set { _statusFilter = value; OnPropertyChanged(); LoadOrders(); }
+            set { _statusFilter = value; OnPropertyChanged(); _ = LoadOrdersAsync(); }
         }
 
         // Commands
         public ICommand ShipOrderCommand { get; }
-        public ICommand CompleteOrderCommand { get; }
         public ICommand CancelOrderCommand { get; }
         public ICommand SetFilterCommand { get; }
 
         public SellerOrdersViewModel()
         {
-            try
-            {
-                _context = new TmdtContext();
-            }
-            catch {}
 
             Orders = new ObservableCollection<Order>();
 
             ShipOrderCommand = new RelayCommand(ExecuteShipOrder, o => SelectedOrder != null && SelectedOrder.OrderStatus == "Pending");
-            CompleteOrderCommand = new RelayCommand(ExecuteCompleteOrder, o => SelectedOrder != null && SelectedOrder.OrderStatus == "Shipping");
             CancelOrderCommand = new RelayCommand(ExecuteCancelOrder, o => SelectedOrder != null && (SelectedOrder.OrderStatus == "Pending" || SelectedOrder.OrderStatus == "Shipping"));
             SetFilterCommand = new RelayCommand(o => StatusFilter = o?.ToString() ?? "All");
 
-            LoadOrders();
+            _ = LoadOrdersAsync();
         }
 
-        private void LoadOrders()
+        private async Task LoadOrdersAsync()
         {
             Orders.Clear();
-            int currentShopId = GetCurrentShopId();
+            int currentShopId = await GetCurrentShopIdAsync();
 
             try
             {
-                if (_context != null && _context.Orders.Any())
+                using var ctx = new TmdtContext();
+                if (await ctx.Orders.AnyAsync())
                 {
-                    var query = _context.Orders
+                    var query = ctx.Orders
                         .Include(o => o.Buyer)
                         .Include(o => o.Address)
                         .Include(o => o.OrderDetails)
@@ -79,7 +89,7 @@ namespace TMDT.ViewModels.Seller
                         query = query.Where(o => o.OrderStatus == StatusFilter);
                     }
 
-                    var dbOrders = query.OrderByDescending(o => o.OrderDate).ToList();
+                    var dbOrders = await query.OrderByDescending(o => o.OrderDate).ToListAsync();
                     foreach (var order in dbOrders)
                     {
                         Orders.Add(order);
@@ -99,24 +109,28 @@ namespace TMDT.ViewModels.Seller
         {
             if (SelectedOrder == null) return;
 
-            var result = MessageBox.Show($"Xác nhận chuẩn bị hàng và giao cho đơn vị vận chuyển cho đơn '{SelectedOrder.OrderCode}'?", 
+            var result = MessageBox.Show($"Xác nhận chuẩn bị hàng và giao cho đơn vị vận chuyển [{SelectedShippingProvider}] cho đơn '{SelectedOrder.OrderCode}'?", 
                                          "Xác nhận giao hàng", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result != MessageBoxResult.Yes) return;
 
+            string trackingPrefix = "SPX";
+            if (SelectedShippingProvider == "Giao Hàng Tiết Kiệm") trackingPrefix = "GHTK";
+            else if (SelectedShippingProvider == "Viettel Post") trackingPrefix = "VTP";
+            else if (SelectedShippingProvider == "Giao Hàng Nhanh") trackingPrefix = "GHN";
+            else if (SelectedShippingProvider == "J&T Express") trackingPrefix = "JNT";
+
             SelectedOrder.OrderStatus = "Shipping";
-            SelectedOrder.TrackingCode = "SPX-" + new Random().Next(10000000, 99999999);
+            SelectedOrder.TrackingCode = trackingPrefix + "-" + new Random().Next(10000000, 99999999);
 
             try
             {
-                if (_context != null)
+                using var ctx = new TmdtContext();
+                var dbOrder = await ctx.Orders.FindAsync(SelectedOrder.OrderId);
+                if (dbOrder != null)
                 {
-                    var dbOrder = await _context.Orders.FindAsync(SelectedOrder.OrderId);
-                    if (dbOrder != null)
-                    {
-                        dbOrder.OrderStatus = "Shipping";
-                        dbOrder.TrackingCode = SelectedOrder.TrackingCode;
-                        await _context.SaveChangesAsync();
-                    }
+                    dbOrder.OrderStatus = "Shipping";
+                    dbOrder.TrackingCode = SelectedOrder.TrackingCode;
+                    await ctx.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -125,63 +139,7 @@ namespace TMDT.ViewModels.Seller
             }
 
             MessageBox.Show($"Đã xác nhận đơn hàng thành công! Mã vận đơn là: {SelectedOrder.TrackingCode}", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
-            LoadOrders();
-        }
-
-        private async void ExecuteCompleteOrder(object obj)
-        {
-            if (SelectedOrder == null) return;
-
-            var result = MessageBox.Show($"Xác nhận đơn hàng '{SelectedOrder.OrderCode}' đã giao thành công tới người mua?",
-                                         "Xác nhận hoàn thành", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result != MessageBoxResult.Yes) return;
-
-            SelectedOrder.OrderStatus = "Completed";
-            SelectedOrder.CompletedAt = DateTime.Now;
-
-            try
-            {
-                if (_context != null)
-                {
-                    await using var transaction = await _context.Database.BeginTransactionAsync();
-                    try
-                    {
-                        var dbOrder = await _context.Orders.FindAsync(SelectedOrder.OrderId);
-                        if (dbOrder != null)
-                        {
-                            dbOrder.OrderStatus = "Completed";
-                            dbOrder.CompletedAt = DateTime.Now;
-
-                            var shop = await _context.Shops.FindAsync(dbOrder.ShopId);
-                            if (shop != null)
-                            {
-                                var revenue = (dbOrder.TotalAmount ?? 0) - (dbOrder.PlatformFee ?? 0);
-                                shop.WalletBalance = (shop.WalletBalance ?? 0) + revenue;
-                                
-                                // Cộng phí sàn vào ví tổng hệ thống
-                                SystemSettingsHelper.AddSystemWalletBalance(dbOrder.PlatformFee ?? 0);
-                            }
-
-                            await _context.SaveChangesAsync();
-                            await transaction.CommitAsync();
-                        }
-                    }
-                    catch
-                    {
-                        await transaction.RollbackAsync();
-                        throw;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("EF update order failed: " + ex.Message);
-                MessageBox.Show("Lỗi khi cập nhật đơn hàng: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            MessageBox.Show("Đã hoàn thành đơn đặt hàng! Số tiền doanh thu đã được cộng vào Ví của Shop.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
-            LoadOrders();
+            _ = LoadOrdersAsync();
         }
 
         private async void ExecuteCancelOrder(object obj)
@@ -196,13 +154,12 @@ namespace TMDT.ViewModels.Seller
 
             try
             {
-                if (_context != null)
+                using var ctx = new TmdtContext();
+                await using var transaction = await ctx.Database.BeginTransactionAsync();
+                try
                 {
-                    await using var transaction = await _context.Database.BeginTransactionAsync();
-                    try
-                    {
-                        var dbOrder = await _context.Orders
-                            .Include(o => o.OrderDetails)
+                    var dbOrder = await ctx.Orders
+                        .Include(o => o.OrderDetails)
                             .FirstOrDefaultAsync(o => o.OrderId == SelectedOrder.OrderId);
 
                         if (dbOrder != null)
@@ -211,14 +168,14 @@ namespace TMDT.ViewModels.Seller
                             {
                                 if (detail.ProductId.HasValue && detail.Quantity.HasValue)
                                 {
-                                    var product = await _context.Products.FindAsync(detail.ProductId.Value);
+                                    var product = await ctx.Products.FindAsync(detail.ProductId.Value);
                                     if (product != null)
                                         product.StockQuantity = (product.StockQuantity ?? 0) + detail.Quantity.Value;
                                 }
                             }
 
                             dbOrder.OrderStatus = "Cancelled";
-                            await _context.SaveChangesAsync();
+                            await ctx.SaveChangesAsync();
                             await transaction.CommitAsync();
                         }
                     }
@@ -227,7 +184,6 @@ namespace TMDT.ViewModels.Seller
                         await transaction.RollbackAsync();
                         throw;
                     }
-                }
             }
             catch (Exception ex)
             {
@@ -237,18 +193,18 @@ namespace TMDT.ViewModels.Seller
             }
 
             MessageBox.Show("Đơn hàng đã được hủy thành công.", "Đã hủy", MessageBoxButton.OK, MessageBoxImage.Information);
-            LoadOrders();
+            _ = LoadOrdersAsync();
         }
 
-        private int GetCurrentShopId()
+        private async Task<int> GetCurrentShopIdAsync()
         {
             try
             {
-                if (_context == null) return 0;
                 if (SessionManager.CurrentUser == null) return 0;
 
-                var shop = _context.Shops
-                    .FirstOrDefault(s => s.UserId == SessionManager.CurrentUser.UserId);
+                using var ctx = new TmdtContext();
+                var shop = await ctx.Shops
+                    .FirstOrDefaultAsync(s => s.UserId == SessionManager.CurrentUser.UserId);
                 if (shop != null) return shop.ShopId;
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine("GetCurrentShopId failed: " + ex.Message); }
@@ -257,7 +213,6 @@ namespace TMDT.ViewModels.Seller
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) _context?.Dispose();
             base.Dispose(disposing);
         }
     }

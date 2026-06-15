@@ -21,6 +21,8 @@ public partial class TmdtContext : DbContext
 
     public virtual DbSet<Cart> Carts { get; set; }
 
+    public virtual DbSet<CartItem> CartItems { get; set; }
+
     public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<Complaint> Complaints { get; set; }
@@ -123,26 +125,41 @@ public partial class TmdtContext : DbContext
 
         modelBuilder.Entity<Cart>(entity =>
         {
-            entity.HasKey(e => e.CartId).HasName("PK__Cart__51BCD7B7E57A7923");
+            entity.HasKey(e => e.CartId).HasName("PK_Cart");
 
             entity.ToTable("Cart");
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Carts)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_Cart_User");
+        });
+
+        modelBuilder.Entity<CartItem>(entity =>
+        {
+            entity.HasKey(e => e.CartItemId).HasName("PK_CartItem");
+
+            entity.ToTable("CartItem");
 
             entity.Property(e => e.AddedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.Quantity).HasDefaultValue(1);
 
-            entity.HasOne(d => d.Product).WithMany(p => p.Carts)
+            entity.HasOne(d => d.Cart).WithMany(p => p.CartItems)
+                .HasForeignKey(d => d.CartId)
+                .HasConstraintName("FK_CartItem_Cart");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.CartItems)
                 .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("FK__Cart__ProductId__797309D9");
+                .HasConstraintName("FK_CartItem_Product");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Carts)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Cart__UserId__787EE5A0");
-
-            entity.HasOne(d => d.Variant).WithMany(p => p.Carts)
+            entity.HasOne(d => d.Variant).WithMany(p => p.CartItems)
                 .HasForeignKey(d => d.VariantId)
-                .HasConstraintName("FK__Cart__VariantId__7A672E12");
+                .HasConstraintName("FK_CartItem_Variant");
         });
 
         modelBuilder.Entity<Category>(entity =>

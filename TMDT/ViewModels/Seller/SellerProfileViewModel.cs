@@ -274,10 +274,64 @@ namespace TMDT.ViewModels.Seller
             ShopNameInput = Shop.ShopName;
             LogoInput = Shop.Logo;
             WarehouseAddressInput = Shop.WarehouseAddress;
-            HouseNumberInput = Shop.WarehouseAddress; // Khởi tạo tạm
             CommissionRate = Shop.CommissionRate ?? 3.0m;
             VacationMode = Shop.VacationMode ?? false;
             OpenedAtDisplay = Shop.OpenedAt.HasValue ? Shop.OpenedAt.Value.ToString("dd/MM/yyyy") : DateTime.Now.ToString("dd/MM/yyyy");
+            
+            _ = ParseAddressAsync(Shop.WarehouseAddress);
+        }
+
+        private async System.Threading.Tasks.Task ParseAddressAsync(string fullAddress)
+        {
+            if (string.IsNullOrWhiteSpace(fullAddress)) return;
+
+            var parts = fullAddress.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            if (parts.Count < 4)
+            {
+                // Cannot reliably parse into 4 components, dump into HouseNumber
+                _houseNumberInput = fullAddress;
+                OnPropertyChanged(nameof(HouseNumberInput));
+                return;
+            }
+
+            // The last 3 parts are expected to be Ward, District, Province
+            string provinceName = parts[parts.Count - 1];
+            string districtName = parts[parts.Count - 2];
+            string wardName = parts[parts.Count - 3];
+            
+            // The rest is HouseNumber
+            var houseParts = parts.Take(parts.Count - 3);
+            _houseNumberInput = string.Join(", ", houseParts);
+            OnPropertyChanged(nameof(HouseNumberInput));
+
+            // Try to match Province
+            if (Provinces == null || !Provinces.Any()) await LoadProvincesAsync();
+            var province = Provinces.FirstOrDefault(p => p.Name == provinceName);
+            if (province != null)
+            {
+                // Set backing field to avoid triggering UpdateWarehouseAddressInput multiple times
+                _selectedProvince = province;
+                OnPropertyChanged(nameof(SelectedProvince));
+                
+                await LoadDistrictsAsync();
+                var district = Districts.FirstOrDefault(d => d.Name == districtName);
+                if (district != null)
+                {
+                    _selectedDistrict = district;
+                    OnPropertyChanged(nameof(SelectedDistrict));
+                    
+                    await LoadWardsAsync();
+                    var ward = Wards.FirstOrDefault(w => w.Name == wardName);
+                    if (ward != null)
+                    {
+                        _selectedWard = ward;
+                        OnPropertyChanged(nameof(SelectedWard));
+                    }
+                }
+            }
+            
+            // Finally update the assembled string
+            UpdateWarehouseAddressInput();
         }
 
         private void ExecuteToggleVacation()

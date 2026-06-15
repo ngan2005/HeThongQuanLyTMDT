@@ -54,6 +54,46 @@ namespace TMDT.Services
             };
         }
 
+        public async Task<UserDto> LoginWithGoogleAsync(string email, string fullName, string avatarUrl)
+        {
+            var user = await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user == null)
+            {
+                return null; // Tài khoản không tồn tại, trả về null để LoginViewModel xử lý
+            }
+            else if (user.IsActive == false)
+            {
+                return null; // Tài khoản bị khóa
+            }
+
+            int? shopId = null;
+            string? shopName = null;
+            if (user.Role?.RoleName == SessionManager.RoleSeller)
+            {
+                var shop = await _context.Shops.FirstOrDefaultAsync(s => s.UserId == user.UserId);
+                if (shop != null)
+                {
+                    shopId = shop.ShopId;
+                    shopName = shop.ShopName;
+                }
+            }
+
+            return new UserDto
+            {
+                UserId = user.UserId,
+                UserCode = user.UserCode ?? $"USR-{user.UserId}",
+                Email = user.Email,
+                FullName = user.FullName ?? user.Email.Split('@')[0],
+                RoleName = user.Role?.RoleName,
+                Avatar = user.Avatar,
+                ShopId = shopId,
+                ShopName = shopName
+            };
+        }
+
         public async Task<(bool Success, string? ErrorMessage)> RegisterAsync(RegisterRequest request)
         {
             // Kiểm tra email trùng
