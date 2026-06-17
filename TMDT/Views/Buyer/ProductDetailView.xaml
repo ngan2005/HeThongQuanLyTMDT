@@ -4,214 +4,192 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:components="clr-namespace:TMDT.Views.Components"
              xmlns:converters="clr-namespace:TMDT.Converters"
              mc:Ignorable="d"
-             d:DesignHeight="900" d:DesignWidth="1920"
+             d:DesignHeight="1200" d:DesignWidth="1920"
              Background="{StaticResource BackgroundBrush}">
 
     <UserControl.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="BoolToVisInverse"/>
+        <converters:GreaterThanZeroToVisibilityConverter x:Key="GreaterThanZeroToVis"/>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid Margin="20">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <StackPanel>
+            <Grid MaxWidth="1280" Margin="40" HorizontalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Breadcrumb -->
+                    <RowDefinition Height="Auto"/> <!-- Hero -->
+                    <RowDefinition Height="Auto"/> <!-- Tabs & Content -->
+                </Grid.RowDefinitions>
 
-            <!-- Back Button + Breadcrumb -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                <Button Style="{StaticResource MaterialDesignFlatButton}"
-                        Command="{Binding BackCommand}"
-                        Foreground="{StaticResource TextBrush}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="ArrowLeft" Margin="0,0,5,0"/>
-                        <TextBlock Text="Quay lại"/>
-                    </StackPanel>
-                </Button>
-                <TextBlock Text=" / " VerticalAlignment="Center" Foreground="{StaticResource TextMutedBrush}"/>
-                <TextBlock Text="{Binding ProductName}" VerticalAlignment="Center"
-                           FontWeight="SemiBold" Foreground="{StaticResource BrandPrimaryBrush}"/>
-            </StackPanel>
+                <!-- Breadcrumb -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,30">
+                    <Button Style="{StaticResource MaterialDesignFlatButton}" Command="{Binding BackCommand}" Padding="0" Foreground="{StaticResource TextMutedBrush}">
+                        <TextBlock Text="Trang chủ"/>
+                    </Button>
+                    <materialDesign:PackIcon Kind="ChevronRight" VerticalAlignment="Center" Foreground="{StaticResource TextMutedBrush}" Margin="5,0"/>
+                    <TextBlock Text="{Binding CategoryName}" VerticalAlignment="Center" Foreground="{StaticResource TextMutedBrush}"/>
+                    <materialDesign:PackIcon Kind="ChevronRight" VerticalAlignment="Center" Foreground="{StaticResource TextMutedBrush}" Margin="5,0"/>
+                    <TextBlock Text="{Binding ProductName}" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{StaticResource BrandPrimaryBrush}"/>
+                </StackPanel>
 
-            <!-- Main Content -->
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="500"/>
-                    <ColumnDefinition Width="40"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                <!-- Product Hero Section -->
+                <Grid Grid.Row="1" Margin="0,0,0,60">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="450"/> <!-- Left: Image -->
+                        <ColumnDefinition Width="50"/> <!-- Gap -->
+                        <ColumnDefinition Width="*"/> <!-- Right: Info -->
+                    </Grid.ColumnDefinitions>
 
-                <!-- Left: Image -->
-                <Border Background="White" CornerRadius="16" Padding="20"
-                        Effect="{StaticResource CardShadow}">
-                    <Grid>
-                        <!-- Placeholder Image -->
-                        <Border Background="#F1F5F9" CornerRadius="12"
-                                Height="450" VerticalAlignment="Top">
+                    <!-- Left: Image Gallery -->
+                    <StackPanel Grid.Column="0">
+                        <Border Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Margin="0,0,0,15" Height="450">
+                            <!-- Show real image if we had ImageUrl, otherwise placeholder -->
                             <Grid>
-                                <materialDesign:PackIcon Kind="ImageOutline" Width="80" Height="80"
-                                                         HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                         Foreground="{StaticResource TextMutedBrush}"/>
-
-                                <!-- Discount Badge -->
-                                <Border Background="#FF3D00" CornerRadius="8"
-                                        HorizontalAlignment="Left" VerticalAlignment="Top"
-                                        Margin="10" Padding="8,4"
-                                        Visibility="{Binding DiscountPercent, Converter={StaticResource GreaterThanZeroToVis}}">
-                                    <TextBlock Text="{Binding DiscountPercent, StringFormat=-{0}%}"
-                                               Foreground="White" FontWeight="Bold" FontSize="14"/>
+                                <materialDesign:PackIcon Kind="ImageOutline" Width="100" Height="100" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource TextMutedBrush}" Visibility="{Binding MainImageUrl, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/>
+                                
+                                <Image Source="{Binding MainImageUrl}" Stretch="Uniform" Margin="2"/>
+                                <Border Background="#FF3D00" CornerRadius="8" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15" Padding="10,5" Visibility="{Binding DiscountPercent, Converter={StaticResource GreaterThanZeroToVis}}">
+                                    <TextBlock Text="{Binding DiscountPercent, StringFormat=-{0}%}" Foreground="White" FontWeight="Bold" FontSize="16"/>
                                 </Border>
                             </Grid>
                         </Border>
-
-                        <!-- Thumbnail Row -->
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
-                                    Margin="0,470,0,0">
-                            <Border Background="{StaticResource BrandPrimaryBrush}"
-                                    CornerRadius="8" Width="70" Height="70" Margin="3">
-                                <materialDesign:PackIcon Kind="Image" Width="30" Height="30"
-                                                         HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                         Foreground="White"/>
-                            </Border>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <!-- Right: Product Info -->
-                <StackPanel Grid.Column="2">
-
-                    <!-- Name + Rating -->
-                    <Border Background="White" CornerRadius="16" Padding="24"
-                            Effect="{StaticResource CardShadow}" Margin="0,0,0,16">
-                        <StackPanel>
-                            <TextBlock Text="{Binding ProductName}" FontSize="26" FontWeight="Bold"
-                                       Foreground="{StaticResource TextBrush}" TextWrapping="Wrap"
-                                       Margin="0,0,0,12"/>
-
-                            <!-- Rating Row -->
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Star" Foreground="#FFB800" Width="18" Height="18"/>
-                                    <TextBlock Text="{Binding Rating, StringFormat={}{0:N1}}"
-                                               FontSize="14" Margin="4,0,0,0" VerticalAlignment="Center"/>
-                                </StackPanel>
-                                <TextBlock Text=" | " Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding SoldCount, StringFormat={}{0} đã bán}"
-                                           Foreground="{StaticResource TextMutedBrush}" FontSize="14"
-                                           VerticalAlignment="Center"/>
-                                <TextBlock Text=" | " Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding CategoryName}" Foreground="{StaticResource BrandPrimaryBrush}"
-                                           FontSize="14" VerticalAlignment="Center"/>
-                            </StackPanel>
-
-                            <!-- Divider -->
-                            <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,5,0,15"/>
-
-                            <!-- Price -->
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                <TextBlock Text="{Binding Price, StringFormat={}{0:N0}đ}"
-                                           FontSize="32" FontWeight="Bold"
-                                           Foreground="{StaticResource PriceBrush}"/>
-                                <TextBlock Text="{Binding OriginalPrice, StringFormat={}{0:N0}đ}"
-                                           FontSize="18" Foreground="{StaticResource TextMutedBrush}"
-                                           TextDecorations="Strikethrough" VerticalAlignment="Bottom"
-                                           Margin="12,0,0,4"/>
-                            </StackPanel>
-
-                            <!-- Stock Status -->
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
-                                <materialDesign:PackIcon Kind="CheckCircle" Foreground="#10B981"
-                                                         VerticalAlignment="Center" Width="18" Height="18"
-                                                         Visibility="{Binding IsInStock, Converter={StaticResource BoolToVis}}"/>
-                                <materialDesign:PackIcon Kind="CloseCircle" Foreground="#EF4444"
-                                                         VerticalAlignment="Center" Width="18" Height="18"
-                                                         Visibility="{Binding IsInStock, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}"/>
-                                <TextBlock Text="{Binding StockQuantity, StringFormat=Còn {0} trong kho}"
-                                           Foreground="{StaticResource TextMutedBrush}" Margin="6,0,0,0"
-                                           VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Shop Info -->
-                    <Border Background="White" CornerRadius="16" Padding="24"
-                            Effect="{StaticResource CardShadow}" Margin="0,0,0,16">
-                        <StackPanel Orientation="Horizontal">
-                            <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="50"
-                                    Width="50" Height="50">
-                                <TextBlock Text="{Binding ShopName[0]}" Foreground="White"
-                                           FontSize="22" FontWeight="Bold"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <StackPanel Margin="15,0,0,0">
-                                <TextBlock Text="Cửa hàng" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
-                                <TextBlock Text="{Binding ShopName}" FontSize="16" FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Quantity Selector -->
-                    <Border Background="White" CornerRadius="16" Padding="24"
-                            Effect="{StaticResource CardShadow}" Margin="0,0,0,16">
-                        <StackPanel>
-                            <TextBlock Text="Số lượng" FontWeight="SemiBold" Margin="0,0,0,12"
-                                       Foreground="{StaticResource TextBrush}"/>
-                            <StackPanel Orientation="Horizontal">
-                                <Button Style="{StaticResource MaterialDesignOutlinedButton}"
-                                        Content="-" Width="40" Height="40"
-                                        Command="{Binding DecreaseCommand}"
-                                        FontSize="18" Padding="0"/>
-                                <TextBlock Text="{Binding Quantity}" Width="60" TextAlignment="Center"
-                                           FontSize="18" FontWeight="SemiBold"
-                                           VerticalAlignment="Center" Padding="0,10"/>
-                                <Button Style="{StaticResource MaterialDesignOutlinedButton}"
-                                        Content="+" Width="40" Height="40"
-                                        Command="{Binding IncreaseCommand}"
-                                        FontSize="18" Padding="0"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Description -->
-                    <Border Background="White" CornerRadius="16" Padding="24"
-                            Effect="{StaticResource CardShadow}" Margin="0,0,0,16"
-                            Visibility="{Binding Description, Converter={StaticResource NullToVisibilityConverter}}">
-                        <StackPanel>
-                            <TextBlock Text="Mô tả sản phẩm" FontWeight="Bold" FontSize="16"
-                                       Margin="0,0,0,12" Foreground="{StaticResource TextBrush}"/>
-                            <TextBlock Text="{Binding Description}" TextWrapping="Wrap"
-                                       Foreground="{StaticResource TextMutedBrush}" FontSize="14"/>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Action Buttons -->
-                    <StackPanel Orientation="Horizontal">
-                        <Button Style="{StaticResource ModernButtonStyle}"
-                                Background="{StaticResource BrandSecondaryBrush}"
-                                Foreground="White"
-                                Width="220" Height="52"
-                                Command="{Binding AddToCartCommand}"
-                                Margin="0,0,12,0">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="CartPlus" Width="22" Height="22" Margin="0,0,8,0"/>
-                                <TextBlock Text="Thêm vào giỏ hàng" FontSize="16"/>
-                            </StackPanel>
-                        </Button>
-                        <Button Style="{StaticResource ModernButtonStyle}"
-                                Background="{StaticResource BrandPrimaryBrush}"
-                                Foreground="White"
-                                Width="220" Height="52"
-                                Command="{Binding BackCommand}">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="ShoppingOutline" Width="22" Height="22" Margin="0,0,8,0"/>
-                                <TextBlock Text="Tiếp tục mua sắm" FontSize="16"/>
-                            </StackPanel>
-                        </Button>
+                        
+                        <!-- Thumbnails -->
+                        <ItemsControl ItemsSource="{Binding Thumbnails}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding DataContext.SelectImageCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            Background="Transparent" BorderThickness="0" Padding="0" Margin="0,0,10,10"
+                                            Cursor="Hand">
+                                        <Border Width="80" Height="80" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Background="White">
+                                            <Image Source="{Binding}" Stretch="Uniform" Margin="2"/>
+                                        </Border>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
+
+                    <!-- Right: Product Info -->
+                    <StackPanel Grid.Column="2">
+                        <!-- Bán chạy nhất badge (optional, hidden or static) -->
+                        <Border Background="{StaticResource BrandAccentBrush}" CornerRadius="12" HorizontalAlignment="Left" Padding="10,4" Margin="0,0,0,10">
+                            <TextBlock Text="BÁN CHẠY NHẤT" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        </Border>
+
+                        <TextBlock Text="{Binding ProductName}" FontSize="28" FontWeight="Bold" TextWrapping="Wrap" Foreground="{StaticResource TextBrush}" Margin="0,0,0,12"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+                                <materialDesign:PackIcon Kind="Star" Foreground="{StaticResource RatingBrush}" Width="20" Height="20"/>
+                                <materialDesign:PackIcon Kind="Star" Foreground="{StaticResource RatingBrush}" Width="20" Height="20"/>
+                                <materialDesign:PackIcon Kind="Star" Foreground="{StaticResource RatingBrush}" Width="20" Height="20"/>
+                                <materialDesign:PackIcon Kind="Star" Foreground="{StaticResource RatingBrush}" Width="20" Height="20"/>
+                                <materialDesign:PackIcon Kind="StarHalf" Foreground="{StaticResource RatingBrush}" Width="20" Height="20"/>
+                            </StackPanel>
+                            <TextBlock Text="{Binding SoldCount, StringFormat=({0} đánh giá)}" Foreground="{StaticResource TextMutedBrush}" FontSize="16" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Price -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,30">
+                            <TextBlock Text="{Binding Price, StringFormat={}{0:N0}đ}" FontSize="34" FontWeight="Bold" Foreground="{StaticResource BrandPrimaryBrush}"/>
+                            <TextBlock Text="{Binding OriginalPrice, StringFormat={}{0:N0}đ}" FontSize="18" Foreground="{StaticResource TextMutedBrush}" TextDecorations="Strikethrough" VerticalAlignment="Bottom" Margin="12,0,0,6"/>
+                        </StackPanel>
+
+                        <!-- Stock Info instead of Colors -->
+                        <StackPanel Margin="0,0,0,20">
+                            <TextBlock Text="TÌNH TRẠNG KHO" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,10"/>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="CheckCircle" Foreground="#10B981" Width="24" Height="24" Visibility="{Binding IsInStock, Converter={StaticResource BoolToVis}}"/>
+                                <materialDesign:PackIcon Kind="CloseCircle" Foreground="#EF4444" Width="24" Height="24" Visibility="{Binding IsInStock, Converter={StaticResource BoolToVisInverse}}"/>
+                                <TextBlock Text="{Binding StockQuantity, StringFormat=Còn {0} sản phẩm}" FontSize="16" Foreground="{StaticResource TextBrush}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+                        
+                        <!-- Shop Info -->
+                        <StackPanel Margin="0,0,0,30">
+                            <TextBlock Text="CỬA HÀNG" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,10"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="20" Width="40" Height="40">
+                                    <TextBlock Text="{Binding ShopName[0]}" Foreground="White" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="{Binding ShopName}" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Quantity -->
+                        <StackPanel Margin="0,0,0,40">
+                            <TextBlock Text="SỐ LƯỢNG" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,10"/>
+                            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Background="White" Width="140" HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Style="{StaticResource MaterialDesignFlatButton}" Content="-" Width="40" Command="{Binding DecreaseCommand}" FontSize="20" Foreground="{StaticResource TextBrush}"/>
+                                    <TextBlock Text="{Binding Quantity}" Width="58" TextAlignment="Center" VerticalAlignment="Center" FontSize="16" FontWeight="SemiBold"/>
+                                    <Button Style="{StaticResource MaterialDesignFlatButton}" Content="+" Width="40" Command="{Binding IncreaseCommand}" FontSize="20" Foreground="{StaticResource TextBrush}"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Actions -->
+                        <Grid Margin="0,0,0,30">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Style="{StaticResource ModernButtonStyle}" Command="{Binding AddToCartCommand}" Height="50" Background="{StaticResource BrandPrimaryBrush}" Foreground="White" FontSize="15" FontWeight="Bold" Content="THÊM VÀO GIỎ HÀNG"/>
+                            <Button Grid.Column="2" Style="{StaticResource ModernButtonStyle}" Command="{Binding BackCommand}" Height="50" Background="White" BorderBrush="{StaticResource BrandPrimaryBrush}" BorderThickness="2" Foreground="{StaticResource BrandPrimaryBrush}" FontSize="15" FontWeight="Bold" Content="TIẾP TỤC MUA SẮM"/>
+                        </Grid>
+
+                        <!-- Trust Badges -->
+                        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0" Padding="0,20,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="TruckFastOutline" Foreground="{StaticResource BrandPrimaryBrush}" Width="24" Height="24"/>
+                                    <TextBlock Text="Giao hàng miễn phí" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="ShieldCheckOutline" Foreground="{StaticResource BrandPrimaryBrush}" Width="24" Height="24"/>
+                                    <TextBlock Text="Bảo hành chính hãng" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Tabs & Content -->
+                <StackPanel Grid.Row="2">
+                    <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Margin="0,0,0,30">
+                        <StackPanel Orientation="Horizontal">
+                            <Border BorderBrush="{StaticResource BrandPrimaryBrush}" BorderThickness="0,0,0,2" Padding="0,0,0,10" Margin="0,0,40,0">
+                                <TextBlock Text="MÔ TẢ SẢN PHẨM" FontSize="16" FontWeight="Bold" Foreground="{StaticResource BrandPrimaryBrush}"/>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Description Content -->
+                    <Border Background="White" CornerRadius="12" Padding="30" Effect="{StaticResource CardShadow}" Margin="0,0,0,40">
+                        <TextBlock Text="{Binding Description}" TextWrapping="Wrap" FontSize="16" LineHeight="26" Foreground="{StaticResource TextBrush}"/>
+                    </Border>
                 </StackPanel>
             </Grid>
-        </Grid>
+
+            <!-- Footer -->
+            <components:BuyerFooterView />
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

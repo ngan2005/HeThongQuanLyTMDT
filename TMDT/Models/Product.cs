@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TMDT.Models;
 
@@ -54,4 +55,7 @@ public partial class Product
     public virtual ICollection<ViewHistory> ViewHistories { get; set; } = new List<ViewHistory>();
 
     public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
+
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public string? MainImageUrl => ProductImages?.FirstOrDefault(i => i.IsMain == true)?.ImageUrl ?? ProductImages?.FirstOrDefault()?.ImageUrl;
 }

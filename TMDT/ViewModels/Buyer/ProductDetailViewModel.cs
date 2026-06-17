@@ -1,4 +1,6 @@
 using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using TMDT.Models;
@@ -13,6 +15,7 @@ namespace TMDT.ViewModels.Buyer
         private readonly Product _product;
 
         private int _quantity = 1;
+        private string? _mainImageUrl;
 
         public Product Product => _product;
         public string ProductName => _product.ProductName;
@@ -25,6 +28,14 @@ namespace TMDT.ViewModels.Buyer
         public string? CategoryName => _product.Category?.CategoryName;
         public string? ShopName => _product.Shop?.ShopName;
         public int ShopId => _product.ShopId ?? 0;
+
+        public string? MainImageUrl 
+        {
+            get => _mainImageUrl;
+            set => SetProperty(ref _mainImageUrl, value);
+        }
+
+        public ObservableCollection<string> Thumbnails { get; } = new();
 
         public int Quantity
         {
@@ -47,6 +58,7 @@ namespace TMDT.ViewModels.Buyer
         public ICommand BackCommand { get; } = null!;
         public ICommand IncreaseCommand { get; } = null!;
         public ICommand DecreaseCommand { get; } = null!;
+        public ICommand SelectImageCommand { get; } = null!;
 
         public event Action? AddedToCart;
 
@@ -59,6 +71,22 @@ namespace TMDT.ViewModels.Buyer
             BackCommand = new RelayCommand(_ => ExecuteBack());
             IncreaseCommand = new RelayCommand(_ => Quantity++);
             DecreaseCommand = new RelayCommand(_ => Quantity--, _ => Quantity > 1);
+            SelectImageCommand = new RelayCommand(url => MainImageUrl = url as string);
+
+            var mainImg = _product.ProductImages?.FirstOrDefault(i => i.IsMain == true) 
+                       ?? _product.ProductImages?.FirstOrDefault();
+            _mainImageUrl = mainImg?.ImageUrl;
+
+            if (_product.ProductImages != null)
+            {
+                foreach (var img in _product.ProductImages.OrderBy(i => i.SortOrder))
+                {
+                    if (!string.IsNullOrEmpty(img.ImageUrl))
+                    {
+                        Thumbnails.Add(img.ImageUrl);
+                    }
+                }
+            }
         }
 
         private void ExecuteAddToCart()

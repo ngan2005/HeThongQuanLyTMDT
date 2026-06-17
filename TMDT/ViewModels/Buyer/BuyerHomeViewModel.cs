@@ -17,6 +17,8 @@ namespace TMDT.ViewModels.Buyer
 
         public ObservableCollection<Category> Categories => _mainVm.Categories;
         public ObservableCollection<Product> FeaturedProducts => _mainVm.FeaturedProducts;
+        public ObservableCollection<Banner> Banners => _mainVm.Banners;
+        public Banner? CurrentBanner => _mainVm.CurrentBanner;
 
         public ICommand SearchCommand { get; }
         public ICommand ProductClickCommand { get; }
@@ -26,6 +28,10 @@ namespace TMDT.ViewModels.Buyer
         public ICommand LogoutCommand { get; }
         public ICommand BecomeSellerCommand { get; }
         public ICommand OpenSellerPortalCommand { get; }
+        public ICommand CategoryClickCommand { get; }
+        public ICommand ShowAllCommand { get; }
+        public ICommand NextBannerCommand { get; }
+        public ICommand PrevBannerCommand { get; }
 
         public bool IsLoggedIn => SessionManager.IsLoggedIn;
         public bool IsBuyer => SessionManager.IsBuyer;
@@ -37,6 +43,13 @@ namespace TMDT.ViewModels.Buyer
         public BuyerHomeViewModel(BuyerMainViewModel mainVm)
         {
             _mainVm = mainVm;
+            _mainVm.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(_mainVm.CurrentBanner))
+                {
+                    OnPropertyChanged(nameof(CurrentBanner));
+                }
+            };
 
             SearchCommand = new RelayCommand(_ => ExecuteSearch());
             ProductClickCommand = new RelayCommand(p => _mainVm.NavigateProductDetail(p as Product));
@@ -46,6 +59,10 @@ namespace TMDT.ViewModels.Buyer
             LogoutCommand = new RelayCommand(_ => ExecuteLogout());
             BecomeSellerCommand = new RelayCommand(_ => ExecuteBecomeSeller(), _ => IsLoggedIn && IsBuyer);
             OpenSellerPortalCommand = new RelayCommand(_ => ExecuteOpenSellerPortal(), _ => IsLoggedIn && IsSeller);
+            CategoryClickCommand = new RelayCommand(c => _mainVm.SearchByCategory(c as Category));
+            ShowAllCommand = new RelayCommand(_ => _mainVm.ShowAllFeatured());
+            NextBannerCommand = new RelayCommand(_ => { _mainVm.NextBanner(); OnPropertyChanged(nameof(CurrentBanner)); });
+            PrevBannerCommand = new RelayCommand(_ => { _mainVm.PrevBanner(); OnPropertyChanged(nameof(CurrentBanner)); });
 
             CartService.Instance.CartChanged += () => OnPropertyChanged(nameof(CartBadgeCount));
         }

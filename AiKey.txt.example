@@ -1,0 +1,9 @@
+# Hướng dẫn lấy AI Key:
+# 1. Truy cập: [URL của AI service]
+# 2. Đăng nhập hoặc tạo tài khoản
+# 3. Tạo API key mới
+# 4. Copy key và lưu vào file: AiKey.txt
+# 5. KHÔNG ĐƯỢC COMMIT file AiKey.txt lên GitHub
+
+# Ví dụ:
+sk-1234567890abcdefghijklmnopqrstuvwxyz

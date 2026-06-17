@@ -1,0 +1,14 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning"
+    }
+  },
+  "ConnectionStrings": {
+    "TmdtConnection": "Server=your_server;Database=your_database;User Id=sa;Password=your_password;TrustServerCertificate=true;"
+  },
+  "ApiKey": "your_api_key_here",
+  "JwtSecret": "your_jwt_secret_key_here",
+  "AllowedHosts": "*"
+}

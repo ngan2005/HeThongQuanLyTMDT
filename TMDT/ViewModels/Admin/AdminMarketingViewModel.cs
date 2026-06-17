@@ -238,6 +238,7 @@ namespace TMDT.ViewModels.Admin
         public ICommand CreateNewCommand { get; } = null!;
         public ICommand CloseDetailCommand { get; } = null!;
         public ICommand GenerateAiContentCommand { get; } = null!;
+        public ICommand BrowseBannerImageCommand { get; } = null!;
 
         public AdminMarketingViewModel(string initialTab = "Banners")
         {
@@ -270,6 +271,7 @@ namespace TMDT.ViewModels.Admin
                 SelectedFlashSale = null;
             });
             GenerateAiContentCommand = new RelayCommand(ExecuteGenerateAiContent, o => !IsAiGenerating);
+            BrowseBannerImageCommand = new RelayCommand(ExecuteBrowseBannerImage);
 
             _ = LoadMarketingDataAsync();
         }
@@ -292,6 +294,20 @@ namespace TMDT.ViewModels.Admin
             finally
             {
                 IsAiGenerating = false;
+            }
+        }
+
+        private void ExecuteBrowseBannerImage(object? obj)
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Chọn ảnh Banner",
+                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.gif;*.bmp;*.webp"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                BannerImageUrl = dialog.FileName;
             }
         }
 

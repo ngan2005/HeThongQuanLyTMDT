@@ -16,6 +16,7 @@ namespace TMDT.ViewModels.Buyer
         private Product? _selectedProduct;
         private int _cartBadgeCount;
         private string _pageTitle = "Trang chủ";
+        private string _searchQuery = "";
 
         public ViewModelBase CurrentViewModel
         {
@@ -43,7 +44,14 @@ namespace TMDT.ViewModels.Buyer
 
         public bool IsLoggedIn => SessionManager.IsLoggedIn;
         public bool IsSeller => SessionManager.IsSeller;
+        public bool IsBuyer => SessionManager.IsBuyer;
         public string UserName => SessionManager.CurrentUser?.FullName ?? "Khách";
+
+        public string SearchQuery
+        {
+            get => _searchQuery;
+            set { SetProperty(ref _searchQuery, value); }
+        }
 
         public ICommand GoHomeCommand { get; }
         public ICommand GoCartCommand { get; }
@@ -51,10 +59,21 @@ namespace TMDT.ViewModels.Buyer
         public ICommand OpenProductCommand { get; }
         public ICommand LogoutCommand { get; }
         public ICommand OpenSellerPortalCommand { get; }
+        public ICommand LoginCommand { get; }
+        public ICommand BecomeSellerCommand { get; }
         public ICommand SearchCommand { get; }
 
         public ObservableCollection<Category> Categories { get; } = new();
         public ObservableCollection<Product> FeaturedProducts { get; } = new();
+        public ObservableCollection<Banner> Banners { get; } = new();
+
+        private Banner? _currentBanner;
+        private int _currentBannerIndex = 0;
+        public Banner? CurrentBanner
+        {
+            get => _currentBanner;
+            set => SetProperty(ref _currentBanner, value);
+        }
 
         public BuyerMainViewModel()
         {
@@ -67,11 +86,14 @@ namespace TMDT.ViewModels.Buyer
             GoOrdersCommand = new RelayCommand(_ => NavigateOrders());
             OpenProductCommand = new RelayCommand(p => NavigateProductDetail(p as Product));
             LogoutCommand = new RelayCommand(_ => ExecuteLogout());
-            OpenSellerPortalCommand = new RelayCommand(_ => ExecuteOpenSellerPortal());
-            SearchCommand = new RelayCommand(term => SearchProducts(term?.ToString() ?? ""));
+            OpenSellerPortalCommand = new RelayCommand(_ => ExecuteOpenSellerPortal(), _ => IsLoggedIn && IsSeller);
+            LoginCommand = new RelayCommand(_ => ExecuteLogin());
+            BecomeSellerCommand = new RelayCommand(_ => ExecuteBecomeSeller(), _ => IsLoggedIn && IsBuyer);
+            SearchCommand = new RelayCommand(_ => SearchProducts(SearchQuery));
 
             _ = LoadCategoriesAsync();
             _ = LoadFeaturedProductsAsync();
+            _ = LoadBannersAsync();
             UpdateCartBadge();
         }
 
@@ -119,6 +141,7 @@ namespace TMDT.ViewModels.Buyer
                 using var context = new TmdtContext();
                 var query = context.Products.AsNoTracking()
                     .Include(p => p.Shop)
+                    .Include(p => p.ProductImages)
                     .Where(p => p.Status == "Approved" && (p.Shop == null || p.Shop.IsActive == true))
                     .AsQueryable();
 
@@ -143,6 +166,56 @@ namespace TMDT.ViewModels.Buyer
             {
                 System.Diagnostics.Debug.WriteLine("Search failed: " + ex.Message);
             }
+        }
+
+        public void NextBanner()
+        {
+            if (Banners.Count <= 1) return;
+            _currentBannerIndex = (_currentBannerIndex + 1) % Banners.Count;
+            CurrentBanner = Banners[_currentBannerIndex];
+        }
+
+        public void PrevBanner()
+        {
+            if (Banners.Count <= 1) return;
+            _currentBannerIndex = (_currentBannerIndex - 1 + Banners.Count) % Banners.Count;
+            CurrentBanner = Banners[_currentBannerIndex];
+        }
+
+        public void SearchByCategory(Category cat)
+        {
+            if (cat != null) _ = SearchByCategoryAsync(cat);
+        }
+
+        public async Task SearchByCategoryAsync(Category cat)
+        {
+            try
+            {
+                using var context = new TmdtContext();
+                var items = await context.Products.AsNoTracking()
+                    .Include(p => p.Shop)
+                    .Include(p => p.ProductImages)
+                    .Where(p => p.Status == "Approved" && (p.Shop == null || p.Shop.IsActive == true))
+                    .Where(p => p.CategoryId == cat.CategoryId)
+                    .OrderByDescending(p => p.SoldCount)
+                    .Take(20).ToListAsync();
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    FeaturedProducts.Clear();
+                    foreach (var p in items)
+                        FeaturedProducts.Add(p);
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Search by category failed: " + ex.Message);
+            }
+        }
+
+        public void ShowAllFeatured()
+        {
+            _ = LoadFeaturedProductsAsync();
         }
 
         private async Task LoadCategoriesAsync()
@@ -172,6 +245,7 @@ namespace TMDT.ViewModels.Buyer
                 using var context = new TmdtContext();
                 var items = await context.Products.AsNoTracking()
                     .Include(p => p.Shop)
+                    .Include(p => p.ProductImages)
                     .Where(p => p.Status == "Approved" && (p.Shop == null || p.Shop.IsActive == true))
                     .OrderByDescending(p => p.SoldCount)
                     .Take(10)
@@ -187,6 +261,34 @@ namespace TMDT.ViewModels.Buyer
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Load featured products failed: " + ex.Message);
+            }
+        }
+
+        private async Task LoadBannersAsync()
+        {
+            try
+            {
+                using var context = new TmdtContext();
+                var items = await context.Banners.AsNoTracking()
+                    .Where(b => b.IsActive == true)
+                    .OrderBy(b => b.SortOrder)
+                    .ToListAsync();
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Banners.Clear();
+                    foreach (var p in items)
+                        Banners.Add(p);
+                    if (Banners.Count > 0)
+                    {
+                        _currentBannerIndex = 0;
+                        CurrentBanner = Banners[0];
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Load banners failed: " + ex.Message);
             }
         }
 
@@ -213,6 +315,35 @@ namespace TMDT.ViewModels.Buyer
             var sellerWindow = new Views.Seller.SellerMainView();
             sellerWindow.Show();
             Application.Current.MainWindow?.Close();
+        }
+
+        private void ExecuteLogin()
+        {
+            var loginView = new Views.Auth.LoginView();
+            loginView.ShowDialog();
+            OnPropertyChanged(nameof(IsLoggedIn));
+            OnPropertyChanged(nameof(IsBuyer));
+            OnPropertyChanged(nameof(IsSeller));
+            OnPropertyChanged(nameof(UserName));
+        }
+
+        private void ExecuteBecomeSeller()
+        {
+            if (!SessionManager.IsBuyer)
+            {
+                MessageBox.Show("Bạn đã là Người bán hoặc không có quyền.", "Thông báo",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            var dialog = new Views.Seller.ShopRegistrationDialog
+            {
+                Owner = Application.Current.MainWindow
+            };
+            if (dialog.ShowDialog() == true)
+            {
+                MessageBox.Show("Yêu cầu đăng ký shop đã được gửi!\nVui lòng chờ Admin phê duyệt.",
+                    "Đang chờ duyệt", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
 
         protected override void Dispose(bool disposing)

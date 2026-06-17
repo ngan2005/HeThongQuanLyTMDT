@@ -16,3 +16,4 @@ obj/
 .ReSharper*/
 */.vs/*
 AiKey.txt
+appsettings.json
