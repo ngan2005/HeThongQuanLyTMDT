@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using TMDT.Models;
+using TMDT.Utilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace TMDT.Services
 {
@@ -62,6 +64,7 @@ namespace TMDT.Services
                     });
                 }
             }
+            SaveToDatabase();
             OnCartChanged();
         }
 
@@ -73,6 +76,7 @@ namespace TMDT.Services
                 if (item != null)
                     Items.Remove(item);
             }
+            SaveToDatabase();
             OnCartChanged();
         }
 
@@ -91,6 +95,7 @@ namespace TMDT.Services
                     item.Quantity = quantity;
                 }
             }
+            SaveToDatabase();
             OnCartChanged();
         }
 
@@ -100,10 +105,91 @@ namespace TMDT.Services
             {
                 Items.Clear();
             }
+            SaveToDatabase();
             OnCartChanged();
         }
 
         private void OnCartChanged() => CartChanged?.Invoke();
+
+        public void LoadFromDatabase(int userId)
+        {
+            lock (_lock)
+            {
+                Items.Clear();
+                using (var context = new TmdtContext())
+                {
+                    var cart = context.Carts
+                        .Include(c => c.CartItems)
+                        .ThenInclude(ci => ci.Product)
+                        .FirstOrDefault(c => c.UserId == userId);
+
+                    if (cart != null)
+                    {
+                        foreach (var ci in cart.CartItems)
+                        {
+                            if (ci.Product != null)
+                            {
+                                Items.Add(new CartItem
+                                {
+                                    ProductId = ci.Product.ProductId,
+                                    ProductName = ci.Product.ProductName ?? "",
+                                    Price = ci.Product.Price,
+                                    OriginalPrice = ci.Product.OriginalPrice,
+                                    ImageUrl = null,
+                                    StockQuantity = ci.Product.StockQuantity ?? 0,
+                                    Quantity = ci.Quantity ?? 1,
+                                    ShopId = ci.Product.ShopId ?? 0
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            OnCartChanged();
+        }
+
+        private void SaveToDatabase()
+        {
+            if (!SessionManager.IsLoggedIn) return;
+            int userId = SessionManager.CurrentUser.UserId;
+            
+            System.Threading.Tasks.Task.Run(() =>
+            {
+                using (var context = new TmdtContext())
+                {
+                    var cart = context.Carts
+                        .Include(c => c.CartItems)
+                        .FirstOrDefault(c => c.UserId == userId);
+
+                    if (cart == null)
+                    {
+                        cart = new Cart { UserId = userId, CreatedAt = DateTime.Now };
+                        context.Carts.Add(cart);
+                    }
+                    else
+                    {
+                        context.CartItems.RemoveRange(cart.CartItems);
+                    }
+
+                    List<CartItem> snapshot;
+                    lock (_lock)
+                    {
+                        snapshot = Items.ToList();
+                    }
+
+                    foreach (var item in snapshot)
+                    {
+                        cart.CartItems.Add(new TMDT.Models.CartItem
+                        {
+                            ProductId = item.ProductId,
+                            Quantity = item.Quantity,
+                            AddedAt = DateTime.Now
+                        });
+                    }
+                    context.SaveChanges();
+                }
+            });
+        }
     }
 
     public class CartItem : System.ComponentModel.INotifyPropertyChanged

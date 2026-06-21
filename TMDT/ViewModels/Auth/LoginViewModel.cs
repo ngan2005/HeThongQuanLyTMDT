@@ -87,6 +87,11 @@ namespace TMDT.ViewModels.Auth
 
                     SessionManager.CurrentUser = user;
 
+                    if (user.RoleName == SessionManager.RoleBuyer)
+                    {
+                        CartService.Instance.LoadFromDatabase(user.UserId);
+                    }
+
                     Window targetWindow = null;
                     string redirectMsg = "";
 
@@ -175,6 +180,11 @@ namespace TMDT.ViewModels.Auth
 
                 // Thực hiện logic sau khi đăng nhập
                 SessionManager.CurrentUser = user;
+
+                if (user.RoleName == SessionManager.RoleBuyer)
+                {
+                    CartService.Instance.LoadFromDatabase(user.UserId);
+                }
 
                 Window targetWindow = null;
                 string redirectMsg = "";
