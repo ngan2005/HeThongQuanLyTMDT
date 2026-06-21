@@ -404,7 +404,7 @@
                     </Border>
 
                     <!-- Form Inputs -->
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,20,24,10">
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden" Padding="24,20,24,10">
                         <StackPanel>
                             <!-- Product Images -->
                             <TextBlock Style="{StaticResource InputLabel}" Text="HÌNH ẢNH SẢN PHẨM *"/>

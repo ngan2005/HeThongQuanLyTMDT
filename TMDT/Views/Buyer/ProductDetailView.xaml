@@ -17,7 +17,8 @@
         <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel>
             <Grid MaxWidth="1280" Margin="40" HorizontalAlignment="Center">
                 <Grid.RowDefinitions>
@@ -52,7 +53,7 @@
                             <Grid>
                                 <materialDesign:PackIcon Kind="ImageOutline" Width="100" Height="100" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource TextMutedBrush}" Visibility="{Binding MainImageUrl, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/>
                                 
-                                <Image Source="{Binding MainImageUrl}" Stretch="Uniform" Margin="2"/>
+                                <Image x:Name="MainProductImage" Source="{Binding MainImageUrl}" Stretch="Uniform" Margin="2" Cursor="Hand" MouseLeftButtonUp="MainProductImage_MouseLeftButtonUp"/>
                                 <Border Background="#FF3D00" CornerRadius="8" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15" Padding="10,5" Visibility="{Binding DiscountPercent, Converter={StaticResource GreaterThanZeroToVis}}">
                                     <TextBlock Text="{Binding DiscountPercent, StringFormat=-{0}%}" Foreground="White" FontWeight="Bold" FontSize="16"/>
                                 </Border>
@@ -147,7 +148,7 @@
                                 <ColumnDefinition Width="15"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Style="{StaticResource ModernButtonStyle}" Command="{Binding AddToCartCommand}" Height="50" Background="{StaticResource BrandPrimaryBrush}" Foreground="White" FontSize="15" FontWeight="Bold" Content="THÊM VÀO GIỎ HÀNG"/>
+                            <Button x:Name="BtnAddToCart" Grid.Column="0" Style="{StaticResource ModernButtonStyle}" Command="{Binding AddToCartCommand}" Height="50" Background="{StaticResource BrandPrimaryBrush}" Foreground="White" FontSize="15" FontWeight="Bold" Content="THÊM VÀO GIỎ HÀNG"/>
                             <Button Grid.Column="2" Style="{StaticResource ModernButtonStyle}" Command="{Binding BackCommand}" Height="50" Background="White" BorderBrush="{StaticResource BrandPrimaryBrush}" BorderThickness="2" Foreground="{StaticResource BrandPrimaryBrush}" FontSize="15" FontWeight="Bold" Content="TIẾP TỤC MUA SẮM"/>
                         </Grid>
 
@@ -192,4 +193,39 @@
             <components:BuyerFooterView />
         </StackPanel>
     </ScrollViewer>
+
+    <!-- LIGHTBOX OVERLAY: IMAGE ZOOM -->
+    <Grid x:Name="LightboxOverlay" Visibility="Collapsed" Panel.ZIndex="100">
+        <!-- Semi-transparent overlay background -->
+        <Border Background="#B2000000" MouseDown="LightboxOverlay_MouseDown" Cursor="Hand"/>
+        
+        <!-- Image Container with nice drop shadow and rounded corners -->
+        <Border HorizontalAlignment="Center" VerticalAlignment="Center" 
+                Background="White" CornerRadius="16" Padding="15" Margin="60"
+                MaxWidth="800" MaxHeight="800">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="40" ShadowDepth="10" Opacity="0.6" Direction="270" Color="Black"/>
+            </Border.Effect>
+            <Border CornerRadius="8" ClipToBounds="True">
+                <Image Source="{Binding MainImageUrl}" Stretch="Uniform"/>
+            </Border>
+        </Border>
+        
+        <!-- Close Button -->
+        <Button Click="CloseLightbox_Click" Background="Transparent" BorderThickness="0" Width="50" Height="50" Cursor="Hand" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="25">
+            <Button.Template>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="bd" Background="#80000000" CornerRadius="25">
+                        <TextBlock Text="&#xE106;" FontFamily="Segoe MDL2 Assets" FontSize="18" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bd" Property="Background" Value="#CC000000"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
+    </Grid>
+    </Grid>
 </UserControl>

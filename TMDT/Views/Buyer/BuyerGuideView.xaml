@@ -1,0 +1,239 @@
+<UserControl x:Class="TMDT.Views.Buyer.BuyerGuideView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:converters="clr-namespace:TMDT.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="1000" d:DesignWidth="1200"
+             Background="{StaticResource BackgroundBrush}">
+
+    <UserControl.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+                
+                <!-- Hero Banner Section -->
+                <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="0,0,30,30" Padding="0,50,0,70" Margin="0,0,0,-40" ClipToBounds="True">
+                    <Grid MaxWidth="800" Margin="30,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="Xin chào, chúng tôi có thể giúp gì cho bạn?" 
+                                       FontSize="32" FontWeight="Bold" Foreground="White" TextWrapping="Wrap"/>
+                            <TextBlock Text="Cẩm nang toàn tập về cách sử dụng, mua sắm và chính sách tại Volox." 
+                                       FontSize="16" Foreground="#E2E8F0" Margin="0,10,0,20" TextWrapping="Wrap"/>
+                            
+                            <!-- Search Bar Mockup -->
+                            <Border Background="White" CornerRadius="25" Padding="15,5" Effect="{StaticResource CardShadow}" MaxWidth="500" HorizontalAlignment="Left">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <materialDesign:PackIcon Kind="Magnify" Width="24" Height="24" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="5,0"/>
+                                    <TextBox Grid.Column="1" materialDesign:HintAssist.Hint="Nhập từ khóa cần tìm (vd: đổi trả, phí ship...)" 
+                                             BorderThickness="0" VerticalAlignment="Center" FontSize="15" Margin="10,0"/>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+
+                        <materialDesign:PackIcon Grid.Column="1" Kind="HeadQuestionOutline" Width="140" Height="140" Foreground="White" Opacity="0.2" VerticalAlignment="Center" Margin="40,0,0,0"/>
+                    </Grid>
+                </Border>
+
+                <!-- Main Content Container -->
+                <Grid MaxWidth="900" Margin="30,0,30,50">
+                    <StackPanel>
+                        
+                        <!-- Section 1: Mua Sắm -->
+                        <Border Background="White" CornerRadius="16" Padding="25" Margin="0,0,0,25" Effect="{StaticResource CardShadow}">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                    <Border Background="#E0F2FE" CornerRadius="12" Padding="12">
+                                        <materialDesign:PackIcon Kind="CartOutline" Width="30" Height="30" Foreground="{StaticResource BrandSecondaryBrush}"/>
+                                    </Border>
+                                    <TextBlock Text="1. Hướng Dẫn Mua Sắm" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" Margin="15,0,0,0"/>
+                                </StackPanel>
+
+                                <Expander Background="Transparent" Margin="0,0,0,5" materialDesign:ExpanderAssist.HeaderBackground="Transparent" BorderThickness="0,0,0,1" BorderBrush="#F1F5F9">
+                                    <Expander.Header>
+                                        <TextBlock Text="Làm thế nào để đặt hàng trên Volox?" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Padding="5,10"/>
+                                    </Expander.Header>
+                                    <StackPanel Margin="10,5,10,20">
+                                        <TextBlock Text="Bước 1: Tìm kiếm sản phẩm thông qua thanh tìm kiếm hoặc danh mục." TextWrapping="Wrap" Margin="0,0,0,8" Foreground="{StaticResource TextBrush}" FontSize="14"/>
+                                        <TextBlock Text="Bước 2: Xem chi tiết sản phẩm, chọn phân loại (màu sắc, kích thước) và bấm 'Thêm vào giỏ hàng'." TextWrapping="Wrap" Margin="0,0,0,8" Foreground="{StaticResource TextBrush}" FontSize="14"/>
+                                        <TextBlock Text="Bước 3: Vào giỏ hàng, chọn các sản phẩm muốn thanh toán, áp dụng mã Khuyến mãi (nếu có)." TextWrapping="Wrap" Margin="0,0,0,8" Foreground="{StaticResource TextBrush}" FontSize="14"/>
+                                        <TextBlock Text="Bước 4: Điền địa chỉ giao hàng, chọn phương thức thanh toán và nhấn 'Đặt hàng'." TextWrapping="Wrap" Foreground="{StaticResource TextBrush}" FontSize="14"/>
+                                    </StackPanel>
+                                </Expander>
+
+                                <Expander Background="Transparent" materialDesign:ExpanderAssist.HeaderBackground="Transparent" BorderThickness="0">
+                                    <Expander.Header>
+                                        <TextBlock Text="Các phương thức thanh toán được chấp nhận" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Padding="5,10"/>
+                                    </Expander.Header>
+                                    <StackPanel Margin="10,5,10,10">
+                                        <TextBlock Text="• Thanh toán khi nhận hàng (COD): Trả tiền mặt trực tiếp cho shipper." TextWrapping="Wrap" Margin="0,0,0,8" Foreground="{StaticResource TextBrush}" FontSize="14"/>
+                                        <TextBlock Text="• Thanh toán qua Ví điện tử (Momo, ZaloPay): Đang được tích hợp." TextWrapping="Wrap" Margin="0,0,0,8" Foreground="{StaticResource TextBrush}" FontSize="14"/>
+                                        <TextBlock Text="• Thanh toán bằng thẻ Ngân hàng (Thẻ nội địa / Visa / Mastercard)." TextWrapping="Wrap" Foreground="{StaticResource TextBrush}" FontSize="14"/>
+                                    </StackPanel>
+                                </Expander>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Section 2: Trả hàng & Hoàn tiền -->
+                        <Border Background="White" CornerRadius="16" Padding="25" Margin="0,0,0,25" Effect="{StaticResource CardShadow}">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                    <Border Background="#FEF3C7" CornerRadius="12" Padding="12">
+                                        <materialDesign:PackIcon Kind="CashRefund" Width="30" Height="30" Foreground="#D97706"/>
+                                    </Border>
+                                    <TextBlock Text="2. Chính Sách Trả Hàng &amp; Hoàn Tiền" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" Margin="15,0,0,0"/>
+                                </StackPanel>
+
+                                <Expander Background="Transparent" materialDesign:ExpanderAssist.HeaderBackground="Transparent" BorderThickness="0">
+                                    <Expander.Header>
+                                        <TextBlock Text="Điều kiện để được Trả hàng / Hoàn tiền" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Padding="5,10"/>
+                                    </Expander.Header>
+                                    <StackPanel Margin="10,5,10,10">
+                                        <TextBlock Text="• Sản phẩm bị lỗi kỹ thuật do nhà sản xuất." TextWrapping="Wrap" Margin="0,0,0,8" Foreground="{StaticResource TextBrush}" FontSize="14"/>
+                                        <TextBlock Text="• Sản phẩm giao sai màu sắc, kích thước so với đơn đặt hàng." TextWrapping="Wrap" Margin="0,0,0,8" Foreground="{StaticResource TextBrush}" FontSize="14"/>
+                                        <TextBlock Text="• Sản phẩm bị hư hỏng, vỡ nát trong quá trình vận chuyển." TextWrapping="Wrap" Margin="0,0,0,12" Foreground="{StaticResource TextBrush}" FontSize="14"/>
+                                        <Border Background="#FEF2F2" BorderBrush="#FCA5A5" BorderThickness="1" CornerRadius="8" Padding="15">
+                                            <TextBlock Text="Lưu ý: Khách hàng cần cung cấp Video mở hộp (quay rõ mã vận đơn và tình trạng gói hàng) để yêu cầu được giải quyết nhanh nhất." TextWrapping="Wrap" FontWeight="SemiBold" Foreground="#DC2626" FontSize="13"/>
+                                        </Border>
+                                    </StackPanel>
+                                </Expander>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Section 3: Bán Hàng -->
+                        <Border Background="White" CornerRadius="16" Padding="25" Effect="{StaticResource CardShadow}">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                    <Border Background="#DCFCE7" CornerRadius="12" Padding="12">
+                                        <materialDesign:PackIcon Kind="StorefrontOutline" Width="30" Height="30" Foreground="#16A34A"/>
+                                    </Border>
+                                    <TextBlock Text="3. Dành Cho Người Bán (Seller)" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" Margin="15,0,0,0"/>
+                                </StackPanel>
+
+                                <Expander Background="Transparent" materialDesign:ExpanderAssist.HeaderBackground="Transparent" BorderThickness="0">
+                                    <Expander.Header>
+                                        <TextBlock Text="Làm sao để mở Shop trên Volox?" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Padding="5,10"/>
+                                    </Expander.Header>
+                                    <StackPanel Margin="10,5,10,10">
+                                        <TextBlock Text="Nếu bạn đang đăng nhập với tư cách Người Mua (Buyer), hãy bấm vào nút 'Trở thành Người Bán' trên thanh menu trên cùng. Điền các thông tin về Tên Shop, Địa chỉ Kho, Logo và chờ Admin duyệt. Khi được duyệt, bạn sẽ có quyền truy cập Kênh Người Bán để đăng sản phẩm." TextWrapping="Wrap" Foreground="{StaticResource TextBrush}" FontSize="14" LineHeight="22"/>
+                                    </StackPanel>
+                                </Expander>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Contact Support -->
+                        <Border Background="#F1F5F9" CornerRadius="16" Padding="30" Margin="0,30,0,0" BorderBrush="#E2E8F0" BorderThickness="1">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="Vẫn chưa tìm thấy câu trả lời?" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Đội ngũ hỗ trợ của chúng tôi luôn sẵn sàng 24/7" FontSize="14" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" Margin="0,5,0,20"/>
+                                <Button Command="{Binding OpenChatCommand}" Style="{StaticResource MaterialDesignFlatButton}" Background="{StaticResource BrandSecondaryBrush}" Foreground="White" FontWeight="Bold" Padding="25,10" materialDesign:ButtonAssist.CornerRadius="8" Height="Auto">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="ChatOutline" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Chat với Chăm sóc khách hàng" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- AI Chatbox Overlay -->
+        <Border Visibility="{Binding IsChatOpen, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                Background="#80000000" Grid.RowSpan="2" Panel.ZIndex="10">
+            <Border Background="White" Width="400" Height="600" CornerRadius="16" Effect="{StaticResource CardShadow}" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Chat Header -->
+                    <Border Grid.Row="0" Background="{StaticResource BrandPrimaryBrush}" CornerRadius="16,16,0,0" Padding="15">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="RobotOutline" Width="30" Height="30" Foreground="White" VerticalAlignment="Center"/>
+                                <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="Trợ Lý Ảo Volox" FontWeight="Bold" Foreground="White" FontSize="16"/>
+                                    <TextBlock Text="Đang trực tuyến" Foreground="#E2E8F0" FontSize="12"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <Button HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource MaterialDesignToolButton}" Command="{Binding CloseChatCommand}">
+                                <materialDesign:PackIcon Kind="Close" Foreground="White"/>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- Chat Messages -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,10">
+                        <ItemsControl ItemsSource="{Binding Messages}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="15,5">
+                                        <Border x:Name="BubbleBorder" MaxWidth="300" Padding="12,10" CornerRadius="12" 
+                                                HorizontalAlignment="Left" Background="#F1F5F9">
+                                            <TextBlock x:Name="BubbleText" Text="{Binding Content}" TextWrapping="Wrap" Foreground="#334155"/>
+                                        </Border>
+                                    </Grid>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsUser}" Value="True">
+                                            <Setter TargetName="BubbleBorder" Property="HorizontalAlignment" Value="Right"/>
+                                            <Setter TargetName="BubbleBorder" Property="Background" Value="{StaticResource BrandSecondaryBrush}"/>
+                                            <Setter TargetName="BubbleText" Property="Foreground" Value="White"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <!-- Typing Indicator -->
+                    <TextBlock Grid.Row="1" Text="AI đang nhập..." FontStyle="Italic" Foreground="{StaticResource TextMutedBrush}" 
+                               VerticalAlignment="Bottom" Margin="15,0,0,5"
+                               Visibility="{Binding IsAiTyping, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                    <!-- Chat Input -->
+                    <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderBrush}" Padding="15,10" Background="#F8FAFC" CornerRadius="0,0,16,16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBox Grid.Column="0" Text="{Binding CurrentMessage, UpdateSourceTrigger=PropertyChanged}" 
+                                     materialDesign:HintAssist.Hint="Nhập câu hỏi của bạn..." 
+                                     BorderThickness="0" Background="White" Padding="10"
+                                     VerticalAlignment="Center">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Enter" Command="{Binding SendMessageCommand}" />
+                                </TextBox.InputBindings>
+                            </TextBox>
+                            
+                            <Button Grid.Column="1" Command="{Binding SendMessageCommand}" Style="{StaticResource MaterialDesignFloatingActionMiniButton}" 
+                                    Background="{StaticResource BrandSecondaryBrush}" BorderBrush="{StaticResource BrandSecondaryBrush}" 
+                                    Margin="10,0,0,0" Width="36" Height="36">
+                                <materialDesign:PackIcon Kind="Send" Foreground="White" Width="18" Height="18" Margin="4,0,0,0"/>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </Border>
+    </Grid>
+</UserControl>

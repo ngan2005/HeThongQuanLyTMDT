@@ -6,6 +6,7 @@ using System.Windows.Input;
 using TMDT.Models;
 using TMDT.Services;
 using TMDT.Utilities;
+using TMDT.Messages;
 
 namespace TMDT.ViewModels.Buyer
 {
@@ -106,8 +107,7 @@ namespace TMDT.ViewModels.Buyer
             }
 
             CartService.Instance.AddProduct(_product, Quantity);
-            MessageBox.Show($"Đã thêm {Quantity} sản phẩm '{ProductName}' vào giỏ hàng!",
-                "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBus.SendToast($"Đã thêm {Quantity} sản phẩm '{ProductName}' vào giỏ hàng!");
             AddedToCart?.Invoke();
         }
 

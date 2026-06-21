@@ -112,6 +112,36 @@ namespace TMDT.Converters
         }
     }
 
+    public class PageToNavForegroundConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            bool isActive = value != null && parameter != null &&
+                value.ToString().Equals(parameter.ToString(), StringComparison.OrdinalIgnoreCase);
+
+            return isActive
+                ? Application.Current.FindResource("BrandPrimaryBrush")
+                : Application.Current.FindResource("TextMutedBrush");
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
+    public class PageToNavFontWeightConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            bool isActive = value != null && parameter != null &&
+                value.ToString().Equals(parameter.ToString(), StringComparison.OrdinalIgnoreCase);
+
+            return isActive ? FontWeights.Bold : FontWeights.Normal;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
     public class Base64ToImageConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -149,7 +179,16 @@ namespace TMDT.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             bool isEmpty = string.IsNullOrWhiteSpace(value as string);
-            return parameter?.ToString() == "Inverse" ? isEmpty : !isEmpty;
+
+            if (targetType == typeof(Visibility))
+            {
+                bool inverse = parameter?.ToString() == "Inverse";
+                bool show = inverse ? isEmpty : !isEmpty;
+                return show ? Visibility.Visible : Visibility.Collapsed;
+            }
+
+            bool inverse2 = parameter?.ToString() == "Inverse";
+            return inverse2 ? isEmpty : !isEmpty;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -215,6 +254,34 @@ namespace TMDT.Converters
             if (value is string s && !string.IsNullOrWhiteSpace(s))
                 return s.Trim()[0].ToString().ToUpper();
             return "?";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class StringToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var str = value as string;
+            return string.IsNullOrWhiteSpace(str) ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class InverseStringToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var str = value as string;
+            return string.IsNullOrWhiteSpace(str) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

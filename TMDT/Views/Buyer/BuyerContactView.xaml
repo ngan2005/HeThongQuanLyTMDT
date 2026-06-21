@@ -1,0 +1,209 @@
+<UserControl x:Class="TMDT.Views.Buyer.BuyerContactView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:converters="clr-namespace:TMDT.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="900" d:DesignWidth="1200"
+             Background="{StaticResource BackgroundBrush}">
+
+    <UserControl.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="BoolToVisInverse"/>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel>
+
+            <!-- Hero Banner -->
+            <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="0,0,30,30" Padding="0,50,0,70" Margin="0,0,0,-40" ClipToBounds="True">
+                <Grid MaxWidth="900" Margin="30,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="Liên Hệ Với Chúng Tôi" FontSize="34" FontWeight="Bold" Foreground="White" TextWrapping="Wrap"/>
+                        <TextBlock Text="Đội ngũ hỗ trợ Volox luôn sẵn sàng lắng nghe và giải đáp mọi thắc mắc của bạn." FontSize="16" Foreground="#E2E8F0" Margin="0,10,0,0" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <materialDesign:PackIcon Grid.Column="1" Kind="EmailFastOutline" Width="150" Height="150" Foreground="White" Opacity="0.15" VerticalAlignment="Center" Margin="30,0,0,0"/>
+                </Grid>
+            </Border>
+
+            <!-- Main Content: 2 columns -->
+            <Grid MaxWidth="1000" Margin="30,0,30,50">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="1.6*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: Contact Info -->
+                <StackPanel Grid.Column="0" Margin="0,20,0,0">
+
+                    <!-- Hotline Card -->
+                    <Border Background="White" CornerRadius="16" Padding="20" Margin="0,0,0,15" Effect="{StaticResource CardShadow}">
+                        <StackPanel Orientation="Horizontal">
+                            <Border Background="#EFF6FF" CornerRadius="14" Width="52" Height="52">
+                                <materialDesign:PackIcon Kind="Phone" Width="26" Height="26" Foreground="{StaticResource BrandSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Margin="15,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="Hotline" FontSize="12" Foreground="{StaticResource TextMutedBrush}" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Hotline}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Email Card -->
+                    <Border Background="White" CornerRadius="16" Padding="20" Margin="0,0,0,15" Effect="{StaticResource CardShadow}">
+                        <StackPanel Orientation="Horizontal">
+                            <Border Background="#F0FDF4" CornerRadius="14" Width="52" Height="52">
+                                <materialDesign:PackIcon Kind="EmailOutline" Width="26" Height="26" Foreground="#16A34A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Margin="15,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="Email hỗ trợ" FontSize="12" Foreground="{StaticResource TextMutedBrush}" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Email}" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Address Card -->
+                    <Border Background="White" CornerRadius="16" Padding="20" Margin="0,0,0,15" Effect="{StaticResource CardShadow}">
+                        <StackPanel Orientation="Horizontal">
+                            <Border Background="#FFF7ED" CornerRadius="14" Width="52" Height="52">
+                                <materialDesign:PackIcon Kind="MapMarkerOutline" Width="26" Height="26" Foreground="#EA580C" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Margin="15,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="Địa chỉ" FontSize="12" Foreground="{StaticResource TextMutedBrush}" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Address}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextBrush}" TextWrapping="Wrap" MaxWidth="200"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Working Hours Card -->
+                    <Border Background="White" CornerRadius="16" Padding="20" Margin="0,0,0,15" Effect="{StaticResource CardShadow}">
+                        <StackPanel Orientation="Horizontal">
+                            <Border Background="#FAF5FF" CornerRadius="14" Width="52" Height="52">
+                                <materialDesign:PackIcon Kind="ClockOutline" Width="26" Height="26" Foreground="#9333EA" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Margin="15,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="Giờ làm việc" FontSize="12" Foreground="{StaticResource TextMutedBrush}" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding WorkingHours}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextBrush}" TextWrapping="Wrap" MaxWidth="200"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Social Media -->
+                    <Border Background="{StaticResource BrandPrimaryBrush}" CornerRadius="16" Padding="20" Margin="0,5,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Theo dõi chúng tôi" FontSize="14" FontWeight="Bold" Foreground="White" Margin="0,0,0,12"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Background="#FFFFFF22" CornerRadius="10" Width="44" Height="44" Margin="0,0,10,0">
+                                    <materialDesign:PackIcon Kind="Facebook" Width="24" Height="24" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <Border Background="#FFFFFF22" CornerRadius="10" Width="44" Height="44" Margin="0,0,10,0">
+                                    <materialDesign:PackIcon Kind="Instagram" Width="24" Height="24" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <Border Background="#FFFFFF22" CornerRadius="10" Width="44" Height="44">
+                                    <materialDesign:PackIcon Kind="Youtube" Width="24" Height="24" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Divider -->
+                <Rectangle Grid.Column="1"/>
+
+                <!-- Right: Feedback Form -->
+                <Border Grid.Column="2" Background="White" CornerRadius="20" Padding="30" Margin="0,20,0,0" Effect="{StaticResource CardShadow}">
+                    <StackPanel>
+
+                        <!-- Form Header -->
+                        <TextBlock Text="Gửi phản hồi cho chúng tôi" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,5"/>
+                        <TextBlock Text="Chúng tôi sẽ phản hồi trong vòng 24 giờ làm việc." FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,25"/>
+
+                        <!-- Success Message -->
+                        <Border Background="#F0FDF4" BorderBrush="#86EFAC" BorderThickness="1" CornerRadius="12" Padding="15"
+                                Margin="0,0,0,20"
+                                Visibility="{Binding IsSuccess, Converter={StaticResource BoolToVis}}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="CheckCircleOutline" Width="22" Height="22" Foreground="#16A34A" VerticalAlignment="Center"/>
+                                <TextBlock Text="Cảm ơn bạn đã gửi phản hồi! Chúng tôi sẽ liên hệ lại sớm nhất có thể." 
+                                           Foreground="#15803D" FontWeight="SemiBold" Margin="10,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Row 1: Name + Email -->
+                        <Grid Margin="0,0,0,18">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Họ và tên" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,6"/>
+                                <TextBox Text="{Binding SenderName, UpdateSourceTrigger=PropertyChanged}"
+                                         materialDesign:HintAssist.Hint="Nguyễn Văn A"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         FontSize="14"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Email của bạn" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,6"/>
+                                <TextBox Text="{Binding SenderEmail, UpdateSourceTrigger=PropertyChanged}"
+                                         materialDesign:HintAssist.Hint="email@example.com"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         FontSize="14"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Row 2: Subject -->
+                        <StackPanel Margin="0,0,0,18">
+                            <TextBlock Text="Chủ đề" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,6"/>
+                            <ComboBox ItemsSource="{Binding SubjectList}"
+                                      SelectedItem="{Binding SelectedSubject}"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      FontSize="14"/>
+                        </StackPanel>
+
+                        <!-- Row 3: Content -->
+                        <StackPanel Margin="0,0,0,25">
+                            <TextBlock Text="Nội dung *" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,6"/>
+                            <TextBox Text="{Binding FeedbackContent, UpdateSourceTrigger=PropertyChanged}"
+                                     materialDesign:HintAssist.Hint="Mô tả chi tiết vấn đề hoặc câu hỏi của bạn..."
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     AcceptsReturn="True" TextWrapping="Wrap"
+                                     MinHeight="130" VerticalScrollBarVisibility="Auto"
+                                     FontSize="14" VerticalContentAlignment="Top"/>
+                        </StackPanel>
+
+                        <!-- Submit Button -->
+                        <Button Command="{Binding SendFeedbackCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                Background="{StaticResource BrandSecondaryBrush}"
+                                BorderBrush="{StaticResource BrandSecondaryBrush}"
+                                Foreground="White" FontWeight="Bold" FontSize="15"
+                                Height="50" materialDesign:ButtonAssist.CornerRadius="12"
+                                HorizontalAlignment="Stretch"
+                                Visibility="{Binding IsSending, Converter={StaticResource BoolToVisInverse}}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Send" Width="20" Height="20" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="Gửi phản hồi" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Loading indicator -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10"
+                                    Visibility="{Binding IsSending, Converter={StaticResource BoolToVis}}">
+                            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" Value="0" IsIndeterminate="True" Width="28" Height="28"/>
+                            <TextBlock Text="Đang gửi..." Foreground="{StaticResource TextMutedBrush}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

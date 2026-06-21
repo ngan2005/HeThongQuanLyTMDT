@@ -3,8 +3,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
 using TMDT.Models;
+using TMDT.Services;
 using TMDT.Utilities;
 
 namespace TMDT.ViewModels.Admin
@@ -87,20 +87,23 @@ namespace TMDT.ViewModels.Admin
         {
             try
             {
-                using var context = new TmdtContext();
-                var allOrders = await context.Orders.AsNoTracking()
-                    .Include(o => o.Shop)
-                    .Include(o => o.Buyer)
-                    .Include(o => o.OrderDetails)
-                        .ThenInclude(od => od.Product)
-                    .OrderByDescending(o => o.OrderDate)
-                    .ToListAsync();
+                string dbStatus = SelectedStatus switch
+                {
+                    "Chờ xác nhận" => "Pending",
+                    "Đang xử lý" => "Processing",
+                    "Đang giao hàng" => "Shipping",
+                    "Hoàn thành" => "Completed",
+                    "Đã hủy" => "Cancelled",
+                    _ => SelectedStatus
+                };
 
-                // Stats
-                TotalOrders = allOrders.Count;
-                PendingOrders = allOrders.Count(o => o.OrderStatus == "Chờ xác nhận");
-                ShippingOrders = allOrders.Count(o => o.OrderStatus == "Đang giao hàng");
-                TotalRevenue = allOrders.Where(o => o.OrderStatus == "Hoàn thành" || o.OrderStatus == "Đã giao hàng").Sum(o => o.TotalAmount ?? 0);
+                var allOrders = await OrderService.Instance.GetAllOrdersAsync(dbStatus, SearchKeyword);
+                var stats = await OrderService.Instance.GetAdminStatsAsync();
+
+                TotalOrders = stats.TotalOrders;
+                PendingOrders = stats.PendingOrders;
+                ShippingOrders = stats.ShippingOrders;
+                TotalRevenue = stats.TotalRevenue;
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -110,9 +113,7 @@ namespace TMDT.ViewModels.Admin
                     {
                         var updated = allOrders.FirstOrDefault(o => o.OrderId == SelectedOrder.OrderId);
                         if (updated != null)
-                        {
                             SelectedOrder = updated;
-                        }
                     }
                 });
             }
@@ -126,29 +127,18 @@ namespace TMDT.ViewModels.Admin
         {
             try
             {
-                using var context = new TmdtContext();
-                var query = context.Orders.AsNoTracking()
-                    .Include(o => o.Shop)
-                    .Include(o => o.Buyer)
-                    .Include(o => o.OrderDetails)
-                        .ThenInclude(od => od.Product)
-                    .AsQueryable();
-
-                if (!string.IsNullOrWhiteSpace(SearchKeyword))
+                string dbStatus = SelectedStatus switch
                 {
-                    string keyword = SearchKeyword.Trim();
-                    query = query.Where(o =>
-                        (o.OrderCode != null && EF.Functions.Like(o.OrderCode, $"%{keyword}%")) ||
-                        (o.Shop != null && o.Shop.ShopName != null && EF.Functions.Like(o.Shop.ShopName, $"%{keyword}%")) ||
-                        (o.Buyer != null && o.Buyer.FullName != null && EF.Functions.Like(o.Buyer.FullName, $"%{keyword}%"))
-                    );
-                }
+                    "Chờ xác nhận" => "Pending",
+                    "Đang xử lý" => "Processing",
+                    "Đang giao hàng" => "Shipping",
+                    "Hoàn thành" => "Completed",
+                    "Đã hủy" => "Cancelled",
+                    _ => SelectedStatus
+                };
 
-                if (SelectedStatus != "Tất cả")
-                    query = query.Where(o => o.OrderStatus == SelectedStatus);
+                var list = await OrderService.Instance.GetAllOrdersAsync(dbStatus, SearchKeyword);
 
-                var list = await query.OrderByDescending(o => o.OrderDate).ToListAsync();
-                
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     FilteredOrders = new ObservableCollection<Order>(list);
@@ -157,9 +147,7 @@ namespace TMDT.ViewModels.Admin
                     {
                         var updated = list.FirstOrDefault(o => o.OrderId == SelectedOrder.OrderId);
                         if (updated != null)
-                        {
                             SelectedOrder = updated;
-                        }
                     }
                 });
             }
@@ -184,61 +172,30 @@ namespace TMDT.ViewModels.Admin
                 "Cảnh báo", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes) return;
 
-            using var context = new TmdtContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                var dbOrder = await context.Orders
-                    .Include(o => o.OrderDetails)
-                    .FirstOrDefaultAsync(o => o.OrderId == SelectedOrder.OrderId);
-                if (dbOrder == null)
-                {
-                    MessageBox.Show("Không tìm thấy đơn hàng trong cơ sở dữ liệu.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                // Hoàn trả lại số lượng tồn kho
-                foreach (var detail in dbOrder.OrderDetails)
-                {
-                    if (detail.ProductId.HasValue && detail.Quantity.HasValue)
-                    {
-                        var product = await context.Products.FindAsync(detail.ProductId.Value);
-                        if (product != null)
-                            product.StockQuantity = (product.StockQuantity ?? 0) + detail.Quantity.Value;
-                    }
-                }
-
-                dbOrder.OrderStatus = "Đã hủy";
-                context.OrderStatusHistories.Add(new OrderStatusHistory
-                {
-                    OrderId = SelectedOrder.OrderId,
-                    NewStatus = "Đã hủy",
-                    Note = "Hủy khẩn cấp bởi Admin",
-                    ChangedAt = DateTime.Now
-                });
-
-                await context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                SelectedOrder.OrderStatus = "Đã hủy";
+                await OrderService.Instance.CancelOrderAsync(SelectedOrder.OrderId);
+                SelectedOrder.OrderStatus = "Cancelled";
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show(ex.Message, "Không thể hủy", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
                 MessageBox.Show($"Lỗi hủy đơn: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             AuditLogHelper.Log("CANCEL_ORDER", $"Hủy '{SelectedOrder.OrderCode}' ({SelectedOrder.TotalAmount:N0} đ) — Shop: {SelectedOrder.Shop?.ShopName}", "Đơn hàng", "Critical");
             MessageBox.Show("Đã hủy đơn hàng.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-            
+
             var selectedId = SelectedOrder?.OrderId;
             HideDetailRequest?.Invoke();
             _ = LoadOrdersAsync();
             if (selectedId.HasValue)
-            {
                 SelectedOrder = FilteredOrders.FirstOrDefault(o => o.OrderId == selectedId.Value);
-            }
         }
 
         private bool CanRefundOrder(object _) =>
@@ -255,80 +212,30 @@ namespace TMDT.ViewModels.Admin
                 "Xác nhận hoàn tiền", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes) return;
 
-            using var context = new TmdtContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                var dbOrder = await context.Orders
-                    .Include(o => o.OrderDetails)
-                    .FirstOrDefaultAsync(o => o.OrderId == SelectedOrder.OrderId);
-                if (dbOrder == null)
-                    throw new Exception("Không tìm thấy đơn hàng trong cơ sở dữ liệu.");
-
-                if (!dbOrder.BuyerId.HasValue)
-                    throw new Exception("Đơn hàng không có thông tin người mua.");
-
-                var buyer = await context.Users.FindAsync(dbOrder.BuyerId.Value);
-                if (buyer == null)
-                    throw new Exception("Không tìm thấy thông tin người mua để hoàn tiền.");
-
-                // Trừ tiền của Shop nếu đơn hàng đã "Hoàn thành" (Shop đã nhận tiền)
-                if (dbOrder.OrderStatus == "Hoàn thành" && dbOrder.ShopId.HasValue)
-                {
-                    var shop = await context.Shops.FindAsync(dbOrder.ShopId.Value);
-                    if (shop != null)
-                    {
-                        var revenue = (dbOrder.TotalAmount ?? 0) - (dbOrder.PlatformFee ?? 0);
-                        shop.WalletBalance = (shop.WalletBalance ?? 0) - revenue;
-                        
-                        // Trừ phí sàn khỏi ví tổng hệ thống
-                        SystemSettingsHelper.AddSystemWalletBalance(-(dbOrder.PlatformFee ?? 0));
-                    }
-                }
-
-                // Hoàn trả Tồn kho
-                foreach (var detail in dbOrder.OrderDetails)
-                {
-                    if (detail.ProductId.HasValue && detail.Quantity.HasValue)
-                    {
-                        var product = await context.Products.FindAsync(detail.ProductId.Value);
-                        if (product != null)
-                            product.StockQuantity = (product.StockQuantity ?? 0) + detail.Quantity.Value;
-                    }
-                }
-
-                // Hoàn tiền vào ví người mua
-                buyer.WalletBalance = (buyer.WalletBalance ?? 0) + (dbOrder.TotalAmount ?? 0);
-                dbOrder.OrderStatus = "Hoàn tiền";
-                context.OrderStatusHistories.Add(new OrderStatusHistory
-                {
-                    OrderId = SelectedOrder.OrderId,
-                    NewStatus = "Hoàn tiền",
-                    Note = "Hoàn tiền bởi Admin",
-                    ChangedAt = DateTime.Now
-                });
-
-                await context.SaveChangesAsync();
-                await transaction.CommitAsync();
+                await OrderService.Instance.RefundOrderAsync(SelectedOrder.OrderId);
                 SelectedOrder.OrderStatus = "Hoàn tiền";
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show(ex.Message, "Không thể hoàn tiền", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
                 MessageBox.Show($"Lỗi hoàn tiền: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             AuditLogHelper.Log("REFUND_ORDER", $"Hoàn tiền '{SelectedOrder.OrderCode}' ({SelectedOrder.TotalAmount:N0} đ) — Người mua: {SelectedOrder.Buyer?.FullName}", "Đơn hàng", "Critical");
             MessageBox.Show("Đã hoàn tiền cho người mua.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-            
+
             var selectedId = SelectedOrder?.OrderId;
             HideDetailRequest?.Invoke();
             _ = LoadOrdersAsync();
             if (selectedId.HasValue)
-            {
                 SelectedOrder = FilteredOrders.FirstOrDefault(o => o.OrderId == selectedId.Value);
-            }
         }
 
         protected override void Dispose(bool disposing)

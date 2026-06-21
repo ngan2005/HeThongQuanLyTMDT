@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
 using TMDT.Models;
 using TMDT.Services;
 using TMDT.Utilities;
@@ -72,19 +71,8 @@ namespace TMDT.ViewModels.Buyer
             IsLoading = true;
             try
             {
-                using var context = new TmdtContext();
-                var userId = SessionManager.CurrentUser!.UserId;
-
-                var query = context.Orders.AsNoTracking()
-                    .Include(o => o.Shop)
-                    .Include(o => o.Address)
-                    .Where(o => o.BuyerId == userId)
-                    .AsQueryable();
-
-                if (StatusFilter != "Tất cả")
-                    query = query.Where(o => o.OrderStatus == StatusFilter);
-
-                var list = await query.OrderByDescending(o => o.OrderDate).ToListAsync();
+                var list = await OrderService.Instance.GetBuyerOrdersAsync(
+                    SessionManager.CurrentUser!.UserId, StatusFilter);
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -108,15 +96,13 @@ namespace TMDT.ViewModels.Buyer
             if (order?.OrderId == null) return;
             try
             {
-                using var context = new TmdtContext();
-                var details = await context.OrderDetails.AsNoTracking()
-                    .Where(d => d.OrderId == order.OrderId)
-                    .ToListAsync();
+                var refreshed = await OrderService.Instance.GetOrderByIdAsync(order.OrderId);
+                if (refreshed == null) return;
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     order.OrderDetails.Clear();
-                    foreach (var d in details)
+                    foreach (var d in refreshed.OrderDetails)
                         order.OrderDetails.Add(d);
                 });
             }
@@ -140,35 +126,17 @@ namespace TMDT.ViewModels.Buyer
 
             try
             {
-                using var context = new TmdtContext();
-                await using var transaction = await context.Database.BeginTransactionAsync();
-
-                var dbOrder = await context.Orders
-                    .Include(o => o.OrderDetails)
-                    .FirstOrDefaultAsync(o => o.OrderId == order.OrderId);
-
-                if (dbOrder == null) return;
-
-                dbOrder.OrderStatus = "Cancelled";
-
-                foreach (var detail in dbOrder.OrderDetails)
-                {
-                    if (detail.ProductId.HasValue && detail.Quantity.HasValue)
-                    {
-                        var product = await context.Products.FindAsync(detail.ProductId.Value);
-                        if (product != null)
-                            product.StockQuantity = (product.StockQuantity ?? 0) + detail.Quantity.Value;
-                    }
-                }
-
-                await context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
+                await OrderService.Instance.CancelOrderAsync(order.OrderId);
                 order.OrderStatus = "Cancelled";
                 OnPropertyChanged(nameof(Orders));
 
                 MessageBox.Show("Đơn hàng đã được hủy.", "Thành công",
                     MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show(ex.Message, "Không thể hủy",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             catch (Exception ex)
             {
@@ -192,34 +160,12 @@ namespace TMDT.ViewModels.Buyer
 
             try
             {
-                using var context = new TmdtContext();
-                await using var transaction = await context.Database.BeginTransactionAsync();
-                
-                var dbOrder = await context.Orders.FindAsync(order.OrderId);
-                if (dbOrder != null && dbOrder.OrderStatus == "Shipping")
-                {
-                    dbOrder.OrderStatus = "Completed";
-                    dbOrder.CompletedAt = DateTime.Now;
+                await OrderService.Instance.ReceiveOrderAsync(order.OrderId);
+                order.OrderStatus = "Completed";
+                OnPropertyChanged(nameof(Orders));
+                _ = LoadOrdersAsync();
 
-                    var shop = await context.Shops.FindAsync(dbOrder.ShopId);
-                    if (shop != null)
-                    {
-                        var revenue = (dbOrder.TotalAmount ?? 0) - (dbOrder.PlatformFee ?? 0);
-                        shop.WalletBalance = (shop.WalletBalance ?? 0) + revenue;
-                        
-                        // Cộng phí sàn vào ví tổng hệ thống
-                        SystemSettingsHelper.AddSystemWalletBalance(dbOrder.PlatformFee ?? 0);
-                    }
-
-                    await context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-
-                    order.OrderStatus = "Completed";
-                    OnPropertyChanged(nameof(Orders));
-                    _ = LoadOrdersAsync(); // Tải lại danh sách để cập nhật UI
-
-                    MessageBox.Show("Cảm ơn bạn đã mua sắm! Đơn hàng đã hoàn thành.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
+                MessageBox.Show("Cảm ơn bạn đã mua sắm! Đơn hàng đã hoàn thành.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {

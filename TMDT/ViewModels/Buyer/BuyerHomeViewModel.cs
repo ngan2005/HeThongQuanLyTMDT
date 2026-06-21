@@ -16,7 +16,7 @@ namespace TMDT.ViewModels.Buyer
         public string SearchQuery { get; set; } = "";
 
         public ObservableCollection<Category> Categories => _mainVm.Categories;
-        public ObservableCollection<Product> FeaturedProducts => _mainVm.FeaturedProducts;
+        public ObservableCollection<ProductWrapper> FeaturedProducts => _mainVm.FeaturedProducts;
         public ObservableCollection<Banner> Banners => _mainVm.Banners;
         public Banner? CurrentBanner => _mainVm.CurrentBanner;
 
@@ -52,7 +52,7 @@ namespace TMDT.ViewModels.Buyer
             };
 
             SearchCommand = new RelayCommand(_ => ExecuteSearch());
-            ProductClickCommand = new RelayCommand(p => _mainVm.NavigateProductDetail(p as Product));
+            ProductClickCommand = new RelayCommand(p => _mainVm.NavigateProductDetail(p is ProductWrapper w ? w.Product : p as Product));
             CartCommand = new RelayCommand(_ => _mainVm.NavigateCart());
             OrdersCommand = new RelayCommand(_ => _mainVm.NavigateOrders());
             LoginCommand = new RelayCommand(_ => ExecuteLogin());

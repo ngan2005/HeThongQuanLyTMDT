@@ -254,19 +254,19 @@
                                                 <Border.Style>
                                                     <Style TargetType="Border" BasedOn="{StaticResource StatusBadge}">
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Chờ xác nhận">
+                                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Pending">
                                                                 <Setter Property="Background" Value="{DynamicResource WarningBg}"/>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Đang xử lý">
+                                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Processing">
                                                                 <Setter Property="Background" Value="#EFF6FF"/>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Đang giao hàng">
+                                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Shipping">
                                                                 <Setter Property="Background" Value="{DynamicResource WarningBg}"/>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Hoàn thành">
+                                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Completed">
                                                                 <Setter Property="Background" Value="{DynamicResource SuccessGreenBg}"/>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Đã hủy">
+                                                            <DataTrigger Binding="{Binding OrderStatus}" Value="Cancelled">
                                                                 <Setter Property="Background" Value="{DynamicResource DangerRedBg}"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding OrderStatus}" Value="Hoàn tiền">
@@ -279,23 +279,23 @@
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Chờ xác nhận">
+                                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Pending">
                                                                     <Setter Property="Text" Value="Chờ xác nhận"/>
                                                                     <Setter Property="Foreground" Value="{DynamicResource WarningOrange}"/>
                                                                 </DataTrigger>
-                                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Đang xử lý">
+                                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Processing">
                                                                     <Setter Property="Text" Value="Đang xử lý"/>
                                                                     <Setter Property="Foreground" Value="#3B82F6"/>
                                                                 </DataTrigger>
-                                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Đang giao hàng">
+                                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Shipping">
                                                                     <Setter Property="Text" Value="Đang giao hàng"/>
                                                                     <Setter Property="Foreground" Value="{DynamicResource WarningOrange}"/>
                                                                 </DataTrigger>
-                                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Hoàn thành">
+                                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Completed">
                                                                     <Setter Property="Text" Value="Hoàn thành"/>
                                                                     <Setter Property="Foreground" Value="{DynamicResource SuccessGreen}"/>
                                                                 </DataTrigger>
-                                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Đã hủy">
+                                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Cancelled">
                                                                     <Setter Property="Text" Value="Đã hủy"/>
                                                                     <Setter Property="Foreground" Value="{DynamicResource DangerRed}"/>
                                                                 </DataTrigger>
@@ -408,19 +408,19 @@
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Chờ xác nhận">
+                                                    <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Pending">
                                                         <Setter Property="Background" Value="{DynamicResource WarningBg}"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Đang xử lý">
+                                                    <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Processing">
                                                         <Setter Property="Background" Value="#EFF6FF"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Đang giao hàng">
+                                                    <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Shipping">
                                                         <Setter Property="Background" Value="{DynamicResource WarningBg}"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Hoàn thành">
+                                                    <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Completed">
                                                         <Setter Property="Background" Value="{DynamicResource SuccessGreenBg}"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Đã hủy">
+                                                    <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Cancelled">
                                                         <Setter Property="Background" Value="{DynamicResource DangerRedBg}"/>
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Hoàn tiền">
@@ -433,23 +433,23 @@
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Chờ xác nhận">
+                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Pending">
                                                             <Setter Property="Text" Value="⏳ CHỜ XÁC NHẬN"/>
                                                             <Setter Property="Foreground" Value="{DynamicResource WarningOrange}"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Đang xử lý">
+                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Processing">
                                                             <Setter Property="Text" Value="⚙️ ĐANG XỬ LÝ"/>
                                                             <Setter Property="Foreground" Value="#3B82F6"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Đang giao hàng">
+                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Shipping">
                                                             <Setter Property="Text" Value="🚚 ĐANG GIAO HÀNG"/>
                                                             <Setter Property="Foreground" Value="{DynamicResource WarningOrange}"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Hoàn thành">
+                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Completed">
                                                             <Setter Property="Text" Value="✅ ĐƠN HOÀN THÀNH"/>
                                                             <Setter Property="Foreground" Value="{DynamicResource SuccessGreen}"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Đã hủy">
+                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Cancelled">
                                                             <Setter Property="Text" Value="❌ ĐƠN ĐÃ HỦY"/>
                                                             <Setter Property="Foreground" Value="{DynamicResource DangerRed}"/>
                                                         </DataTrigger>

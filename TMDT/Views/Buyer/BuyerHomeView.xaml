@@ -119,7 +119,10 @@
                             <DataTemplate>
                                 <components:ProductCard
                                     ClickCommand="{Binding DataContext.ProductClickCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                    ClickCommandParameter="{Binding}"/>
+                                    ClickCommandParameter="{Binding}"
+                                    WishlistCommand="{Binding DataContext.ToggleWishlistCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    WishlistCommandParameter="{Binding}"
+                                    IsWishlisted="{Binding IsWishlisted, Mode=TwoWay}"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

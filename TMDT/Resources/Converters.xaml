@@ -13,5 +13,7 @@
     <conv:GreaterThanZeroToVisibilityConverter x:Key="GreaterThanZeroToVis"/>
     <conv:CountToVisibilityConverter x:Key="CountToVis"/>
     <conv:InitialLetterConverter x:Key="InitialLetterConverter"/>
+    <conv:PageToNavForegroundConverter x:Key="PageToNavForeground"/>
+    <conv:PageToNavFontWeightConverter x:Key="PageToNavFontWeight"/>
     
 </ResourceDictionary>

@@ -17,6 +17,7 @@ namespace TMDT.ViewModels.Buyer
         private int _cartBadgeCount;
         private string _pageTitle = "Trang chủ";
         private string _searchQuery = "";
+        private string _currentPage = "Home";
 
         public ViewModelBase CurrentViewModel
         {
@@ -53,18 +54,31 @@ namespace TMDT.ViewModels.Buyer
             set { SetProperty(ref _searchQuery, value); }
         }
 
+        public string CurrentPage
+        {
+            get => _currentPage;
+            set { SetProperty(ref _currentPage, value); }
+        }
+
         public ICommand GoHomeCommand { get; }
+        public ICommand GoProductsCommand { get; }
+        public ICommand GoPromotionsCommand { get; }
+        public ICommand GoGuideCommand { get; }
+        public ICommand GoContactCommand { get; }
         public ICommand GoCartCommand { get; }
         public ICommand GoOrdersCommand { get; }
+        public ICommand GoProfileCommand { get; }
+        public ICommand GoWishlistCommand { get; }
         public ICommand OpenProductCommand { get; }
         public ICommand LogoutCommand { get; }
         public ICommand OpenSellerPortalCommand { get; }
         public ICommand LoginCommand { get; }
         public ICommand BecomeSellerCommand { get; }
         public ICommand SearchCommand { get; }
+        public ICommand ToggleWishlistCommand { get; }
 
         public ObservableCollection<Category> Categories { get; } = new();
-        public ObservableCollection<Product> FeaturedProducts { get; } = new();
+        public ObservableCollection<ProductWrapper> FeaturedProducts { get; } = new();
         public ObservableCollection<Banner> Banners { get; } = new();
 
         private Banner? _currentBanner;
@@ -82,14 +96,21 @@ namespace TMDT.ViewModels.Buyer
             CartService.Instance.CartChanged += UpdateCartBadge;
 
             GoHomeCommand = new RelayCommand(_ => NavigateHome());
+            GoProductsCommand = new RelayCommand(_ => NavigateProducts());
+            GoPromotionsCommand = new RelayCommand(_ => NavigatePromotions());
+            GoGuideCommand = new RelayCommand(_ => NavigateGuide());
+            GoContactCommand = new RelayCommand(_ => NavigateContact());
             GoCartCommand = new RelayCommand(_ => NavigateCart());
             GoOrdersCommand = new RelayCommand(_ => NavigateOrders());
-            OpenProductCommand = new RelayCommand(p => NavigateProductDetail(p as Product));
+            GoProfileCommand = new RelayCommand(_ => NavigateProfile());
+            GoWishlistCommand = new RelayCommand(_ => NavigateWishlist());
+            OpenProductCommand = new RelayCommand(p => NavigateProductDetail(p is ProductWrapper w ? w.Product : p as Product));
             LogoutCommand = new RelayCommand(_ => ExecuteLogout());
             OpenSellerPortalCommand = new RelayCommand(_ => ExecuteOpenSellerPortal(), _ => IsLoggedIn && IsSeller);
             LoginCommand = new RelayCommand(_ => ExecuteLogin());
             BecomeSellerCommand = new RelayCommand(_ => ExecuteBecomeSeller(), _ => IsLoggedIn && IsBuyer);
             SearchCommand = new RelayCommand(_ => SearchProducts(SearchQuery));
+            ToggleWishlistCommand = new RelayCommand(p => ExecuteToggleWishlist(p as ProductWrapper));
 
             _ = LoadCategoriesAsync();
             _ = LoadFeaturedProductsAsync();
@@ -100,12 +121,14 @@ namespace TMDT.ViewModels.Buyer
         public void NavigateHome()
         {
             PageTitle = "Trang chủ";
+            CurrentPage = "Home";
             CurrentViewModel = new BuyerHomeViewModel(this);
         }
 
         public void NavigateCart()
         {
             PageTitle = "Giỏ hàng";
+            CurrentPage = "Cart";
             CurrentViewModel = new CartViewModel(this);
         }
 
@@ -118,7 +141,62 @@ namespace TMDT.ViewModels.Buyer
                 return;
             }
             PageTitle = "Đơn hàng của tôi";
+            CurrentPage = "Orders";
             CurrentViewModel = new BuyerOrdersViewModel(this);
+        }
+
+        public void NavigateProfile()
+        {
+            if (!SessionManager.IsLoggedIn)
+            {
+                MessageBox.Show("Vui lòng đăng nhập.", "Thông báo",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            PageTitle = "Tài khoản của tôi";
+            CurrentPage = "Profile";
+            CurrentViewModel = new BuyerProfileViewModel(this);
+        }
+
+        public void NavigateWishlist()
+        {
+            if (!SessionManager.IsLoggedIn)
+            {
+                MessageBox.Show("Vui lòng đăng nhập.", "Thông báo",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            PageTitle = "Yêu thích";
+            CurrentPage = "Wishlist";
+            CurrentViewModel = new WishlistViewModel(this);
+        }
+
+        public void NavigateProducts(string initialSearchQuery = "")
+        {
+            PageTitle = "Sản phẩm";
+            CurrentPage = "Products";
+            CurrentViewModel = new BuyerProductsViewModel(this, initialSearchQuery);
+        }
+
+        public void NavigatePromotions()
+        {
+            PageTitle = "Khuyến mãi";
+            CurrentPage = "Promotions";
+            CurrentViewModel = new BuyerPromotionsViewModel(this);
+        }
+
+        public void NavigateGuide()
+        {
+            PageTitle = "Hướng dẫn";
+            CurrentPage = "Guide";
+            CurrentViewModel = new BuyerGuideViewModel(this);
+        }
+
+        public void NavigateContact()
+        {
+            PageTitle = "Liên hệ";
+            CurrentPage = "Contact";
+            CurrentViewModel = new BuyerContactViewModel(this);
         }
 
         public void NavigateProductDetail(Product? product)
@@ -126,12 +204,13 @@ namespace TMDT.ViewModels.Buyer
             if (product == null) return;
             SelectedProduct = product;
             PageTitle = "Chi tiết sản phẩm";
+            CurrentPage = "Product";
             CurrentViewModel = new ProductDetailViewModel(product, this);
         }
 
         public void SearchProducts(string term)
         {
-            _ = SearchProductsAsync(term);
+            NavigateProducts(term);
         }
 
         public async Task SearchProductsAsync(string term)
@@ -159,7 +238,11 @@ namespace TMDT.ViewModels.Buyer
                 {
                     FeaturedProducts.Clear();
                     foreach (var p in items)
-                        FeaturedProducts.Add(p);
+                    {
+                        bool inWishlist = SessionManager.IsLoggedIn
+                            && context.Wishlists.Any(w => w.UserId == SessionManager.CurrentUser!.UserId && w.ProductId == p.ProductId);
+                        FeaturedProducts.Add(new ProductWrapper(p, inWishlist));
+                    }
                 });
             }
             catch (Exception ex)
@@ -204,7 +287,11 @@ namespace TMDT.ViewModels.Buyer
                 {
                     FeaturedProducts.Clear();
                     foreach (var p in items)
-                        FeaturedProducts.Add(p);
+                    {
+                        bool inWishlist = SessionManager.IsLoggedIn
+                            && context.Wishlists.Any(w => w.UserId == SessionManager.CurrentUser!.UserId && w.ProductId == p.ProductId);
+                        FeaturedProducts.Add(new ProductWrapper(p, inWishlist));
+                    }
                 });
             }
             catch (Exception ex)
@@ -255,7 +342,11 @@ namespace TMDT.ViewModels.Buyer
                 {
                     FeaturedProducts.Clear();
                     foreach (var p in items)
-                        FeaturedProducts.Add(p);
+                    {
+                        bool inWishlist = SessionManager.IsLoggedIn
+                            && context.Wishlists.Any(w => w.UserId == SessionManager.CurrentUser!.UserId && w.ProductId == p.ProductId);
+                        FeaturedProducts.Add(new ProductWrapper(p, inWishlist));
+                    }
                 });
             }
             catch (Exception ex)
@@ -315,6 +406,48 @@ namespace TMDT.ViewModels.Buyer
             var sellerWindow = new Views.Seller.SellerMainView();
             sellerWindow.Show();
             Application.Current.MainWindow?.Close();
+        }
+
+        private void ExecuteToggleWishlist(ProductWrapper? wrapper)
+        {
+            if (wrapper == null) return;
+
+            if (!SessionManager.IsLoggedIn)
+            {
+                MessageBox.Show("Vui lòng đăng nhập để thêm sản phẩm yêu thích.",
+                    "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            try
+            {
+                using var ctx = new TmdtContext();
+                var existing = ctx.Wishlists
+                    .FirstOrDefault(w => w.UserId == SessionManager.CurrentUser!.UserId
+                                      && w.ProductId == wrapper.Product.ProductId);
+
+                if (existing != null)
+                {
+                    ctx.Wishlists.Remove(existing);
+                    ctx.SaveChanges();
+                    wrapper.IsWishlisted = false;
+                }
+                else
+                {
+                    ctx.Wishlists.Add(new Wishlist
+                    {
+                        UserId = SessionManager.CurrentUser!.UserId,
+                        ProductId = wrapper.Product.ProductId,
+                        AddedAt = DateTime.Now
+                    });
+                    ctx.SaveChanges();
+                    wrapper.IsWishlisted = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Toggle wishlist failed: " + ex.Message);
+            }
         }
 
         private void ExecuteLogin()

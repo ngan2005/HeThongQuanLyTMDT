@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
 using TMDT.Models;
 using TMDT.Services;
 using TMDT.Utilities;
@@ -144,6 +143,12 @@ namespace TMDT.ViewModels.Buyer
                 return;
             }
 
+            if (SelectedAddress == null)
+            {
+                MessageBox.Show("Bạn chưa có địa chỉ nhận hàng.\nVui lòng vào mục 'Tài Khoản' -> 'Địa Chỉ' để thêm và chọn địa chỉ mặc định trước khi đặt hàng.", "Thiếu địa chỉ", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             string paymentMethod = SelectedPayment switch
             {
                 0 => "COD",
@@ -159,73 +164,42 @@ namespace TMDT.ViewModels.Buyer
 
             try
             {
-                using var context = new TmdtContext();
-                await using var transaction = await context.Database.BeginTransactionAsync();
-
                 foreach (var group in Items.GroupBy(i => i.ShopId))
                 {
-                    // Kiểm tra xem Shop có bị khóa không
-                    var shopId = group.Key;
-                    if (shopId > 0)
+                    var cartItems = group.Select(i => new DTOs.CartOrderItem
                     {
-                        var shop = await context.Shops.FindAsync(shopId);
-                        if (shop != null && shop.IsActive == false)
+                        ProductId = i.ProductId,
+                        ProductName = i.ProductName,
+                        Quantity = i.Quantity,
+                        UnitPrice = i.Price,
+                        TotalPrice = i.LineTotal
+                    }).ToList();
+
+                    var order = await OrderService.Instance.CreateOrderFromCartAsync(
+                        SessionManager.CurrentUser!.UserId,
+                        group.Key,
+                        SelectedAddress?.AddressId,
+                        null,
+                        paymentMethod,
+                        ShippingFee,
+                        cartItems);
+
+                    if (paymentMethod == "VNPay" && order != null)
+                    {
+                        string vnpUrl = VNPayService.CreatePaymentUrl(order);
+                        var vnPayWindow = new TMDT.Views.Components.VNPayWindow(vnpUrl);
+                        bool? success = vnPayWindow.ShowDialog();
+
+                        if (success == true)
                         {
-                            await transaction.RollbackAsync();
-                            MessageBox.Show($"Cửa hàng '{shop.ShopName}' hiện đang bị tạm khóa. Bạn không thể đặt hàng từ cửa hàng này. Vui lòng điều chỉnh lại giỏ hàng.", "Lỗi đặt hàng", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
+                            await OrderService.Instance.UpdatePaymentSuccessAsync(order.OrderId, vnPayWindow.TransactionCode);
+                        }
+                        else
+                        {
+                            MessageBox.Show($"Thanh toán VNPay cho đơn hàng {order.OrderCode} thất bại hoặc đã bị hủy.\nĐơn hàng vẫn được tạo nhưng ở trạng thái Chưa thanh toán.", "Lưu ý", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
                     }
-
-                    var order = new Order
-                    {
-                        OrderCode = "ORD-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
-                        BuyerId = SessionManager.CurrentUser!.UserId,
-                        ShopId = group.Key,
-                        SubTotal = group.Sum(i => i.LineTotal),
-                        ShippingFee = ShippingFee,
-                        Discount = 0,
-                        TotalAmount = group.Sum(i => i.LineTotal) + ShippingFee,
-                        PlatformFee = (group.Sum(i => i.LineTotal) + ShippingFee) * (SystemSettingsHelper.Current.PlatformCommissionRate / 100m),
-                        PaymentMethod = paymentMethod,
-                        OrderStatus = "Pending",
-                        OrderDate = DateTime.Now,
-                        AddressId = SelectedAddress?.AddressId
-                    };
-
-                    context.Orders.Add(order);
-                    await context.SaveChangesAsync();
-
-                    foreach (var item in group)
-                    {
-                        var detail = new OrderDetail
-                        {
-                            OrderId = order.OrderId,
-                            ProductId = item.ProductId,
-                            ProductNameSnapshot = item.ProductName,
-                            Quantity = item.Quantity,
-                            UnitPrice = item.Price,
-                            TotalPrice = item.LineTotal
-                        };
-                        context.OrderDetails.Add(detail);
-
-                        var product = await context.Products.FindAsync(item.ProductId);
-                        if (product != null)
-                        {
-                            if ((product.StockQuantity ?? 0) < item.Quantity)
-                            {
-                                await transaction.RollbackAsync();
-                                MessageBox.Show($"Sản phẩm '{product.ProductName}' không đủ số lượng tồn kho. (Còn lại: {product.StockQuantity ?? 0}). Vui lòng điều chỉnh lại giỏ hàng.", "Hết hàng", MessageBoxButton.OK, MessageBoxImage.Error);
-                                return;
-                            }
-                            product.StockQuantity = (product.StockQuantity ?? 0) - item.Quantity;
-                        }
-                    }
-
-                    await context.SaveChangesAsync();
                 }
-
-                await transaction.CommitAsync();
 
                 CartService.Instance.Clear();
                 Recalculate();
@@ -234,6 +208,11 @@ namespace TMDT.ViewModels.Buyer
                     "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 _mainVm.NavigateOrders();
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi đặt hàng",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch (Exception ex)
             {
