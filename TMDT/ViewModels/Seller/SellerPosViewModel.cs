@@ -75,6 +75,9 @@ namespace TMDT.ViewModels.Seller
         private int _loyaltyPoints;
         public int LoyaltyPoints { get => _loyaltyPoints; set => SetProperty(ref _loyaltyPoints, value); }
 
+        private int _orderCount;
+        public int OrderCount { get => _orderCount; set => SetProperty(ref _orderCount, value); }
+
         private bool _useLoyaltyPoints;
         public bool UseLoyaltyPoints { get => _useLoyaltyPoints; set => SetProperty(ref _useLoyaltyPoints, value); }
 
@@ -294,6 +297,7 @@ namespace TMDT.ViewModels.Seller
             ExecuteAddTab();
             
             LoadProducts();
+            _ = LoadActiveVouchersAsync();
         }
 
         private void ExecuteAddTab()
@@ -375,6 +379,33 @@ namespace TMDT.ViewModels.Seller
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi tải sản phẩm: {ex.Message}");
+            }
+        }
+
+        private ObservableCollection<Voucher> _activeVouchers = new();
+        public ObservableCollection<Voucher> ActiveVouchers
+        {
+            get => _activeVouchers;
+            set => SetProperty(ref _activeVouchers, value);
+        }
+
+        public async System.Threading.Tasks.Task LoadActiveVouchersAsync()
+        {
+            try
+            {
+                using var context = new TmdtContext();
+                var list = await context.Vouchers
+                    .Where(v => v.ShopId == _shopId && 
+                                v.IsActive == true && 
+                                v.StartDate <= DateTime.Now && 
+                                v.EndDate >= DateTime.Now &&
+                                (v.TotalQuantity == null || v.UsedCount < v.TotalQuantity))
+                    .ToListAsync();
+                ActiveVouchers = new ObservableCollection<Voucher>(list);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Lỗi tải active vouchers: {ex.Message}");
             }
         }
 
@@ -552,6 +583,7 @@ namespace TMDT.ViewModels.Seller
                 SelectedTab.BuyerId = null;
                 SelectedTab.CustomerName = "Khách vãng lai";
                 SelectedTab.LoyaltyPoints = 0;
+                SelectedTab.OrderCount = 0;
                 SelectedTab.UseLoyaltyPoints = false;
                 return;
             }
@@ -563,12 +595,17 @@ namespace TMDT.ViewModels.Seller
                 SelectedTab.BuyerId = user.UserId;
                 SelectedTab.CustomerName = user.FullName ?? user.Email;
                 SelectedTab.LoyaltyPoints = user.LoyaltyPoints ?? 0;
+                
+                // Đếm số đơn hàng đã hoàn thành của khách hàng tại shop này
+                var count = await context.Orders.CountAsync(o => o.BuyerId == user.UserId && o.ShopId == _shopId);
+                SelectedTab.OrderCount = count;
             }
             else
             {
                 SelectedTab.BuyerId = null;
                 SelectedTab.CustomerName = "Khách vãng lai";
                 SelectedTab.LoyaltyPoints = 0;
+                SelectedTab.OrderCount = 0;
                 SelectedTab.UseLoyaltyPoints = false;
             }
         }

@@ -60,6 +60,9 @@
         <DataTemplate DataType="{x:Type vm:SellerSalesHistoryViewModel}">
             <views:SellerSalesHistoryView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SellerCustomersViewModel}">
+            <views:SellerCustomersView/>
+        </DataTemplate>
 
         <!-- Design System Colors — Seller Teal & Indigo Theme -->
         <SolidColorBrush x:Key="SidebarBg" Color="#1E1B4B"/> <!-- Very dark Indigo -->
@@ -376,6 +379,18 @@
                                 <StackPanel Orientation="Horizontal">
                                     <materialDesign:PackIcon Kind="ChartBar" Width="18" Height="18" Foreground="#94A3B8" VerticalAlignment="Center"/>
                                     <TextBlock Text="Lịch sử bán hàng" FontSize="12.5" FontWeight="Medium" FontFamily="Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
+                                        <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <!-- Khách hàng của Shop -->
+                            <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowCustomersCommand}" 
+                                         IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Customers, Mode=OneWay}"
+                                         ToolTip="Khách hàng của Shop">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="AccountGroupOutline" Width="18" Height="18" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Khách hàng của Shop" FontSize="12.5" FontWeight="Medium" FontFamily="Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
                                         <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
                                     </TextBlock>
                                 </StackPanel>

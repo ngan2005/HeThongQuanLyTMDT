@@ -5,17 +5,34 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Hóa đơn thanh toán" Height="600" Width="400"
+        Title="Hóa đơn thanh toán" Height="620" Width="430"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
-        Background="#F1F5F9">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent">
+    <Border Background="#F1F5F9" CornerRadius="14" Margin="16" Effect="{StaticResource CardShadow}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <!-- Receipt Content (This will be printed) -->
-        <ScrollViewer Grid.Row="0" Margin="16" Background="White" Effect="{StaticResource CardShadow}">
+            <!-- Custom Header -->
+            <Border Grid.Row="0" Background="#0F766E" CornerRadius="14,14,0,0" Padding="16,12" MouseLeftButtonDown="Header_MouseDown" Cursor="SizeAll">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <materialDesign:PackIcon Kind="ReceiptText" Width="22" Height="22" Foreground="White" Margin="0,0,8,0"/>
+                        <TextBlock Text="In Hóa Đơn" FontSize="16" FontWeight="Bold" Foreground="White"/>
+                    </StackPanel>
+                    <Button HorizontalAlignment="Right" VerticalAlignment="Center" 
+                            Click="Close_Click" Padding="0" Width="28" Height="28"
+                            Style="{StaticResource MaterialDesignFlatButton}" Foreground="#99F6E4" ToolTip="Đóng">
+                        <materialDesign:PackIcon Kind="Close" Width="18" Height="18"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Receipt Content (This will be printed) -->
+            <ScrollViewer Grid.Row="1" Margin="16" Background="White" Effect="{StaticResource CardShadow}">
             <!-- The 300px width is roughly 80mm thermal paper -->
             <Border x:Name="ReceiptPrintArea" Width="320" HorizontalAlignment="Center" Padding="16" Background="White">
                 <StackPanel>
@@ -106,18 +123,19 @@
             </Border>
         </ScrollViewer>
 
-        <!-- Actions -->
-        <Border Grid.Row="1" Background="White" Padding="16" BorderThickness="0,1,0,0" BorderBrush="#E2E8F0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Content="In Máy in (Print)" Click="Print_Click" Margin="0,0,8,0" Background="#0D9488" BorderBrush="#0D9488"/>
-                <Button Grid.Column="1" Content="Xuất PDF" Click="ExportPdf_Click" Margin="0,0,16,0" Background="#2563EB" BorderBrush="#2563EB"/>
-                <Button Grid.Column="2" Content="Đóng" Click="Close_Click" Style="{StaticResource MaterialDesignOutlinedButton}" Width="80"/>
-            </Grid>
-        </Border>
-    </Grid>
+            <!-- Actions -->
+            <Border Grid.Row="2" Background="White" Padding="16" BorderThickness="0,1,0,0" BorderBrush="#E2E8F0" CornerRadius="0,0,14,14">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="In Hóa đơn (Print)" Click="Print_Click" Margin="0,0,8,0" Background="#0D9488" BorderBrush="#0D9488"/>
+                    <Button Grid.Column="1" Content="Xuất PDF" Click="ExportPdf_Click" Margin="0,0,16,0" Background="#2563EB" BorderBrush="#2563EB"/>
+                    <Button Grid.Column="2" Content="Đóng" Click="Close_Click" Style="{StaticResource MaterialDesignOutlinedButton}" Width="80"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
 </Window>

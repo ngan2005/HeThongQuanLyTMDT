@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TMDT.Views.Seller"
              xmlns:converters="clr-namespace:TMDT.Converters"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="580" d:DesignWidth="820">
 
@@ -257,9 +258,9 @@
             <!-- Translucent Backdrop -->
             <Border Background="#990F172A" MouseDown="LightboxOverlay_MouseDown"/>
 
-            <!-- Dialog Content Card -->
-            <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="600" Margin="0,30,0,30">
-                <Border Background="#FFFFFF" CornerRadius="16" Effect="{StaticResource CardShadow}">
+            <!-- Dialog Content Card (Cart Style) -->
+            <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="560" Margin="0,30,0,30">
+                <Border Background="#F8FAFC" CornerRadius="12" Effect="{StaticResource CardShadow}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <!-- Header -->
@@ -270,65 +271,96 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Header -->
-                        <Border Grid.Row="0" Background="#0D9488" CornerRadius="16,16,0,0" Padding="24,18">
+                        <!-- Header (Cart Style) -->
+                        <Border Grid.Row="0" Background="#0F766E" CornerRadius="12,12,0,0" Padding="24,24,24,16">
                             <Grid>
-                                <StackPanel>
-                                    <TextBlock Text="{Binding SelectedOrder.OrderCode, StringFormat={}ĐƠN HÀNG: {0}}" FontSize="15" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
-                                    <TextBlock Text="{Binding SelectedOrder.OrderDate, StringFormat={}Thời gian đặt: {0:dd/MM/yyyy HH:mm}}" FontSize="11" Foreground="#CCFFFFFF" Margin="0,4,0,0" FontFamily="Segoe UI"/>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- Cart Icon -->
+                                <Border Grid.Column="0" Background="#14B8A6" Width="48" Height="48" CornerRadius="24" Margin="0,0,16,0" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="CartVariant" Width="28" Height="28" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="CHI TIẾT GIỎ HÀNG" FontSize="13" Foreground="#99F6E4" FontWeight="SemiBold" FontFamily="Segoe UI" Margin="0,0,0,2"/>
+                                    <TextBlock Text="{Binding SelectedOrder.OrderCode, StringFormat={}Mã: {0}}" FontSize="18" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
+                                    <TextBlock Text="{Binding SelectedOrder.OrderDate, StringFormat={}Đặt lúc: {0:dd/MM/yyyy HH:mm}}" FontSize="12" Foreground="#CCFBF1" Margin="0,2,0,0" FontFamily="Segoe UI"/>
                                 </StackPanel>
-                                <Button HorizontalAlignment="Right" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" Cursor="Hand" Click="CloseLightbox_Click">
-                                    <TextBlock Text="&#xE10A;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="White"/>
+                                
+                                <Button Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top" Background="Transparent" BorderThickness="0" Cursor="Hand" Click="CloseLightbox_Click" Margin="0,-10,-10,0">
+                                    <materialDesign:PackIcon Kind="Close" Width="24" Height="24" Foreground="#99F6E4"/>
                                 </Button>
                             </Grid>
                         </Border>
 
                         <!-- Details Body -->
-                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MaxHeight="380" Padding="24,20">
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MaxHeight="400" Padding="24,20" Background="White">
                             <StackPanel>
-                                <!-- Buyer info -->
-                                <TextBlock Style="{StaticResource LabelHeader}" Text="Khách Hàng"/>
-                                <TextBlock Style="{StaticResource ValueText}">
-                                    <Run Text="{Binding SelectedOrder.Buyer.FullName, Mode=OneWay}" FontWeight="SemiBold"/>
-                                    <Run Text=" - "/>
-                                    <Run Text="{Binding SelectedOrder.Buyer.Email, Mode=OneWay}"/>
-                                </TextBlock>
+                                <!-- Buyer & Address info in a Card -->
+                                <Border Background="#F1F5F9" CornerRadius="8" Padding="16" Margin="0,0,0,20">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource LabelHeader}" Text="THÔNG TIN KHÁCH HÀNG" Foreground="#0F766E"/>
+                                        <TextBlock FontSize="13" Foreground="#1E293B" Margin="0,0,0,12">
+                                            <Run Text="{Binding SelectedOrder.Buyer.FullName, Mode=OneWay}" FontWeight="Bold"/>
+                                            <Run Text=" - "/>
+                                            <Run Text="{Binding SelectedOrder.Buyer.Email, Mode=OneWay}"/>
+                                        </TextBlock>
 
-                                <!-- Address -->
-                                <TextBlock Style="{StaticResource LabelHeader}" Text="Địa Chỉ Nhận Hàng"/>
-                                <TextBlock Style="{StaticResource ValueText}">
-                                    <Run Text="{Binding SelectedOrder.Address.RecipientName, Mode=OneWay}" FontWeight="Bold"/>
-                                    <Run Text=" ("/>
-                                    <Run Text="{Binding SelectedOrder.Address.Phone, Mode=OneWay}"/>
-                                    <Run Text=")&#x0a;"/>
-                                    <Run Text="{Binding SelectedOrder.Address.FullAddress, Mode=OneWay}"/>
-                                </TextBlock>
-
-                                <!-- Tracking code if shipping -->
-                                <StackPanel>
-                                    <StackPanel.Style>
-                                        <Style TargetType="StackPanel">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Shipping">
+                                        <TextBlock Style="{StaticResource LabelHeader}" Text="ĐỊA CHỈ NHẬN HÀNG" Foreground="#0F766E"/>
+                                        <TextBlock FontSize="13" Foreground="#334155" TextWrapping="Wrap" LineHeight="20">
+                                            <Run Text="{Binding SelectedOrder.Address.RecipientName, Mode=OneWay}" FontWeight="SemiBold"/>
+                                            <Run Text=" - "/>
+                                            <Run Text="{Binding SelectedOrder.Address.Phone, Mode=OneWay}"/>
+                                            <LineBreak/>
+                                            <Run Text="{Binding SelectedOrder.Address.FullAddress, Mode=OneWay}"/>
+                                        </TextBlock>
+                                        
+                                        <!-- Tracking code if shipping -->
+                                        <StackPanel Margin="0,12,0,0">
+                                            <StackPanel.Style>
+                                                <Style TargetType="StackPanel">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Shipping">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Completed">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </StackPanel.Style>
+                                            <TextBlock Style="{StaticResource LabelHeader}" Text="MÃ VẬN ĐƠN" Foreground="#0F766E"/>
+                                            <TextBlock Text="{Binding SelectedOrder.TrackingCode}" FontSize="14" FontWeight="Bold" Foreground="#1D4ED8"/>
+                                        </StackPanel>
+                                        
+                                        <!-- Notes -->
+                                        <StackPanel Margin="0,12,0,0">
+                                            <StackPanel.Style>
+                                                <Style TargetType="StackPanel">
                                                     <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding SelectedOrder.OrderStatus}" Value="Completed">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </StackPanel.Style>
-                                    <TextBlock Style="{StaticResource LabelHeader}" Text="Mã Vận Đơn (Giao hàng)"/>
-                                    <TextBlock Style="{StaticResource ValueText}" Text="{Binding SelectedOrder.TrackingCode}" FontWeight="Bold" Foreground="#0D9488"/>
-                                </StackPanel>
-
-                                <!-- Notes -->
-                                <TextBlock Style="{StaticResource LabelHeader}" Text="Ghi Chú Đơn Hàng"/>
-                                <TextBlock Style="{StaticResource ValueText}" Text="{Binding SelectedOrder.Note}" FontStyle="Italic"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding SelectedOrder.Note}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding SelectedOrder.Note}" Value="">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </StackPanel.Style>
+                                            <TextBlock Style="{StaticResource LabelHeader}" Text="GHI CHÚ" Foreground="#0F766E"/>
+                                            <TextBlock FontSize="12.5" Foreground="#EF4444" Text="{Binding SelectedOrder.Note}" FontStyle="Italic"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
 
                                 <!-- Shipping Provider Selection (Only for Pending) -->
-                                <StackPanel Margin="0,16,0,0">
+                                <StackPanel Margin="0,0,0,20">
                                     <StackPanel.Style>
                                         <Style TargetType="StackPanel">
                                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -339,43 +371,48 @@
                                             </Style.Triggers>
                                         </Style>
                                     </StackPanel.Style>
-                                    <TextBlock Style="{StaticResource LabelHeader}" Text="Đơn Vị Vận Chuyển (Chọn trước khi giao hàng)" Foreground="#0D9488"/>
+                                    <TextBlock Text="Đơn vị vận chuyển (Chọn trước khi giao):" FontSize="12" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,6"/>
                                     <ComboBox ItemsSource="{Binding AvailableShippingProviders}" 
                                               SelectedItem="{Binding SelectedShippingProvider, Mode=TwoWay}"
-                                              Margin="0,4,0,0" Padding="8,6" FontSize="13" FontFamily="Segoe UI"
-                                              Background="White" BorderBrush="#E2E8F0" BorderThickness="1"/>
+                                              Padding="12,8" FontSize="13" FontFamily="Segoe UI"
+                                              Background="#F8FAFC" BorderBrush="#CBD5E1" BorderThickness="1"/>
                                 </StackPanel>
 
-                                <!-- Separator -->
-                                <Border BorderThickness="0,0,0,1" BorderBrush="#F1F5F9" Margin="0,4,0,14"/>
-
-                                <!-- Order items list -->
-                                <TextBlock Style="{StaticResource LabelHeader}" Text="Sản Phẩm Đã Đặt" Margin="0,0,0,10"/>
+                                <!-- Order items list (Cart format) -->
+                                <TextBlock Text="SẢN PHẨM TRONG GIỎ" FontSize="12.5" FontWeight="Bold" Foreground="#64748B" Margin="0,0,0,10"/>
+                                
                                 <ItemsControl ItemsSource="{Binding SelectedOrder.OrderDetails}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Background="#F8FAFC" CornerRadius="8" Padding="12" Margin="0,0,0,8" BorderThickness="1" BorderBrush="#F1F5F9">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <StackPanel Grid.Column="0">
-                                                        <TextBlock Text="{Binding ProductNameSnapshot}" FontSize="12" FontWeight="SemiBold" Foreground="#1E293B" TextWrapping="Wrap" FontFamily="Segoe UI"/>
-                                                        <TextBlock Text="{Binding UnitPrice, StringFormat={}{0:N0} đ}" FontSize="10.5" Foreground="#64748B" Margin="0,4,0,0" FontFamily="Segoe UI"/>
-                                                    </StackPanel>
-                                                    <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding Quantity, StringFormat={}x{0}}" FontSize="12.5" FontWeight="Bold" Foreground="#0D9488" HorizontalAlignment="Right" FontFamily="Segoe UI"/>
-                                                        <TextBlock Text="{Binding TotalPrice, StringFormat={}{0:N0} đ}" FontSize="11.5" FontWeight="SemiBold" Foreground="#1E293B" Margin="0,4,0,0" FontFamily="Segoe UI"/>
-                                                    </StackPanel>
-                                                </Grid>
-                                            </Border>
+                                            <Grid Margin="0,0,0,12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <!-- Product Icon/Dot -->
+                                                <Border Grid.Column="0" Width="36" Height="36" Background="#F1F5F9" CornerRadius="6" Margin="0,0,12,0" VerticalAlignment="Top">
+                                                    <materialDesign:PackIcon Kind="PackageVariantClosed" Width="20" Height="20" Foreground="#94A3B8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                
+                                                <StackPanel Grid.Column="1" Margin="0,0,16,0">
+                                                    <TextBlock Text="{Binding ProductNameSnapshot}" FontSize="13" FontWeight="SemiBold" Foreground="#1E293B" TextWrapping="Wrap" FontFamily="Segoe UI" LineHeight="18"/>
+                                                    <TextBlock FontSize="12" Foreground="#64748B" Margin="0,4,0,0" FontFamily="Segoe UI">
+                                                        <Run Text="{Binding UnitPrice, StringFormat={}{0:N0} đ}"/>
+                                                        <Run Text=" x "/>
+                                                        <Run Text="{Binding Quantity}" FontWeight="Bold" Foreground="#0F766E"/>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                                
+                                                <TextBlock Grid.Column="2" Text="{Binding TotalPrice, StringFormat={}{0:N0} đ}" FontSize="14" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center" FontFamily="Segoe UI"/>
+                                            </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
 
-                                <!-- Separator -->
-                                <Border BorderThickness="0,0,0,1" BorderBrush="#F1F5F9" Margin="0,8,0,14"/>
+                                <!-- Dashed Separator -->
+                                <Line X1="0" Y1="0" X2="500" Y2="0" Stroke="#CBD5E1" StrokeDashArray="4,4" StrokeThickness="1" Margin="0,10,0,16"/>
 
                                 <!-- Bill amount stats -->
                                 <Grid>
@@ -383,22 +420,22 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0">
-                                        <TextBlock Text="Tạm tính:" FontSize="11.5" Foreground="#64748B" Margin="0,0,0,4" FontFamily="Segoe UI"/>
-                                        <TextBlock Text="Phí ship:" FontSize="11.5" Foreground="#64748B" Margin="0,0,0,6" FontFamily="Segoe UI"/>
-                                        <TextBlock Text="TỔNG THANH TOÁN:" FontSize="13" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI"/>
+                                    <StackPanel Grid.Column="0" VerticalAlignment="Bottom">
+                                        <TextBlock Text="Tạm tính" FontSize="13" Foreground="#64748B" Margin="0,0,0,8" FontFamily="Segoe UI"/>
+                                        <TextBlock Text="Phí giao hàng" FontSize="13" Foreground="#64748B" Margin="0,0,0,16" FontFamily="Segoe UI"/>
+                                        <TextBlock Text="TỔNG CỘNG" FontSize="14" FontWeight="Bold" Foreground="#0F766E" FontFamily="Segoe UI"/>
                                     </StackPanel>
-                                    <StackPanel Grid.Column="1" HorizontalAlignment="Right">
-                                        <TextBlock Text="{Binding SelectedOrder.SubTotal, StringFormat={}{0:N0} đ}" FontSize="11.5" Foreground="#1E293B" HorizontalAlignment="Right" Margin="0,0,0,4" FontFamily="Segoe UI"/>
-                                        <TextBlock Text="{Binding SelectedOrder.ShippingFee, StringFormat={}{0:N0} đ}" FontSize="11.5" Foreground="#1E293B" HorizontalAlignment="Right" Margin="0,0,0,6" FontFamily="Segoe UI"/>
-                                        <TextBlock Text="{Binding SelectedOrder.TotalAmount, StringFormat={}{0:N0} đ}" FontSize="15" FontWeight="Bold" Foreground="#0D9488" HorizontalAlignment="Right" FontFamily="Segoe UI"/>
+                                    <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                                        <TextBlock Text="{Binding SelectedOrder.SubTotal, StringFormat={}{0:N0} đ}" FontSize="13" FontWeight="SemiBold" Foreground="#334155" HorizontalAlignment="Right" Margin="0,0,0,8" FontFamily="Segoe UI"/>
+                                        <TextBlock Text="{Binding SelectedOrder.ShippingFee, StringFormat={}{0:N0} đ}" FontSize="13" FontWeight="SemiBold" Foreground="#334155" HorizontalAlignment="Right" Margin="0,0,0,16" FontFamily="Segoe UI"/>
+                                        <TextBlock Text="{Binding SelectedOrder.TotalAmount, StringFormat={}{0:N0} đ}" FontSize="20" FontWeight="Bold" Foreground="#0F766E" HorizontalAlignment="Right" FontFamily="Segoe UI"/>
                                     </StackPanel>
                                 </Grid>
                             </StackPanel>
                         </ScrollViewer>
 
                         <!-- Actions Footer -->
-                        <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="#F1F5F9" Padding="24,16" CornerRadius="0,0,16,16">
+                        <Border Grid.Row="2" Background="#F8FAFC" BorderThickness="0,1,0,0" BorderBrush="#E2E8F0" Padding="24,16" CornerRadius="0,0,12,12">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>

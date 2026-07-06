@@ -52,5 +52,26 @@ namespace TMDT.Views.Seller
         {
             e.Handled = !System.Text.RegularExpressions.Regex.IsMatch(e.Text, @"[\d]");
         }
+
+        private void AddCustomer_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            var addWindow = new AddCustomerWindow();
+            addWindow.Owner = System.Windows.Window.GetWindow(this);
+            if (addWindow.ShowDialog() == true)
+            {
+                if (DataContext is TMDT.ViewModels.Seller.SellerPosViewModel vm && vm.SelectedTab != null)
+                {
+                    vm.SelectedTab.CustomerPhone = addWindow.RegisteredPhone;
+                }
+            }
+        }
+
+        private void VoucherComboBox_DropDownOpened(object sender, System.EventArgs e)
+        {
+            if (DataContext is TMDT.ViewModels.Seller.SellerPosViewModel vm)
+            {
+                _ = vm.LoadActiveVouchersAsync();
+            }
+        }
     }
 }

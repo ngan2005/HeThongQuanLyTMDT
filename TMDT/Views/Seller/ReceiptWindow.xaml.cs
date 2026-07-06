@@ -32,6 +32,12 @@ namespace TMDT.Views.Seller
             DataContext = vm;
         }
 
+        private void Header_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
+                this.DragMove();
+        }
+
         private void Print_Click(object sender, RoutedEventArgs e)
         {
             PrintDialog printDialog = new PrintDialog();

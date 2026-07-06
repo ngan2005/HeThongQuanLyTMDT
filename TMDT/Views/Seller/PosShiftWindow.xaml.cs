@@ -21,6 +21,18 @@ namespace TMDT.Views.Seller
             Loaded += (s, e) => txtOpeningFloat.Focus();
         }
 
+        private void Header_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+                this.DragMove();
+        }
+
+        private void btnClose_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+            Close();
+        }
+
         private void btnStart_Click(object sender, RoutedEventArgs e)
         {
             if (decimal.TryParse(txtOpeningFloat.Text.Replace(",", ""), out decimal amount))

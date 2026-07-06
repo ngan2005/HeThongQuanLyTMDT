@@ -115,7 +115,16 @@ namespace TMDT.ViewModels.Seller
 
                         var productsOfShop = await ctx.Products.AsNoTracking().Where(p => p.ShopId == shopId).ToListAsync();
                         TotalProducts = productsOfShop.Count;
-                        TotalSold = productsOfShop.Sum(p => p.SoldCount ?? 0);
+
+                        // Tính tổng số lượng sản phẩm ĐÃ BÁN từ các đơn hàng Completed
+                        var soldData = await ctx.OrderDetails
+                            .Include(od => od.Order)
+                            .Where(od => od.Order.ShopId == shopId && od.Order.OrderStatus == "Completed")
+                            .GroupBy(od => od.ProductId)
+                            .Select(g => new { ProductId = g.Key, Sold = g.Sum(x => x.Quantity ?? 0) })
+                            .ToListAsync();
+
+                        TotalSold = soldData.Sum(x => x.Sold);
 
                         ActiveOrders = await ctx.Orders.CountAsync(o => o.ShopId == shopId && o.OrderStatus == "Pending");
 
@@ -144,25 +153,26 @@ namespace TMDT.ViewModels.Seller
                             }
                         }
 
-                        // Sản phẩm bán chạy
-                        var topProducts = productsOfShop
-                            .OrderByDescending(p => p.SoldCount)
-                            .Take(4)
-                            .ToList();
+                        // Sản phẩm bán chạy (dựa trên thực tế số lượng đã bán)
+                        var topProductStats = soldData.OrderByDescending(x => x.Sold).Take(4).ToList();
 
-                        if (topProducts.Any())
+                        if (topProductStats.Any())
                         {
                             TopProducts.Clear();
-                            foreach (var prod in topProducts)
+                            foreach (var stat in topProductStats)
                             {
-                                TopProducts.Add(new SellerProductSummary
+                                var prod = productsOfShop.FirstOrDefault(p => p.ProductId == stat.ProductId);
+                                if (prod != null)
                                 {
-                                    ProductCode = prod.ProductCode ?? $"PROD-{prod.ProductId}",
-                                    ProductName = prod.ProductName,
-                                    Price = prod.Price,
-                                    SoldCount = prod.SoldCount ?? 0,
-                                    StockQuantity = prod.StockQuantity ?? 0
-                                });
+                                    TopProducts.Add(new SellerProductSummary
+                                    {
+                                        ProductCode = prod.ProductCode ?? $"PROD-{prod.ProductId}",
+                                        ProductName = prod.ProductName,
+                                        Price = prod.Price,
+                                        SoldCount = stat.Sold,
+                                        StockQuantity = prod.StockQuantity ?? 0
+                                    });
+                                }
                             }
                         }
 

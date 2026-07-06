@@ -17,6 +17,13 @@ namespace TMDT.Views.Seller
         {
             InitializeComponent();
             _shopId = shopId;
+            txtOrderCode.Focus();
+        }
+
+        private void Header_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+                this.DragMove();
         }
 
         private void txtOrderCode_KeyDown(object sender, KeyEventArgs e)

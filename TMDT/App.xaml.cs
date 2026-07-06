@@ -41,16 +41,27 @@ namespace TMDT
             }
         }
 
+        private bool _isLogging = false;
+
         private void LogException(Exception? ex, string source)
         {
             if (ex == null) return;
-            string logMessage = $"[{DateTime.Now}] Source: {source}\nException: {ex.GetType().Name}\nMessage: {ex.Message}\nStackTrace:\n{ex.StackTrace}\n\n";
+            if (_isLogging) return; // Prevent infinite recursion
+            _isLogging = true;
             try
             {
-                System.IO.File.AppendAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "crash.log"), logMessage);
+                string logMessage = $"[{DateTime.Now}] Source: {source}\nException: {ex.GetType().Name}\nMessage: {ex.Message}\nStackTrace:\n{ex.StackTrace}\n\n";
+                try
+                {
+                    System.IO.File.AppendAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "crash.log"), logMessage);
+                }
+                catch {}
+                MessageBox.Show($"Đã xảy ra lỗi hệ thống ({source}): {ex.Message}\nChi tiết xem tại crash.log", "Lỗi hệ thống", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            catch {}
-            MessageBox.Show($"Đã xảy ra lỗi hệ thống ({source}): {ex.Message}\nChi tiết xem tại crash.log", "Lỗi hệ thống", MessageBoxButton.OK, MessageBoxImage.Error);
+            finally
+            {
+                _isLogging = false;
+            }
         }
     }
 }

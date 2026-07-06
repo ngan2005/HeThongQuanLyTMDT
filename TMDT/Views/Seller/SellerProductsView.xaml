@@ -155,9 +155,10 @@
                         <Grid Grid.Column="2" Width="220" HorizontalAlignment="Right" VerticalAlignment="Center">
                             <TextBox Style="{StaticResource SearchBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Padding="28,8,12,8" ToolTip="Tìm theo Tên hoặc Mã sản phẩm"/>
                             <materialDesign:PackIcon Kind="Magnify" Width="16" Height="16" Foreground="#94A3B8" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                            <TextBlock IsHitTestVisible="False" Text="Tìm sản phẩm..." FontSize="12.5" Foreground="#94A3B8" VerticalAlignment="Center" Margin="28,0,12,0" FontFamily="Segoe UI">
+                            <TextBlock IsHitTestVisible="False" FontSize="12.5" Foreground="#94A3B8" VerticalAlignment="Center" Margin="28,0,12,0" FontFamily="Segoe UI">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="Tìm sản phẩm..."/>
                                         <Setter Property="Visibility" Value="Collapsed"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding SearchText}" Value="">

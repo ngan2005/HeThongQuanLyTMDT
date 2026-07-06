@@ -447,6 +447,25 @@ public class OrderService : IOrderService
                 shop.WalletBalance = (shop.WalletBalance ?? 0) + shopRevenue;
             }
 
+            // TÍCH ĐIỂM CHO KHÁCH HÀNG TẠI QUẦY (1 điểm = 10,000 VNĐ)
+            if (buyerId.HasValue && actualBuyer != null && actualBuyer.Email != "guest@pos.local")
+            {
+                int earnedPoints = (int)(totalAmount / 10000);
+                if (earnedPoints > 0)
+                {
+                    actualBuyer.LoyaltyPoints = (actualBuyer.LoyaltyPoints ?? 0) + earnedPoints;
+                    context.PointHistories.Add(new PointHistory
+                    {
+                        UserId = actualBuyer.UserId,
+                        Points = earnedPoints,
+                        TransactionType = "Earn",
+                        OrderId = order.OrderId,
+                        Description = $"Tích điểm từ đơn hàng POS {order.OrderCode}",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+            }
+
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
             return order;

@@ -137,27 +137,39 @@
                                                     <TextBlock Text="{Binding VoucherName}" FontSize="12" FontWeight="SemiBold" Foreground="#1E293B" TextTrimming="CharacterEllipsis" FontFamily="Segoe UI" MaxWidth="120"/>
                                                 </StackPanel>
 
-                                                <!-- Discount Value text -->
+                                                <!-- Discount Value text for Fixed Discount -->
                                                 <TextBlock FontSize="11.5" Foreground="#64748B" FontFamily="Segoe UI">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding DiscountType}" Value="Fixed">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
                                                     <Run Text="Giảm: "/>
-                                                    <Run Text="{Binding DiscountValue, StringFormat={}{0:N0}}" FontWeight="Bold" Foreground="#EA580C"/>
-                                                    <Style TargetType="TextBlock">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding DiscountType}" Value="Percentage">
-                                                                <Setter Property="Text">
-                                                                    <Setter.Value>
-                                                                        <TextBlock FontSize="11.5" Foreground="#64748B" FontFamily="Segoe UI">
-                                                                            <Run Text="Giảm: "/>
-                                                                            <Run Text="{Binding DiscountValue, StringFormat={}{0:N0}%}" FontWeight="Bold" Foreground="#EA580C"/>
-                                                                            <Run Text=" (Tối đa "/>
-                                                                            <Run Text="{Binding MaxDiscount, StringFormat={}{0:N0} đ}"/>
-                                                                            <Run Text=")"/>
-                                                                        </TextBlock>
-                                                                    </Setter.Value>
-                                                                </Setter>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
+                                                    <Run Text="{Binding DiscountValue, StringFormat={}{0:N0} đ}" FontWeight="Bold" Foreground="#EA580C"/>
+                                                </TextBlock>
+
+                                                <!-- Discount Value text for Percentage Discount -->
+                                                <TextBlock FontSize="11.5" Foreground="#64748B" FontFamily="Segoe UI">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding DiscountType}" Value="Percentage">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                    <Run Text="Giảm: "/>
+                                                    <Run Text="{Binding DiscountValue, StringFormat={}{0:N0}%}" FontWeight="Bold" Foreground="#EA580C"/>
+                                                    <Run Text=" (Tối đa "/>
+                                                    <Run Text="{Binding MaxDiscount, StringFormat={}{0:N0} đ}"/>
+                                                    <Run Text=")"/>
                                                 </TextBlock>
 
                                                 <!-- Order requirement -->

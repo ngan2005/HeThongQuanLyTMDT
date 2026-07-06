@@ -64,6 +64,7 @@ namespace TMDT.ViewModels.Seller
         public ICommand ShowWalletCommand { get; }
         public ICommand ShowProfileCommand { get; }
         public ICommand ShowSalesHistoryCommand { get; }
+        public ICommand ShowCustomersCommand { get; }
         public ICommand RegisterShopCommand { get; }
         public ICommand LogoutCommand { get; }
 
@@ -102,6 +103,7 @@ namespace TMDT.ViewModels.Seller
             ShowWalletCommand = new RelayCommand(o => { CurrentView = new SellerWalletViewModel(); ActiveMenu = "Wallet"; }, _ => HasShop);
             ShowProfileCommand = new RelayCommand(o => { CurrentView = new SellerProfileViewModel(); ActiveMenu = "Profile"; });
             ShowSalesHistoryCommand = new RelayCommand(o => { CurrentView = new SellerSalesHistoryViewModel(); ActiveMenu = "SalesHistory"; }, _ => HasShop);
+            ShowCustomersCommand = new RelayCommand(o => { CurrentView = new SellerCustomersViewModel(); ActiveMenu = "Customers"; }, _ => HasShop);
             RegisterShopCommand = new RelayCommand(_ => ExecuteRegisterShop());
             LogoutCommand = new RelayCommand(_ => ExecuteLogout());
 
