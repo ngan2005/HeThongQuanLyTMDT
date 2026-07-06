@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TMDT.Views.Seller"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1120"
              Background="#F8FAFC">
@@ -48,8 +49,8 @@
 
         <!-- HEADER -->
         <StackPanel Grid.Row="0" Margin="0,0,0,24">
-            <TextBlock Text="Tổng quan cửa hàng" FontSize="26" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,4"/>
-            <TextBlock Text="Chào mừng quay trở lại. Dưới đây là hoạt động kinh doanh của bạn hôm nay." FontSize="14" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI"/>
+            <TextBlock Text="Tổng quan cửa hàng" FontSize="26" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI" Margin="0,0,0,4"/>
+            <TextBlock Text="Chào mừng quay trở lại. Dưới đây là hoạt động kinh doanh của bạn hôm nay." FontSize="14" Foreground="#64748B" FontFamily="Segoe UI"/>
         </StackPanel>
 
         <!-- 5 STATS CARDS -->
@@ -76,19 +77,19 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="DOANH THU" FontSize="11.5" Foreground="#64748B" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,4,0"/>
+                        <TextBlock Grid.Column="0" Text="DOANH THU" FontSize="11.5" Foreground="#64748B" FontWeight="Bold" FontFamily="Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,4,0"/>
                         <Border Grid.Column="1" Width="32" Height="32" Background="#F0FDFA" CornerRadius="8">
                             <TextBlock Text="&#xE172;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#0D9488" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
 
                     <Viewbox Grid.Row="1" HorizontalAlignment="Left" Margin="0,0,0,8" MaxHeight="30">
-                        <TextBlock Text="{Binding WalletBalance, StringFormat={}{0:N0}}" FontSize="24" Foreground="#0F172A" FontWeight="ExtraBold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text="{Binding WalletBalance, StringFormat={}{0:N0}}" FontSize="24" Foreground="#0F172A" FontWeight="ExtraBold" FontFamily="Segoe UI"/>
                     </Viewbox>
                     
                     <StackPanel Grid.Row="2" Orientation="Horizontal">
                         <TextBlock Text="{Binding WalletTrendIcon}" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="{Binding WalletTrendColor}" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding WalletTrendText}" FontSize="11.5" Foreground="{Binding WalletTrendColor}" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding WalletTrendText}" FontSize="11.5" Foreground="{Binding WalletTrendColor}" FontFamily="Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -107,19 +108,19 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="ĐÃ BÁN" FontSize="11.5" Foreground="#64748B" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,4,0"/>
+                        <TextBlock Grid.Column="0" Text="ĐÃ BÁN" FontSize="11.5" Foreground="#64748B" FontWeight="Bold" FontFamily="Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,4,0"/>
                         <Border Grid.Column="1" Width="32" Height="32" Background="#EFF6FF" CornerRadius="8">
                             <TextBlock Text="&#xE8A1;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#2563EB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
 
                     <Viewbox Grid.Row="1" HorizontalAlignment="Left" Margin="0,0,0,8" MaxHeight="30">
-                        <TextBlock Text="{Binding TotalSold, StringFormat={}{0:N0}}" FontSize="24" Foreground="#0F172A" FontWeight="ExtraBold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text="{Binding TotalSold, StringFormat={}{0:N0}}" FontSize="24" Foreground="#0F172A" FontWeight="ExtraBold" FontFamily="Segoe UI"/>
                     </Viewbox>
                     
                     <StackPanel Grid.Row="2" Orientation="Horizontal">
                         <TextBlock Text="{Binding TotalSoldTrendIcon}" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="{Binding TotalSoldTrendColor}" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding TotalSoldTrendText}" FontSize="11.5" Foreground="{Binding TotalSoldTrendColor}" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding TotalSoldTrendText}" FontSize="11.5" Foreground="{Binding TotalSoldTrendColor}" FontFamily="Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -138,18 +139,18 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="ĐƠN CHỜ" FontSize="11.5" Foreground="#64748B" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,4,0"/>
+                        <TextBlock Grid.Column="0" Text="ĐƠN CHỜ" FontSize="11.5" Foreground="#64748B" FontWeight="Bold" FontFamily="Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,4,0"/>
                         <Border Grid.Column="1" Width="32" Height="32" Background="#FEF2F2" CornerRadius="8">
                             <TextBlock Text="&#xE8C7;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#DC2626" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
 
                     <Viewbox Grid.Row="1" HorizontalAlignment="Left" Margin="0,0,0,8" MaxHeight="30">
-                        <TextBlock Text="{Binding ActiveOrders}" FontSize="24" Foreground="#0F172A" FontWeight="ExtraBold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text="{Binding ActiveOrders}" FontSize="24" Foreground="#0F172A" FontWeight="ExtraBold" FontFamily="Segoe UI"/>
                     </Viewbox>
                     
                     <StackPanel Grid.Row="2" Orientation="Horizontal">
-                        <TextBlock Text="{Binding ActiveOrdersTrendText}" FontSize="11.5" Foreground="{Binding ActiveOrdersTrendColor}" FontFamily="Be Vietnam Pro, Segoe UI" FontWeight="Medium" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding ActiveOrdersTrendText}" FontSize="11.5" Foreground="{Binding ActiveOrdersTrendColor}" FontFamily="Segoe UI" FontWeight="Medium" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -168,18 +169,18 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="SẢN PHẨM" FontSize="11.5" Foreground="#64748B" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,4,0"/>
+                        <TextBlock Grid.Column="0" Text="SẢN PHẨM" FontSize="11.5" Foreground="#64748B" FontWeight="Bold" FontFamily="Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,4,0"/>
                         <Border Grid.Column="1" Width="32" Height="32" Background="#EEF2FF" CornerRadius="8">
                             <TextBlock Text="&#xE179;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#4F46E5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
 
                     <Viewbox Grid.Row="1" HorizontalAlignment="Left" Margin="0,0,0,8" MaxHeight="30">
-                        <TextBlock Text="{Binding TotalProducts, StringFormat={}{0:N0}}" FontSize="24" Foreground="#0F172A" FontWeight="ExtraBold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text="{Binding TotalProducts, StringFormat={}{0:N0}}" FontSize="24" Foreground="#0F172A" FontWeight="ExtraBold" FontFamily="Segoe UI"/>
                     </Viewbox>
                     
                     <StackPanel Grid.Row="2" Orientation="Horizontal">
-                        <TextBlock Text="{Binding TotalProductsTrendText}" FontSize="11.5" Foreground="{Binding TotalProductsTrendColor}" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding TotalProductsTrendText}" FontSize="11.5" Foreground="{Binding TotalProductsTrendColor}" FontFamily="Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -198,18 +199,18 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="ĐÁNH GIÁ" FontSize="11.5" Foreground="#64748B" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,4,0"/>
+                        <TextBlock Grid.Column="0" Text="ĐÁNH GIÁ" FontSize="11.5" Foreground="#64748B" FontWeight="Bold" FontFamily="Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,4,0"/>
                         <Border Grid.Column="1" Width="32" Height="32" Background="#FEF9C3" CornerRadius="8">
                             <TextBlock Text="&#xE734;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#CA8A04" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
 
                     <Viewbox Grid.Row="1" HorizontalAlignment="Left" Margin="0,0,0,8" MaxHeight="30">
-                        <TextBlock Text="{Binding Rating, StringFormat={}{0:F1} ★}" FontSize="24" Foreground="#CA8A04" FontWeight="ExtraBold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text="{Binding Rating, StringFormat={}{0:F1} ★}" FontSize="24" Foreground="#CA8A04" FontWeight="ExtraBold" FontFamily="Segoe UI"/>
                     </Viewbox>
                     
                     <StackPanel Grid.Row="2" Orientation="Horizontal">
-                        <TextBlock Text="{Binding RatingTrendText}" FontSize="11.5" Foreground="{Binding RatingTrendColor}" FontWeight="Medium" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding RatingTrendText}" FontSize="11.5" Foreground="{Binding RatingTrendColor}" FontWeight="Medium" FontFamily="Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -232,50 +233,39 @@
 
                     <!-- Chart Header -->
                     <Grid Grid.Row="0" Margin="0,0,0,16">
-                        <TextBlock Text="Biểu đồ doanh thu" FontSize="16" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center"/>
-                        <ComboBox HorizontalAlignment="Right" Width="130" SelectedIndex="0" Background="#F8FAFC" BorderBrush="#E2E8F0" Padding="8,6" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="13">
+                        <TextBlock Text="Biểu đồ doanh thu" FontSize="16" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                        <ComboBox HorizontalAlignment="Right" Width="130" SelectedIndex="0" Background="#F8FAFC" BorderBrush="#E2E8F0" Padding="8,6" FontFamily="Segoe UI" FontSize="13">
                             <ComboBoxItem Content="7 Ngày qua"/>
                             <ComboBoxItem Content="30 Ngày qua"/>
                             <ComboBoxItem Content="Năm nay"/>
                         </ComboBox>
                     </Grid>
 
-                    <!-- Sparkline Line Chart (SVG Replacement) -->
-                    <Grid Grid.Row="1" Margin="24,16,16,24">
-                        <!-- Y-Axis Labels -->
-                        <TextBlock Text="20M" FontSize="11" Foreground="#94A3B8" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-24,-8,0,0"/>
-                        <TextBlock Text="10M" FontSize="11" Foreground="#94A3B8" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="-24,0,0,0"/>
-                        <TextBlock Text="0" FontSize="11" Foreground="#94A3B8" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-16,0,0,-8"/>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.5*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
                         
-                        <!-- Grid Lines -->
-                        <Border BorderThickness="0,1,0,0" BorderBrush="#F1F5F9" VerticalAlignment="Top"/>
-                        <Border BorderThickness="0,1,0,0" BorderBrush="#F1F5F9" VerticalAlignment="Center"/>
-                        <Border BorderThickness="0,0,0,1" BorderBrush="#F1F5F9" VerticalAlignment="Bottom"/>
+                        <!-- Doanh thu Cột -->
+                        <lvc:CartesianChart Grid.Column="0"
+                                            Series="{Binding RevenueSeries}"
+                                            XAxes="{Binding XAxes}"
+                                            TooltipPosition="Top"
+                                            Margin="0,0,16,0"/>
 
-                        <!-- Polyline Graph -->
-                        <Polygon Points="0,100 0,60 20,40 40,70 60,30 80,45 100,10 100,100" Stretch="Fill" Opacity="0.15">
-                            <Polygon.Fill>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                    <GradientStop Color="#0D9488" Offset="0"/>
-                                    <GradientStop Color="#FFFFFF" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Polygon.Fill>
-                        </Polygon>
-                        <Polyline Points="0,60 20,40 40,70 60,30 80,45 100,10" Stroke="#0D9488" StrokeThickness="2.5" Stretch="Fill" StrokeLineJoin="Round" StrokeEndLineCap="Round"/>
-
-                        <!-- X-Axis Labels using ItemsControl -->
-                        <ItemsControl ItemsSource="{Binding RevenueTrend}" Margin="0,0,0,-24" VerticalAlignment="Bottom">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <UniformGrid Columns="7" Rows="1"/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding DayName}" FontSize="11" Foreground="#94A3B8" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,10,0,0"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <!-- Tỷ lệ Đơn hàng Tròn -->
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Nguồn Đơn Hàng" HorizontalAlignment="Center" FontSize="14" FontWeight="SemiBold" Foreground="#64748B" Margin="0,0,0,8"/>
+                            <lvc:PieChart Grid.Row="1"
+                                          Series="{Binding OrderSourceSeries}"
+                                          TooltipPosition="Right"
+                                          LegendPosition="Bottom"/>
+                        </Grid>
                     </Grid>
                 </Grid>
             </Border>
@@ -290,8 +280,8 @@
 
                     <Border Grid.Row="0" Margin="0,0,0,16" Padding="0,0,0,12" BorderThickness="0,0,0,1" BorderBrush="#F1F5F9">
                         <Grid>
-                            <TextBlock Text="Đơn Hàng Gần Đây" FontSize="16" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center"/>
-                            <TextBlock Text="Xem tất cả" FontSize="13" Foreground="#0D9488" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Right" VerticalAlignment="Center" Cursor="Hand">
+                            <TextBlock Text="Đơn Hàng Gần Đây" FontSize="16" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                            <TextBlock Text="Xem tất cả" FontSize="13" Foreground="#0D9488" FontFamily="Segoe UI" HorizontalAlignment="Right" VerticalAlignment="Center" Cursor="Hand">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Style.Triggers>
@@ -329,11 +319,11 @@
                                                         <ColumnDefinition Width="*"/>
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
-                                                    <TextBlock Grid.Column="0" Text="{Binding OrderCode}" FontSize="13.5" FontWeight="SemiBold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Left" TextTrimming="CharacterEllipsis"/>
-                                                    <TextBlock Grid.Column="1" Text="{Binding TimeAgo}" FontSize="11" Foreground="#94A3B8" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Right" Margin="8,0,0,0"/>
+                                                    <TextBlock Grid.Column="0" Text="{Binding OrderCode}" FontSize="13.5" FontWeight="SemiBold" Foreground="#1E293B" FontFamily="Segoe UI" HorizontalAlignment="Left" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding TimeAgo}" FontSize="11" Foreground="#94A3B8" FontFamily="Segoe UI" HorizontalAlignment="Right" Margin="8,0,0,0"/>
                                                 </Grid>
                                                 
-                                                <TextBlock Text="{Binding BuyerName}" FontSize="12.5" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI" TextTrimming="CharacterEllipsis" Margin="0,0,0,6"/>
+                                                <TextBlock Text="{Binding BuyerName}" FontSize="12.5" Foreground="#64748B" FontFamily="Segoe UI" TextTrimming="CharacterEllipsis" Margin="0,0,0,6"/>
                                                 
                                                 <!-- Status Badge -->
                                                 <Border CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
@@ -352,7 +342,7 @@
                                                             </Style.Triggers>
                                                         </Style>
                                                     </Border.Style>
-                                                    <TextBlock FontSize="10" FontWeight="SemiBold" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center">
+                                                    <TextBlock FontSize="10" FontWeight="SemiBold" FontFamily="Segoe UI" VerticalAlignment="Center">
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">
                                                                 <Style.Triggers>
@@ -376,7 +366,7 @@
                                             </StackPanel>
 
                                             <!-- Price -->
-                                            <TextBlock Grid.Column="2" Text="{Binding TotalAmount, StringFormat={}{0:N0} đ}" FontSize="13.5" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding TotalAmount, StringFormat={}{0:N0} đ}" FontSize="13.5" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI" VerticalAlignment="Center" Margin="12,0,0,0"/>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>

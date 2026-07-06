@@ -68,7 +68,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     
-                    <TextBlock Grid.Column="0" Text="Khuyến Mãi &amp; Voucher Của Shop" FontSize="16" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                    <TextBlock Grid.Column="0" Text="Khuyến Mãi &amp; Voucher Của Shop" FontSize="16" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center" FontFamily="Segoe UI"/>
                     
                     <Button Grid.Column="1" Click="OpenCreateVoucher_Click" HorizontalAlignment="Right" Background="#0D9488" Foreground="White" BorderThickness="0" Height="34" Padding="16,0" Cursor="Hand" VerticalAlignment="Center">
                         <Button.Template>
@@ -76,7 +76,7 @@
                                 <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE109;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                        <TextBlock Text=" Đăng voucher mới" FontSize="12.5" Foreground="#FFFFFF" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        <TextBlock Text=" Đăng voucher mới" FontSize="12.5" Foreground="#FFFFFF" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Segoe UI"/>
                                     </StackPanel>
                                 </Border>
                             </ControlTemplate>
@@ -112,7 +112,7 @@
                                                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                                     <!-- Icon coupon -->
                                                     <TextBlock Text="&#xE1A1;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="#FFFFFF" HorizontalAlignment="Center"/>
-                                                    <TextBlock Text="VOUCHER" FontSize="9.5" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                    <TextBlock Text="VOUCHER" FontSize="9.5" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center" Margin="0,4,0,0" FontFamily="Segoe UI"/>
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
@@ -132,13 +132,13 @@
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                                                     <!-- Coupon Code Badge -->
                                                     <Border Background="#F0FDFA" BorderBrush="#0D9488" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
-                                                        <TextBlock Text="{Binding VoucherCode}" FontSize="11" FontWeight="Bold" Foreground="#0D9488" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                        <TextBlock Text="{Binding VoucherCode}" FontSize="11" FontWeight="Bold" Foreground="#0D9488" FontFamily="Segoe UI"/>
                                                     </Border>
-                                                    <TextBlock Text="{Binding VoucherName}" FontSize="12" FontWeight="SemiBold" Foreground="#1E293B" TextTrimming="CharacterEllipsis" FontFamily="Be Vietnam Pro, Segoe UI" MaxWidth="120"/>
+                                                    <TextBlock Text="{Binding VoucherName}" FontSize="12" FontWeight="SemiBold" Foreground="#1E293B" TextTrimming="CharacterEllipsis" FontFamily="Segoe UI" MaxWidth="120"/>
                                                 </StackPanel>
 
                                                 <!-- Discount Value text -->
-                                                <TextBlock FontSize="11.5" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI">
+                                                <TextBlock FontSize="11.5" Foreground="#64748B" FontFamily="Segoe UI">
                                                     <Run Text="Giảm: "/>
                                                     <Run Text="{Binding DiscountValue, StringFormat={}{0:N0}}" FontWeight="Bold" Foreground="#EA580C"/>
                                                     <Style TargetType="TextBlock">
@@ -146,7 +146,7 @@
                                                             <DataTrigger Binding="{Binding DiscountType}" Value="Percentage">
                                                                 <Setter Property="Text">
                                                                     <Setter.Value>
-                                                                        <TextBlock FontSize="11.5" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI">
+                                                                        <TextBlock FontSize="11.5" Foreground="#64748B" FontFamily="Segoe UI">
                                                                             <Run Text="Giảm: "/>
                                                                             <Run Text="{Binding DiscountValue, StringFormat={}{0:N0}%}" FontWeight="Bold" Foreground="#EA580C"/>
                                                                             <Run Text=" (Tối đa "/>
@@ -161,14 +161,14 @@
                                                 </TextBlock>
 
                                                 <!-- Order requirement -->
-                                                <TextBlock Text="{Binding MinOrderValue, StringFormat={}Đơn tối thiểu: {0:N0} đ}" FontSize="10.5" Foreground="#94A3B8" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                                <TextBlock Text="{Binding EndDate, StringFormat={}Hạn dùng: {0:dd/MM/yyyy}}" FontSize="10.5" Foreground="#94A3B8" Margin="0,2,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                <TextBlock Text="{Binding MinOrderValue, StringFormat={}Đơn tối thiểu: {0:N0} đ}" FontSize="10.5" Foreground="#94A3B8" Margin="0,4,0,0" FontFamily="Segoe UI"/>
+                                                <TextBlock Text="{Binding EndDate, StringFormat={}Hạn dùng: {0:dd/MM/yyyy}}" FontSize="10.5" Foreground="#94A3B8" Margin="0,2,0,0" FontFamily="Segoe UI"/>
                                             </StackPanel>
 
                                             <!-- Quick Action: Toggle Status -->
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="4,0,0,0">
                                                 <!-- Used count -->
-                                                <TextBlock Text="{Binding UsedCount, StringFormat={}{0} đã dùng}" FontSize="10" Foreground="#64748B" HorizontalAlignment="Right" Margin="0,0,0,12" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                <TextBlock Text="{Binding UsedCount, StringFormat={}{0} đã dùng}" FontSize="10" Foreground="#64748B" HorizontalAlignment="Right" Margin="0,0,0,12" FontFamily="Segoe UI"/>
                                                 
                                                 <!-- Toggle active button -->
                                                 <Button Content="Tạm dừng" FontSize="10" Padding="8,4" Cursor="Hand"
@@ -230,7 +230,7 @@
                         <!-- Header -->
                         <Border Grid.Row="0" Background="#0D9488" CornerRadius="16,16,0,0" Padding="24,18">
                             <Grid>
-                                <TextBlock Text="Tạo Mã Giảm Giá Mới" FontSize="15" FontWeight="Bold" Foreground="White" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="Tạo Mã Giảm Giá Mới" FontSize="15" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
                                 <Button HorizontalAlignment="Right" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" Cursor="Hand" Click="CloseLightbox_Click">
                                     <TextBlock Text="&#xE10A;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="White"/>
                                 </Button>
@@ -323,7 +323,7 @@
                                  <Button.Content>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE105;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                        <TextBlock Text=" Tạo &amp; Phát Hành Voucher" FontSize="12.5" Foreground="#FFFFFF" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        <TextBlock Text=" Tạo &amp; Phát Hành Voucher" FontSize="12.5" Foreground="#FFFFFF" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Segoe UI"/>
                                     </StackPanel>
                                 </Button.Content>
                                 <Button.Style>

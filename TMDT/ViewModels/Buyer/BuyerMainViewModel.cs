@@ -19,6 +19,10 @@ namespace TMDT.ViewModels.Buyer
         private string _searchQuery = "";
         private string _currentPage = "Home";
 
+        public BuyerChatViewModel ChatViewModel { get; } = new BuyerChatViewModel();
+
+        public ObservableCollection<object> Notifications { get; } = new();
+
         public ViewModelBase CurrentViewModel
         {
             get => _currentViewModel;
@@ -171,11 +175,18 @@ namespace TMDT.ViewModels.Buyer
             CurrentViewModel = new WishlistViewModel(this);
         }
 
-        public void NavigateProducts(string initialSearchQuery = "")
+        public void NavigateProducts(string initialSearchQuery = "", int? shopId = null)
         {
             PageTitle = "Sản phẩm";
             CurrentPage = "Products";
-            CurrentViewModel = new BuyerProductsViewModel(this, initialSearchQuery);
+            CurrentViewModel = new BuyerProductsViewModel(this, initialSearchQuery, shopId);
+        }
+
+        public void NavigateShop(int shopId)
+        {
+            PageTitle = "Cửa hàng";
+            CurrentPage = "Shop";
+            CurrentViewModel = new BuyerShopViewModel(shopId, this);
         }
 
         public void NavigatePromotions()

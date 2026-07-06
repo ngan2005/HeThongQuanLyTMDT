@@ -2,9 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TMDT.Models;
 using TMDT.Utilities;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
+using SkiaSharp;
 
 namespace TMDT.ViewModels.Seller
 {
@@ -62,6 +67,16 @@ namespace TMDT.ViewModels.Seller
         public ObservableCollection<SellerOrderSummary> RecentOrders { get; set; }
         public ObservableCollection<SellerProductSummary> TopProducts { get; set; }
         public ObservableCollection<SellerRevenueTrendPoint> RevenueTrend { get; set; }
+        
+        // LiveCharts
+        private ISeries[] _revenueSeries;
+        public ISeries[] RevenueSeries { get => _revenueSeries; set { _revenueSeries = value; OnPropertyChanged(); } }
+        
+        private Axis[] _xAxes;
+        public Axis[] XAxes { get => _xAxes; set { _xAxes = value; OnPropertyChanged(); } }
+
+        private ISeries[] _orderSourceSeries;
+        public ISeries[] OrderSourceSeries { get => _orderSourceSeries; set { _orderSourceSeries = value; OnPropertyChanged(); } }
 
         public SellerDashboardViewModel()
         {
@@ -151,32 +166,60 @@ namespace TMDT.ViewModels.Seller
                             }
                         }
 
-                        // Biểu đồ doanh thu 7 ngày qua
+                        // LiveCharts: Biểu đồ doanh thu 7 ngày qua
                         var last7Days = Enumerable.Range(0, 7).Select(i => DateTime.Now.Date.AddDays(-i)).Reverse().ToList();
-                        var rawTrend = new List<SellerRevenueTrendPoint>();
+                        var revenues = new List<double>();
+                        var days = new List<string>();
+                        int posOrdersCount = 0;
+                        int onlineOrdersCount = 0;
 
+                        // Tính dữ liệu doanh thu
                         foreach (var date in last7Days)
                         {
                             var dailyOrders = await ctx.Orders.AsNoTracking()
                                 .Where(o => o.ShopId == shopId && o.OrderDate.HasValue && o.OrderDate.Value.Date == date && o.OrderStatus != "Cancelled")
                                 .ToListAsync();
 
-                            rawTrend.Add(new SellerRevenueTrendPoint
-                            {
-                                DayName = GetVietnameseDayOfWeek(date.DayOfWeek),
-                                Revenue = dailyOrders.Sum(o => o.TotalAmount ?? 0)
-                            });
+                            revenues.Add((double)dailyOrders.Sum(o => o.TotalAmount ?? 0));
+                            days.Add(GetVietnameseDayOfWeek(date.DayOfWeek));
                         }
 
-                        decimal maxRevenue = rawTrend.Any() ? rawTrend.Max(t => t.Revenue) : 0;
-                        if (maxRevenue == 0) maxRevenue = 1;
+                        // Tính nguồn đơn hàng (POS vs Online) trong 7 ngày
+                        var all7DaysOrders = await ctx.Orders.AsNoTracking()
+                            .Where(o => o.ShopId == shopId && o.OrderStatus != "Cancelled" && o.OrderDate >= last7Days.First())
+                            .ToListAsync();
+                            
+                        posOrdersCount = all7DaysOrders.Count(o => o.AddressId == null);
+                        onlineOrdersCount = all7DaysOrders.Count(o => o.AddressId != null);
 
-                        RevenueTrend.Clear();
-                        foreach (var p in rawTrend)
+                        RevenueSeries = new ISeries[]
                         {
-                            p.BarHeight = p.Revenue > 0 ? (double)(p.Revenue / maxRevenue * 150) : 5;
-                            RevenueTrend.Add(p);
-                        }
+                            new ColumnSeries<double>
+                            {
+                                Values = revenues,
+                                Name = "Doanh thu",
+                                Fill = new SolidColorPaint(SKColors.Teal),
+                                MaxBarWidth = 40,
+                                Rx = 8,
+                                Ry = 8
+                            }
+                        };
+
+                        XAxes = new Axis[]
+                        {
+                            new Axis
+                            {
+                                Labels = days,
+                                LabelsPaint = new SolidColorPaint(SKColors.SlateGray),
+                                TextSize = 12
+                            }
+                        };
+
+                        OrderSourceSeries = new ISeries[]
+                        {
+                            new PieSeries<int> { Values = new[] { posOrdersCount }, Name = "Đơn POS", Fill = new SolidColorPaint(SKColors.Teal) },
+                            new PieSeries<int> { Values = new[] { onlineOrdersCount }, Name = "Đơn Online", Fill = new SolidColorPaint(SKColors.Orange) }
+                        };
 
                         // TÍNH TOÁN TREND THẬT SỰ
                         var last7DaysStart = DateTime.Now.Date.AddDays(-7);
@@ -251,25 +294,38 @@ namespace TMDT.ViewModels.Seller
             TopProducts.Add(new SellerProductSummary { ProductCode = "ROBO-QREVO", ProductName = "Robot Hút Bụi Lau Nhà Roborock Q Revo", Price = 14500000, SoldCount = 30, StockQuantity = 15 });
             TopProducts.Add(new SellerProductSummary { ProductCode = "SONY-WH1000", ProductName = "Tai nghe Chống Ồn Sony WH-1000XM5", Price = 6490000, SoldCount = 12, StockQuantity = 8 });
 
-            RevenueTrend.Clear();
-            var rawTrend = new List<SellerRevenueTrendPoint>
+            // LiveCharts Mock Data
+            var revenues = new List<double> { 4500000, 8200000, 6400000, 12900000, 15100000, 21800000, 18500000 };
+            var days = new List<string> { "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật" };
+
+            RevenueSeries = new ISeries[]
             {
-                new SellerRevenueTrendPoint { DayName = "Thứ 2", Revenue = 4500000 },
-                new SellerRevenueTrendPoint { DayName = "Thứ 3", Revenue = 8200000 },
-                new SellerRevenueTrendPoint { DayName = "Thứ 4", Revenue = 6400000 },
-                new SellerRevenueTrendPoint { DayName = "Thứ 5", Revenue = 12900000 },
-                new SellerRevenueTrendPoint { DayName = "Thứ 6", Revenue = 15100000 },
-                new SellerRevenueTrendPoint { DayName = "Thứ 7", Revenue = 21800000 },
-                new SellerRevenueTrendPoint { DayName = "Chủ Nhật", Revenue = 18500000 }
+                new ColumnSeries<double>
+                {
+                    Values = revenues,
+                    Name = "Doanh thu",
+                    Fill = new SolidColorPaint(SKColors.Teal),
+                    MaxBarWidth = 40,
+                    Rx = 8,
+                    Ry = 8
+                }
             };
 
-            decimal maxRevenue = rawTrend.Max(t => t.Revenue);
-            if (maxRevenue == 0) maxRevenue = 1;
-            foreach (var p in rawTrend)
+            XAxes = new Axis[]
             {
-                p.BarHeight = (double)(p.Revenue / maxRevenue * 150);
-                RevenueTrend.Add(p);
-            }
+                new Axis
+                {
+                    Labels = days,
+                    LabelsPaint = new SolidColorPaint(SKColors.SlateGray),
+                    TextSize = 12
+                }
+            };
+
+            OrderSourceSeries = new ISeries[]
+            {
+                new PieSeries<int> { Values = new[] { 45 }, Name = "Đơn POS", Fill = new SolidColorPaint(SKColors.Teal) },
+                new PieSeries<int> { Values = new[] { 120 }, Name = "Đơn Online", Fill = new SolidColorPaint(SKColors.Orange) }
+            };
         }
 
         private string GetVietnameseDayOfWeek(DayOfWeek day)

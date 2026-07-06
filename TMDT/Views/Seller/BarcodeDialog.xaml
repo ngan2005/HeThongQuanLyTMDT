@@ -1,0 +1,70 @@
+<Window x:Class="TMDT.Views.Seller.BarcodeDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Mã vạch sản phẩm" Height="450" Width="400"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent">
+    <Window.Resources>
+        <DropShadowEffect x:Key="CardShadow" BlurRadius="16" ShadowDepth="2" Opacity="0.07" Color="#000" Direction="270"/>
+    </Window.Resources>
+
+    <Border Background="White" CornerRadius="16" BorderBrush="#E2E8F0" BorderThickness="1" Effect="{StaticResource CardShadow}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Grid Grid.Row="0" Background="#F8FAFC" Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Text="Tạo Mã QR / Mã vạch" FontSize="18" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center" Margin="20,15"/>
+                
+                <Button Grid.Column="1" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Đóng" Click="CloseButton_Click" Margin="0,0,10,0">
+                    <materialDesign:PackIcon Kind="Close" Width="24" Height="24" Foreground="#64748B"/>
+                </Button>
+                
+                <Border Grid.ColumnSpan="2" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" VerticalAlignment="Bottom"/>
+            </Grid>
+
+            <!-- Content -->
+            <StackPanel Grid.Row="1" Margin="20" HorizontalAlignment="Center">
+                <TextBlock Text="{Binding ProductName}" FontSize="16" FontWeight="SemiBold" Foreground="#1E293B" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,10" MaxWidth="320"/>
+                
+                <!-- Toggle QR or Barcode -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,20">
+                    <RadioButton Content="Mã QR" IsChecked="{Binding IsQRCode}" Margin="0,0,10,0" Padding="15,5" Cursor="Hand" />
+                    <RadioButton Content="Mã vạch sọc" IsChecked="{Binding IsBarcode}" Padding="15,5" Cursor="Hand" />
+                </StackPanel>
+                
+                <!-- Barcode Image -->
+                <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="10" MinHeight="200" MinWidth="200">
+                    <Image Source="{Binding BarcodeImage}" Stretch="Uniform" MaxHeight="200" MaxWidth="300" RenderOptions.BitmapScalingMode="HighQuality"/>
+                </Border>
+            </StackPanel>
+
+            <!-- Footer Buttons -->
+            <Border Grid.Row="2" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="20,15">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Button Grid.Column="0" Content="Lưu hình ảnh" Command="{Binding SaveImageCommand}" Style="{StaticResource MaterialDesignOutlinedButton}" FontWeight="SemiBold"/>
+                    <Button Grid.Column="2" Content="In mã" Command="{Binding PrintCommand}" Style="{StaticResource MaterialDesignFlatDarkBgButton}" FontWeight="SemiBold"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

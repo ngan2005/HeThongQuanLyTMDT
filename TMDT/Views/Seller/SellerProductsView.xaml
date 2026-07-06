@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TMDT.Views.Seller"
              xmlns:converters="clr-namespace:TMDT.Converters"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="580" d:DesignWidth="820">
 
@@ -142,28 +143,31 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         
-                        <TextBlock Grid.Column="0" Text="Danh Sách Sản Phẩm" FontSize="18" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Grid.Column="0" Text="Danh Sách Sản Phẩm" FontSize="18" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center" FontFamily="Segoe UI"/>
                         
                         <Button Grid.Column="1" Click="AddNewProduct_Click" Margin="20,0,0,0" Background="Transparent" BorderThickness="0" Cursor="Hand" ToolTip="Đăng bán sản phẩm mới" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE109;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#0D9488" FontWeight="Bold" VerticalAlignment="Center"/>
-                                <TextBlock Text=" Đăng bán sản phẩm mới" FontSize="13" Foreground="#0D9488" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <materialDesign:PackIcon Kind="PlusCircleOutline" Width="18" Height="18" Foreground="#0D9488" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Đăng bán sản phẩm mới" FontSize="13" Foreground="#0D9488" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Segoe UI"/>
                             </StackPanel>
                         </Button>
                         
-                        <TextBox Grid.Column="2" Style="{StaticResource SearchBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Width="220" HorizontalAlignment="Right" VerticalAlignment="Center" ToolTip="Tìm theo Tên hoặc Mã sản phẩm"/>
-                        <TextBlock Grid.Column="2" IsHitTestVisible="False" Text="&#xE721; Tìm sản phẩm..." FontFamily="Segoe MDL2 Assets" FontSize="11.5" Foreground="#94A3B8" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SearchText}" Value="">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
+                        <Grid Grid.Column="2" Width="220" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBox Style="{StaticResource SearchBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Padding="28,8,12,8" ToolTip="Tìm theo Tên hoặc Mã sản phẩm"/>
+                            <materialDesign:PackIcon Kind="Magnify" Width="16" Height="16" Foreground="#94A3B8" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            <TextBlock IsHitTestVisible="False" Text="Tìm sản phẩm..." FontSize="12.5" Foreground="#94A3B8" VerticalAlignment="Center" Margin="28,0,12,0" FontFamily="Segoe UI">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SearchText}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
                     </Grid>
 
                     <!-- Filters bar -->
@@ -276,7 +280,7 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <TextBlock FontSize="10.5" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center">
+                                        <TextBlock FontSize="10.5" FontWeight="Bold" FontFamily="Segoe UI" VerticalAlignment="Center">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Style.Triggers>
@@ -301,14 +305,24 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="Thao Tác" Width="90">
+                        <DataGridTemplateColumn Header="Thao Tác" Width="120">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Button Click="OpenDetail_Click" Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="4" ToolTip="Xem chi tiết &amp; Chỉnh sửa" HorizontalAlignment="Center">
-                                        <Border Width="28" Height="28" CornerRadius="6" Background="#F1F5F9">
-                                            <TextBlock Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </Button>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <!-- Edit Button -->
+                                        <Button Click="OpenDetail_Click" Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="4" ToolTip="Xem chi tiết &amp; Chỉnh sửa" Margin="0,0,5,0">
+                                            <Border Width="28" Height="28" CornerRadius="6" Background="#F1F5F9">
+                                                <materialDesign:PackIcon Kind="PencilOutline" Width="14" Height="14" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </Button>
+                                        
+                                        <!-- Barcode Button -->
+                                        <Button Command="{Binding DataContext.ShowBarcodeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="4" ToolTip="Tạo mã vạch / QR">
+                                            <Border Width="28" Height="28" CornerRadius="6" Background="#F0FDFA">
+                                                <materialDesign:PackIcon Kind="BarcodeScan" Width="14" Height="14" Foreground="#0D9488" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </Button>
+                                    </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -322,7 +336,7 @@
         <!-- ========================================== -->
         <Grid x:Name="LightboxOverlay" Visibility="Collapsed" Background="#990F172A" Grid.ColumnSpan="1" MouseDown="LightboxOverlay_MouseDown">
             <Border Background="#FFFFFF" CornerRadius="16" BorderThickness="1" BorderBrush="#E2E8F0"
-                    Width="600" MaxHeight="540" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    Width="750" MaxHeight="620" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Border.Effect>
                     <DropShadowEffect Color="#0D9488" BlurRadius="30" ShadowDepth="0" Opacity="0.12"/>
                 </Border.Effect>
@@ -353,11 +367,11 @@
                             </Grid.ColumnDefinitions>
 
                             <Border Grid.Column="0" Width="36" Height="36" Background="#F0FDFA" CornerRadius="8" Margin="0,0,12,0">
-                                <TextBlock Text="&#xE71B;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#0D9488" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <materialDesign:PackIcon Kind="PackageVariant" Width="20" Height="20" Foreground="#0D9488" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
 
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding FormTitle}" FontSize="15" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="{Binding FormTitle}" FontSize="15" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                                     <Border CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
                                         <Border.Style>
@@ -379,7 +393,7 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <TextBlock FontSize="9.5" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" Text="{Binding FormStatusBadge}"/>
+                                        <TextBlock FontSize="9.5" FontWeight="Bold" FontFamily="Segoe UI" VerticalAlignment="Center" Text="{Binding FormStatusBadge}"/>
                                     </Border>
                                 </StackPanel>
                             </StackPanel>
@@ -389,7 +403,7 @@
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border x:Name="bd" Background="Transparent" CornerRadius="6">
-                                            <TextBlock Text="&#xE106;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <materialDesign:PackIcon Kind="Close" Width="18" Height="18" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
@@ -423,7 +437,7 @@
                                                         <Grid>
                                                             <Image Source="{Binding ImageUrl}" Stretch="UniformToFill"/>
                                                             <Border Visibility="{Binding IsMain, Converter={StaticResource BooleanToVisibilityConverter}}" Background="#CC0D9488" VerticalAlignment="Bottom" Padding="4,2">
-                                                                <TextBlock Text="Ảnh bìa" Foreground="White" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                                <TextBlock Text="Ảnh bìa" Foreground="White" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" FontFamily="Segoe UI"/>
                                                             </Border>
                                                         </Grid>
                                                     </Border>
@@ -432,20 +446,26 @@
                                         </ItemsControl>
                                     </ScrollViewer>
                                     <StackPanel Orientation="Horizontal">
-                                        <Button Command="{Binding SelectImageCommand}" Content="&#xE711; Chọn hình ảnh..." FontFamily="Segoe MDL2 Assets" Foreground="#0D9488" Background="#F0FDFA" BorderThickness="0" Padding="12,6" Cursor="Hand" Margin="0,0,8,0">
+                                        <Button Command="{Binding SelectImageCommand}" Foreground="#0D9488" Background="#F0FDFA" BorderThickness="0" Padding="12,6" Cursor="Hand" Margin="0,0,8,0">
                                             <Button.Template>
                                                 <ControlTemplate TargetType="Button">
                                                     <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                                        <TextBlock Text="{TemplateBinding Content}" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="{TemplateBinding Foreground}"/>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <materialDesign:PackIcon Kind="ImageAdd" Width="16" Height="16" Foreground="#0D9488" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                            <TextBlock Text="Chọn hình ảnh..." FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center"/>
+                                                        </StackPanel>
                                                     </Border>
                                                 </ControlTemplate>
                                             </Button.Template>
                                         </Button>
-                                        <Button Command="{Binding ClearImagesCommand}" Content="&#xE74D; Xóa tất cả ảnh" FontFamily="Segoe MDL2 Assets" Foreground="#EF4444" Background="#FEF2F2" BorderThickness="0" Padding="12,6" Cursor="Hand">
+                                        <Button Command="{Binding ClearImagesCommand}" Foreground="#EF4444" Background="#FEF2F2" BorderThickness="0" Padding="12,6" Cursor="Hand">
                                             <Button.Template>
                                                 <ControlTemplate TargetType="Button">
                                                     <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                                        <TextBlock Text="{TemplateBinding Content}" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="{TemplateBinding Foreground}"/>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <materialDesign:PackIcon Kind="DeleteSweep" Width="16" Height="16" Foreground="#EF4444" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                            <TextBlock Text="Xóa tất cả ảnh" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center"/>
+                                                        </StackPanel>
                                                     </Border>
                                                 </ControlTemplate>
                                             </Button.Template>
@@ -510,6 +530,57 @@
                                 <TextBox Style="{StaticResource FormInput}" Text="{Binding StockInput, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Height="36" VerticalContentAlignment="Center"/>
                             </Border>
 
+                            <!-- Logistics (Vận chuyển) -->
+                            <TextBlock Style="{StaticResource InputLabel}" Text="VẬN CHUYỂN &amp; ĐÓNG GÓI"/>
+                            <Border BorderThickness="1" BorderBrush="#E2E8F0" CornerRadius="6" Margin="0,0,0,12" Background="#F8FAFC" Padding="12">
+                                <StackPanel>
+                                    <Grid Margin="0,0,0,12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <!-- Weight -->
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Style="{StaticResource InputLabel}" Text="Cân nặng (g)"/>
+                                            <Border BorderThickness="1" BorderBrush="#E2E8F0" CornerRadius="6" Background="#FFFFFF">
+                                                <TextBox Style="{StaticResource FormInput}" Text="{Binding WeightInput, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Height="32" Padding="8,4" FontSize="11.5"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <!-- Length -->
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Style="{StaticResource InputLabel}" Text="Dài (cm)"/>
+                                            <Border BorderThickness="1" BorderBrush="#E2E8F0" CornerRadius="6" Background="#FFFFFF">
+                                                <TextBox Style="{StaticResource FormInput}" Text="{Binding LengthInput, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Height="32" Padding="8,4" FontSize="11.5"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <!-- Width -->
+                                        <StackPanel Grid.Column="4">
+                                            <TextBlock Style="{StaticResource InputLabel}" Text="Rộng (cm)"/>
+                                            <Border BorderThickness="1" BorderBrush="#E2E8F0" CornerRadius="6" Background="#FFFFFF">
+                                                <TextBox Style="{StaticResource FormInput}" Text="{Binding WidthInput, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Height="32" Padding="8,4" FontSize="11.5"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <!-- Height -->
+                                        <StackPanel Grid.Column="6">
+                                            <TextBlock Style="{StaticResource InputLabel}" Text="Cao (cm)"/>
+                                            <Border BorderThickness="1" BorderBrush="#E2E8F0" CornerRadius="6" Background="#FFFFFF">
+                                                <TextBox Style="{StaticResource FormInput}" Text="{Binding HeightInput, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Height="32" Padding="8,4" FontSize="11.5"/>
+                                            </Border>
+                                        </StackPanel>
+                                    </Grid>
+                                    <TextBlock Text="Thông tin trên sẽ được dùng để tính phí vận chuyển." FontSize="10.5" Foreground="#64748B" FontStyle="Italic"/>
+                                </StackPanel>
+                            </Border>
+
                             <!-- Variants (Phân loại hàng) -->
                             <TextBlock Style="{StaticResource InputLabel}" Text="PHÂN LOẠI HÀNG (TÙY CHỌN)"/>
                             <Border BorderThickness="1" BorderBrush="#E2E8F0" CornerRadius="6" Margin="0,0,0,12" Background="#F8FAFC" Padding="12">
@@ -565,7 +636,7 @@
                                                 <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
                                                     <StackPanel Orientation="Horizontal">
                                                         <TextBlock Text="&#xE109;" FontFamily="Segoe MDL2 Assets" FontSize="11" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                                        <TextBlock Text="Thêm phân loại" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="Thêm phân loại" FontFamily="Segoe UI" FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                                     </StackPanel>
                                                 </Border>
                                             </ControlTemplate>
@@ -665,7 +736,7 @@
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border Background="{TemplateBinding Background}" CornerRadius="8">
-                                            <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#EF4444" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <materialDesign:PackIcon Kind="DeleteOutline" Width="16" Height="16" Foreground="#EF4444" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
                                     </ControlTemplate>
                                 </Button.Template>
@@ -692,25 +763,25 @@
                                 </Button.Template>
                                 <Button.Content>
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="11.5" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,8,0">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Text" Value="&#xE105;"/>
+                                        <materialDesign:PackIcon Width="16" Height="16" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,8,0">
+                                            <materialDesign:PackIcon.Style>
+                                                <Style TargetType="materialDesign:PackIcon">
+                                                    <Setter Property="Kind" Value="Plus"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsEditMode}" Value="True">
-                                                            <Setter Property="Text" Value="&#xE74E;"/>
+                                                            <Setter Property="Kind" Value="ContentSaveOutline"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock VerticalAlignment="Center" FontSize="13" Foreground="#FFFFFF" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI">
+                                            </materialDesign:PackIcon.Style>
+                                        </materialDesign:PackIcon>
+                                        <TextBlock VerticalAlignment="Center" FontSize="13" Foreground="#FFFFFF" FontWeight="Bold" FontFamily="Segoe UI">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
-                                                    <Setter Property="Text" Value=" Đăng bán sản phẩm"/>
+                                                    <Setter Property="Text" Value="Đăng bán sản phẩm"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsEditMode}" Value="True">
-                                                            <Setter Property="Text" Value=" Lưu thay đổi"/>
+                                                            <Setter Property="Text" Value="Lưu thay đổi"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>

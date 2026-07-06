@@ -107,7 +107,16 @@ namespace TMDT.Converters
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is bool boolValue && boolValue && parameter != null)
-                return parameter.ToString();
+            {
+                try
+                {
+                    return System.Convert.ChangeType(parameter.ToString(), targetType);
+                }
+                catch
+                {
+                    return parameter.ToString();
+                }
+            }
             return Binding.DoNothing;
         }
     }
@@ -282,6 +291,22 @@ namespace TMDT.Converters
         {
             var str = value as string;
             return string.IsNullOrWhiteSpace(str) ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class NumericLessThanZeroConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is decimal d) return d < 0;
+            if (value is int i) return i < 0;
+            if (value is double dbl) return dbl < 0;
+            return false;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

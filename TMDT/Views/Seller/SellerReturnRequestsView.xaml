@@ -98,7 +98,7 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <TextBlock Grid.Row="0" Text="Trả hàng / Hoàn tiền" FontSize="24" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,24"/>
+        <TextBlock Grid.Row="0" Text="Trả hàng / Hoàn tiền" FontSize="24" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI" Margin="0,0,0,24"/>
 
         <!-- Filters -->
         <Border Grid.Row="1" Background="#FFFFFF" CornerRadius="12" Padding="24" Margin="0,0,0,24" BorderThickness="1" BorderBrush="#E2E8F0">
@@ -106,7 +106,7 @@
                 <DropShadowEffect Color="#0F172A" BlurRadius="20" ShadowDepth="4" Opacity="0.03"/>
             </Border.Effect>
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Trạng thái:" VerticalAlignment="Center" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="14" Margin="0,0,16,0"/>
+                <TextBlock Text="Trạng thái:" VerticalAlignment="Center" Foreground="#64748B" FontFamily="Segoe UI" FontSize="14" Margin="0,0,16,0"/>
                 <RadioButton Content="Tất cả" GroupName="StatusGrp" IsChecked="True" Style="{StaticResource FilterButtonStyle}" Command="{Binding SetFilterCommand}" CommandParameter="All"/>
                 <RadioButton Content="Chờ xử lý" GroupName="StatusGrp" Style="{StaticResource FilterButtonStyle}" Command="{Binding SetFilterCommand}" CommandParameter="Pending"/>
                 <RadioButton Content="Đã chấp nhận" GroupName="StatusGrp" Style="{StaticResource FilterButtonStyle}" Command="{Binding SetFilterCommand}" CommandParameter="Approved"/>
@@ -135,11 +135,11 @@
                                 <StackPanel Grid.Column="0" Margin="0,0,24,0">
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                         <Border Background="#F1F5F9" CornerRadius="4" Padding="8,4" Margin="0,0,12,0">
-                                            <TextBlock Text="{Binding OrderCode, StringFormat={}Mã ĐH: {0}}" FontWeight="Bold" FontSize="13" Foreground="#475569" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                            <TextBlock Text="{Binding OrderCode, StringFormat={}Mã ĐH: {0}}" FontWeight="Bold" FontSize="13" Foreground="#475569" FontFamily="Segoe UI"/>
                                         </Border>
-                                        <TextBlock Text="{Binding BuyerName}" FontWeight="Bold" FontSize="15" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding BuyerName}" FontWeight="Bold" FontSize="15" Foreground="#1E293B" FontFamily="Segoe UI" VerticalAlignment="Center"/>
                                         <TextBlock Text=" • " Foreground="#94A3B8" VerticalAlignment="Center"/>
-                                        <TextBlock Text="{Binding RequestDate}" FontSize="13" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding RequestDate}" FontSize="13" Foreground="#64748B" FontFamily="Segoe UI" VerticalAlignment="Center"/>
                                     </StackPanel>
 
                                     <!-- Product Details -->
@@ -148,11 +148,11 @@
                                             <ColumnDefinition Width="100"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="Sản phẩm:" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="14"/>
+                                        <TextBlock Grid.Column="0" Text="Sản phẩm:" Foreground="#64748B" FontFamily="Segoe UI" FontSize="14"/>
                                         <StackPanel Grid.Column="1">
-                                            <TextBlock Text="{Binding ProductName}" FontWeight="SemiBold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="14" TextWrapping="Wrap"/>
-                                            <TextBlock Text="{Binding Quantity, StringFormat={}Số lượng: x{0}}" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="13" Margin="0,4,0,0"/>
-                                            <TextBlock Text="{Binding TotalPrice, StringFormat={}{0:N0} đ}" FontWeight="Bold" Foreground="#EF4444" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="14" Margin="0,4,0,0"/>
+                                            <TextBlock Text="{Binding ProductName}" FontWeight="SemiBold" Foreground="#1E293B" FontFamily="Segoe UI" FontSize="14" TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding Quantity, StringFormat={}Số lượng: x{0}}" Foreground="#64748B" FontFamily="Segoe UI" FontSize="13" Margin="0,4,0,0"/>
+                                            <TextBlock Text="{Binding TotalPrice, StringFormat={}{0:N0} đ}" FontWeight="Bold" Foreground="#EF4444" FontFamily="Segoe UI" FontSize="14" Margin="0,4,0,0"/>
                                         </StackPanel>
                                     </Grid>
 
@@ -162,8 +162,8 @@
                                             <ColumnDefinition Width="100"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="Lý do trả:" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="14"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding Reason}" Foreground="#334155" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="14" TextWrapping="Wrap"/>
+                                        <TextBlock Grid.Column="0" Text="Lý do trả:" Foreground="#64748B" FontFamily="Segoe UI" FontSize="14"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Reason}" Foreground="#334155" FontFamily="Segoe UI" FontSize="14" TextWrapping="Wrap"/>
                                     </Grid>
 
                                     <!-- Evidence -->
@@ -172,7 +172,7 @@
                                             <ColumnDefinition Width="100"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="Bằng chứng:" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="14"/>
+                                        <TextBlock Grid.Column="0" Text="Bằng chứng:" Foreground="#64748B" FontFamily="Segoe UI" FontSize="14"/>
                                         <Border Grid.Column="1" Width="120" Height="120" CornerRadius="8" HorizontalAlignment="Left" ClipToBounds="True">
                                             <Image Source="{Binding EvidenceImage}" Stretch="UniformToFill"/>
                                         </Border>
@@ -185,7 +185,7 @@
                                         
                                         <!-- Status Display -->
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
-                                            <TextBlock Text="Trạng thái: " Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="14" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Trạng thái: " Foreground="#64748B" FontFamily="Segoe UI" FontSize="14" VerticalAlignment="Center"/>
                                             <Border CornerRadius="4" Padding="8,4">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
@@ -200,7 +200,7 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Border.Style>
-                                                <TextBlock Text="{Binding StatusText}" FontWeight="Bold" FontSize="13" FontFamily="Be Vietnam Pro, Segoe UI">
+                                                <TextBlock Text="{Binding StatusText}" FontWeight="Bold" FontSize="13" FontFamily="Segoe UI">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Foreground" Value="#D97706"/>
@@ -220,7 +220,7 @@
 
                                         <!-- Processed Time (if not pending) -->
                                         <TextBlock Text="{Binding ProcessedDate, StringFormat={}Xử lý lúc: {0}}" 
-                                                   FontSize="12" Foreground="#94A3B8" FontFamily="Be Vietnam Pro, Segoe UI" 
+                                                   FontSize="12" Foreground="#94A3B8" FontFamily="Segoe UI" 
                                                    HorizontalAlignment="Center" Margin="0,0,0,16"
                                                    Visibility="{Binding IsProcessed, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
@@ -237,7 +237,7 @@
                                                     Style="{StaticResource RejectButtonStyle}"/>
                                         </StackPanel>
 
-                                        <TextBlock Text="Đã xử lý xong" FontSize="14" FontWeight="SemiBold" Foreground="#10B981" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Center"
+                                        <TextBlock Text="Đã xử lý xong" FontSize="14" FontWeight="SemiBold" Foreground="#10B981" FontFamily="Segoe UI" HorizontalAlignment="Center"
                                                    Visibility="{Binding IsProcessed, Converter={StaticResource BooleanToVisibilityConverter}}">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">

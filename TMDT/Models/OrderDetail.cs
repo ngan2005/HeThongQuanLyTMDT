@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace TMDT.Models;
@@ -11,7 +11,12 @@ public partial class OrderDetail
 
     public int? ProductId { get; set; }
 
+    public int? VariantId { get; set; }
+
     public string? ProductNameSnapshot { get; set; }
+
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public bool IsReviewed { get; set; }
 
     public int? Quantity { get; set; }
 
@@ -22,6 +27,8 @@ public partial class OrderDetail
     public virtual Order? Order { get; set; }
 
     public virtual Product? Product { get; set; }
+
+    public virtual ProductVariant? Variant { get; set; }
 
     public virtual ICollection<ReturnRequest> ReturnRequests { get; set; } = new List<ReturnRequest>();
 

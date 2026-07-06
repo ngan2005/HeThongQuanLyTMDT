@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace TMDT.Models;
@@ -22,6 +22,8 @@ public partial class Order
     public decimal? ShippingFee { get; set; }
 
     public decimal? Discount { get; set; }
+
+    public decimal? ManualDiscount { get; set; }
 
     public decimal? TotalAmount { get; set; }
 

@@ -138,7 +138,7 @@ namespace TMDT.ViewModels.Buyer
                 return;
             }
 
-            CartService.Instance.AddProduct(product, 1);
+            CartService.Instance.AddProduct(product, null, 1);
 
             var result = MessageBox.Show(
                 $"Đã thêm '{product.ProductName}' vào giỏ hàng.\n\nBạn có muốn xóa khỏi danh sách yêu thích?",

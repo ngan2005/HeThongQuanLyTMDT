@@ -154,11 +154,34 @@
                                                         <TextBlock Text="{Binding Quantity, StringFormat={}x{0}}"
                                                                    FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
                                                     </StackPanel>
-                                                    <TextBlock Grid.Column="2"
-                                                               Text="{Binding TotalPrice, StringFormat={}{0:N0}đ}"
-                                                               FontWeight="SemiBold" FontSize="14"
-                                                               Foreground="{StaticResource TextBrush}"
-                                                               VerticalAlignment="Top"/>
+                                                    <StackPanel Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Right">
+                                                        <TextBlock Text="{Binding TotalPrice, StringFormat={}{0:N0}đ}"
+                                                                   FontWeight="SemiBold" FontSize="14"
+                                                                   Foreground="{StaticResource TextBrush}"
+                                                                   HorizontalAlignment="Right" Margin="0,0,0,8"/>
+                                                        <Button Content="Đánh giá"
+                                                                Command="{Binding DataContext.ReviewProductCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                CommandParameter="{Binding}"
+                                                                Foreground="#F59E0B" BorderBrush="#F59E0B"
+                                                                FontSize="12" Height="28" Padding="10,0">
+                                                            <Button.Style>
+                                                                <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    <Style.Triggers>
+                                                                        <MultiDataTrigger>
+                                                                            <MultiDataTrigger.Conditions>
+                                                                                <Condition Binding="{Binding DataContext.OrderStatus, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="Completed"/>
+                                                                                <Condition Binding="{Binding IsReviewed}" Value="False"/>
+                                                                            </MultiDataTrigger.Conditions>
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </MultiDataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Button.Style>
+                                                        </Button>
+                                                        <TextBlock Text="Đã đánh giá" FontSize="12" Foreground="#059669" HorizontalAlignment="Right"
+                                                                   Visibility="{Binding IsReviewed, Converter={StaticResource BoolToVis}}"/>
+                                                    </StackPanel>
                                                 </Grid>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>

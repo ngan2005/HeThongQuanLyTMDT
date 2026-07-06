@@ -26,20 +26,20 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0">
-                <TextBlock Text="Nhật ký Hoạt động Admin" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                <TextBlock Text="Lịch sử toàn bộ hành động nhạy cảm của quản trị viên — đảm bảo minh bạch và truy vết bảo mật" FontSize="12.5" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                <TextBlock Text="Nhật ký Hoạt động Admin" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI"/>
+                <TextBlock Text="Lịch sử toàn bộ hành động nhạy cảm của quản trị viên — đảm bảo minh bạch và truy vết bảo mật" FontSize="12.5" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0" FontFamily="Segoe UI"/>
             </StackPanel>
 
             <!-- Refresh Button -->
             <Button Grid.Column="1" Command="{Binding RefreshCommand}" Height="36" Padding="16,0" Margin="0,0,8,0"
                     Background="{DynamicResource SidebarHoverBg}" Foreground="{StaticResource BrandPurple}" BorderThickness="0" Cursor="Hand"
-                    FontSize="12.5" FontWeight="SemiBold" FontFamily="Be Vietnam Pro, Segoe UI">
+                    FontSize="12.5" FontWeight="SemiBold" FontFamily="Segoe UI">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                <TextBlock Text="Làm mới" VerticalAlignment="Center" FontSize="12.5" FontWeight="SemiBold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="Làm mới" VerticalAlignment="Center" FontSize="12.5" FontWeight="SemiBold" FontFamily="Segoe UI"/>
                             </StackPanel>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -54,13 +54,13 @@
             <!-- Clear All Button -->
             <Button Grid.Column="2" Command="{Binding ClearAllLogsCommand}" Height="36" Padding="16,0"
                     Background="{DynamicResource DangerRedBg}" Foreground="#EF4444" BorderThickness="0" Cursor="Hand"
-                    FontSize="12.5" FontWeight="SemiBold" FontFamily="Be Vietnam Pro, Segoe UI">
+                    FontSize="12.5" FontWeight="SemiBold" FontFamily="Segoe UI">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="#EF4444" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                <TextBlock Text="Xóa nhật ký" VerticalAlignment="Center" FontSize="12.5" FontWeight="SemiBold" FontFamily="Be Vietnam Pro, Segoe UI" Foreground="#EF4444"/>
+                                <TextBlock Text="Xóa nhật ký" VerticalAlignment="Center" FontSize="12.5" FontWeight="SemiBold" FontFamily="Segoe UI" Foreground="#EF4444"/>
                             </StackPanel>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -91,8 +91,8 @@
                         <TextBlock Text="&#xE81C;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="{StaticResource BrandPurple}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding TotalCount}" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                        <TextBlock Text="Tổng nhật ký" FontSize="11.5" Foreground="{StaticResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text="{Binding TotalCount}" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI"/>
+                        <TextBlock Text="Tổng nhật ký" FontSize="11.5" Foreground="{StaticResource TextSecondary}" FontFamily="Segoe UI"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -105,8 +105,8 @@
                         <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="#EA580C" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding WarningCount}" FontSize="22" FontWeight="Bold" Foreground="#EA580C" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                        <TextBlock Text="Hành động cảnh báo" FontSize="11.5" Foreground="{StaticResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text="{Binding WarningCount}" FontSize="22" FontWeight="Bold" Foreground="#EA580C" FontFamily="Segoe UI"/>
+                        <TextBlock Text="Hành động cảnh báo" FontSize="11.5" Foreground="{StaticResource TextSecondary}" FontFamily="Segoe UI"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -119,8 +119,8 @@
                         <TextBlock Text="&#xE783;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="#EF4444" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding CriticalCount}" FontSize="22" FontWeight="Bold" Foreground="#EF4444" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                        <TextBlock Text="Hành động nguy hiểm" FontSize="11.5" Foreground="{StaticResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text="{Binding CriticalCount}" FontSize="22" FontWeight="Bold" Foreground="#EF4444" FontFamily="Segoe UI"/>
+                        <TextBlock Text="Hành động nguy hiểm" FontSize="11.5" Foreground="{StaticResource TextSecondary}" FontFamily="Segoe UI"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -145,18 +145,18 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
                     <TextBox Grid.Column="1" Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Background="Transparent"
-                             VerticalAlignment="Center" FontSize="12.5" Padding="6,0,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                             VerticalAlignment="Center" FontSize="12.5" Padding="6,0,0,0" FontFamily="Segoe UI"/>
                 </Grid>
             </Border>
 
             <!-- Category filter -->
             <ComboBox Grid.Column="2" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}"
-                      Height="36" FontSize="12.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalContentAlignment="Center"
+                      Height="36" FontSize="12.5" FontFamily="Segoe UI" VerticalContentAlignment="Center"
                       Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderSlate}"/>
 
             <!-- Severity filter -->
             <ComboBox Grid.Column="4" ItemsSource="{Binding Severities}" SelectedItem="{Binding SelectedSeverity}"
-                      Height="36" FontSize="12.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalContentAlignment="Center"
+                      Height="36" FontSize="12.5" FontFamily="Segoe UI" VerticalContentAlignment="Center"
                       Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderSlate}"/>
         </Grid>
 
@@ -170,7 +170,7 @@
                       Background="Transparent" BorderThickness="0" GridLinesVisibility="None"
                       CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True"
                       RowBackground="{DynamicResource CardBg}" AlternatingRowBackground="{DynamicResource GridAltRowBg}"
-                      HeadersVisibility="Column" RowHeight="46" FontFamily="Be Vietnam Pro, Segoe UI">
+                      HeadersVisibility="Column" RowHeight="46" FontFamily="Segoe UI">
                 <DataGrid.Resources>
                     <Style TargetType="DataGridColumnHeader">
                         <Setter Property="Background" Value="{DynamicResource GridHeaderBg}"/>

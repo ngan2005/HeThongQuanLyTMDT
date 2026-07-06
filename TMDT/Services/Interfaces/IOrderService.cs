@@ -9,7 +9,8 @@ public interface IOrderService
     Task<List<Order>> GetBuyerOrdersAsync(int buyerId, string? statusFilter = null);
     Task<List<Order>> GetShopOrdersAsync(int shopId, string? statusFilter = null);
     Task<List<Order>> GetAllOrdersAsync(string? statusFilter = null, string? keyword = null);
-    Task<Order?> CreateOrderFromCartAsync(int buyerId, int shopId, int? addressId, int? voucherId, string paymentMethod, decimal shippingFee, List<CartOrderItem> items);
+    Task<Order?> CreateOrderFromCartAsync(int buyerId, int shopId, int? addressId, int? voucherId, string paymentMethod, decimal shippingFee, List<CartOrderItem> items, int pointsUsed = 0);
+    Task<Order?> CreatePosOrderAsync(int? buyerId, int shopId, int? voucherId, string paymentMethod, List<CartOrderItem> items, int pointsUsed = 0, decimal manualDiscount = 0);
     Task<bool> CancelOrderAsync(int orderId);
     Task<bool> ShipOrderAsync(int orderId, string shippingProvider);
     Task<bool> ReceiveOrderAsync(int orderId);

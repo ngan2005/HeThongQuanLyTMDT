@@ -55,7 +55,7 @@
                     <!-- Contacts Header -->
                     <Border Grid.Row="0" Padding="16,20,16,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource BorderSlate}">
                         <StackPanel>
-                            <TextBlock Text="Tin nhắn &amp; Hỗ trợ" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Text="Tin nhắn &amp; Hỗ trợ" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Segoe UI"/>
                             <!-- Search -->
                             <Border Background="{DynamicResource SurfaceHigh}" CornerRadius="8" Margin="0,12,0,0" Padding="10,6">
                                 <Grid>
@@ -64,7 +64,7 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
-                                    <TextBox Grid.Column="1" Text="Tìm kiếm..." Foreground="{DynamicResource TextMuted}" BorderThickness="0" Background="Transparent" Padding="8,0,0,0" FontSize="12" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBox Grid.Column="1" Text="Tìm kiếm..." Foreground="{DynamicResource TextMuted}" BorderThickness="0" Background="Transparent" Padding="8,0,0,0" FontSize="12" FontFamily="Segoe UI"/>
                                 </Grid>
                             </Border>
                         </StackPanel>
@@ -109,10 +109,10 @@
                                     </Border>
                                     <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
                                         <Grid>
-                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextPrimary}" FontFamily="Segoe UI"/>
                                             <TextBlock Text="{Binding TimeDisplay}" FontSize="10" Foreground="{DynamicResource TextMuted}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         </Grid>
-                                        <TextBlock Text="{Binding LastMessage}" FontSize="11.5" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" TextTrimming="CharacterEllipsis" MaxWidth="170" Margin="0,2,0,0"/>
+                                        <TextBlock Text="{Binding LastMessage}" FontSize="11.5" Foreground="{DynamicResource TextSecondary}" FontFamily="Segoe UI" TextTrimming="CharacterEllipsis" MaxWidth="170" Margin="0,2,0,0"/>
                                     </StackPanel>
                                 </Grid>
                             </DataTemplate>
@@ -154,10 +154,10 @@
                             </Border>
                             
                             <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding SelectedContact.Name}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="{Binding SelectedContact.Name}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Segoe UI"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                                     <Ellipse Width="6" Height="6" Fill="{DynamicResource SuccessGreen}" Margin="0,0,4,0"/>
-                                    <TextBlock Text="Đang hoạt động" FontSize="10.5" Foreground="{DynamicResource SuccessGreen}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Đang hoạt động" FontSize="10.5" Foreground="{DynamicResource SuccessGreen}" FontFamily="Segoe UI"/>
                                 </StackPanel>
                             </StackPanel>
                             
@@ -177,7 +177,7 @@
                                         <!-- Mine (Admin) -->
                                         <StackPanel HorizontalAlignment="Right" Visibility="{Binding IsMine, Converter={StaticResource BoolToVis}}">
                                             <Border Background="{DynamicResource BrandPurple}" CornerRadius="14,14,2,14" Padding="12,8" MaxWidth="280">
-                                                <TextBlock Text="{Binding Content}" Foreground="{DynamicResource PrimaryBtnText}" FontSize="13" FontFamily="Be Vietnam Pro, Segoe UI" TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding Content}" Foreground="{DynamicResource PrimaryBtnText}" FontSize="13" FontFamily="Segoe UI" TextWrapping="Wrap"/>
                                             </Border>
                                             <TextBlock Text="{Binding TimeDisplay}" FontSize="9.5" Foreground="{DynamicResource TextMuted}" HorizontalAlignment="Right" Margin="0,4,4,0"/>
                                         </StackPanel>
@@ -194,7 +194,7 @@
                                                 </Style>
                                             </StackPanel.Style>
                                             <Border Background="{DynamicResource CardBg}" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" CornerRadius="14,14,14,2" Padding="12,8" MaxWidth="280">
-                                                <TextBlock Text="{Binding Content}" Foreground="{DynamicResource TextPrimary}" FontSize="13" FontFamily="Be Vietnam Pro, Segoe UI" TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding Content}" Foreground="{DynamicResource TextPrimary}" FontSize="13" FontFamily="Segoe UI" TextWrapping="Wrap"/>
                                             </Border>
                                             <TextBlock Text="{Binding TimeDisplay}" FontSize="9.5" Foreground="{DynamicResource TextMuted}" HorizontalAlignment="Left" Margin="4,4,0,0"/>
                                         </StackPanel>
@@ -217,7 +217,7 @@
                             </Style>
                         </StackPanel.Style>
                         <TextBlock Text="&#xE733;" FontFamily="Segoe MDL2 Assets" FontSize="36" Foreground="{DynamicResource BorderSlate}" HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                        <TextBlock Text="Gửi tin nhắn đầu tiên" FontSize="13" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Gửi tin nhắn đầu tiên" FontSize="13" Foreground="{DynamicResource TextSecondary}" FontFamily="Segoe UI" HorizontalAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Message Input Box -->
@@ -252,7 +252,7 @@
                             <Border Grid.Column="1" Background="{DynamicResource AppBackground}" CornerRadius="20" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Margin="8,0">
                                 <TextBox Text="{Binding MessageText, UpdateSourceTrigger=PropertyChanged}" 
                                          Background="Transparent" BorderThickness="0" Padding="14,8"
-                                         FontSize="13" FontFamily="Be Vietnam Pro, Segoe UI" Foreground="{DynamicResource TextPrimary}"
+                                         FontSize="13" FontFamily="Segoe UI" Foreground="{DynamicResource TextPrimary}"
                                          CaretBrush="{DynamicResource BrandPurple}"
                                          VerticalAlignment="Center">
                                     <TextBox.InputBindings>
@@ -290,8 +290,8 @@
                         <Border Width="80" Height="80" CornerRadius="40" Background="{DynamicResource CardBg}" BorderThickness="1" BorderBrush="{DynamicResource BorderSlate}" Margin="0,0,0,20">
                             <TextBlock Text="&#xE8F2;" FontFamily="Segoe MDL2 Assets" FontSize="32" Foreground="{DynamicResource BrandPurple}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                        <TextBlock Text="Trung tâm Tin nhắn" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Center" Margin="0,0,0,8"/>
-                        <TextBlock Text="Chọn một cửa hàng để bắt đầu hỗ trợ" FontSize="13" Foreground="{DynamicResource TextSecondary}" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Trung tâm Tin nhắn" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontFamily="Segoe UI" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                        <TextBlock Text="Chọn một cửa hàng để bắt đầu hỗ trợ" FontSize="13" Foreground="{DynamicResource TextSecondary}" FontFamily="Segoe UI" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Grid>
             </Grid>

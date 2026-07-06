@@ -6,6 +6,7 @@ using System.Windows.Input;
 using TMDT.Models;
 using TMDT.Services;
 using TMDT.Utilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace TMDT.ViewModels.Buyer
 {
@@ -60,6 +61,7 @@ namespace TMDT.ViewModels.Buyer
             ReceiveOrderCommand = new RelayCommand(o => ExecuteReceiveOrder(o as Order), o => CanReceiveOrder(o as Order));
             BackCommand = new RelayCommand(_ => _mainVm.NavigateHome());
             SetFilterCommand = new RelayCommand(o => StatusFilter = o?.ToString() ?? "Tất cả");
+            ReviewProductCommand = new RelayCommand(o => ExecuteReviewProduct(o as OrderDetail));
 
             _ = LoadOrdersAsync();
         }
@@ -99,14 +101,111 @@ namespace TMDT.ViewModels.Buyer
                 var refreshed = await OrderService.Instance.GetOrderByIdAsync(order.OrderId);
                 if (refreshed == null) return;
 
+                using var ctx = new TmdtContext();
+                var reviewedIds = ctx.Reviews
+                    .Where(r => r.UserId == SessionManager.CurrentUser!.UserId && r.OrderDetailId != null)
+                    .Select(r => r.OrderDetailId)
+                    .ToList();
+
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     order.OrderDetails.Clear();
                     foreach (var d in refreshed.OrderDetails)
+                    {
+                        d.IsReviewed = reviewedIds.Contains(d.OrderDetailId);
                         order.OrderDetails.Add(d);
+                    }
                 });
             }
             catch { }
+        }
+
+        public ICommand ReviewProductCommand { get; }
+
+        private void ExecuteReviewProduct(OrderDetail? detail)
+        {
+            if (detail == null || detail.IsReviewed) return;
+
+            var dialog = new TMDT.Views.Buyer.ReviewDialog(detail.ProductNameSnapshot ?? "Sản phẩm");
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    using var ctx = new TmdtContext();
+                    var newReview = new Review
+                    {
+                        OrderDetailId = detail.OrderDetailId,
+                        ProductId = detail.ProductId,
+                        UserId = SessionManager.CurrentUser!.UserId,
+                        StarRating = (byte)dialog.StarRating,
+                        Content = dialog.ReviewContent,
+                        ReviewedAt = DateTime.Now
+                    };
+                    ctx.Reviews.Add(newReview);
+                    ctx.SaveChanges();
+
+                    // Cập nhật lại Rating trung bình của Product và Shop
+                    if (detail.ProductId.HasValue)
+                    {
+                        var product = ctx.Products.Find(detail.ProductId.Value);
+                        if (product != null)
+                        {
+                            var allReviews = ctx.Reviews.Where(r => r.ProductId == product.ProductId).ToList();
+                            if (allReviews.Any())
+                            {
+                                product.Rating = (decimal)allReviews.Average(r => r.StarRating ?? 0);
+                            }
+
+                            if (product.ShopId.HasValue)
+                            {
+                                var shop = ctx.Shops.Find(product.ShopId.Value);
+                                if (shop != null)
+                                {
+                                    var shopReviews = ctx.Reviews
+                                        .Include(r => r.Product)
+                                        .Where(r => r.Product != null && r.Product.ShopId == shop.ShopId)
+                                        .ToList();
+                                    if (shopReviews.Any())
+                                    {
+                                        shop.Rating = (decimal)shopReviews.Average(r => r.StarRating ?? 0);
+                                    }
+                                }
+                            }
+                        }
+                        ctx.SaveChanges();
+                    }
+
+                    detail.IsReviewed = true;
+                    // Refresh UI
+                    var order = Orders.FirstOrDefault(o => o.OrderId == detail.OrderId);
+                    if (order != null)
+                    {
+                        var list = order.OrderDetails as IList<OrderDetail>;
+                        if (list != null)
+                        {
+                            var index = list.IndexOf(detail);
+                            if (index >= 0)
+                            {
+                                list.RemoveAt(index);
+                                list.Insert(index, detail);
+                            }
+                        }
+                        
+                        var orderIndex = Orders.IndexOf(order);
+                        if (orderIndex >= 0)
+                        {
+                            Orders.RemoveAt(orderIndex);
+                            Orders.Insert(orderIndex, order);
+                        }
+                    }
+
+                    MessageBox.Show("Cảm ơn bạn đã đánh giá sản phẩm!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Lỗi khi gửi đánh giá: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         private bool CanCancelOrder(Order? order)

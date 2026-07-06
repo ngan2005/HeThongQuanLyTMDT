@@ -86,7 +86,7 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <TextBlock Grid.Row="0" Text="Đánh giá Shop" FontSize="24" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,24"/>
+        <TextBlock Grid.Row="0" Text="Đánh giá Shop" FontSize="24" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI" Margin="0,0,0,24"/>
 
         <!-- Stats & Filters Section -->
         <Border Grid.Row="1" Background="#FFFFFF" CornerRadius="12" Padding="24" Margin="0,0,0,24" BorderThickness="1" BorderBrush="#E2E8F0">
@@ -102,11 +102,11 @@
 
                 <!-- Left Stats -->
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" MinWidth="150">
-                    <TextBlock Text="{Binding AverageRating, StringFormat={}{0:N1} trên 5}" FontSize="32" FontWeight="Bold" Foreground="#0D9488" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding AverageRating, StringFormat={}{0:N1} trên 5}" FontSize="32" FontWeight="Bold" Foreground="#0D9488" FontFamily="Segoe UI" HorizontalAlignment="Center"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,8">
                         <TextBlock Text="&#xE735; &#xE735; &#xE735; &#xE735; &#xE735;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="#F59E0B"/>
                     </StackPanel>
-                    <TextBlock Text="{Binding TotalReviews, StringFormat={}Tổng {0} đánh giá}" FontSize="13" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding TotalReviews, StringFormat={}Tổng {0} đánh giá}" FontSize="13" Foreground="#64748B" FontFamily="Segoe UI" HorizontalAlignment="Center"/>
                 </StackPanel>
 
                 <!-- Separator -->
@@ -124,7 +124,7 @@
                     </WrapPanel>
 
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Trạng thái:" VerticalAlignment="Center" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="13" Margin="0,0,12,0"/>
+                        <TextBlock Text="Trạng thái:" VerticalAlignment="Center" Foreground="#64748B" FontFamily="Segoe UI" FontSize="13" Margin="0,0,12,0"/>
                         <RadioButton Content="Tất cả" GroupName="StatusGrp" IsChecked="True" Style="{StaticResource FilterButtonStyle}" Command="{Binding SetStatusFilterCommand}" CommandParameter="All"/>
                         <RadioButton Content="Chưa trả lời" GroupName="StatusGrp" Style="{StaticResource FilterButtonStyle}" Command="{Binding SetStatusFilterCommand}" CommandParameter="NotReplied"/>
                         <RadioButton Content="Đã trả lời" GroupName="StatusGrp" Style="{StaticResource FilterButtonStyle}" Command="{Binding SetStatusFilterCommand}" CommandParameter="Replied"/>
@@ -160,7 +160,7 @@
                                     <!-- User Info & Stars -->
                                     <Grid>
                                         <StackPanel Orientation="Vertical">
-                                            <TextBlock Text="{Binding BuyerName}" FontWeight="Bold" FontSize="14" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                            <TextBlock Text="{Binding BuyerName}" FontWeight="Bold" FontSize="14" Foreground="#1E293B" FontFamily="Segoe UI"/>
                                             <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                                                 <!-- Custom Star Rendering Logic based on StarRating could go here, for now simple representation -->
                                                 <TextBlock Text="&#xE735; &#xE735; &#xE735; &#xE735; &#xE735;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#F59E0B" Visibility="{Binding StarRating, ConverterParameter=5, Converter={StaticResource BooleanToVisibilityConverter}}"/>
@@ -171,7 +171,7 @@
                                                         <TextBlock Text="&#xE735;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#D97706" VerticalAlignment="Center"/>
                                                     </StackPanel>
                                                 </Border>
-                                                <TextBlock Text="{Binding ReviewDate}" FontSize="12" Foreground="#94A3B8" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding ReviewDate}" FontSize="12" Foreground="#94A3B8" FontFamily="Segoe UI" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </Grid>
@@ -180,12 +180,12 @@
                                     <Border Background="#F8FAFC" CornerRadius="6" Padding="8,4" Margin="0,12,0,0" HorizontalAlignment="Left">
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="&#xE118;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                            <TextBlock Text="{Binding ProductName}" FontSize="12" Foreground="#475569" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                            <TextBlock Text="{Binding ProductName}" FontSize="12" Foreground="#475569" FontFamily="Segoe UI"/>
                                         </StackPanel>
                                     </Border>
 
                                     <!-- Review Content -->
-                                    <TextBlock Text="{Binding Content}" FontSize="14" Foreground="#334155" FontFamily="Be Vietnam Pro, Segoe UI" TextWrapping="Wrap" Margin="0,12,0,0"/>
+                                    <TextBlock Text="{Binding Content}" FontSize="14" Foreground="#334155" FontFamily="Segoe UI" TextWrapping="Wrap" Margin="0,12,0,0"/>
 
                                     <!-- Review Image (If any) -->
                                     <Border Margin="0,12,0,0" Width="100" Height="100" CornerRadius="8" ClipToBounds="True" HorizontalAlignment="Left" Visibility="{Binding HasImage, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -196,11 +196,11 @@
                                     <Border Background="#F0FDFA" CornerRadius="8" Padding="16" Margin="0,16,0,0" BorderThickness="1" BorderBrush="#CCFBF1" Visibility="{Binding HasReply, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <StackPanel>
                                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                                <TextBlock Text="Phản hồi của Shop" FontWeight="Bold" FontSize="13" Foreground="#0F766E" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                <TextBlock Text="Phản hồi của Shop" FontWeight="Bold" FontSize="13" Foreground="#0F766E" FontFamily="Segoe UI"/>
                                                 <TextBlock Text=" • " Foreground="#94A3B8"/>
-                                                <TextBlock Text="{Binding ReplyDate}" FontSize="12" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                <TextBlock Text="{Binding ReplyDate}" FontSize="12" Foreground="#64748B" FontFamily="Segoe UI"/>
                                             </StackPanel>
-                                            <TextBlock Text="{Binding ReplyContent}" FontSize="13" Foreground="#115E59" FontFamily="Be Vietnam Pro, Segoe UI" TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding ReplyContent}" FontSize="13" Foreground="#115E59" FontFamily="Segoe UI" TextWrapping="Wrap"/>
                                         </StackPanel>
                                     </Border>
 
@@ -211,7 +211,7 @@
                                                 Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="0">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="&#xE115;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#0D9488" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                                <TextBlock Text="Trả lời đánh giá" FontSize="13" FontWeight="SemiBold" Foreground="#0D9488" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center">
+                                                <TextBlock Text="Trả lời đánh giá" FontSize="13" FontWeight="SemiBold" Foreground="#0D9488" FontFamily="Segoe UI" VerticalAlignment="Center">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Style.Triggers>
@@ -232,12 +232,12 @@
                                             <TextBox Text="{Binding ReplyInputText, UpdateSourceTrigger=PropertyChanged}" 
                                                      TextWrapping="Wrap" AcceptsReturn="True" MinHeight="60" 
                                                      Background="#FFFFFF" BorderThickness="1" BorderBrush="#CBD5E1" 
-                                                     Padding="10" FontSize="13" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                     Padding="10" FontSize="13" FontFamily="Segoe UI"/>
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
                                                 <Button Content="Hủy" 
                                                         Command="{Binding DataContext.ToggleReplyCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" 
                                                         CommandParameter="{Binding}"
-                                                        Background="Transparent" Foreground="#64748B" BorderThickness="0" Padding="12,6" Cursor="Hand" Margin="0,0,8,0" FontFamily="Be Vietnam Pro, Segoe UI" FontWeight="SemiBold"/>
+                                                        Background="Transparent" Foreground="#64748B" BorderThickness="0" Padding="12,6" Cursor="Hand" Margin="0,0,8,0" FontFamily="Segoe UI" FontWeight="SemiBold"/>
                                                 <Button Content="Gửi phản hồi" 
                                                         Command="{Binding DataContext.SubmitReplyCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" 
                                                         CommandParameter="{Binding}"

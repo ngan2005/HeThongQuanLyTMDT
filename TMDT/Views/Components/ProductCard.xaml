@@ -120,6 +120,12 @@
                            TextTrimming="CharacterEllipsis"
                            Margin="0,0,0,5"/>
 
+                <!-- Shop Name -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                    <materialDesign:PackIcon Kind="StorefrontOutline" Width="14" Height="14" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                    <TextBlock Text="{Binding Product.Shop.ShopName, TargetNullValue='Không có tên'}" FontSize="12" Foreground="{StaticResource TextMutedBrush}" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+
                 <!-- Price Row -->
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                     <TextBlock Text="{Binding Product.Price, StringFormat={}{0:N0}đ}" 

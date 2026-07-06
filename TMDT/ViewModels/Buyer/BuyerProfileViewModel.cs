@@ -172,6 +172,7 @@ namespace TMDT.ViewModels.Buyer
         public ICommand SetDefaultAddressCommand { get; }
         public ICommand ToggleAddAddressCommand { get; }
         public ICommand OpenAddressPickerCommand { get; }
+        public ICommand TopUpCommand { get; }
 
         public BuyerProfileViewModel(BuyerMainViewModel mainVm)
         {
@@ -186,6 +187,7 @@ namespace TMDT.ViewModels.Buyer
             DeleteAddressCommand = new RelayCommand(a => ExecuteDeleteAddress(a as Address));
             SetDefaultAddressCommand = new RelayCommand(a => ExecuteSetDefaultAddress(a as Address));
             ToggleAddAddressCommand = new RelayCommand(_ => IsAddingAddress = !IsAddingAddress);
+            TopUpCommand = new RelayCommand(async _ => await ExecuteTopUp());
 
             LoadProfile();
             LoadAddresses();
@@ -529,6 +531,49 @@ namespace TMDT.ViewModels.Buyer
             finally
             {
                 IsUploadingAvatar = false;
+            }
+        }
+
+        private async Task ExecuteTopUp()
+        {
+            var dialog = new TMDT.Views.Components.TopUpDialog();
+            bool? result = dialog.ShowDialog();
+            if (result == true && dialog.Amount > 0)
+            {
+                // Gọi API lấy link VNPay với user ID hiện tại
+                string vnpUrl = TMDT.Services.VNPayService.CreateTopUpPaymentUrl(dialog.Amount, _userId);
+                var vnPayWindow = new TMDT.Views.Components.VNPayWindow(vnpUrl);
+                bool? paymentSuccess = vnPayWindow.ShowDialog();
+
+                if (paymentSuccess == true)
+                {
+                    try
+                    {
+                        using var ctx = new TmdtContext();
+                        var user = await ctx.Users.FindAsync(_userId);
+                        if (user != null)
+                        {
+                            user.WalletBalance = (user.WalletBalance ?? 0) + dialog.Amount;
+                            await ctx.SaveChangesAsync();
+                            
+                            // Cập nhật lại UI ngay lập tức
+                            WalletBalance = user.WalletBalance ?? 0;
+                            
+                            MessageBox.Show($"Nạp thành công {dialog.Amount:N0} đ vào Ví!", "Thành công",
+                                MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Lỗi cập nhật số dư: {ex.Message}", "Lỗi",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Giao dịch nạp tiền đã bị hủy.", "Thông báo",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
         }
     }

@@ -54,9 +54,9 @@
                 <Grid>
                     <StackPanel>
                         <TextBlock Text="Đăng ký Cửa hàng" FontSize="18" FontWeight="Bold"
-                                   Foreground="White" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                   Foreground="White" FontFamily="Segoe UI"/>
                         <TextBlock Text="Tạo cửa hàng của riêng bạn trên MyShop"
-                                   FontSize="12" Foreground="#94A3B8" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                   FontSize="12" Foreground="#94A3B8" Margin="0,4,0,0" FontFamily="Segoe UI"/>
                     </StackPanel>
 
                     <!-- Close button -->
@@ -78,7 +78,7 @@
                     <TextBox Text="{Binding ShopName, UpdateSourceTrigger=PropertyChanged}"
                              BorderThickness="0" Background="Transparent"
                              VerticalAlignment="Center" FontSize="13"
-                             FontFamily="Be Vietnam Pro, Segoe UI"
+                             FontFamily="Segoe UI"
                              Padding="0"/>
                 </Border>
                 <TextBlock Text="Tên shop sẽ hiển thị trên sản phẩm và trang mua sắm"
@@ -90,7 +90,7 @@
                     <TextBox Text="{Binding WarehouseAddress, UpdateSourceTrigger=PropertyChanged}"
                              BorderThickness="0" Background="Transparent"
                              VerticalAlignment="Center" FontSize="13"
-                             FontFamily="Be Vietnam Pro, Segoe UI"
+                             FontFamily="Segoe UI"
                              TextWrapping="Wrap" AcceptsReturn="True"
                              Padding="0" VerticalContentAlignment="Center"/>
                 </Border>
@@ -135,7 +135,7 @@
                                 <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="8">
                                     <TextBlock Text="Hủy bỏ" HorizontalAlignment="Center"
                                                VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold"
-                                               FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                               FontFamily="Segoe UI"/>
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
@@ -154,7 +154,7 @@
                                 <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="8">
                                     <TextBlock Text="Gửi yêu cầu" HorizontalAlignment="Center"
                                                VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold"
-                                               FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                               FontFamily="Segoe UI"/>
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">

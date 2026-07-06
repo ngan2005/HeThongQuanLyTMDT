@@ -13,5 +13,9 @@ namespace TMDT.Services.Interfaces
         Task<(bool Success, string? ErrorMessage)> RegisterAsync(RegisterRequest request);
 
         Task<bool> LogoutAsync();
+
+        Task<(bool Success, string? ErrorMessage)> SendPasswordResetOtpAsync(string email, IEmailService emailService);
+
+        Task<(bool Success, string? ErrorMessage)> VerifyOtpAndResetPasswordAsync(string email, string otp, string newPassword);
     }
 }

@@ -76,8 +76,8 @@
 
         <!-- 1. TITLE -->
         <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="Cấu hình Hệ thống &amp; Vận hành" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Be Vietnam Pro, Segoe UI"/>
-            <TextBlock Text="Thiết lập các thông số tài chính, quản trị rủi ro, chính sách bán hàng và chế độ bảo trì sàn thương mại điện tử" FontSize="12.5" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+            <TextBlock Text="Cấu hình Hệ thống &amp; Vận hành" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI"/>
+            <TextBlock Text="Thiết lập các thông số tài chính, quản trị rủi ro, chính sách bán hàng và chế độ bảo trì sàn thương mại điện tử" FontSize="12.5" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0" FontFamily="Segoe UI"/>
         </StackPanel>
 
         <!-- 2. SETTINGS LIST -->
@@ -87,7 +87,7 @@
                 <!-- CARD 1: FINANCIAL CONFIGURATION -->
                 <Border Style="{StaticResource SettingsCard}">
                     <StackPanel>
-                        <TextBlock Text="Cấu hình Tài chính &amp; Chiết khấu" FontSize="14.5" FontWeight="Bold" Foreground="{StaticResource BrandPurple}" Margin="0,0,0,16" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text="Cấu hình Tài chính &amp; Chiết khấu" FontSize="14.5" FontWeight="Bold" Foreground="{StaticResource BrandPurple}" Margin="0,0,0,16" FontFamily="Segoe UI"/>
                         
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -134,7 +134,7 @@
                 <!-- CARD 2: RISK CONTROL & AUDITING POLICY -->
                 <Border Style="{StaticResource SettingsCard}">
                     <StackPanel>
-                        <TextBlock Text="Kiểm soát rủi ro &amp; Chính sách bán hàng" FontSize="14.5" FontWeight="Bold" Foreground="{StaticResource BrandPurple}" Margin="0,0,0,16" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text="Kiểm soát rủi ro &amp; Chính sách bán hàng" FontSize="14.5" FontWeight="Bold" Foreground="{StaticResource BrandPurple}" Margin="0,0,0,16" FontFamily="Segoe UI"/>
 
                         <!-- Toggle 1: Require Product approval -->
                         <Grid Margin="0,0,0,18">
@@ -167,9 +167,9 @@
                 <!-- CARD 3: MAINTENANCE SYSTEM (CRITICAL CONTROL) -->
                 <Border Style="{StaticResource SettingsCard}" BorderBrush="#FCA5A5" Background="{DynamicResource DangerRedBg}">
                     <StackPanel>
-                        <TextBlock Text="Chế độ bảo trì hệ thống (Maintenance Mode)" FontSize="14.5" FontWeight="Bold" Foreground="#DC2626" Margin="0,0,0,6" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                        <TextBlock Text="Chế độ bảo trì hệ thống (Maintenance Mode)" FontSize="14.5" FontWeight="Bold" Foreground="#DC2626" Margin="0,0,0,6" FontFamily="Segoe UI"/>
                         <TextBlock Text="⚠️ CẢNH BÁO: KHI KÍCH HOẠT CHẾ ĐỘ NÀY, TOÀN BỘ SÀN THƯƠNG MẠI SẼ TẠM DỪNG HOẠT ĐỘNG MUA BÁN. NGƯỜI MUA CHỈ NHÌN THẤY TRANG THÔNG BÁO BẢO TRÌ ĐỂ HỆ THỐNG NÂNG CẤP DỮ LIỆU." 
-                                   Foreground="#EF4444" FontWeight="SemiBold" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,16" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                   Foreground="#EF4444" FontWeight="SemiBold" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,16" FontFamily="Segoe UI"/>
 
                         <Grid>
                             <Grid.ColumnDefinitions>

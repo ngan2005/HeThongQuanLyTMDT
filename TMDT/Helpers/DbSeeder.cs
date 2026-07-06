@@ -23,6 +23,10 @@ namespace TMDT.Helpers
                 {
                     context.Roles.Add(new Role { RoleName = "Buyer", Description = "Regular Customer", IsActive = true });
                 }
+                if (!context.Roles.Any(r => r.RoleName == "Staff"))
+                {
+                    context.Roles.Add(new Role { RoleName = "Staff", Description = "Shop Staff/Cashier", IsActive = true });
+                }
                 context.SaveChanges();
 
                 // Seed SystemConfig — cấu hình mặc định lưu vào DB
@@ -93,6 +97,24 @@ namespace TMDT.Helpers
                         Password = PasswordHelper.HashPassword("buyer123"),
                         Phone = "0909123456",
                         RoleId = buyerRole.RoleId,
+                        IsActive = true,
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                // Seed Staff User
+                var staffEmail = "staff@myshop.com";
+                if (!context.Users.Any(u => u.Email == staffEmail))
+                {
+                    var staffRole = context.Roles.First(r => r.RoleName == "Staff");
+                    context.Users.Add(new User
+                    {
+                        UserCode = "USR-STAFF",
+                        Email = staffEmail,
+                        FullName = "Trần Thị Thu Ngân",
+                        Password = PasswordHelper.HashPassword("staff123"),
+                        Phone = "0988112233",
+                        RoleId = staffRole.RoleId,
                         IsActive = true,
                         CreatedAt = DateTime.Now
                     });

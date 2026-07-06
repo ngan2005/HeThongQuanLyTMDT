@@ -42,6 +42,7 @@ namespace TMDT.ViewModels.Auth
         public ICommand LoginCommand { get; }
         public ICommand LoginWithGoogleCommand { get; }
         public ICommand ShowRegisterCommand { get; }
+        public ICommand ShowForgotPasswordCommand { get; }
         public ICommand ExitCommand { get; }
 
         private readonly IAuthService _authService;
@@ -54,6 +55,7 @@ namespace TMDT.ViewModels.Auth
             LoginCommand = new RelayCommand(ExecuteLogin);
             LoginWithGoogleCommand = new RelayCommand(ExecuteLoginWithGoogle);
             ShowRegisterCommand = new RelayCommand(ExecuteShowRegister);
+            ShowForgotPasswordCommand = new RelayCommand(ExecuteShowForgotPassword);
             ExitCommand = new RelayCommand(ExecuteExit);
         }
 
@@ -102,8 +104,9 @@ namespace TMDT.ViewModels.Auth
                             redirectMsg = $"Chào Admin {user.FullName}!";
                             break;
                         case SessionManager.RoleSeller:
+                        case SessionManager.RoleStaff:
                             targetWindow = new Views.Seller.SellerMainView();
-                            redirectMsg = $"Chào Seller {user.FullName}!";
+                            redirectMsg = $"Chào {user.FullName}!";
                             break;
                         case SessionManager.RoleBuyer:
                             targetWindow = new Views.MainWindow();
@@ -196,8 +199,9 @@ namespace TMDT.ViewModels.Auth
                         redirectMsg = $"Chào Admin {user.FullName}!";
                         break;
                     case SessionManager.RoleSeller:
+                    case SessionManager.RoleStaff:
                         targetWindow = new Views.Seller.SellerMainView();
-                        redirectMsg = $"Chào Seller {user.FullName}!";
+                        redirectMsg = $"Chào {user.FullName}!";
                         break;
                     case SessionManager.RoleBuyer:
                         targetWindow = new Views.MainWindow();
@@ -236,6 +240,14 @@ namespace TMDT.ViewModels.Auth
             var loginWindow = Application.Current.MainWindow;
             var register = new Views.Auth.RegisterView();
             register.Show();
+            loginWindow?.Close();
+        }
+
+        private void ExecuteShowForgotPassword(object parameter)
+        {
+            var loginWindow = Application.Current.MainWindow;
+            var forgotWindow = new Views.Auth.ForgotPasswordView();
+            forgotWindow.Show();
             loginWindow?.Close();
         }
 

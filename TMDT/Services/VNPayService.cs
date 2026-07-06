@@ -51,6 +51,42 @@ namespace TMDT.Services
             return vnp_Url + "?" + query.ToString();
         }
 
+        public static string CreateTopUpPaymentUrl(decimal amount, int userId, string ipAddress = "127.0.0.1")
+        {
+            var vnp_Params = new SortedList<string, string>(new VNPayCompare());
+            vnp_Params.Add("vnp_Version", "2.1.0");
+            vnp_Params.Add("vnp_Command", "pay");
+            vnp_Params.Add("vnp_TmnCode", vnp_TmnCode);
+            vnp_Params.Add("vnp_Amount", ((long)(amount * 100)).ToString()); // in VND * 100
+            vnp_Params.Add("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
+            vnp_Params.Add("vnp_CurrCode", "VND");
+            vnp_Params.Add("vnp_IpAddr", ipAddress);
+            vnp_Params.Add("vnp_Locale", "vn");
+            vnp_Params.Add("vnp_OrderInfo", $"Nap tien vao vi - Nguoi dung {userId}");
+            vnp_Params.Add("vnp_OrderType", "topup");
+            vnp_Params.Add("vnp_ReturnUrl", vnp_Returnurl);
+            vnp_Params.Add("vnp_TxnRef", "TOPUP_" + userId + "_" + DateTime.Now.Ticks.ToString()); // Add ticks to make it unique per try
+            
+            StringBuilder query = new StringBuilder();
+            foreach (var kv in vnp_Params)
+            {
+                if (!string.IsNullOrEmpty(kv.Value))
+                {
+                    query.Append(WebUtility.UrlEncode(kv.Key) + "=" + WebUtility.UrlEncode(kv.Value) + "&");
+                }
+            }
+
+            if (query.Length > 0)
+            {
+                query.Remove(query.Length - 1, 1);
+            }
+
+            string vnp_SecureHash = HmacSHA512(vnp_HashSecret, query.ToString());
+            query.Append("&vnp_SecureHash=" + vnp_SecureHash);
+
+            return vnp_Url + "?" + query.ToString();
+        }
+
         public static bool ValidateSignature(Dictionary<string, string> responseData, out int orderId, out string txnRefOut)
         {
             orderId = 0;

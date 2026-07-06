@@ -156,7 +156,78 @@
                             <TextBlock Text="{Binding ShippingFee, StringFormat={}{0:N0}đ}"
                                        HorizontalAlignment="Right" FontWeight="SemiBold"/>
                         </Grid>
-                        <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,4,0,16"/>
+                        
+                        <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,4,0,10"/>
+                        
+                        <!-- Mã giảm giá -->
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="Mã giảm giá" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,5"/>
+                            
+                            <!-- Input -->
+                            <Grid Visibility="{Binding HasVoucher, Converter={StaticResource InverseBoolToVis}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding VoucherCode, UpdateSourceTrigger=PropertyChanged}"
+                                         materialDesign:HintAssist.Hint="Nhập mã voucher"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         Height="40" Padding="12,0"/>
+                                <Button Grid.Column="1" Content="Áp dụng" Margin="8,0,0,0"
+                                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        Command="{Binding ApplyVoucherCommand}" Height="40"/>
+                            </Grid>
+                            
+                            <!-- Applied Voucher -->
+                            <Border Background="#F0FDF4" BorderBrush="#16A34A" BorderThickness="1"
+                                    CornerRadius="8" Padding="12,8"
+                                    Visibility="{Binding HasVoucher, Converter={StaticResource BoolToVis}}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <materialDesign:PackIcon Kind="TicketPercentOutline" Foreground="#16A34A" 
+                                                             Width="24" Height="24" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding AppliedVoucher.VoucherCode}" FontWeight="Bold" Foreground="#166534"/>
+                                        <TextBlock Text="{Binding AppliedVoucher.VoucherName}" FontSize="12" Foreground="#15803D" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="2" Style="{StaticResource MaterialDesignFlatButton}"
+                                            Command="{Binding RemoveVoucherCommand}"
+                                            Foreground="#EF4444" Padding="4" Height="Auto" Margin="8,0,0,0">
+                                        <materialDesign:PackIcon Kind="Close"/>
+                                    </Button>
+                                </Grid>
+                            </Border>
+
+                            <!-- Discount amount display -->
+                            <Grid Margin="0,8,0,0" Visibility="{Binding HasVoucher, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="- Mã giảm giá" Foreground="#EF4444" FontSize="13"/>
+                                <TextBlock Text="{Binding VoucherDiscountAmount, StringFormat=- {0:N0}đ}"
+                                           HorizontalAlignment="Right" FontWeight="Bold" Foreground="#EF4444"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,4,0,10"/>
+                        
+                        <!-- Dùng điểm tích lũy -->
+                        <StackPanel Margin="0,0,0,10">
+                            <CheckBox IsChecked="{Binding UsePoints, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Content="Dùng điểm tích lũy"
+                                      Foreground="{StaticResource BrandPrimaryBrush}" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding UserLoyaltyPoints, StringFormat=Bạn đang có {0:N0} điểm}"
+                                       FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="24,2,0,5"/>
+                            <Grid Visibility="{Binding UsePoints, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="{Binding PointsToUse, StringFormat=- Dùng {0:N0} điểm}" 
+                                           Foreground="#EF4444" FontSize="13"/>
+                                <TextBlock Text="{Binding PointsDiscountAmount, StringFormat=- {0:N0}đ}"
+                                           HorizontalAlignment="Right" FontWeight="Bold" Foreground="#EF4444"/>
+                            </Grid>
+                        </StackPanel>
+                        
+                        <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,0,0,16"/>
 
                         <Grid Margin="0,0,0,20">
                             <TextBlock Text="Tổng cộng" FontSize="18" FontWeight="Bold"

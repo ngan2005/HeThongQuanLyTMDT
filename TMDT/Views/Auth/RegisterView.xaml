@@ -515,12 +515,12 @@
                             <Grid Margin="16">
                                 <!-- Top Branding -->
                                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,8,0,0">
-                                    <TextBlock Text="Volox AI" FontSize="16" FontWeight="ExtraBold" Foreground="#1E293B" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI">
+                                    <TextBlock Text="Volox AI" FontSize="16" FontWeight="ExtraBold" Foreground="#1E293B" HorizontalAlignment="Center" FontFamily="Segoe UI">
                                         <TextBlock.Effect>
                                             <DropShadowEffect Color="#5B5CEB" BlurRadius="10" Opacity="0.6" ShadowDepth="0"/>
                                         </TextBlock.Effect>
                                     </TextBlock>
-                                    <TextBlock Text="Trợ lý đăng ký thông minh" FontSize="9.5" Foreground="#475569" Opacity="0.85" FontWeight="Medium" Margin="0,2,0,0" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Trợ lý đăng ký thông minh" FontSize="9.5" Foreground="#475569" Opacity="0.85" FontWeight="Medium" Margin="0,2,0,0" HorizontalAlignment="Center" FontFamily="Segoe UI"/>
                                 </StackPanel>
 
                                 <!-- Mascot Container (Floating) -->
@@ -646,7 +646,7 @@
                                 </Grid>
 
                                 <!-- Bottom Status / Footer info -->
-                                <TextBlock Text="Mascot v1.0 • Chờ đăng ký" VerticalAlignment="Bottom" FontSize="9.5" Foreground="#94A3B8" Opacity="0.5" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="Mascot v1.0 • Chờ đăng ký" VerticalAlignment="Bottom" FontSize="9.5" Foreground="#94A3B8" Opacity="0.5" HorizontalAlignment="Center" FontFamily="Segoe UI"/>
                             </Grid>
                         </Border>
 
@@ -659,8 +659,8 @@
                                     <StackPanel.RenderTransform>
                                         <TranslateTransform x:Name="RevealTitleTransform" Y="15"/>
                                     </StackPanel.RenderTransform>
-                                    <TextBlock Text="Đăng ký tài khoản" FontSize="22" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    <TextBlock Text="Tham gia hệ thống phân phối thông minh Volox" FontSize="12" Foreground="#64748B" Margin="0,3,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Đăng ký tài khoản" FontSize="22" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI"/>
+                                    <TextBlock Text="Tham gia hệ thống phân phối thông minh Volox" FontSize="12" Foreground="#64748B" Margin="0,3,0,0" FontFamily="Segoe UI"/>
                                 </StackPanel>
 
                                 <!-- Stagger 2: Fields Grid -->
@@ -682,7 +682,7 @@
 
                                     <!-- Họ và tên -->
                                     <StackPanel Grid.Row="0" Grid.Column="0">
-                                        <TextBlock Text="Họ và tên" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="4,0,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        <TextBlock Text="Họ và tên" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="4,0,0,4" FontFamily="Segoe UI"/>
                                         <Grid>
                                             <TextBox x:Name="txtName" Style="{StaticResource ModernTextBox}" Tag="Nguyễn Văn A"
                                                      Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}"/>
@@ -692,7 +692,7 @@
 
                                     <!-- Email -->
                                     <StackPanel Grid.Row="0" Grid.Column="2">
-                                        <TextBlock Text="Email" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="4,0,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        <TextBlock Text="Email" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="4,0,0,4" FontFamily="Segoe UI"/>
                                         <Grid>
                                             <TextBox x:Name="txtEmail" Style="{StaticResource ModernTextBox}" Tag="username@email.com"
                                                      Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
@@ -702,7 +702,7 @@
 
                                     <!-- Số điện thoại -->
                                     <StackPanel Grid.Row="2" Grid.Column="0">
-                                        <TextBlock Text="Số điện thoại" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="4,0,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        <TextBlock Text="Số điện thoại" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="4,0,0,4" FontFamily="Segoe UI"/>
                                         <Grid>
                                             <TextBox x:Name="txtPhone" Style="{StaticResource ModernTextBox}" Tag="0901234567"
                                                      Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"/>
@@ -712,7 +712,7 @@
 
                                     <!-- Mật khẩu -->
                                     <StackPanel Grid.Row="2" Grid.Column="2">
-                                        <TextBlock Text="Mật khẩu" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="4,0,0,4" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        <TextBlock Text="Mật khẩu" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="4,0,0,4" FontFamily="Segoe UI"/>
                                         <Grid>
                                             <PasswordBox x:Name="txtPassword" Style="{StaticResource ModernPasswordBox}"
                                                          helpers:PasswordBoxHelper.BindPassword="True"
@@ -782,8 +782,8 @@
                                     <StackPanel.RenderTransform>
                                         <TranslateTransform x:Name="RevealLinkTransform" Y="15"/>
                                     </StackPanel.RenderTransform>
-                                    <TextBlock Text="Bạn đã có tài khoản Volox?" FontSize="11.5" Foreground="#94A3B8" Opacity="0.8" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    <TextBlock Text="Đăng nhập ngay" FontSize="11.5" FontWeight="Bold" Foreground="#6C63FF" Margin="5,0,0,0" Cursor="Hand" MouseLeftButtonDown="BackToLogin_Click" FontFamily="Be Vietnam Pro, Segoe UI">
+                                    <TextBlock Text="Bạn đã có tài khoản Volox?" FontSize="11.5" Foreground="#94A3B8" Opacity="0.8" FontFamily="Segoe UI"/>
+                                    <TextBlock Text="Đăng nhập ngay" FontSize="11.5" FontWeight="Bold" Foreground="#6C63FF" Margin="5,0,0,0" Cursor="Hand" MouseLeftButtonDown="BackToLogin_Click" FontFamily="Segoe UI">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
                                                 <Style.Triggers>

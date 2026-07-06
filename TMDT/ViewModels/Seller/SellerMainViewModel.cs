@@ -51,7 +51,10 @@ namespace TMDT.ViewModels.Seller
             set { _hasShop = value; OnPropertyChanged(); }
         }
 
+        public bool IsOwner => SessionManager.IsSeller;
+
         public ICommand ShowDashboardCommand { get; }
+        public ICommand ShowPosCommand { get; }
         public ICommand ShowProductsCommand { get; }
         public ICommand ShowOrdersCommand { get; }
         public ICommand ShowReturnRequestsCommand { get; }
@@ -60,14 +63,15 @@ namespace TMDT.ViewModels.Seller
         public ICommand ShowChatCommand { get; }
         public ICommand ShowWalletCommand { get; }
         public ICommand ShowProfileCommand { get; }
+        public ICommand ShowSalesHistoryCommand { get; }
         public ICommand RegisterShopCommand { get; }
         public ICommand LogoutCommand { get; }
 
         public SellerMainViewModel()
         {
-            if (!SessionManager.IsSeller)
+            if (!SessionManager.IsSeller && !SessionManager.IsStaff)
             {
-                MessageBox.Show("Bạn không có quyền truy cập trang Seller.", "Cảnh báo",
+                MessageBox.Show("Bạn không có quyền truy cập trang Seller/Staff.", "Cảnh báo",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 Application.Current.Shutdown();
                 return;
@@ -75,7 +79,7 @@ namespace TMDT.ViewModels.Seller
 
             if (SessionManager.CurrentUser != null)
             {
-                SellerName = SessionManager.CurrentUser.FullName ?? "Seller";
+                SellerName = SessionManager.CurrentUser.FullName ?? (SessionManager.IsStaff ? "Nhân viên" : "Seller");
                 ShopName = SessionManager.CurrentUser.ShopName ?? "";
                 HasShop = SessionManager.CurrentUser.ShopId.HasValue;
             }
@@ -88,6 +92,7 @@ namespace TMDT.ViewModels.Seller
             }
 
             ShowDashboardCommand = new RelayCommand(o => { CurrentView = new SellerDashboardViewModel(); ActiveMenu = "Dashboard"; });
+            ShowPosCommand = new RelayCommand(o => { CurrentView = new SellerPosViewModel(); ActiveMenu = "POS"; }, _ => HasShop);
             ShowProductsCommand = new RelayCommand(o => { CurrentView = new SellerProductsViewModel(); ActiveMenu = "Products"; }, _ => HasShop);
             ShowOrdersCommand = new RelayCommand(o => { CurrentView = new SellerOrdersViewModel(); ActiveMenu = "Orders"; }, _ => HasShop);
             ShowReturnRequestsCommand = new RelayCommand(o => { CurrentView = new SellerReturnRequestsViewModel(); ActiveMenu = "ReturnRequests"; }, _ => HasShop);
@@ -96,10 +101,20 @@ namespace TMDT.ViewModels.Seller
             ShowChatCommand = new RelayCommand(o => { CurrentView = new SellerChatViewModel(); ActiveMenu = "Chat"; }, _ => HasShop);
             ShowWalletCommand = new RelayCommand(o => { CurrentView = new SellerWalletViewModel(); ActiveMenu = "Wallet"; }, _ => HasShop);
             ShowProfileCommand = new RelayCommand(o => { CurrentView = new SellerProfileViewModel(); ActiveMenu = "Profile"; });
+            ShowSalesHistoryCommand = new RelayCommand(o => { CurrentView = new SellerSalesHistoryViewModel(); ActiveMenu = "SalesHistory"; }, _ => HasShop);
             RegisterShopCommand = new RelayCommand(_ => ExecuteRegisterShop());
             LogoutCommand = new RelayCommand(_ => ExecuteLogout());
 
-            CurrentView = new SellerDashboardViewModel();
+            if (IsOwner)
+            {
+                CurrentView = new SellerDashboardViewModel();
+                ActiveMenu = "Dashboard";
+            }
+            else
+            {
+                CurrentView = new SellerPosViewModel();
+                ActiveMenu = "POS";
+            }
         }
 
         private bool CheckHasShopInDb()

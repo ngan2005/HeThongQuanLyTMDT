@@ -77,9 +77,9 @@
                 <StackPanel Margin="0,0,0,20">
 
                     <TextBlock Text="Hồ Sơ Cửa Hàng" FontSize="18" FontWeight="Bold"
-                               Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,4"/>
+                               Foreground="#1E293B" FontFamily="Segoe UI" Margin="0,4,0,4"/>
                     <TextBlock Text="Xem thông tin tổng quan và thao tác quản lý shop của bạn"
-                               FontSize="11.5" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,24"/>
+                               FontSize="11.5" Foreground="#64748B" FontFamily="Segoe UI" Margin="0,0,0,24"/>
 
                     <!-- Bento Stats Row -->
                     <Grid Margin="0,0,0,20">
@@ -98,9 +98,9 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Tổng sản phẩm" FontSize="11" Foreground="#64748B" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    <TextBlock Text="{Binding TotalProducts}" FontSize="24" FontWeight="ExtraBold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,8,0,0"/>
-                                    <TextBlock Text="Đang bán trực tuyến" FontSize="9.5" Foreground="#0D9488" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0"/>
+                                    <TextBlock Text="Tổng sản phẩm" FontSize="11" Foreground="#64748B" FontWeight="Bold" FontFamily="Segoe UI"/>
+                                    <TextBlock Text="{Binding TotalProducts}" FontSize="24" FontWeight="ExtraBold" Foreground="#1E293B" FontFamily="Segoe UI" Margin="0,8,0,0"/>
+                                    <TextBlock Text="Đang bán trực tuyến" FontSize="9.5" Foreground="#0D9488" FontWeight="Bold" FontFamily="Segoe UI" Margin="0,4,0,0"/>
                                 </StackPanel>
                                 <Border Grid.Column="1" Width="32" Height="32" Background="#EFF6FF" CornerRadius="8" VerticalAlignment="Top" HorizontalAlignment="Right">
                                     <TextBlock Text="&#xE179;" FontFamily="Segoe MDL2 Assets" FontSize="12.5" Foreground="#2563EB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -116,9 +116,9 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Đơn hàng" FontSize="11" Foreground="#64748B" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    <TextBlock Text="{Binding TotalOrders}" FontSize="24" FontWeight="ExtraBold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,8,0,0"/>
-                                    <TextBlock Text="Tổng số lượng đơn" FontSize="9.5" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0"/>
+                                    <TextBlock Text="Đơn hàng" FontSize="11" Foreground="#64748B" FontWeight="Bold" FontFamily="Segoe UI"/>
+                                    <TextBlock Text="{Binding TotalOrders}" FontSize="24" FontWeight="ExtraBold" Foreground="#1E293B" FontFamily="Segoe UI" Margin="0,8,0,0"/>
+                                    <TextBlock Text="Tổng số lượng đơn" FontSize="9.5" Foreground="#64748B" FontFamily="Segoe UI" Margin="0,4,0,0"/>
                                 </StackPanel>
                                 <Border Grid.Column="1" Width="32" Height="32" Background="#F3E8FF" CornerRadius="8" VerticalAlignment="Top" HorizontalAlignment="Right">
                                     <TextBlock Text="&#xE8C7;" FontFamily="Segoe MDL2 Assets" FontSize="12.5" Foreground="#7C3AED" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -134,9 +134,9 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Số dư ví shop" FontSize="11" Foreground="#64748B" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    <TextBlock Text="{Binding WalletBalanceDisplay}" FontSize="18" FontWeight="ExtraBold" Foreground="#0D9488" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,11,0,0"/>
-                                    <TextBlock Text="Sẵn sàng giải ngân" FontSize="9.5" Foreground="#10B981" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0"/>
+                                    <TextBlock Text="Số dư ví shop" FontSize="11" Foreground="#64748B" FontWeight="Bold" FontFamily="Segoe UI"/>
+                                    <TextBlock Text="{Binding WalletBalanceDisplay}" FontSize="18" FontWeight="ExtraBold" Foreground="#0D9488" FontFamily="Segoe UI" Margin="0,11,0,0"/>
+                                    <TextBlock Text="Sẵn sàng giải ngân" FontSize="9.5" Foreground="#10B981" FontWeight="Bold" FontFamily="Segoe UI" Margin="0,4,0,0"/>
                                 </StackPanel>
                                 <Border Grid.Column="1" Width="32" Height="32" Background="#F0FDFA" CornerRadius="8" VerticalAlignment="Top" HorizontalAlignment="Right">
                                     <TextBlock Text="&#xE172;" FontFamily="Segoe MDL2 Assets" FontSize="12.5" Foreground="#0D9488" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -152,12 +152,12 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Đánh giá shop" FontSize="11" Foreground="#64748B" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Đánh giá shop" FontSize="11" Foreground="#64748B" FontWeight="Bold" FontFamily="Segoe UI"/>
                                     <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                        <TextBlock Text="{Binding ShopRating}" FontSize="24" FontWeight="ExtraBold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        <TextBlock Text="{Binding ShopRating}" FontSize="24" FontWeight="ExtraBold" Foreground="#1E293B" FontFamily="Segoe UI"/>
                                         <TextBlock Text="/5 ★" FontSize="11.5" Foreground="#64748B" VerticalAlignment="Bottom" Margin="2,0,0,4" FontWeight="Bold"/>
                                     </StackPanel>
-                                    <TextBlock Text="Chỉ số uy tín" FontSize="9.5" Foreground="#EA580C" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0"/>
+                                    <TextBlock Text="Chỉ số uy tín" FontSize="9.5" Foreground="#EA580C" FontWeight="Bold" FontFamily="Segoe UI" Margin="0,4,0,0"/>
                                 </StackPanel>
                                 <Border Grid.Column="1" Width="32" Height="32" Background="#FEF9C3" CornerRadius="8" VerticalAlignment="Top" HorizontalAlignment="Right">
                                     <TextBlock Text="&#xE734;" FontFamily="Segoe MDL2 Assets" FontSize="12.5" Foreground="#CA8A04" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -180,15 +180,15 @@
                             </Border>
 
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="18,0,0,0">
-                                <TextBlock Text="{Binding ShopNameInput}" FontSize="16" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                <TextBlock Text="{Binding WarehouseAddressInput}" FontSize="11.5" Foreground="#64748B" TextWrapping="Wrap" MaxWidth="420" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="{Binding ShopNameInput}" FontSize="16" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI"/>
+                                <TextBlock Text="{Binding WarehouseAddressInput}" FontSize="11.5" Foreground="#64748B" TextWrapping="Wrap" MaxWidth="420" Margin="0,4,0,0" FontFamily="Segoe UI"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                     <Border Background="#ECFDF5" CornerRadius="4" Padding="8,3">
-                                        <TextBlock Text="Đang hoạt động" FontSize="9.5" FontWeight="Bold" Foreground="#059669" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        <TextBlock Text="Đang hoạt động" FontSize="9.5" FontWeight="Bold" Foreground="#059669" FontFamily="Segoe UI"/>
                                     </Border>
                                     <Border Background="{Binding VacationBg}" CornerRadius="4" Padding="8,3" Margin="6,0,0,0">
                                         <TextBlock Text="{Binding VacationText}" FontSize="9.5" FontWeight="Bold"
-                                                   Foreground="{Binding VacationFg}" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                                   Foreground="{Binding VacationFg}" FontFamily="Segoe UI"/>
                                     </Border>
                                 </StackPanel>
                             </StackPanel>
@@ -206,7 +206,7 @@
                                 <Button.Content>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                        <TextBlock Text="Chỉnh sửa" Foreground="White" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                        <TextBlock Text="Chỉnh sửa" Foreground="White" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" FontFamily="Segoe UI"/>
                                     </StackPanel>
                                 </Button.Content>
                                 <Button.Style>
@@ -223,7 +223,7 @@
                     </Border>
 
                     <!-- Quick Actions -->
-                    <TextBlock Text="Thao tác nhanh" FontSize="14.5" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,0,0,14"/>
+                    <TextBlock Text="Thao tác nhanh" FontSize="14.5" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI" Margin="0,0,0,14"/>
 
                     <UniformGrid Columns="3" Margin="0,0,0,24">
                         <!-- Add Product Quick Action -->
@@ -232,10 +232,10 @@
                                 <Border Width="38" Height="38" CornerRadius="10" Background="#EEF2FF" Margin="0,0,0,12" HorizontalAlignment="Left">
                                     <TextBlock Text="&#xE109;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#4F46E5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
-                                <TextBlock Text="Thêm sản phẩm" FontSize="13.5" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                <TextBlock Text="Đăng bán sản phẩm mới lên gian hàng của shop" FontSize="10.5" Foreground="#64748B" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,12" Height="30"/>
+                                <TextBlock Text="Thêm sản phẩm" FontSize="13.5" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI"/>
+                                <TextBlock Text="Đăng bán sản phẩm mới lên gian hàng của shop" FontSize="10.5" Foreground="#64748B" TextWrapping="Wrap" FontFamily="Segoe UI" Margin="0,4,0,12" Height="30"/>
                                 <Button Content="Đăng ngay" Padding="0,8" Background="#4F46E5" BorderThickness="0" Cursor="Hand"
-                                        Foreground="White" FontSize="11.5" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI">
+                                        Foreground="White" FontSize="11.5" FontWeight="Bold" FontFamily="Segoe UI">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
                                             <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
@@ -262,10 +262,10 @@
                                 <Border Width="38" Height="38" CornerRadius="10" Background="#FFF7ED" Margin="0,0,0,12" HorizontalAlignment="Left">
                                     <TextBlock Text="&#xE1A1;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#EA580C" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
-                                <TextBlock Text="Tạo Voucher" FontSize="13.5" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                <TextBlock Text="Tạo chương trình ưu đãi giảm giá cho khách" FontSize="10.5" Foreground="#64748B" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,12" Height="30"/>
+                                <TextBlock Text="Tạo Voucher" FontSize="13.5" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI"/>
+                                <TextBlock Text="Tạo chương trình ưu đãi giảm giá cho khách" FontSize="10.5" Foreground="#64748B" TextWrapping="Wrap" FontFamily="Segoe UI" Margin="0,4,0,12" Height="30"/>
                                 <Button Content="Tạo voucher" Padding="0,8" Background="#EA580C" BorderThickness="0" Cursor="Hand"
-                                        Foreground="White" FontSize="11.5" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI">
+                                        Foreground="White" FontSize="11.5" FontWeight="Bold" FontFamily="Segoe UI">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
                                             <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
@@ -292,10 +292,10 @@
                                 <Border Width="38" Height="38" CornerRadius="10" Background="#F0FDF4" Margin="0,0,0,12" HorizontalAlignment="Left">
                                     <TextBlock Text="&#xE172;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#16A34A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
-                                <TextBlock Text="Rút tiền ví" FontSize="13.5" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                <TextBlock Text="Gửi yêu cầu giải ngân số dư ví shop về ngân hàng" FontSize="10.5" Foreground="#64748B" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,12" Height="30"/>
+                                <TextBlock Text="Rút tiền ví" FontSize="13.5" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI"/>
+                                <TextBlock Text="Gửi yêu cầu giải ngân số dư ví shop về ngân hàng" FontSize="10.5" Foreground="#64748B" TextWrapping="Wrap" FontFamily="Segoe UI" Margin="0,4,0,12" Height="30"/>
                                 <Button Command="{Binding WithdrawCommand}" Content="Rút tiền ngay" Padding="0,8" Background="#16A34A" BorderThickness="0" Cursor="Hand"
-                                        Foreground="White" FontSize="11.5" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI">
+                                        Foreground="White" FontSize="11.5" FontWeight="Bold" FontFamily="Segoe UI">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
                                             <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
@@ -320,7 +320,7 @@
                     <!-- Guidelines Card -->
                     <Border Background="#FFFFFF" CornerRadius="16" BorderThickness="1" BorderBrush="#F1F5F9" Effect="{StaticResource CardShadow}" Padding="24">
                         <StackPanel>
-                            <TextBlock Text="Hướng dẫn vận hành shop" FontSize="14" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,16" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Text="Hướng dẫn vận hành shop" FontSize="14" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,16" FontFamily="Segoe UI"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -333,25 +333,25 @@
                                 <StackPanel Grid.Column="0">
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                                         <TextBlock Text="&#xE10B;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#0D9488" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                        <TextBlock Text="Giao đơn hàng" FontSize="12.5" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Giao đơn hàng" FontSize="12.5" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI" VerticalAlignment="Center"/>
                                     </StackPanel>
-                                    <TextBlock Text="Kiểm tra và chuẩn bị giao hàng trong 24h để tránh hủy đơn." FontSize="10.5" Foreground="#64748B" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Kiểm tra và chuẩn bị giao hàng trong 24h để tránh hủy đơn." FontSize="10.5" Foreground="#64748B" TextWrapping="Wrap" FontFamily="Segoe UI"/>
                                 </StackPanel>
                                 
                                 <StackPanel Grid.Column="2">
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                                         <TextBlock Text="&#xE109;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#4F46E5" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                        <TextBlock Text="Đăng sản phẩm" FontSize="12.5" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Đăng sản phẩm" FontSize="12.5" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI" VerticalAlignment="Center"/>
                                     </StackPanel>
-                                    <TextBlock Text="Cung cấp hình ảnh đẹp và thông tin chính xác để tăng tỷ lệ chốt đơn." FontSize="10.5" Foreground="#64748B" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Cung cấp hình ảnh đẹp và thông tin chính xác để tăng tỷ lệ chốt đơn." FontSize="10.5" Foreground="#64748B" TextWrapping="Wrap" FontFamily="Segoe UI"/>
                                 </StackPanel>
                                 
                                 <StackPanel Grid.Column="4">
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                                         <TextBlock Text="&#xE172;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#16A34A" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                        <TextBlock Text="Định kỳ rút tiền" FontSize="12.5" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Định kỳ rút tiền" FontSize="12.5" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI" VerticalAlignment="Center"/>
                                     </StackPanel>
-                                    <TextBlock Text="Doanh thu đơn hàng hoàn tất sẽ cộng vào ví. Giải ngân sau 1-3 ngày." FontSize="10.5" Foreground="#64748B" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Doanh thu đơn hàng hoàn tất sẽ cộng vào ví. Giải ngân sau 1-3 ngày." FontSize="10.5" Foreground="#64748B" TextWrapping="Wrap" FontFamily="Segoe UI"/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -365,7 +365,7 @@
                     <StaticResource ResourceKey="CardShadow"/>
                 </Border.Effect>
                 <StackPanel>
-                    <TextBlock Text="Quản lý nhanh" FontSize="14.5" FontWeight="Bold" Foreground="#1E293B" Margin="0,8,0,16" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                    <TextBlock Text="Quản lý nhanh" FontSize="14.5" FontWeight="Bold" Foreground="#1E293B" Margin="0,8,0,16" FontFamily="Segoe UI"/>
 
                     <!-- Chỉnh sửa hồ sơ button -->
                     <Button Command="{Binding OpenProfileCommand}" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Padding="12,12" Height="Auto"
@@ -392,8 +392,8 @@
                                 <TextBlock Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" FontSize="13.5" Foreground="#0D9488" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <StackPanel Margin="12,0,0,0">
-                                <TextBlock Text="Chỉnh sửa hồ sơ" FontSize="12.5" FontWeight="SemiBold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                <TextBlock Text="Tên shop, logo, kho hàng" FontSize="10.5" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="Chỉnh sửa hồ sơ" FontSize="12.5" FontWeight="SemiBold" Foreground="#1E293B" FontFamily="Segoe UI"/>
+                                <TextBlock Text="Tên shop, logo, kho hàng" FontSize="10.5" Foreground="#64748B" FontFamily="Segoe UI"/>
                             </StackPanel>
                         </StackPanel>
                     </Button>
@@ -423,8 +423,8 @@
                                 <TextBlock Text="&#xE706;" FontFamily="Segoe MDL2 Assets" FontSize="13.5" Foreground="#EA580C" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <StackPanel Margin="12,0,0,0">
-                                <TextBlock Text="Tạm nghỉ phép" FontSize="12.5" FontWeight="SemiBold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                <TextBlock Text="Tạm dừng nhận đặt hàng mới" FontSize="10.5" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="Tạm nghỉ phép" FontSize="12.5" FontWeight="SemiBold" Foreground="#1E293B" FontFamily="Segoe UI"/>
+                                <TextBlock Text="Tạm dừng nhận đặt hàng mới" FontSize="10.5" Foreground="#64748B" FontFamily="Segoe UI"/>
                             </StackPanel>
                         </StackPanel>
                     </Button>
@@ -454,8 +454,8 @@
                                 <TextBlock Text="&#xE172;" FontFamily="Segoe MDL2 Assets" FontSize="13.5" Foreground="#16A34A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <StackPanel Margin="12,0,0,0">
-                                <TextBlock Text="Yêu cầu rút tiền" FontSize="12.5" FontWeight="SemiBold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                <TextBlock Text="Rút số dư ví shop về ngân hàng" FontSize="10.5" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="Yêu cầu rút tiền" FontSize="12.5" FontWeight="SemiBold" Foreground="#1E293B" FontFamily="Segoe UI"/>
+                                <TextBlock Text="Rút số dư ví shop về ngân hàng" FontSize="10.5" Foreground="#64748B" FontFamily="Segoe UI"/>
                             </StackPanel>
                         </StackPanel>
                     </Button>
@@ -463,16 +463,16 @@
                     <!-- Rating Score Sidebar Card -->
                     <Border Background="#FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#E2E8F0" Padding="16" Margin="0,16,0,0">
                         <StackPanel>
-                            <TextBlock Text="Độ uy tín cửa hàng" FontSize="11.5" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,10" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                            <TextBlock Text="Độ uy tín cửa hàng" FontSize="11.5" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,10" FontFamily="Segoe UI"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="{Binding ShopRating}" FontSize="32" FontWeight="ExtraBold" Foreground="#EA580C" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="0" Text="{Binding ShopRating}" FontSize="32" FontWeight="ExtraBold" Foreground="#EA580C" FontFamily="Segoe UI" VerticalAlignment="Center"/>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0">
-                                    <TextBlock Text="/5 ★ đánh giá" FontSize="11.5" Foreground="#64748B" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    <TextBlock Text="Bình chọn từ người mua" FontSize="10.5" Foreground="#94A3B8" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="/5 ★ đánh giá" FontSize="11.5" Foreground="#64748B" FontWeight="Bold" FontFamily="Segoe UI"/>
+                                    <TextBlock Text="Bình chọn từ người mua" FontSize="10.5" Foreground="#94A3B8" FontFamily="Segoe UI"/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -503,7 +503,7 @@
                         <Border Grid.Row="0" Background="#FFFFFF" BorderBrush="#F1F5F9" BorderThickness="0,0,0,1" CornerRadius="16,16,0,0" Padding="24,18">
                             <Grid>
                                 <TextBlock Text="Chỉnh Sửa Hồ Sơ Cửa Hàng" FontSize="16" FontWeight="Bold"
-                                           Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                           Foreground="#1E293B" FontFamily="Segoe UI"/>
                                 <Button HorizontalAlignment="Right" Background="Transparent" BorderThickness="0"
                                         Cursor="Hand" Click="CloseLightbox" Padding="4" VerticalAlignment="Center">
                                     <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#94A3B8" FontWeight="Bold"/>
@@ -561,16 +561,16 @@
                                     <!-- Opened At -->
                                     <Border Grid.Column="0" Background="#F8FAFC" CornerRadius="8" Padding="12" BorderBrush="#E2E8F0" BorderThickness="1">
                                         <StackPanel>
-                                            <TextBlock Text="Ngày mở cửa" FontSize="10.5" Foreground="#64748B" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                            <TextBlock Text="{Binding OpenedAtDisplay}" FontSize="12" FontWeight="SemiBold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0"/>
+                                            <TextBlock Text="Ngày mở cửa" FontSize="10.5" Foreground="#64748B" FontWeight="Bold" FontFamily="Segoe UI"/>
+                                            <TextBlock Text="{Binding OpenedAtDisplay}" FontSize="12" FontWeight="SemiBold" Foreground="#1E293B" FontFamily="Segoe UI" Margin="0,4,0,0"/>
                                         </StackPanel>
                                     </Border>
                                     
                                     <!-- Commission Rate -->
                                     <Border Grid.Column="2" Background="#F8FAFC" CornerRadius="8" Padding="12" BorderBrush="#E2E8F0" BorderThickness="1">
                                         <StackPanel>
-                                            <TextBlock Text="Chiết khấu sàn" FontSize="10.5" Foreground="#64748B" FontWeight="Bold" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0">
+                                            <TextBlock Text="Chiết khấu sàn" FontSize="10.5" Foreground="#64748B" FontWeight="Bold" FontFamily="Segoe UI"/>
+                                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#1E293B" FontFamily="Segoe UI" Margin="0,4,0,0">
                                                 <Run Text="{Binding CommissionRate, StringFormat={}{0}%}"/>
                                             </TextBlock>
                                         </StackPanel>
@@ -584,8 +584,8 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                                        <TextBlock Text="Chế độ tạm nghỉ phép" FontSize="12.5" FontWeight="SemiBold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                        <TextBlock Text="Khi bật chế độ này, người mua không thể tạo đơn đặt hàng mới từ cửa hàng." FontSize="10" Foreground="#64748B" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,4,0,0"/>
+                                        <TextBlock Text="Chế độ tạm nghỉ phép" FontSize="12.5" FontWeight="SemiBold" Foreground="#1E293B" FontFamily="Segoe UI"/>
+                                        <TextBlock Text="Khi bật chế độ này, người mua không thể tạo đơn đặt hàng mới từ cửa hàng." FontSize="10" Foreground="#64748B" TextWrapping="Wrap" FontFamily="Segoe UI" Margin="0,4,0,0"/>
                                     </StackPanel>
                                     
                                     <!-- Custom Toggle Switch -->
@@ -628,7 +628,7 @@
 
                                 <!-- Cancel -->
                                 <Button Grid.Column="0" Content="Hủy bỏ" Padding="18,10" Background="#F1F5F9" BorderThickness="0"
-                                        Foreground="#64748B" FontWeight="Bold" FontSize="11.5" FontFamily="Be Vietnam Pro, Segoe UI"
+                                        Foreground="#64748B" FontWeight="Bold" FontSize="11.5" FontFamily="Segoe UI"
                                         Cursor="Hand" Click="CloseLightbox" HorizontalAlignment="Left">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
@@ -661,7 +661,7 @@
                                     <Button.Content>
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="&#xE105;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                            <TextBlock Text="Lưu thay đổi" Foreground="White" FontSize="12.5" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                            <TextBlock Text="Lưu thay đổi" Foreground="White" FontSize="12.5" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Segoe UI"/>
                                         </StackPanel>
                                     </Button.Content>
                                     <Button.Style>

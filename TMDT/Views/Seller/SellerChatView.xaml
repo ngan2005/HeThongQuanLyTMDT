@@ -92,7 +92,7 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16" VerticalAlignment="Center">
-            <TextBlock Text="Tin nhắn khách hàng" FontSize="24" FontWeight="Bold" Foreground="#0F172A" FontFamily="Be Vietnam Pro, Segoe UI"/>
+            <TextBlock Text="Tin nhắn khách hàng" FontSize="24" FontWeight="Bold" Foreground="#0F172A" FontFamily="Segoe UI"/>
             <Button Command="{Binding RefreshCommand}" Background="Transparent" BorderThickness="0" Cursor="Hand" Margin="20,0,0,0" ToolTip="Làm mới">
                 <Border Background="#FFFFFF" CornerRadius="18" Width="36" Height="36" BorderThickness="1" BorderBrush="#E2E8F0">
                     <Border.Effect>
@@ -133,7 +133,7 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="&#xE11A;" FontFamily="Segoe MDL2 Assets" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="14"/>
-                                <TextBox Grid.Column="1" Background="Transparent" BorderThickness="0" Foreground="#1E293B" FontSize="13.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalContentAlignment="Center">
+                                <TextBox Grid.Column="1" Background="Transparent" BorderThickness="0" Foreground="#1E293B" FontSize="13.5" FontFamily="Segoe UI" VerticalContentAlignment="Center">
                                     <TextBox.Style>
                                         <Style TargetType="TextBox">
                                             <Style.Triggers>
@@ -142,7 +142,7 @@
                                                         <Setter.Value>
                                                             <VisualBrush Stretch="None" AlignmentX="Left" AlignmentY="Center">
                                                                 <VisualBrush.Visual>
-                                                                    <TextBlock Text="Tìm kiếm hội thoại..." Foreground="#94A3B8" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="13.5"/>
+                                                                    <TextBlock Text="Tìm kiếm hội thoại..." Foreground="#94A3B8" FontFamily="Segoe UI" FontSize="13.5"/>
                                                                 </VisualBrush.Visual>
                                                             </VisualBrush>
                                                         </Setter.Value>
@@ -187,10 +187,10 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="{Binding BuyerName}" FontWeight="Bold" FontSize="14" Foreground="#0F172A" FontFamily="Be Vietnam Pro, Segoe UI" TextTrimming="CharacterEllipsis"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding LastMessageTime}" FontSize="11" Foreground="#94A3B8" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="0" Text="{Binding BuyerName}" FontWeight="Bold" FontSize="14" Foreground="#0F172A" FontFamily="Segoe UI" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding LastMessageTime}" FontSize="11" Foreground="#94A3B8" FontFamily="Segoe UI" VerticalAlignment="Center"/>
                                         </Grid>
-                                        <TextBlock Grid.Row="1" Text="{Binding LastMessageSnippet}" FontSize="12.5" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Grid.Row="1" Text="{Binding LastMessageSnippet}" FontSize="12.5" Foreground="#64748B" FontFamily="Segoe UI" TextTrimming="CharacterEllipsis"/>
                                     </Grid>
                                 </Grid>
                             </DataTemplate>
@@ -224,10 +224,10 @@
                                 <Image Source="{Binding SelectedConversation.BuyerAvatar}" Stretch="UniformToFill"/>
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding SelectedConversation.BuyerName}" FontWeight="Bold" FontSize="15" Foreground="#0F172A" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="{Binding SelectedConversation.BuyerName}" FontWeight="Bold" FontSize="15" Foreground="#0F172A" FontFamily="Segoe UI"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,1,0,0">
                                     <Border Width="6" Height="6" CornerRadius="3" Background="#10B981" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Đang hoạt động" FontSize="12" Foreground="#10B981" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Đang hoạt động" FontSize="12" Foreground="#10B981" FontFamily="Segoe UI"/>
                                 </StackPanel>
                             </StackPanel>
                             <!-- Header actions -->
@@ -295,7 +295,7 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </Border.Style>
-                                                        <TextBlock Text="{Binding Content}" TextWrapping="Wrap" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="14.5" LineHeight="22">
+                                                        <TextBlock Text="{Binding Content}" TextWrapping="Wrap" FontFamily="Segoe UI" FontSize="14.5" LineHeight="22">
                                                             <TextBlock.Style>
                                                                 <Style TargetType="TextBlock">
                                                                     <Setter Property="Foreground" Value="#1E293B"/>
@@ -309,7 +309,7 @@
                                                         </TextBlock>
                                                     </Border>
                                                     <!-- Time below bubble -->
-                                                    <TextBlock Text="{Binding SentTime}" FontSize="11" Foreground="#94A3B8" FontFamily="Be Vietnam Pro, Segoe UI" Margin="0,6,0,0">
+                                                    <TextBlock Text="{Binding SentTime}" FontSize="11" Foreground="#94A3B8" FontFamily="Segoe UI" Margin="0,6,0,0">
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">
                                                                 <Setter Property="HorizontalAlignment" Value="Left"/>
@@ -340,13 +340,13 @@
                                     <Border Background="#F0FDF4" BorderBrush="#86EFAC" BorderThickness="1" CornerRadius="16" Padding="12,6">
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="✨" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="Gợi ý AI" FontSize="13" FontWeight="SemiBold" Foreground="#166534" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Gợi ý AI" FontSize="13" FontWeight="SemiBold" Foreground="#166534" FontFamily="Segoe UI" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
                                 </Button>
                                 
                                 <!-- Loading Text -->
-                                <TextBlock Text="AI đang phân tích..." FontSize="13" Foreground="#94A3B8" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" FontStyle="Italic" Visibility="{Binding IsAILoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                <TextBlock Text="AI đang phân tích..." FontSize="13" Foreground="#94A3B8" FontFamily="Segoe UI" VerticalAlignment="Center" FontStyle="Italic" Visibility="{Binding IsAILoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
                                 <!-- Danh sách Gợi ý -->
                                 <ItemsControl ItemsSource="{Binding AIReplySuggestions}">
@@ -368,7 +368,7 @@
                                                             </Style.Triggers>
                                                         </Style>
                                                     </Border.Style>
-                                                    <TextBlock Text="{Binding}" FontSize="13" Foreground="#475569" FontFamily="Be Vietnam Pro, Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="250"/>
+                                                    <TextBlock Text="{Binding}" FontSize="13" Foreground="#475569" FontFamily="Segoe UI" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="250"/>
                                                 </Border>
                                             </Button>
                                         </DataTemplate>
@@ -395,7 +395,7 @@
                             <!-- Text Input -->
                             <Border Grid.Column="2" Background="#F8FAFC" CornerRadius="24" Padding="20,12" BorderThickness="1" BorderBrush="#E2E8F0">
                                 <TextBox Text="{Binding MessageInput, UpdateSourceTrigger=PropertyChanged}" 
-                                         Background="Transparent" BorderThickness="0" FontSize="14.5" FontFamily="Be Vietnam Pro, Segoe UI" VerticalContentAlignment="Center">
+                                         Background="Transparent" BorderThickness="0" FontSize="14.5" FontFamily="Segoe UI" VerticalContentAlignment="Center">
                                     <TextBox.Style>
                                         <Style TargetType="TextBox">
                                             <Style.Triggers>
@@ -404,7 +404,7 @@
                                                         <Setter.Value>
                                                             <VisualBrush Stretch="None" AlignmentX="Left" AlignmentY="Center">
                                                                 <VisualBrush.Visual>
-                                                                    <TextBlock Text="Nhập tin nhắn của bạn..." Foreground="#94A3B8" FontFamily="Be Vietnam Pro, Segoe UI" FontSize="14.5"/>
+                                                                    <TextBlock Text="Nhập tin nhắn của bạn..." Foreground="#94A3B8" FontFamily="Segoe UI" FontSize="14.5"/>
                                                                 </VisualBrush.Visual>
                                                             </VisualBrush>
                                                         </Setter.Value>
@@ -439,8 +439,8 @@
                         <Border Width="96" Height="96" CornerRadius="48" Background="#E2E8F0" Margin="0,0,0,24" HorizontalAlignment="Center">
                             <TextBlock Text="&#xE119;" FontFamily="Segoe MDL2 Assets" FontSize="40" Foreground="#94A3B8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                        <TextBlock Text="Chưa chọn đoạn chat nào" FontSize="20" FontWeight="Bold" Foreground="#0F172A" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Hãy chọn một đoạn chat từ danh sách bên trái để bắt đầu trò chuyện với khách hàng." FontSize="14.5" Foreground="#64748B" FontFamily="Be Vietnam Pro, Segoe UI" HorizontalAlignment="Center" Margin="0,8,0,0" MaxWidth="300" TextWrapping="Wrap" TextAlignment="Center" LineHeight="22"/>
+                        <TextBlock Text="Chưa chọn đoạn chat nào" FontSize="20" FontWeight="Bold" Foreground="#0F172A" FontFamily="Segoe UI" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Hãy chọn một đoạn chat từ danh sách bên trái để bắt đầu trò chuyện với khách hàng." FontSize="14.5" Foreground="#64748B" FontFamily="Segoe UI" HorizontalAlignment="Center" Margin="0,8,0,0" MaxWidth="300" TextWrapping="Wrap" TextAlignment="Center" LineHeight="22"/>
                     </StackPanel>
                 </Border>
             </Grid>

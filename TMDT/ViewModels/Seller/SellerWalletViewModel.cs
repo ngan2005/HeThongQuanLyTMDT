@@ -6,6 +6,7 @@ using System.Windows.Input;
 using Microsoft.EntityFrameworkCore;
 using TMDT.Models;
 using TMDT.Utilities;
+using TMDT.Views.Components;
 
 namespace TMDT.ViewModels.Seller
 {
@@ -16,12 +17,14 @@ namespace TMDT.ViewModels.Seller
         private decimal _pendingPayouts;
         private decimal _withdrawnYTD;
         private bool _isWithdrawDialogOpen;
+        private bool _isVNPayMethod = true;
         private ObservableCollection<WithdrawRequest> _withdrawRequests;
 
         // Input fields for a new request
         private decimal _amountInput;
         private string _bankNameInput = "Vietcombank";
         private string _accountNumberInput;
+        private string _vnPayAccountInput = "";
 
         public decimal WalletBalance
         {
@@ -47,6 +50,12 @@ namespace TMDT.ViewModels.Seller
             set { _isWithdrawDialogOpen = value; OnPropertyChanged(); }
         }
 
+        public bool IsVNPayMethod
+        {
+            get => _isVNPayMethod;
+            set { _isVNPayMethod = value; OnPropertyChanged(); }
+        }
+
         public ObservableCollection<WithdrawRequest> WithdrawRequests
         {
             get => _withdrawRequests;
@@ -68,6 +77,11 @@ namespace TMDT.ViewModels.Seller
         {
             get => _accountNumberInput;
             set { _accountNumberInput = value; OnPropertyChanged(); }
+        }
+        public string VNPayAccountInput
+        {
+            get => _vnPayAccountInput;
+            set { _vnPayAccountInput = value; OnPropertyChanged(); }
         }
         #endregion
 
@@ -143,6 +157,8 @@ namespace TMDT.ViewModels.Seller
         {
             AmountInput = 0;
             AccountNumberInput = "";
+            VNPayAccountInput = "";
+            IsVNPayMethod = true;
         }
 
         private async void ExecuteSendWithdrawRequest(object obj)
@@ -159,54 +175,119 @@ namespace TMDT.ViewModels.Seller
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(AccountNumberInput))
+            if (IsVNPayMethod)
             {
-                MessageBox.Show("Vui lòng nhập số tài khoản ngân hàng!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            int currentShopId = GetCurrentShopId();
-
-            var newReq = new WithdrawRequest
-            {
-                ShopId = currentShopId,
-                Amount = AmountInput,
-                BankName = BankNameInput,
-                AccountNumber = AccountNumberInput.Trim(),
-                Status = "Pending",
-                RequestedAt = DateTime.Now
-            };
-
-            // Deduct locally and from DB
-            WalletBalance -= AmountInput;
-
-            try
-            {
-                if (_context != null)
+                // --- Rút qua VNPay: tức thì ---
+                if (string.IsNullOrWhiteSpace(VNPayAccountInput))
                 {
-                    // Update shop balance
-                    var shop = await _context.Shops.FindAsync(currentShopId);
-                    if (shop != null)
-                    {
-                        shop.WalletBalance = WalletBalance;
-                    }
-
-                    _context.WithdrawRequests.Add(newReq);
-                    await _context.SaveChangesAsync();
+                    MessageBox.Show("Vui lòng nhập số điện thoại / tài khoản VNPay!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
                 }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("EF withdraw request failed: " + ex.Message);
-                newReq.WithdrawId = new Random().Next(8000, 9999);
-            }
 
-            WithdrawRequests.Insert(0, newReq);
-            PendingPayouts += AmountInput;
-            IsWithdrawDialogOpen = false;
-            
-            MessageBox.Show("Yêu cầu rút tiền đã được gửi đi! Số dư ví tạm khấu trừ, đang chờ Admin phê duyệt giải ngân.", "Gửi yêu cầu thành công", MessageBoxButton.OK, MessageBoxImage.Information);
-            ResetInputs();
+                // Mở cửa sổ mock VNPay
+                var vnpayWin = new VNPayWithdrawMockWindow(AmountInput, VNPayAccountInput);
+                bool? result = vnpayWin.ShowDialog();
+
+                if (result != true) return; // Người dùng hủy
+
+                // Xác nhận thành công → trừ ví ngay, tạo lịch sử Approved
+                int currentShopId = GetCurrentShopId();
+                var newReq = new WithdrawRequest
+                {
+                    ShopId = currentShopId,
+                    Amount = AmountInput,
+                    BankName = "VNPay",
+                    AccountNumber = VNPayAccountInput.Trim(),
+                    Status = "Approved",  // Tức thì duyệt
+                    RequestedAt = DateTime.Now
+                };
+
+                try
+                {
+                    if (_context != null)
+                    {
+                        var shop = await _context.Shops.FindAsync(currentShopId);
+                        if (shop != null)
+                        {
+                            decimal realBalance = shop.WalletBalance ?? 0;
+                            if (realBalance < AmountInput)
+                            {
+                                MessageBox.Show("Số dư ví thực tế không đủ.", "Lỗi số dư", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                WalletBalance = realBalance;
+                                return;
+                            }
+                            shop.WalletBalance = realBalance - AmountInput;
+                            WalletBalance = shop.WalletBalance.Value;
+                        }
+                        _context.WithdrawRequests.Add(newReq);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("VNPay withdraw failed: " + ex.Message);
+                }
+
+                WithdrawRequests.Insert(0, newReq);
+                WithdrawnYTD += AmountInput;  // VNPay duyệt ngay
+                IsWithdrawDialogOpen = false;
+                MessageBox.Show($"Rút tiền qua VNPay thành công!\nSố tiền {AmountInput:N0} đ đã được chuyển vào {VNPayAccountInput}.\nMã GD: {vnpayWin.TransactionCode}",
+                    "Rút tiền thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                ResetInputs();
+            }
+            else
+            {
+                // --- Rút qua Ngân hàng: gửi yêu cầu chờ Admin duyệt ---
+                if (string.IsNullOrWhiteSpace(AccountNumberInput))
+                {
+                    MessageBox.Show("Vui lòng nhập số tài khoản ngân hàng!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                int currentShopId = GetCurrentShopId();
+                var newReq = new WithdrawRequest
+                {
+                    ShopId = currentShopId,
+                    Amount = AmountInput,
+                    BankName = BankNameInput,
+                    AccountNumber = AccountNumberInput.Trim(),
+                    Status = "Pending",
+                    RequestedAt = DateTime.Now
+                };
+
+                try
+                {
+                    if (_context != null)
+                    {
+                        var shop = await _context.Shops.FindAsync(currentShopId);
+                        if (shop != null)
+                        {
+                            decimal realBalance = shop.WalletBalance ?? 0;
+                            if (realBalance < AmountInput)
+                            {
+                                MessageBox.Show("Số dư ví thực tế không đủ để rút số tiền này.", "Lỗi số dư", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                WalletBalance = realBalance;
+                                return;
+                            }
+                            shop.WalletBalance = realBalance - AmountInput;
+                            WalletBalance = shop.WalletBalance.Value;
+                        }
+                        _context.WithdrawRequests.Add(newReq);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Bank withdraw request failed: " + ex.Message);
+                }
+
+                WithdrawRequests.Insert(0, newReq);
+                PendingPayouts += AmountInput;
+                IsWithdrawDialogOpen = false;
+                MessageBox.Show("Yêu cầu rút tiền đã được gửi!\nSố dư ví tạm khấu trừ, đang chờ Admin phê duyệt giải ngân.",
+                    "Gửi yêu cầu thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                ResetInputs();
+            }
         }
 
         private int GetCurrentShopId()

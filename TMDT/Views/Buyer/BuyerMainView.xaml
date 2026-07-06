@@ -44,6 +44,9 @@
         <DataTemplate DataType="{x:Type vmBuyer:BuyerContactViewModel}" xmlns:vmBuyer="clr-namespace:TMDT.ViewModels.Buyer">
             <buyerViews:BuyerContactView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vmBuyer:BuyerShopViewModel}" xmlns:vmBuyer="clr-namespace:TMDT.ViewModels.Buyer">
+            <buyerViews:BuyerShopView/>
+        </DataTemplate>
     </UserControl.Resources>
 
     <Grid>
@@ -201,7 +204,10 @@
         <!-- 4. Animation Overlay -->
         <Canvas x:Name="AnimationOverlay" Grid.RowSpan="3" Panel.ZIndex="100" IsHitTestVisible="False"/>
 
-        <!-- 5. Toast Notification Snackbar -->
+        <!-- 5. Floating Chat Widget -->
+        <buyerViews:BuyerChatWidget Grid.RowSpan="3" DataContext="{Binding ChatViewModel}" Panel.ZIndex="105"/>
+
+        <!-- 6. Toast Notification Snackbar -->
         <materialDesign:Snackbar x:Name="MainSnackbar" Grid.RowSpan="3" Panel.ZIndex="110"/>
     </Grid>
 </UserControl>

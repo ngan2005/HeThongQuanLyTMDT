@@ -18,6 +18,7 @@ namespace TMDT.ViewModels.Buyer
         private Category? _selectedCategory;
         private decimal? _minPrice;
         private decimal? _maxPrice;
+        private int? _shopIdFilter;
 
         public ObservableCollection<ProductWrapper> Products { get; } = new();
         public ObservableCollection<Category> Categories { get; } = new();
@@ -51,10 +52,11 @@ namespace TMDT.ViewModels.Buyer
         public ICommand OpenProductCommand { get; }
         public ICommand ToggleWishlistCommand { get; }
 
-        public BuyerProductsViewModel(BuyerMainViewModel mainVm, string initialSearchQuery = "")
+        public BuyerProductsViewModel(BuyerMainViewModel mainVm, string initialSearchQuery = "", int? shopIdFilter = null)
         {
             _mainVm = mainVm;
             _searchQuery = initialSearchQuery;
+            _shopIdFilter = shopIdFilter;
 
             FilterCommand = new RelayCommand(_ => LoadProducts());
             ClearFilterCommand = new RelayCommand(_ => ClearFilters());
@@ -111,6 +113,12 @@ namespace TMDT.ViewModels.Buyer
                 if (SelectedCategory != null && SelectedCategory.CategoryId > 0)
                 {
                     query = query.Where(p => p.CategoryId == SelectedCategory.CategoryId);
+                }
+
+                // Shop filter
+                if (_shopIdFilter.HasValue && _shopIdFilter.Value > 0)
+                {
+                    query = query.Where(p => p.ShopId == _shopIdFilter.Value);
                 }
 
                 // 3. Price filter

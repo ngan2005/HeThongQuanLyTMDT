@@ -1,4 +1,5 @@
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace TMDT.Views.Seller
 {
@@ -9,12 +10,24 @@ namespace TMDT.Views.Seller
             InitializeComponent();
         }
 
-        private void LightboxOverlay_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void LightboxOverlay_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (DataContext is ViewModels.Seller.SellerWalletViewModel vm)
             {
                 vm.CloseDialogCommand.Execute(null);
             }
+        }
+
+        private void VNPayTab_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is ViewModels.Seller.SellerWalletViewModel vm)
+                vm.IsVNPayMethod = true;
+        }
+
+        private void BankTab_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is ViewModels.Seller.SellerWalletViewModel vm)
+                vm.IsVNPayMethod = false;
         }
     }
 }

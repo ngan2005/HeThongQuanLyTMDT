@@ -464,6 +464,9 @@ namespace TMDT.Migrations
                         .HasColumnType("decimal(18, 2)")
                         .HasDefaultValue(0m);
 
+                    b.Property<decimal?>("ManualDiscount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Note")
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
@@ -562,12 +565,17 @@ namespace TMDT.Migrations
                     b.Property<decimal?>("UnitPrice")
                         .HasColumnType("decimal(18, 2)");
 
+                    b.Property<int?>("VariantId")
+                        .HasColumnType("int");
+
                     b.HasKey("OrderDetailId")
                         .HasName("PK__OrderDet__D3B9D36CF8F5AE95");
 
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("VariantId");
 
                     b.ToTable("OrderDetail", (string)null);
                 });
@@ -839,6 +847,12 @@ namespace TMDT.Migrations
                         .HasColumnType("decimal(18, 2)")
                         .HasDefaultValue(0m);
 
+                    b.Property<int?>("HeightCm")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("LengthCm")
+                        .HasColumnType("int");
+
                     b.Property<int?>("ProductId")
                         .HasColumnType("int");
 
@@ -856,6 +870,12 @@ namespace TMDT.Migrations
                     b.Property<string>("VariantName")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("WeightGrams")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("WidthCm")
+                        .HasColumnType("int");
 
                     b.HasKey("VariantId")
                         .HasName("PK__ProductV__0EA23384313BEF1D");
@@ -1547,9 +1567,16 @@ namespace TMDT.Migrations
                         .HasForeignKey("ProductId")
                         .HasConstraintName("FK__OrderDeta__Produ__1332DBDC");
 
+                    b.HasOne("TMDT.Models.ProductVariant", "Variant")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("VariantId")
+                        .HasConstraintName("FK_OrderDetail_Variant");
+
                     b.Navigation("Order");
 
                     b.Navigation("Product");
+
+                    b.Navigation("Variant");
                 });
 
             modelBuilder.Entity("TMDT.Models.OrderStatusHistory", b =>
@@ -1842,6 +1869,8 @@ namespace TMDT.Migrations
             modelBuilder.Entity("TMDT.Models.ProductVariant", b =>
                 {
                     b.Navigation("CartItems");
+
+                    b.Navigation("OrderDetails");
                 });
 
             modelBuilder.Entity("TMDT.Models.Review", b =>

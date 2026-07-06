@@ -134,6 +134,7 @@ namespace TMDT.ViewModels.Admin
         public ICommand AiAnalyzeCommand { get; }
         public ICommand ScanFraudCommand { get; }
         public ICommand AiCategorizeCommand { get; }
+        public ICommand ShowBarcodeCommand { get; }
 
         public AdminProductsViewModel(string initialFilter = "All")
         {
@@ -160,8 +161,20 @@ namespace TMDT.ViewModels.Admin
             AiAnalyzeCommand = new RelayCommand(ExecuteAiAnalyze, CanExecuteAiAnalyze);
             ScanFraudCommand = new RelayCommand(ExecuteScanFraud, _ => !IsAiFraudScanning);
             AiCategorizeCommand = new RelayCommand(ExecuteAiCategorize, _ => SelectedProduct != null && !IsAiCategorizing);
+            ShowBarcodeCommand = new RelayCommand(o => ExecuteShowBarcode(o as Product));
 
             _ = LoadProductsAsync();
+        }
+
+        private void ExecuteShowBarcode(Product? product)
+        {
+            if (product == null) return;
+            var dlg = new TMDT.Views.Seller.BarcodeDialog
+            {
+                DataContext = new TMDT.ViewModels.Seller.BarcodeViewModel(product),
+                Owner = Application.Current.MainWindow
+            };
+            dlg.ShowDialog();
         }
 
         private async void ExecuteAiCategorize(object? obj)

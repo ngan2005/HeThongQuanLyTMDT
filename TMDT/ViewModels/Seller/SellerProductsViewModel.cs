@@ -144,6 +144,33 @@ namespace TMDT.ViewModels.Seller
             get => _stockInput;
             set { _stockInput = value; OnPropertyChanged(); }
         }
+        
+        // Logistics Inputs
+        private int? _weightInput;
+        public int? WeightInput
+        {
+            get => _weightInput;
+            set { _weightInput = value; OnPropertyChanged(); }
+        }
+        private int? _lengthInput;
+        public int? LengthInput
+        {
+            get => _lengthInput;
+            set { _lengthInput = value; OnPropertyChanged(); }
+        }
+        private int? _widthInput;
+        public int? WidthInput
+        {
+            get => _widthInput;
+            set { _widthInput = value; OnPropertyChanged(); }
+        }
+        private int? _heightInput;
+        public int? HeightInput
+        {
+            get => _heightInput;
+            set { _heightInput = value; OnPropertyChanged(); }
+        }
+
         public string DescriptionInput
         {
             get => _descriptionInput;
@@ -190,6 +217,7 @@ namespace TMDT.ViewModels.Seller
         public ICommand ClearImagesCommand { get; } = null!;
         public ICommand AddVariantCommand { get; } = null!;
         public ICommand RemoveVariantCommand { get; } = null!;
+        public ICommand ShowBarcodeCommand { get; } = null!;
 
         public SellerProductsViewModel()
         {
@@ -206,10 +234,22 @@ namespace TMDT.ViewModels.Seller
             ClearImagesCommand = new RelayCommand(_ => ExecuteClearImages());
             AddVariantCommand = new RelayCommand(_ => ExecuteAddVariant());
             RemoveVariantCommand = new RelayCommand(o => ExecuteRemoveVariant(o as ProductVariant));
+            ShowBarcodeCommand = new RelayCommand(o => ExecuteShowBarcode(o as Product));
 
             _ = LoadCategoriesAsync();
             _ = LoadProductsAsync();
             ResetInspector();
+        }
+
+        private void ExecuteShowBarcode(Product? product)
+        {
+            if (product == null) return;
+            var dlg = new TMDT.Views.Seller.BarcodeDialog
+            {
+                DataContext = new BarcodeViewModel(product),
+                Owner = Application.Current.MainWindow
+            };
+            dlg.ShowDialog();
         }
 
         private void ExecuteSelectImages()
@@ -351,10 +391,10 @@ namespace TMDT.ViewModels.Seller
                 ProductNameInput = SelectedProduct.ProductName;
                 ProductCodeInput = SelectedProduct.ProductCode;
                 PriceInput = SelectedProduct.Price;
-                OriginalPriceInput = SelectedProduct.OriginalPrice ?? SelectedProduct.Price;
+                OriginalPriceInput = SelectedProduct.OriginalPrice;
                 StockInput = SelectedProduct.StockQuantity ?? 0;
-                DescriptionInput = SelectedProduct.Description;
-                SelectedCategoryInput = Categories.FirstOrDefault(c => c.CategoryId == SelectedProduct.CategoryId) ?? Categories.FirstOrDefault();
+                DescriptionInput = SelectedProduct.Description ?? "";
+                SelectedCategoryInput = Categories.FirstOrDefault(c => c.CategoryId == SelectedProduct.CategoryId);
                 
                 ProductImagesPreview.Clear();
                 SelectedLocalImagePaths.Clear();
@@ -404,7 +444,7 @@ namespace TMDT.ViewModels.Seller
             _selectedProduct = null;
             OnPropertyChanged(nameof(SelectedProduct));
             ProductNameInput = "";
-            ProductCodeInput = "";
+            ProductCodeInput = "PROD-" + Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper();
             PriceInput = 0;
             OriginalPriceInput = null;
             StockInput = 0;
@@ -417,6 +457,10 @@ namespace TMDT.ViewModels.Seller
             VariantExtraPriceInput = 0;
             VariantQuantityInput = 0;
             VariantSkuInput = "";
+            WeightInput = null;
+            LengthInput = null;
+            WidthInput = null;
+            HeightInput = null;
             IsEditMode = false;
             OnPropertyChanged(nameof(FormTitle));
             OnPropertyChanged(nameof(FormStatusBadge));
@@ -466,12 +510,12 @@ namespace TMDT.ViewModels.Seller
                 {
                     targetProd = await ctx.Products.FindAsync(SelectedProduct.ProductId) ?? SelectedProduct;
                     targetProd.ProductName = ProductNameInput;
-                    SelectedProduct.ProductCode = ProductCodeInput;
-                    SelectedProduct.Price = PriceInput;
-                    SelectedProduct.OriginalPrice = OriginalPriceInput;
-                    SelectedProduct.StockQuantity = StockInput;
-                    SelectedProduct.Description = DescriptionInput;
-                    targetProd.CategoryId = SelectedCategoryInput.CategoryId;
+                    targetProd.ProductCode = ProductCodeInput;
+                    targetProd.Price = PriceInput;
+                    targetProd.OriginalPrice = OriginalPriceInput;
+                    targetProd.StockQuantity = StockInput;
+                    targetProd.Description = DescriptionInput;
+                    targetProd.CategoryId = SelectedCategoryInput?.CategoryId;
                 }
                 else
                 {
@@ -486,12 +530,11 @@ namespace TMDT.ViewModels.Seller
                         OriginalPrice = OriginalPriceInput,
                         StockQuantity = StockInput,
                         Description = DescriptionInput,
-                        CategoryId = SelectedCategoryInput.CategoryId,
+                        CategoryId = SelectedCategoryInput?.CategoryId,
                         Status = SystemSettingsHelper.Current.RequireProductApproval ? "Pending" : "Approved",
                         CreatedAt = DateTime.Now,
                         SoldCount = 0,
-                        Rating = 0,
-                        Category = SelectedCategoryInput
+                        Rating = 0
                     };
                     ctx.Products.Add(targetProd);
                 }

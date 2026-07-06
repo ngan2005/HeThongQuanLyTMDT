@@ -1,0 +1,42 @@
+<Window x:Class="TMDT.Views.Components.TopUpDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Nạp tiền vào Ví" Height="400" Width="400"
+        WindowStartupLocation="CenterOwner" Background="#F4F4F4" ResizeMode="NoResize">
+    <Border Background="White" CornerRadius="12" Margin="20">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+        </Border.Effect>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            
+            <TextBlock Text="NẠP TIỀN BẰNG VNPAY" FontSize="20" FontWeight="Bold" Foreground="#005BAA" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+            <TextBlock Text="Nhập số tiền muốn nạp (VNĐ)" FontSize="12" Foreground="Gray" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+            
+            <Border Background="White" BorderBrush="#005BAA" BorderThickness="2" CornerRadius="8" Margin="0,0,0,15" Width="250" Height="45">
+                <TextBox x:Name="txtAmount" FontSize="18" FontWeight="Bold" Foreground="#111111" 
+                         VerticalAlignment="Center" HorizontalAlignment="Center" 
+                         BorderThickness="0" Background="Transparent"
+                         PreviewTextInput="TxtAmount_PreviewTextInput" 
+                         TextChanged="TxtAmount_TextChanged"/>
+            </Border>
+            
+            <!-- Quick Suggestion Buttons -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,20">
+                <Button Content="100k" Click="BtnQuickAmount_Click" Width="55" Height="30" Background="#F0F0F0" Foreground="Black" Margin="0,0,5,0" BorderThickness="0"/>
+                <Button Content="200k" Click="BtnQuickAmount_Click" Width="55" Height="30" Background="#F0F0F0" Foreground="Black" Margin="0,0,5,0" BorderThickness="0"/>
+                <Button Content="500k" Click="BtnQuickAmount_Click" Width="55" Height="30" Background="#F0F0F0" Foreground="Black" Margin="0,0,5,0" BorderThickness="0"/>
+                <Button Content="1M" Click="BtnQuickAmount_Click" Width="55" Height="30" Background="#F0F0F0" Foreground="Black" BorderThickness="0"/>
+            </StackPanel>
+
+            <Button Content="XÁC NHẬN NẠP TIỀN" Background="#005BAA" Foreground="White" FontWeight="Bold" FontSize="14" Height="45" Width="250" Click="BtnConfirm_Click">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="8"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            
+            <Button Content="Hủy" Background="Transparent" Foreground="Gray" FontSize="13" BorderThickness="0" Margin="0,15,0,0" Click="BtnCancel_Click"/>
+        </StackPanel>
+    </Border>
+</Window>

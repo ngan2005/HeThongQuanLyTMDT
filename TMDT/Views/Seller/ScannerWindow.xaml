@@ -1,0 +1,54 @@
+<Window x:Class="TMDT.Views.Seller.ScannerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Quét mã vạch (Webcam)" Height="550" Width="600"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="#F1F5F9" Closing="Window_Closing">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Chọn Camera: " VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,8,0"/>
+            <ComboBox x:Name="CameraComboBox" Grid.Column="1" SelectionChanged="CameraComboBox_SelectionChanged"
+                      materialDesign:HintAssist.Hint="Đang tìm camera..." Style="{StaticResource MaterialDesignOutlinedComboBox}" Padding="8,4"/>
+        </Grid>
+
+        <!-- Camera View -->
+        <Border Grid.Row="1" Background="Black" CornerRadius="12" ClipToBounds="True" BorderBrush="#E2E8F0" BorderThickness="1">
+            <Grid>
+                <!-- Thẻ Image sẽ hiển thị ảnh từ Camera -->
+                <Image x:Name="CameraImage" Stretch="UniformToFill"/>
+                
+                <!-- Overlay: Hình vuông khung quét -->
+                <Border BorderBrush="#10B981" BorderThickness="3" Width="300" Height="150" HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="8">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#10B981" BlurRadius="20" ShadowDepth="0" Opacity="0.5"/>
+                    </Border.Effect>
+                </Border>
+                
+                <!-- Hướng dẫn -->
+                <Border Background="#80000000" VerticalAlignment="Bottom" Padding="12" CornerRadius="0,0,12,12">
+                    <TextBlock Text="Đưa mã vạch của sản phẩm vào trong khung xanh" Foreground="White" HorizontalAlignment="Center" FontSize="14" FontWeight="SemiBold"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Actions -->
+        <Grid Grid.Row="2" Margin="0,16,0,0">
+            <Button Content="Đóng cửa sổ (ESC)" Click="Close_Click" Style="{StaticResource MaterialDesignOutlinedButton}" HorizontalAlignment="Center" Width="150"/>
+        </Grid>
+    </Grid>
+</Window>

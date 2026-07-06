@@ -675,12 +675,12 @@
                             <Grid Margin="16">
                                 <!-- Top Branding -->
                                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,8,0,0">
-                                    <TextBlock Text="Volox AI" FontSize="16" FontWeight="ExtraBold" Foreground="#1E293B" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI">
+                                    <TextBlock Text="Volox AI" FontSize="16" FontWeight="ExtraBold" Foreground="#1E293B" HorizontalAlignment="Center" FontFamily="Segoe UI">
                                         <TextBlock.Effect>
                                             <DropShadowEffect Color="#5B5CEB" BlurRadius="10" Opacity="0.6" ShadowDepth="0"/>
                                         </TextBlock.Effect>
                                     </TextBlock>
-                                    <TextBlock Text="Trợ lý vận hành thông minh" FontSize="9.5" Foreground="#475569" Opacity="0.85" FontWeight="Medium" Margin="0,2,0,0" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Trợ lý vận hành thông minh" FontSize="9.5" Foreground="#475569" Opacity="0.85" FontWeight="Medium" Margin="0,2,0,0" HorizontalAlignment="Center" FontFamily="Segoe UI"/>
                                 </StackPanel>
 
                                 <!-- Mascot Container (Floating) -->
@@ -840,7 +840,7 @@
                                 </Grid>
 
                                 <!-- Bottom Status / Footer info -->
-                                <TextBlock Text="Mascot v1.0 • Chờ đăng nhập" VerticalAlignment="Bottom" FontSize="9.5" Foreground="#94A3B8" Opacity="0.5" HorizontalAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                <TextBlock Text="Mascot v1.0 • Chờ đăng nhập" VerticalAlignment="Bottom" FontSize="9.5" Foreground="#94A3B8" Opacity="0.5" HorizontalAlignment="Center" FontFamily="Segoe UI"/>
                             </Grid>
                         </Border>
 
@@ -853,8 +853,8 @@
                                     <StackPanel.RenderTransform>
                                         <TranslateTransform x:Name="RevealTitleTransform" Y="15"/>
                                     </StackPanel.RenderTransform>
-                                    <TextBlock Text="Đăng nhập" FontSize="22" FontWeight="Bold" Foreground="#1E293B" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    <TextBlock Text="Quản lý hệ thống bán hàng của bạn" FontSize="12" Foreground="#64748B" Margin="0,3,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                    <TextBlock Text="Đăng nhập" FontSize="22" FontWeight="Bold" Foreground="#1E293B" FontFamily="Segoe UI"/>
+                                    <TextBlock Text="Quản lý hệ thống bán hàng của bạn" FontSize="12" Foreground="#64748B" Margin="0,3,0,0" FontFamily="Segoe UI"/>
                                 </StackPanel>
 
                                 <!-- Stagger 2: Username -->
@@ -893,25 +893,32 @@
                                         <TranslateTransform x:Name="RevealOptionsTransform" Y="15"/>
                                     </Grid.RenderTransform>
                                     <CheckBox Content="Ghi nhớ đăng nhập" Foreground="#94A3B8" 
-                                              FontSize="11.5" FontWeight="Medium" VerticalContentAlignment="Center" FontFamily="Be Vietnam Pro, Segoe UI">
+                                              FontSize="11.5" FontWeight="Medium" VerticalContentAlignment="Center" FontFamily="Segoe UI">
                                         <CheckBox.Resources>
                                             <Style TargetType="CheckBox">
                                                 <Setter Property="Cursor" Value="Hand"/>
                                             </Style>
                                         </CheckBox.Resources>
                                     </CheckBox>
-                                    <TextBlock Text="Quên mật khẩu?" Foreground="#6C63FF" 
-                                               FontSize="11.5" FontWeight="SemiBold" HorizontalAlignment="Right" Cursor="Hand" FontFamily="Be Vietnam Pro, Segoe UI">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="TextDecorations" Value="Underline"/>
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
+                                    <Button Command="{Binding ShowForgotPasswordCommand}" HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="0">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <ContentPresenter />
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                        <TextBlock Text="Quên mật khẩu?" Foreground="#6C63FF" 
+                                                   FontSize="11.5" FontWeight="SemiBold" FontFamily="Segoe UI">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="TextDecorations" Value="Underline"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Button>
                                 </Grid>
 
                                 <!-- Stagger 5: Buttons (Submit & Socials) -->
@@ -965,8 +972,8 @@
                                     <StackPanel.RenderTransform>
                                         <TranslateTransform x:Name="RevealLinkTransform" Y="15"/>
                                     </StackPanel.RenderTransform>
-                                    <TextBlock Text="Bạn chưa có tài khoản Volox?" FontSize="11.5" Foreground="#94A3B8" Opacity="0.8" FontFamily="Be Vietnam Pro, Segoe UI"/>
-                                    <TextBlock Text="Đăng ký ngay" FontSize="11.5" FontWeight="Bold" Foreground="#6C63FF" Margin="5,0,0,0" Cursor="Hand" MouseLeftButtonDown="GoToRegister_Click" FontFamily="Be Vietnam Pro, Segoe UI">
+                                    <TextBlock Text="Bạn chưa có tài khoản Volox?" FontSize="11.5" Foreground="#94A3B8" Opacity="0.8" FontFamily="Segoe UI"/>
+                                    <TextBlock Text="Đăng ký ngay" FontSize="11.5" FontWeight="Bold" Foreground="#6C63FF" Margin="5,0,0,0" Cursor="Hand" MouseLeftButtonDown="GoToRegister_Click" FontFamily="Segoe UI">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
                                                 <Style.Triggers>

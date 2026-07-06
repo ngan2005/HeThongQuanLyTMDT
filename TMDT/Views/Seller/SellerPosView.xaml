@@ -1,0 +1,436 @@
+<UserControl x:Class="TMDT.Views.Seller.SellerPosView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:converters="clr-namespace:TMDT.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="850">
+    <UserControl.Resources>
+        <converters:EqualityToBooleanConverter x:Key="EqualityToBooleanConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+    </UserControl.Resources>
+    
+    <UserControl.InputBindings>
+        <KeyBinding Key="F9" Command="{Binding CheckoutCommand}"/>
+        <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding AddTabCommand}"/>
+        <KeyBinding Key="W" Modifiers="Ctrl" Command="{Binding CloseTabCommand}" CommandParameter="{Binding SelectedTab}"/>
+        <KeyBinding Key="F10" Command="{Binding EndShiftCommand}"/>
+    </UserControl.InputBindings>
+    
+    <Grid Background="#F8FAFC">
+        <Grid.ColumnDefinitions>
+            <!-- Left Panel: Products -->
+            <ColumnDefinition Width="*"/>
+            <!-- Right Panel: Cart -->
+            <ColumnDefinition Width="380"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- LEFT PANEL: PRODUCTS & SEARCH -->
+        <Grid Grid.Column="0" Margin="0,0,16,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Search & Barcode -->
+            <Border Grid.Row="0" Background="White" CornerRadius="8" Padding="12" Margin="0,0,0,16" 
+                    Effect="{StaticResource CardShadow}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBox x:Name="txtSearch" Grid.Column="0" Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="Tên sản phẩm (F1)..."
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                             Height="42" Padding="12,0"/>
+                             
+                    <Grid Grid.Column="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="txtBarcode" Grid.Column="0" Text="{Binding BarcodeInput, UpdateSourceTrigger=PropertyChanged, Delay=200}"
+                                 materialDesign:HintAssist.Hint="Quét mã vạch (F2)..."
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 Height="42" Padding="12,0"/>
+                        <Button Grid.Column="1" Margin="4,0,0,0" Padding="8,0" Height="42" 
+                                ToolTip="Quét bằng Webcam" Click="OpenScanner_Click"
+                                Background="#E2E8F0" BorderBrush="#CBD5E1" Foreground="#334155">
+                            <materialDesign:PackIcon Kind="Camera" Width="24" Height="24"/>
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Border>
+            
+            <!-- Products Grid -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Products}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding DataContext.AddToCartCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    CommandParameter="{Binding}"
+                                    Margin="0,0,12,12" Padding="0" BorderThickness="0" Background="Transparent"
+                                    Cursor="Hand" Width="140" Height="190">
+                                <Border Background="White" CornerRadius="8" BorderThickness="1" BorderBrush="#E2E8F0">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="100"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <Border CornerRadius="8,8,0,0" Background="#F1F5F9" ClipToBounds="True">
+                                            <Image Source="{Binding MainImageUrl, FallbackValue='pack://application:,,,/Resources/placeholder.png'}" Stretch="UniformToFill"/>
+                                        </Border>
+                                        <StackPanel Grid.Row="1" Margin="8">
+                                            <TextBlock Text="{Binding ProductName}" FontWeight="SemiBold" FontSize="13" 
+                                                       TextWrapping="Wrap" MaxHeight="34" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding Price, StringFormat={}{0:N0} đ}" Foreground="#EF4444" 
+                                                       FontWeight="Bold" Margin="0,4,0,0"/>
+                                            <TextBlock Text="{Binding StockQuantity, StringFormat=Kho: {0}}" FontSize="11" 
+                                                       Foreground="#64748B" Margin="0,2,0,0"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+        
+        <!-- RIGHT PANEL: CART & CHECKOUT -->
+        <Border Grid.Column="1" Background="White" CornerRadius="12" 
+                Effect="{StaticResource CardShadow}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- ===== HEADER ===== -->
+                <Border Grid.Row="0" Background="#0D9488" CornerRadius="12,12,0,0" Padding="16,12">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Title + Action buttons -->
+                        <Grid Grid.Row="0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <materialDesign:PackIcon Kind="CartOutline" Width="22" Height="22" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="Đơn Hàng POS" FontSize="17" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                        Command="{Binding ReprintReceiptCommand}" Foreground="White" 
+                                        Opacity="0.85" Padding="6,2" Margin="0,0,4,0" Height="Auto" FontSize="12"
+                                        ToolTip="In lại hóa đơn vừa thanh toán">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="PrinterOutline" Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                                        <TextBlock Text="In lại" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                        Command="{Binding RefundCommand}" Foreground="#FCA5A5"
+                                        Padding="6,2" Margin="0,0,4,0" Height="Auto" FontSize="12"
+                                        ToolTip="Hoàn trả đơn hàng tại quầy">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Restore" Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                                        <TextBlock Text="Trả hàng" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                        Command="{Binding ClearCartCommand}" Foreground="#FCA5A5"
+                                        Padding="6,2" Height="Auto" FontSize="12">
+                                    <materialDesign:PackIcon Kind="TrashCanOutline" Width="16" Height="16"/>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Tabs + End Shift -->
+                        <Grid Grid.Row="1" Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ListBox Grid.Column="0" ItemsSource="{Binding Tabs}" SelectedItem="{Binding SelectedTab, Mode=TwoWay}"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                     ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                     Background="Transparent" BorderThickness="0">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Padding" Value="0"/>
+                                        <Setter Property="Margin" Value="0"/>
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <ContentPresenter/>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,0,4,0" Padding="10,5" CornerRadius="6">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#0F9488"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                            <Setter Property="Background" Value="White"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding TabTitle}" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="12" FontWeight="SemiBold">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="#B2DFDB"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#0D9488"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <Button Command="{Binding DataContext.CloseTabCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                        CommandParameter="{Binding}"
+                                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                                        Padding="0" Width="14" Height="14" Foreground="#B2DFDB">
+                                                    <materialDesign:PackIcon Kind="Close" Width="10" Height="10"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <Button Grid.Column="1" Command="{Binding AddTabCommand}" 
+                                    Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                    Width="24" Height="24" Background="White" BorderBrush="White" Margin="6,0">
+                                <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" Foreground="#0D9488"/>
+                            </Button>
+
+                            <Button Grid.Column="2" Command="{Binding EndShiftCommand}" Height="30" Padding="10,0"
+                                    Background="White" Foreground="#0D9488" FontWeight="SemiBold" FontSize="12"
+                                    BorderBrush="White" ToolTip="Chốt ca (F10)">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="10,5">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                Chốt Ca
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- ===== CART ITEMS ===== -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="16,8">
+                    <ItemsControl ItemsSource="{Binding SelectedTab.CartItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="0,0,0,1" BorderBrush="#F1F5F9" Padding="0,10">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Name -->
+                                        <StackPanel Grid.Row="0" Grid.Column="0">
+                                            <TextBlock Text="{Binding ProductName}" FontWeight="SemiBold" FontSize="13"
+                                                       TextWrapping="Wrap" MaxWidth="180" Foreground="#1E293B"/>
+                                            <TextBlock Text="{Binding VariantName, StringFormat='{}Loại: {0}'}" FontSize="11" Foreground="#94A3B8"
+                                                       Visibility="{Binding VariantName, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                        </StackPanel>
+
+                                        <!-- Price -->
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding LineTotal, StringFormat={}{0:N0} đ}" 
+                                                   FontWeight="Bold" Foreground="#0D9488" HorizontalAlignment="Right" FontSize="14"/>
+
+                                        <!-- Controls -->
+                                        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,8,0,0">
+                                            <Border Background="#F1F5F9" CornerRadius="6" Padding="2">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Button Style="{StaticResource MaterialDesignFlatButton}" Width="26" Height="26" Padding="0"
+                                                            Command="{Binding DataContext.DecreaseQuantityCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            CommandParameter="{Binding}" Foreground="#64748B">
+                                                        <materialDesign:PackIcon Kind="Minus" Width="12" Height="12"/>
+                                                    </Button>
+                                                    <TextBlock Text="{Binding Quantity}" Width="28" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Foreground="#1E293B"/>
+                                                    <Button Style="{StaticResource MaterialDesignFlatButton}" Width="26" Height="26" Padding="0"
+                                                            Command="{Binding DataContext.IncreaseQuantityCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            CommandParameter="{Binding}" Foreground="#0D9488">
+                                                        <materialDesign:PackIcon Kind="Plus" Width="12" Height="12"/>
+                                                    </Button>
+                                                </StackPanel>
+                                            </Border>
+                                            <TextBlock Text="{Binding UnitPrice, StringFormat={}{0:N0} đ/sp}" Foreground="#94A3B8" FontSize="11" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                                            <Button Style="{StaticResource MaterialDesignFlatButton}" Width="26" Height="26" Padding="0" Margin="8,0,0,0"
+                                                    Foreground="#EF4444"
+                                                    Command="{Binding DataContext.RemoveItemCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}">
+                                                <materialDesign:PackIcon Kind="TrashCanOutline" Width="14" Height="14"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- ===== CHECKOUT PANEL ===== -->
+                <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="#F1F5F9" Padding="16,12">
+                    <StackPanel>
+                        <!-- Khách hàng -->
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="txtPhone" Grid.Column="0" Text="{Binding SelectedTab.CustomerPhone, UpdateSourceTrigger=PropertyChanged}" 
+                                     materialDesign:HintAssist.Hint="SĐT khách hàng (F3)" Style="{StaticResource MaterialDesignOutlinedTextBox}" Height="36"/>
+                            <Border Grid.Column="1" Background="#ECFDF5" CornerRadius="6" Padding="8,4" Margin="8,0,0,0">
+                                <TextBlock Text="{Binding SelectedTab.CustomerName}" VerticalAlignment="Center" FontWeight="SemiBold" 
+                                           Foreground="#059669" MaxWidth="120" TextTrimming="CharacterEllipsis" FontSize="12"/>
+                            </Border>
+                        </Grid>
+
+                        <CheckBox Content="{Binding SelectedTab.LoyaltyPoints, StringFormat=Dùng {0} điểm tích lũy}" 
+                                  IsChecked="{Binding SelectedTab.UseLoyaltyPoints}" 
+                                  Margin="0,0,0,10" Foreground="#0D9488" FontWeight="Medium">
+                            <CheckBox.Style>
+                                <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedTab.LoyaltyPoints}" Value="0">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </CheckBox.Style>
+                        </CheckBox>
+
+                        <!-- Voucher -->
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Text="{Binding SelectedTab.VoucherCode, UpdateSourceTrigger=PropertyChanged}" 
+                                     materialDesign:HintAssist.Hint="Nhập mã Voucher" Style="{StaticResource MaterialDesignOutlinedTextBox}" Height="36"/>
+                            <Button Grid.Column="1" Command="{Binding ApplyVoucherCommand}" Content="Áp dụng" 
+                                    Style="{StaticResource MaterialDesignFlatButton}" Foreground="#0D9488" Margin="8,0,0,0" Padding="8,0"/>
+                        </Grid>
+
+                        <!-- Giảm giá thủ công -->
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Giảm thêm (VNĐ):" VerticalAlignment="Center" Foreground="#DC2626" FontWeight="SemiBold" FontSize="13" Margin="0,0,8,0"/>
+                            <TextBox Grid.Column="1" 
+                                     Text="{Binding SelectedTab.ManualDiscountInput, UpdateSourceTrigger=PropertyChanged}"
+                                     materialDesign:HintAssist.Hint="0"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}" Height="36"
+                                     TextAlignment="Right" Foreground="#DC2626" FontWeight="Bold" FontSize="13"
+                                     PreviewTextInput="ManualDiscount_PreviewTextInput"/>
+                        </Grid>
+
+                        <!-- Payment method -->
+                        <Border Background="#F8FAFC" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
+                            <UniformGrid Columns="3">
+                                <RadioButton Content="Tiền mặt" IsChecked="{Binding SelectedTab.SelectedPayment, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=0}" Margin="0,0,4,0"/>
+                                <RadioButton Content="VNPay" IsChecked="{Binding SelectedTab.SelectedPayment, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=1}" Margin="0,0,4,0"/>
+                                <RadioButton Content="MoMo" IsChecked="{Binding SelectedTab.SelectedPayment, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=2}"/>
+                            </UniformGrid>
+                        </Border>
+
+                        <!-- Summary -->
+                        <Border Background="#F8FAFC" CornerRadius="8" Padding="12,10" Margin="0,0,0,10">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,6">
+                                    <TextBlock Text="Tổng tiền hàng" Foreground="#64748B" FontSize="13"/>
+                                    <TextBlock Text="{Binding SelectedTab.TotalPayment, StringFormat={}{0:N0} đ}" HorizontalAlignment="Right" FontSize="13" Foreground="#334155"/>
+                                </Grid>
+                                <Grid Margin="0,0,0,6" Visibility="{Binding SelectedTab.DiscountAmount, Converter={StaticResource BoolToVisibility}}">
+                                    <TextBlock Text="Giảm giá" Foreground="#059669" FontSize="13"/>
+                                    <TextBlock Text="{Binding SelectedTab.DiscountAmount, StringFormat=-{0:N0} đ}" Foreground="#059669" HorizontalAlignment="Right" FontWeight="SemiBold" FontSize="13"/>
+                                </Grid>
+                                <Separator Margin="0,4,0,8" Background="#E2E8F0"/>
+                                <Grid>
+                                    <TextBlock Text="KHÁCH PHẢI TRẢ" FontWeight="Bold" FontSize="14" Foreground="#1E293B" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding SelectedTab.NetPayment, StringFormat={}{0:N0} đ}" Foreground="#EF4444" FontWeight="Bold" FontSize="24" HorizontalAlignment="Right"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Cash change (only when Cash) -->
+                        <StackPanel Visibility="{Binding SelectedTab.IsCashPayment, Converter={StaticResource BoolToVisibility}}">
+                            <Grid Margin="0,0,0,6">
+                                <TextBlock Text="Tiền khách đưa" Foreground="#64748B" VerticalAlignment="Center" FontSize="13"/>
+                                <TextBox Text="{Binding SelectedTab.CustomerGivenAmountInput, UpdateSourceTrigger=PropertyChanged}" 
+                                         Width="130" HorizontalAlignment="Right" TextAlignment="Right"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}" Height="34" Padding="8,4" FontWeight="SemiBold"/>
+                            </Grid>
+                            <Grid Margin="0,0,0,10">
+                                <TextBlock Text="Tiền thừa trả khách" Foreground="#64748B" FontSize="13"/>
+                                <TextBlock Text="{Binding SelectedTab.ChangeAmount, StringFormat={}{0:N0} đ}" HorizontalAlignment="Right" 
+                                           FontWeight="Bold" FontSize="15" Foreground="#0D9488"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Checkout Button -->
+                        <Button Content="THANH TOÁN  (F9)" Command="{Binding CheckoutCommand}" 
+                                Height="50" FontSize="15" FontWeight="Bold"
+                                Background="#0D9488" BorderBrush="#0D9488">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#0F766E"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

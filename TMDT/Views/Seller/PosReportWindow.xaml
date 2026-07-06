@@ -1,0 +1,133 @@
+<Window x:Class="TMDT.Views.Seller.PosReportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:converters="clr-namespace:TMDT.Converters"
+        mc:Ignorable="d"
+        Title="Báo Cáo Kết Ca" Height="500" Width="400"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
+        Background="#F8FAFC">
+    <Window.Resources>
+        <converters:NumericLessThanZeroConverter x:Key="NumericLessThanZeroConverter"/>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="White" Padding="16" BorderThickness="0,0,0,1" BorderBrush="#E2E8F0">
+            <StackPanel>
+                <TextBlock Text="KẾT QUẢ BÁN HÀNG TẠI QUẦY (POS)" FontSize="18" FontWeight="Bold" Foreground="#1E293B" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding ReportDate, StringFormat=Ngày: {0:dd/MM/yyyy}}" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="20">
+            <StackPanel x:Name="PrintArea">
+                <Border Background="White" CornerRadius="8" Padding="16" Margin="0,0,0,16" Effect="{StaticResource CardShadow}">
+                    <StackPanel>
+                        <TextBlock Text="Tổng quan" FontWeight="Bold" Foreground="#334155" Margin="0,0,0,12"/>
+                        
+                        <Grid Margin="0,0,0,8">
+                            <TextBlock Text="Tổng số đơn hàng:" Foreground="#64748B"/>
+                            <TextBlock Text="{Binding TotalOrders}" HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                        </Grid>
+                        
+                        <Grid>
+                            <TextBlock Text="Tổng doanh thu:" Foreground="#64748B"/>
+                            <TextBlock Text="{Binding TotalRevenue, StringFormat={}{0:N0} đ}" HorizontalAlignment="Right" FontWeight="Bold" Foreground="#0D9488" FontSize="16"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                
+                <Border Background="White" CornerRadius="8" Padding="16" Effect="{StaticResource CardShadow}">
+                    <StackPanel>
+                        <TextBlock Text="Theo phương thức thanh toán" FontWeight="Bold" Foreground="#334155" Margin="0,0,0,12"/>
+                        
+                        <Grid Margin="0,0,0,8">
+                            <TextBlock Text="Tiền mặt (Cash):" Foreground="#64748B"/>
+                            <TextBlock Text="{Binding TotalCash, StringFormat={}{0:N0} đ}" HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                        </Grid>
+                        
+                        <Grid Margin="0,0,0,8">
+                            <TextBlock Text="Chuyển khoản MoMo:" Foreground="#64748B"/>
+                            <TextBlock Text="{Binding TotalMoMo, StringFormat={}{0:N0} đ}" HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                        </Grid>
+                        
+                        <Grid>
+                            <TextBlock Text="Chuyển khoản VNPay:" Foreground="#64748B"/>
+                            <TextBlock Text="{Binding TotalVNPay, StringFormat={}{0:N0} đ}" HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Quản lý Két tiền -->
+                <Border Background="White" CornerRadius="8" Padding="16" Effect="{StaticResource CardShadow}">
+                    <StackPanel>
+                        <TextBlock Text="Quản lý Két Tiền (Z-Report)" FontWeight="Bold" Foreground="#334155" Margin="0,0,0,12"/>
+                        
+                        <!-- Tiền đầu ca -->
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Tiền lẻ đầu ca:" Foreground="#64748B" VerticalAlignment="Center"/>
+                            <TextBox Text="{Binding StartingCash, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" 
+                                     Width="120" HorizontalAlignment="Right" TextAlignment="Right" 
+                                     materialDesign:HintAssist.Hint="Nhập số tiền..."
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Kỳ vọng trong két:" Foreground="#64748B" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding ExpectedCash, StringFormat={}{0:N0} đ}" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        </Grid>
+
+                        <!-- Tiền đếm thực tế -->
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Tiền đếm thực tế:" Foreground="#64748B" VerticalAlignment="Center"/>
+                            <TextBox Text="{Binding ActualCash, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" 
+                                     Width="120" HorizontalAlignment="Right" TextAlignment="Right" 
+                                     materialDesign:HintAssist.Hint="Nhập số tiền..."
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        </Grid>
+
+                        <!-- Độ lệch -->
+                        <Border Background="#F1F5F9" CornerRadius="4" Padding="12,8" Margin="0,4,0,0">
+                            <Grid>
+                                <TextBlock Text="Độ lệch (Thiếu/Thừa):" Foreground="#334155" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Difference, StringFormat={}{0:N0} đ}" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="#0D9488"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Difference, Converter={StaticResource NumericLessThanZeroConverter}}" Value="True">
+                                                    <Setter Property="Foreground" Value="#EF4444"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+        
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="White" Padding="16" BorderThickness="0,1,0,0" BorderBrush="#E2E8F0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Đóng" Command="{Binding CloseCommand}" 
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                        Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,12,0"/>
+                <Button Content="In Báo Cáo" Click="Print_Click"
+                        Style="{StaticResource MaterialDesignFlatButton}" Background="#0D9488" Foreground="White"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

@@ -30,9 +30,9 @@
                 <Grid>
                     <StackPanel>
                         <TextBlock Text="Địa chỉ giao hàng" FontSize="18" FontWeight="Bold"
-                                   Foreground="White" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                   Foreground="White" FontFamily="Segoe UI"/>
                         <TextBlock Text="Chọn địa chỉ nhận hàng chính xác"
-                                   FontSize="12" Foreground="#94A3B8" Margin="0,4,0,0" FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                   FontSize="12" Foreground="#94A3B8" Margin="0,4,0,0" FontFamily="Segoe UI"/>
                     </StackPanel>
                     <Button HorizontalAlignment="Right" VerticalAlignment="Top"
                             Background="Transparent" BorderThickness="0" Cursor="Hand"
@@ -56,7 +56,7 @@
                                  Text="{Binding RecipientName, UpdateSourceTrigger=PropertyChanged}"
                                  BorderThickness="0" Background="Transparent"
                                  VerticalAlignment="Center" FontSize="13"
-                                 FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                 FontFamily="Segoe UI"/>
                     </Border>
 
                     <!-- Phone -->
@@ -67,7 +67,7 @@
                         <TextBox Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
                                  BorderThickness="0" Background="Transparent"
                                  VerticalAlignment="Center" FontSize="13"
-                                 FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                 FontFamily="Segoe UI"/>
                     </Border>
 
                     <!-- Province -->
@@ -81,7 +81,7 @@
                                   DisplayMemberPath="Name"
                                   BorderThickness="0" Background="Transparent"
                                   VerticalAlignment="Center" FontSize="13"
-                                  FontFamily="Be Vietnam Pro, Segoe UI"
+                                  FontFamily="Segoe UI"
                                   IsSynchronizedWithCurrentItem="False"/>
                     </Border>
 
@@ -95,7 +95,7 @@
                                   DisplayMemberPath="Name"
                                   BorderThickness="0" Background="Transparent"
                                   VerticalAlignment="Center" FontSize="13"
-                                  FontFamily="Be Vietnam Pro, Segoe UI"
+                                  FontFamily="Segoe UI"
                                   IsSynchronizedWithCurrentItem="False"/>
                     </Border>
 
@@ -109,7 +109,7 @@
                                   DisplayMemberPath="Name"
                                   BorderThickness="0" Background="Transparent"
                                   VerticalAlignment="Center" FontSize="13"
-                                  FontFamily="Be Vietnam Pro, Segoe UI"
+                                  FontFamily="Segoe UI"
                                   IsSynchronizedWithCurrentItem="False"/>
                     </Border>
 
@@ -121,7 +121,7 @@
                         <TextBox Text="{Binding Street, UpdateSourceTrigger=PropertyChanged}"
                                  BorderThickness="0" Background="Transparent"
                                  VerticalAlignment="Center" FontSize="13"
-                                 FontFamily="Be Vietnam Pro, Segoe UI"
+                                 FontFamily="Segoe UI"
                                  TextWrapping="Wrap" AcceptsReturn="True"
                                  VerticalContentAlignment="Center"/>
                     </Border>
@@ -129,7 +129,7 @@
                     <!-- Default Address Checkbox -->
                     <CheckBox Content="Đặt làm địa chỉ mặc định"
                               IsChecked="{Binding IsDefaultAddress}"
-                              FontFamily="Be Vietnam Pro, Segoe UI"
+                              FontFamily="Segoe UI"
                               FontSize="13" Foreground="#374151"
                               Margin="0,14,0,0"/>
 
@@ -159,7 +159,7 @@
                                 <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="8">
                                     <TextBlock Text="Hủy bỏ" HorizontalAlignment="Center"
                                                VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold"
-                                               FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                               FontFamily="Segoe UI"/>
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
@@ -178,7 +178,7 @@
                                 <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="8">
                                     <TextBlock Text="Xác nhận" HorizontalAlignment="Center"
                                                VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold"
-                                               FontFamily="Be Vietnam Pro, Segoe UI"/>
+                                               FontFamily="Segoe UI"/>
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">

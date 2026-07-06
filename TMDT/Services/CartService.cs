@@ -34,31 +34,35 @@ namespace TMDT.Services
 
         private CartService() { }
 
-        public void AddProduct(Product product, int quantity = 1)
+        public void AddProduct(Product product, ProductVariant? variant = null, int quantity = 1)
         {
             if (product == null) return;
 
             lock (_lock)
             {
-                var existing = Items.FirstOrDefault(i => i.ProductId == product.ProductId);
+                var existing = Items.FirstOrDefault(i => i.ProductId == product.ProductId && i.VariantId == variant?.VariantId);
                 if (existing != null)
                 {
                     int newQuantity = existing.Quantity + quantity;
-                    if (newQuantity > (product.StockQuantity ?? 0))
-                        newQuantity = product.StockQuantity ?? 0;
+                    int maxStock = variant != null ? (variant.Quantity ?? 0) : (product.StockQuantity ?? 0);
+                    if (newQuantity > maxStock)
+                        newQuantity = maxStock;
                     
                     existing.Quantity = newQuantity;
                 }
                 else
                 {
+                    decimal price = product.Price + (variant?.ExtraPrice ?? 0);
                     Items.Add(new CartItem
                     {
                         ProductId = product.ProductId,
                         ProductName = product.ProductName,
-                        Price = product.Price,
+                        VariantId = variant?.VariantId,
+                        VariantName = variant?.VariantName,
+                        Price = price,
                         OriginalPrice = product.OriginalPrice,
                         ImageUrl = null,
-                        StockQuantity = product.StockQuantity ?? 0,
+                        StockQuantity = variant != null ? (variant.Quantity ?? 0) : (product.StockQuantity ?? 0),
                         Quantity = quantity,
                         ShopId = product.ShopId ?? 0
                     });
@@ -68,11 +72,11 @@ namespace TMDT.Services
             OnCartChanged();
         }
 
-        public void RemoveProduct(int productId)
+        public void RemoveProduct(int productId, int? variantId = null)
         {
             lock (_lock)
             {
-                var item = Items.FirstOrDefault(i => i.ProductId == productId);
+                var item = Items.FirstOrDefault(i => i.ProductId == productId && i.VariantId == variantId);
                 if (item != null)
                     Items.Remove(item);
             }
@@ -80,11 +84,11 @@ namespace TMDT.Services
             OnCartChanged();
         }
 
-        public void UpdateQuantity(int productId, int quantity)
+        public void UpdateQuantity(int productId, int? variantId, int quantity)
         {
             lock (_lock)
             {
-                var item = Items.FirstOrDefault(i => i.ProductId == productId);
+                var item = Items.FirstOrDefault(i => i.ProductId == productId && i.VariantId == variantId);
                 if (item == null) return;
                 if (quantity <= 0)
                     Items.Remove(item);
@@ -133,10 +137,12 @@ namespace TMDT.Services
                                 {
                                     ProductId = ci.Product.ProductId,
                                     ProductName = ci.Product.ProductName ?? "",
-                                    Price = ci.Product.Price,
+                                    VariantId = ci.VariantId,
+                                    VariantName = ci.Variant?.VariantName,
+                                    Price = ci.Product.Price + (ci.Variant?.ExtraPrice ?? 0),
                                     OriginalPrice = ci.Product.OriginalPrice,
                                     ImageUrl = null,
-                                    StockQuantity = ci.Product.StockQuantity ?? 0,
+                                    StockQuantity = ci.VariantId.HasValue ? (ci.Variant?.Quantity ?? 0) : (ci.Product.StockQuantity ?? 0),
                                     Quantity = ci.Quantity ?? 1,
                                     ShopId = ci.Product.ShopId ?? 0
                                 });
@@ -182,6 +188,7 @@ namespace TMDT.Services
                         cart.CartItems.Add(new TMDT.Models.CartItem
                         {
                             ProductId = item.ProductId,
+                            VariantId = item.VariantId,
                             Quantity = item.Quantity,
                             AddedAt = DateTime.Now
                         });
@@ -196,6 +203,8 @@ namespace TMDT.Services
     {
         public int ProductId { get; set; }
         public string ProductName { get; set; } = "";
+        public int? VariantId { get; set; }
+        public string? VariantName { get; set; }
         public decimal Price { get; set; }
         public decimal? OriginalPrice { get; set; }
         public string? ImageUrl { get; set; }

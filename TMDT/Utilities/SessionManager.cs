@@ -9,6 +9,7 @@ namespace TMDT.Utilities
         public const string RoleAdmin = "Admin";
         public const string RoleSeller = "Seller";
         public const string RoleBuyer = "Buyer";
+        public const string RoleStaff = "Staff";
 
         private static UserDto _currentUser;
 
@@ -25,6 +26,8 @@ namespace TMDT.Utilities
         public static bool IsSeller => _currentUser?.RoleName == RoleSeller;
 
         public static bool IsBuyer => _currentUser?.RoleName == RoleBuyer;
+
+        public static bool IsStaff => _currentUser?.RoleName == RoleStaff;
 
         public static void Clear()
         {

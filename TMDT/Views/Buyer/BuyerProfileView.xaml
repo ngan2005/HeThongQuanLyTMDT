@@ -171,6 +171,17 @@
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
                             <TextBlock Text="Ví: " FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
                             <TextBlock Text="{Binding WalletBalanceText}" FontSize="12" FontWeight="Bold" Foreground="#059669"/>
+                            
+                            <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                    Command="{Binding TopUpCommand}"
+                                    Padding="4,0" Height="20" Margin="10,0,0,0"
+                                    Foreground="{StaticResource BrandPrimaryBrush}"
+                                    ToolTip="Nạp tiền vào Ví">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="PlusCircle" Width="14" Height="14" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Nạp" FontSize="11" FontWeight="Bold" Margin="2,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </Grid>
                     <Grid>
