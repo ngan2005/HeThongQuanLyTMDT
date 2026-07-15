@@ -1,0 +1,101 @@
+<Window x:Class="TMDT.Views.Components.DecimalPadWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Bàn phím số" Height="320" Width="280"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        ResizeMode="NoResize" WindowStyle="ToolWindow"
+        Background="#F8FAFC">
+    <Window.Resources>
+        <Style TargetType="Button" x:Key="KeyButton">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="3"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1" CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F1F5F9"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#0D9488"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="Button" x:Key="ActionButton" BasedOn="{StaticResource KeyButton}">
+            <Setter Property="Background" Value="#0D9488"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style TargetType="Button" x:Key="ClearButton" BasedOn="{StaticResource KeyButton}">
+            <Setter Property="Background" Value="#FEE2E2"/>
+            <Setter Property="Foreground" Value="#DC2626"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Display -->
+        <Border Grid.Row="0" Background="White" CornerRadius="8" Padding="12,8" Margin="0,0,0,12"
+                BorderBrush="#0D9488" BorderThickness="2">
+            <TextBlock x:Name="txtDisplay" Text="0" FontSize="28" FontWeight="Bold"
+                       Foreground="#0F172A" TextAlignment="Right" VerticalAlignment="Center"/>
+        </Border>
+
+        <!-- Keys -->
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Row 1: 7 8 9 C -->
+            <Button Grid.Row="0" Grid.Column="0" Style="{StaticResource KeyButton}" Content="7" Click="Key_Click"/>
+            <Button Grid.Row="0" Grid.Column="1" Style="{StaticResource KeyButton}" Content="8" Click="Key_Click"/>
+            <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource KeyButton}" Content="9" Click="Key_Click"/>
+            <Button Grid.Row="0" Grid.Column="3" Style="{StaticResource KeyButton}" Content="←" Click="Backspace_Click"/>
+
+            <!-- Row 2: 4 5 6 Clear -->
+            <Button Grid.Row="1" Grid.Column="0" Style="{StaticResource KeyButton}" Content="4" Click="Key_Click"/>
+            <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource KeyButton}" Content="5" Click="Key_Click"/>
+            <Button Grid.Row="1" Grid.Column="2" Style="{StaticResource KeyButton}" Content="6" Click="Key_Click"/>
+            <Button Grid.Row="1" Grid.Column="3" Style="{StaticResource ClearButton}" Content="C" Click="Clear_Click"/>
+
+            <!-- Row 3: 1 2 3 000 -->
+            <Button Grid.Row="2" Grid.Column="0" Style="{StaticResource KeyButton}" Content="1" Click="Key_Click"/>
+            <Button Grid.Row="2" Grid.Column="1" Style="{StaticResource KeyButton}" Content="2" Click="Key_Click"/>
+            <Button Grid.Row="2" Grid.Column="2" Style="{StaticResource KeyButton}" Content="3" Click="Key_Click"/>
+            <Button Grid.Row="2" Grid.Column="3" Style="{StaticResource KeyButton}" Content="000" Click="Key_Click"/>
+
+            <!-- Row 4: 0 OK Cancel -->
+            <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource KeyButton}" Content="0" Click="Key_Click"/>
+            <Button Grid.Row="3" Grid.Column="2" Style="{StaticResource ActionButton}" Content="OK" Click="OK_Click"/>
+            <Button Grid.Row="3" Grid.Column="3" Style="{StaticResource ClearButton}" Content="✕" Click="Cancel_Click" ToolTip="Huỷ"/>
+        </Grid>
+    </Grid>
+</Window>

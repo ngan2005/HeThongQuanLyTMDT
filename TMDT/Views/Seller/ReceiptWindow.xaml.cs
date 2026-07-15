@@ -20,13 +20,24 @@ namespace TMDT.Views.Seller
                 OrderCode = order.OrderCode,
                 OrderDate = order.OrderDate?.ToString("dd/MM/yyyy HH:mm") ?? "",
                 OrderDetails = order.OrderDetails.ToList(),
-                SubTotal = order.SubTotal ?? 0,
+                SubTotal = order.SubTotal ?? order.OrderDetails.Sum(d => d.TotalPrice ?? 0),
                 Discount = order.Discount ?? 0,
-                TotalAmount = order.TotalAmount ?? 0,
-                PaymentMethod = order.PaymentMethod == "POS_Cash" ? "Tiền mặt" : order.PaymentMethod,
+                TotalAmount = order.TotalAmount ?? order.SubTotal ?? 0,
+                PaymentMethod = order.PaymentMethod switch
+                {
+                    "POS_Cash" => "Tiền mặt",
+                    "Cash" => "Tiền mặt",
+                    "MoMo" => "MoMo",
+                    "VNPay" => "VNPay",
+                    _ => order.PaymentMethod ?? ""
+                },
                 GivenAmount = givenAmount,
                 ChangeAmount = changeAmount,
-                StaffName = TMDT.Utilities.SessionManager.CurrentUser?.FullName ?? "Thu ngân"
+                StaffName = TMDT.Utilities.SessionManager.CurrentUser?.FullName ?? "Thu ngân",
+                // Tính điểm tích lũy: 1 điểm/10,000đ, chỉ hiển khi có BuyerId thật (không phải khách vãng lai)
+                EarnedPoints = (order.BuyerId.HasValue && order.Buyer?.Email != "guest@pos.local")
+                    ? (int)((order.TotalAmount ?? 0) / 10000)
+                    : 0
             };
 
             DataContext = vm;
@@ -105,8 +116,10 @@ namespace TMDT.Views.Seller
         public decimal GivenAmount { get; set; }
         public decimal ChangeAmount { get; set; }
         public string StaffName { get; set; } = "";
+        public int EarnedPoints { get; set; }
         
         public Visibility DiscountVisibility => Discount > 0 ? Visibility.Visible : Visibility.Collapsed;
         public Visibility CashVisibility => PaymentMethod == "Tiền mặt" ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility EarnedPointsVisibility => EarnedPoints > 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 }

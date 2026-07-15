@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using TMDT.Models;
@@ -12,6 +13,9 @@ namespace TMDT.ViewModels.Admin
     public class AdminOrdersViewModel : ViewModelBase
     {
         // Removed long-lived _context for async safety
+
+        // 🟢 Dùng CancellationToken để hủy các query search cũ khi user gõ tiếp — tránh race condition (kết quả cũ ghi đè kết quả mới).
+        private CancellationTokenSource? _searchCts;
 
         private ObservableCollection<Order> _filteredOrders;
         public ObservableCollection<Order> FilteredOrders
@@ -29,6 +33,9 @@ namespace TMDT.ViewModels.Admin
                 if (_selectedOrder == value) return;
                 _selectedOrder = value;
                 OnPropertyChanged();
+                // 🟢 Bắt buộc WPF re-evaluate CanExecute cho Cancel/Refund command
+                // vì CanCancelOrder/CanRefundOrder phụ thuộc SelectedOrder.OrderStatus.
+                CommandManager.InvalidateRequerySuggested();
             }
         }
 
@@ -94,6 +101,7 @@ namespace TMDT.ViewModels.Admin
                     "Đang giao hàng" => "Shipping",
                     "Hoàn thành" => "Completed",
                     "Đã hủy" => "Cancelled",
+                    "Hoàn tiền" => "Hoàn tiền",
                     _ => SelectedStatus
                 };
 
@@ -125,6 +133,11 @@ namespace TMDT.ViewModels.Admin
 
         private async Task FilterOrdersAsync()
         {
+            // 🟢 Hủy query search trước (nếu có) để tránh race condition khi user gõ nhanh
+            _searchCts?.Cancel();
+            _searchCts = new CancellationTokenSource();
+            var token = _searchCts.Token;
+
             try
             {
                 string dbStatus = SelectedStatus switch
@@ -134,13 +147,18 @@ namespace TMDT.ViewModels.Admin
                     "Đang giao hàng" => "Shipping",
                     "Hoàn thành" => "Completed",
                     "Đã hủy" => "Cancelled",
+                    "Hoàn tiền" => "Hoàn tiền",
                     _ => SelectedStatus
                 };
 
                 var list = await OrderService.Instance.GetAllOrdersAsync(dbStatus, SearchKeyword);
 
+                // 🟢 Nếu đã có query mới hơn → bỏ kết quả cũ
+                token.ThrowIfCancellationRequested();
+
                 Application.Current.Dispatcher.Invoke(() =>
                 {
+                    if (token.IsCancellationRequested) return;
                     FilteredOrders = new ObservableCollection<Order>(list);
 
                     if (SelectedOrder != null)
@@ -151,19 +169,22 @@ namespace TMDT.ViewModels.Admin
                     }
                 });
             }
+            catch (OperationCanceledException) { /* query bị hủy bởi search mới — bình thường */ }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi lọc đơn hàng: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (!token.IsCancellationRequested)
+                    MessageBox.Show($"Lỗi lọc đơn hàng: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private bool CanCancelOrder(object _) =>
-            SelectedOrder != null &&
-            SelectedOrder.OrderStatus != "Đã hủy" &&
-            SelectedOrder.OrderStatus != "Hoàn thành" &&
-            SelectedOrder.OrderStatus != "Hoàn tiền";
+        // 🟢 Chỉ cho phép hủy khi đơn còn ở trạng thái đầu (Pending/Processing) — Đã hủy/Hoàn thành/Đang giao/Hoàn tiền đều khóa để tránh sai workflow
+        private bool CanCancelOrder(object? _)
+        {
+            return SelectedOrder != null && 
+                   (SelectedOrder.OrderStatus == "Pending" || SelectedOrder.OrderStatus == "Shipping");
+        }
 
-        private async Task CancelOrderAsync(object _)
+        private async Task CancelOrderAsync(object? _)
         {
             if (SelectedOrder == null) return;
 
@@ -192,18 +213,21 @@ namespace TMDT.ViewModels.Admin
             MessageBox.Show("Đã hủy đơn hàng.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
 
             var selectedId = SelectedOrder?.OrderId;
+            // 🟢 Đóng cửa sổ chi tiết NGAY (trước khi load) — tránh cửa sổ chi tiết hiển thị đơn đã đổi trạng thái.
             HideDetailRequest?.Invoke();
             _ = LoadOrdersAsync();
-            if (selectedId.HasValue)
+            // 🟢 Sau load: nếu đơn còn trong list (vd filter chưa loại) → chọn lại; nếu không còn (filter = Pending thì đơn vừa cancel biến mất) → để null.
+            if (selectedId.HasValue && FilteredOrders != null)
                 SelectedOrder = FilteredOrders.FirstOrDefault(o => o.OrderId == selectedId.Value);
         }
 
-        private bool CanRefundOrder(object _) =>
-            SelectedOrder != null &&
-            SelectedOrder.OrderStatus != "Hoàn tiền" &&
-            (SelectedOrder.OrderStatus == "Đã hủy" || SelectedOrder.OrderStatus == "Hoàn thành" || SelectedOrder.OrderStatus == "Đang giao hàng");
+        // 🟢 Chỉ hoàn tiền khi đơn đã đối soát xong — Đã hủy (chưa chuyển tiền) hoặc Hoàn thành. Đang giao/Đã hủy-sau-ship cần workflow riêng.
+        private bool CanRefundOrder(object? _)
+        {
+            return SelectedOrder != null && SelectedOrder.OrderStatus == "ReturnRequest";
+        }
 
-        private async Task RefundOrderAsync(object _)
+        private async Task RefundOrderAsync(object? _)
         {
             if (SelectedOrder == null) return;
 
@@ -214,7 +238,7 @@ namespace TMDT.ViewModels.Admin
 
             try
             {
-                await OrderService.Instance.RefundOrderAsync(SelectedOrder.OrderId);
+                await OrderService.Instance.AdminRefundOrderAsync(SelectedOrder.OrderId);
                 SelectedOrder.OrderStatus = "Hoàn tiền";
             }
             catch (InvalidOperationException ex)
@@ -232,9 +256,10 @@ namespace TMDT.ViewModels.Admin
             MessageBox.Show("Đã hoàn tiền cho người mua.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
 
             var selectedId = SelectedOrder?.OrderId;
+            // 🟢 Đóng cửa sổ chi tiết NGAY — tránh hiển thị đơn vừa chuyển sang "Hoàn tiền".
             HideDetailRequest?.Invoke();
             _ = LoadOrdersAsync();
-            if (selectedId.HasValue)
+            if (selectedId.HasValue && FilteredOrders != null)
                 SelectedOrder = FilteredOrders.FirstOrDefault(o => o.OrderId == selectedId.Value);
         }
 

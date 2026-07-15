@@ -22,7 +22,9 @@
             </Border>
             
             <TextBlock Text="Số tiền thanh toán:" FontSize="14" Foreground="Gray" HorizontalAlignment="Center"/>
-            <TextBlock x:Name="txtAmount" Text="0 đ" FontSize="24" FontWeight="Bold" Foreground="#111111" HorizontalAlignment="Center" Margin="0,5,0,30"/>
+            <TextBlock x:Name="txtAmount" Text="0 đ" FontSize="24" FontWeight="Bold" Foreground="#111111" HorizontalAlignment="Center" Margin="0,5,0,8"/>
+            <TextBlock x:Name="txtOrderCode" Text="" FontSize="13" Foreground="#005A9C" HorizontalAlignment="Center" Margin="0,0,0,20" FontWeight="SemiBold"
+                       Visibility="Collapsed"/>
 
             <Button Content="XÁC NHẬN ĐÃ CHUYỂN KHOẢN" Background="#005A9C" Foreground="White" FontWeight="Bold" FontSize="14" Height="45" Width="250" Click="BtnConfirm_Click">
                 <Button.Resources>
@@ -33,6 +35,16 @@
             </Button>
             
             <Button Content="Hủy giao dịch" Background="Transparent" Foreground="Gray" FontSize="13" BorderThickness="0" Margin="0,15,0,0" Click="BtnCancel_Click"/>
+
+            <!-- 🟢 Sửa đơn: quay lại POS chỉnh sửa trước khi xác nhận -->
+            <Button Content="✎  SỬA ĐƠN (quay lại POS)" Background="Transparent" Foreground="#005A9C"
+                    FontSize="13" FontWeight="SemiBold" BorderThickness="0" Margin="0,8,0,0"
+                    Click="BtnEditOrder_Click" Cursor="Hand"/>
+
+            <!-- 🟢 Offline: xác nhận đã nhận tiền khi mạng lỗi, sync sau khi có mạng lại -->
+            <Button Content="🔌  Đã nhận tiền (offline - sync sau)" Background="Transparent" Foreground="#0D9488"
+                    FontSize="13" FontWeight="SemiBold" BorderThickness="0" Margin="0,6,0,0"
+                    Click="BtnOfflineConfirm_Click" Cursor="Hand" ToolTip="Khách đã chuyển nhưng POS không kết nối được server — lưu offline và đồng bộ sau"/>
         </StackPanel>
     </Border>
 </Window>

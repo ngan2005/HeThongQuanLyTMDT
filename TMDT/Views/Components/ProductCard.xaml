@@ -5,15 +5,28 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
-             d:DesignHeight="350" d:DesignWidth="220">
-    <Border Background="{StaticResource CardBackgroundBrush}" 
-            CornerRadius="12" 
-            Effect="{StaticResource CardShadow}"
-            Margin="10"
-            Padding="0"
+             d:DesignHeight="350" d:DesignWidth="220"
+             TextElement.FontFamily="Segoe UI, sans-serif">
+    
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="Primary" Color="#5221E7"/>
+        <SolidColorBrush x:Key="Surface" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="TextMain" Color="#1A1B22"/>
+        <SolidColorBrush x:Key="TextMuted" Color="#797588"/>
+        <SolidColorBrush x:Key="Error" Color="#BA1A1A"/>
+        <SolidColorBrush x:Key="Warning" Color="#FFB300"/>
+    </UserControl.Resources>
+
+    <Border Background="{StaticResource Surface}" 
+            CornerRadius="16" 
+            Margin="8"
             RenderTransformOrigin="0.5,0.5"
             MouseLeftButtonUp="CardBorder_MouseLeftButtonUp"
-            Cursor="Hand">
+            Cursor="Hand"
+            x:Name="CardBorder">
+        <Border.Effect>
+            <DropShadowEffect Color="#000000" Opacity="0.04" BlurRadius="12" ShadowDepth="2"/>
+        </Border.Effect>
         <Border.RenderTransform>
             <TransformGroup>
                 <ScaleTransform ScaleX="1" ScaleY="1" />
@@ -24,38 +37,19 @@
             <EventTrigger RoutedEvent="MouseEnter">
                 <BeginStoryboard>
                     <Storyboard>
-                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1.03" Duration="0:0:0.2">
+                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" To="-4" Duration="0:0:0.15">
                             <DoubleAnimation.EasingFunction>
                                 <QuadraticEase EasingMode="EaseOut" />
                             </DoubleAnimation.EasingFunction>
                         </DoubleAnimation>
-                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1.03" Duration="0:0:0.2">
-                            <DoubleAnimation.EasingFunction>
-                                <QuadraticEase EasingMode="EaseOut" />
-                            </DoubleAnimation.EasingFunction>
-                        </DoubleAnimation>
-                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" To="-5" Duration="0:0:0.2">
-                            <DoubleAnimation.EasingFunction>
-                                <QuadraticEase EasingMode="EaseOut" />
-                            </DoubleAnimation.EasingFunction>
-                        </DoubleAnimation>
+                        <!-- Thêm bóng đổ mạnh hơn khi hover (Cần TargetName, xử lý qua Code or Style Trigger, tạm dùng Scale) -->
                     </Storyboard>
                 </BeginStoryboard>
             </EventTrigger>
             <EventTrigger RoutedEvent="MouseLeave">
                 <BeginStoryboard>
                     <Storyboard>
-                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.2">
-                            <DoubleAnimation.EasingFunction>
-                                <QuadraticEase EasingMode="EaseOut" />
-                            </DoubleAnimation.EasingFunction>
-                        </DoubleAnimation>
-                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.2">
-                            <DoubleAnimation.EasingFunction>
-                                <QuadraticEase EasingMode="EaseOut" />
-                            </DoubleAnimation.EasingFunction>
-                        </DoubleAnimation>
-                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" To="0" Duration="0:0:0.2">
+                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" To="0" Duration="0:0:0.15">
                             <DoubleAnimation.EasingFunction>
                                 <QuadraticEase EasingMode="EaseOut" />
                             </DoubleAnimation.EasingFunction>
@@ -64,29 +58,38 @@
                 </BeginStoryboard>
             </EventTrigger>
         </Border.Triggers>
+        
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="180"/>
+                <RowDefinition Height="200"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <!-- Product Image Area -->
-            <Border Grid.Row="0" CornerRadius="12,12,0,0" Background="#F1F5F9" Margin="5">
+            <Border Grid.Row="0" CornerRadius="16,16,0,0" Background="#F4F5F7" ClipToBounds="True">
                 <Grid>
-                    <materialDesign:PackIcon Kind="ImageOutline" Width="50" Height="50" 
+                    <materialDesign:PackIcon Kind="ImageOutline" Width="40" Height="40" 
                                              HorizontalAlignment="Center" VerticalAlignment="Center"
-                                             Foreground="{StaticResource TextMutedBrush}"
+                                             Foreground="{StaticResource TextMuted}"
                                              Visibility="{Binding Product.MainImageUrl, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/>
-                    <Image Source="{Binding Product.MainImageUrl}" Stretch="Uniform" Margin="2"/>
+                    <Image Source="{Binding Product.MainImageUrl}" Stretch="UniformToFill"/>
+                    
+                    <!-- Sale Tag overlay if needed -->
+                    <Border Background="{StaticResource Error}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="12" Padding="8,4" CornerRadius="6"
+                            Visibility="{Binding Product.OriginalPrice, Converter={StaticResource NullToVisibilityConverter}}">
+                        <TextBlock Text="SALE" Foreground="White" FontSize="10" FontWeight="Bold"/>
+                    </Border>
+                    
                     <!-- Heart Icon -->
                     <ToggleButton x:Name="HeartToggle"
                                   Style="{StaticResource MaterialDesignActionToggleButton}"
                                   HorizontalAlignment="Right" VerticalAlignment="Top"
-                                  Margin="5" Width="30" Height="30"
-                                  Background="Transparent" BorderThickness="0"
+                                  Margin="8" Width="36" Height="36"
+                                  Background="#B3FFFFFF" BorderThickness="0"
                                   IsChecked="{Binding IsWishlisted, Mode=TwoWay}"
                                   Click="HeartToggle_Click"
-                                  RenderTransformOrigin="0.5,0.5">
+                                  RenderTransformOrigin="0.5,0.5"
+                                  ToolTip="Thêm vào yêu thích">
                         <ToggleButton.RenderTransform>
                             <ScaleTransform ScaleX="1" ScaleY="1" />
                         </ToggleButton.RenderTransform>
@@ -95,58 +98,62 @@
                                 <BeginStoryboard>
                                     <Storyboard>
                                         <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
-                                                         From="1.0" To="1.4" Duration="0:0:0.15" AutoReverse="True" />
+                                                         From="1.0" To="1.3" Duration="0:0:0.15" AutoReverse="True" />
                                         <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
-                                                         From="1.0" To="1.4" Duration="0:0:0.15" AutoReverse="True" />
+                                                         From="1.0" To="1.3" Duration="0:0:0.15" AutoReverse="True" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </EventTrigger>
                         </ToggleButton.Triggers>
                         <ToggleButton.Content>
-                            <materialDesign:PackIcon Kind="HeartOutline" />
+                            <materialDesign:PackIcon Kind="HeartOutline" Foreground="{StaticResource TextMain}" Width="20" Height="20"/>
                         </ToggleButton.Content>
                         <materialDesign:ToggleButtonAssist.OnContent>
-                            <materialDesign:PackIcon Kind="Heart" Foreground="Red" />
+                            <materialDesign:PackIcon Kind="Heart" Foreground="{StaticResource Error}" Width="20" Height="20"/>
                         </materialDesign:ToggleButtonAssist.OnContent>
                     </ToggleButton>
                 </Grid>
             </Border>
 
             <!-- Product Info -->
-            <StackPanel Grid.Row="1" Margin="15,10,15,15">
+            <StackPanel Grid.Row="1" Margin="16,12,16,16">
+                <!-- Tên sản phẩm -->
                 <TextBlock Text="{Binding Product.ProductName}" 
-                           FontSize="14" FontWeight="Medium" 
-                           Foreground="{StaticResource TextBrush}"
+                           FontSize="14" FontWeight="SemiBold" 
+                           Foreground="{StaticResource TextMain}"
                            TextTrimming="CharacterEllipsis"
-                           Margin="0,0,0,5"/>
+                           Margin="0,0,0,4"/>
 
                 <!-- Shop Name -->
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                    <materialDesign:PackIcon Kind="StorefrontOutline" Width="14" Height="14" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                    <TextBlock Text="{Binding Product.Shop.ShopName, TargetNullValue='Không có tên'}" FontSize="12" Foreground="{StaticResource TextMutedBrush}" TextTrimming="CharacterEllipsis"/>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <materialDesign:PackIcon Kind="StorefrontOutline" Width="12" Height="12" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                    <TextBlock Text="{Binding Product.Shop.ShopName, TargetNullValue='Chính hãng'}" FontSize="12" Foreground="{StaticResource TextMuted}" TextTrimming="CharacterEllipsis"/>
                 </StackPanel>
 
-                <!-- Price Row -->
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                <!-- Giá tiền -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                     <TextBlock Text="{Binding Product.Price, StringFormat={}{0:N0}đ}" 
                                FontSize="16" FontWeight="Bold" 
-                               Foreground="{StaticResource PriceBrush}"
-                               Margin="0,0,10,0"/>
+                               Foreground="{StaticResource Primary}"
+                               Margin="0,0,8,0"/>
+                    <!-- Original Price -->
                     <TextBlock Text="{Binding Product.OriginalPrice, StringFormat={}{0:N0}đ}" 
-                               FontSize="12" Foreground="{StaticResource TextMutedBrush}"
+                               FontSize="12" Foreground="{StaticResource TextMuted}"
                                TextDecorations="Strikethrough"
-                               VerticalAlignment="Bottom"/>
+                               VerticalAlignment="Center"/>
                 </StackPanel>
 
-                <!-- Rating -->
-                <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="Star" Foreground="{StaticResource RatingBrush}" Width="15" Height="15"/>
-                    <materialDesign:PackIcon Kind="Star" Foreground="{StaticResource RatingBrush}" Width="15" Height="15"/>
-                    <materialDesign:PackIcon Kind="Star" Foreground="{StaticResource RatingBrush}" Width="15" Height="15"/>
-                    <materialDesign:PackIcon Kind="Star" Foreground="{StaticResource RatingBrush}" Width="15" Height="15"/>
-                    <materialDesign:PackIcon Kind="StarHalf" Foreground="{StaticResource RatingBrush}" Width="15" Height="15"/>
-                    <TextBlock Text="{Binding Product.SoldCount, TargetNullValue=0, StringFormat='({0} đã bán)'}" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="5,0,0,0"/>
-                </StackPanel>
+                <!-- Đánh giá & Lượt bán -->
+                <Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                        <materialDesign:PackIcon Kind="Star" Foreground="{StaticResource Warning}" Width="14" Height="14"/>
+                        <TextBlock Text="4.9" FontSize="12" Foreground="{StaticResource TextMain}" FontWeight="SemiBold" Margin="2,0,4,0"/>
+                    </StackPanel>
+                    
+                    <TextBlock Text="{Binding Product.SoldCount, TargetNullValue=0, StringFormat='Đã bán {0}'}" 
+                               FontSize="12" Foreground="{StaticResource TextMuted}" 
+                               HorizontalAlignment="Right"/>
+                </Grid>
             </StackPanel>
         </Grid>
     </Border>

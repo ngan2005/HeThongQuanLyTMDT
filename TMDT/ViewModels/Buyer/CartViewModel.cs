@@ -376,7 +376,7 @@ namespace TMDT.ViewModels.Buyer
                 0 => "COD",
                 1 => "VNPay",
                 2 => "MoMo",
-                3 => "ZaloPay",
+                3 => "Wallet",
                 _ => "COD"
             };
 
@@ -396,8 +396,7 @@ namespace TMDT.ViewModels.Buyer
                         VariantId = i.VariantId,
                         VariantName = i.VariantName,
                         Quantity = i.Quantity,
-                        UnitPrice = i.Price,
-                        TotalPrice = i.LineTotal
+                        UnitPrice = i.Price
                     }).ToList();
 
                     int? currentVoucherId = null;
@@ -461,6 +460,16 @@ namespace TMDT.ViewModels.Buyer
                         {
                             MessageBox.Show($"Thanh toán ZaloPay cho đơn hàng {order.OrderCode} đã bị hủy.\nĐơn hàng vẫn được tạo nhưng ở trạng thái Chưa thanh toán.", "Lưu ý", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
+                    }
+
+                    if (order != null)
+                    {
+                        _ = NotificationService.Instance.CreateNotificationAsync(
+                            SessionManager.CurrentUser!.UserId,
+                            "Đặt hàng thành công",
+                            $"Đơn hàng {order.OrderCode} của bạn đã được đặt thành công.",
+                            "Order",
+                            order.OrderId);
                     }
                 }
 

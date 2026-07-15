@@ -79,7 +79,23 @@
                                         <StackPanel Grid.Column="1" Margin="16,0">
                                             <TextBlock Text="{Binding ProductName}" FontSize="16" FontWeight="SemiBold"
                                                        Foreground="{StaticResource TextBrush}" TextWrapping="Wrap"
-                                                       Margin="0,0,0,8"/>
+                                                       Margin="0,0,0,4"/>
+                                            <TextBlock Text="{Binding VariantName}" 
+                                                       FontSize="13" Foreground="{StaticResource TextMutedBrush}"
+                                                       Margin="0,0,0,8">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding VariantName}" Value="{x:Null}">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding VariantName}" Value="">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="{Binding Price, StringFormat={}{0:N0}đ}"
                                                            FontSize="16" FontWeight="Bold"
@@ -249,6 +265,9 @@
                                          Margin="0,4"/>
                             <RadioButton Content="📱 MoMo"
                                          IsChecked="{Binding SelectedPayment, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=2}"
+                                         Margin="0,4"/>
+                            <RadioButton Content="👛 Ví Volox"
+                                         IsChecked="{Binding SelectedPayment, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=3}"
                                          Margin="0,4"/>
                         </StackPanel>
 

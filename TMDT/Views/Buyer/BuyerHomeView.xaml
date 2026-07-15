@@ -1,4 +1,4 @@
-    <UserControl x:Class="TMDT.Views.Buyer.BuyerHomeView"
+<UserControl x:Class="TMDT.Views.Buyer.BuyerHomeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -9,166 +9,272 @@
              xmlns:converters="clr-namespace:TMDT.Converters"
              mc:Ignorable="d"
              d:DesignHeight="1080" d:DesignWidth="1920"
-             Background="{StaticResource BackgroundBrush}">
+             Background="#F4F5F7"
+             TextElement.FontFamily="Segoe UI, sans-serif">
 
     <UserControl.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <converters:InverseBooleanToVisibilityConverter x:Key="BoolToVisInverse"/>
+        <converters:ProductCountToItemsVisibilityConverter x:Key="ItemsVis"/>
+        <SolidColorBrush x:Key="Primary" Color="#5221E7"/>
+        <SolidColorBrush x:Key="Surface" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="TextMain" Color="#1A1B22"/>
+        <SolidColorBrush x:Key="TextMuted" Color="#797588"/>
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel>
-            <!-- 3. Main Content Grid -->
-            <Grid Margin="20,20">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="280"/> <!-- Sidebar Categories -->
-                    <ColumnDefinition Width="*"/>   <!-- Main Area -->
-                </Grid.ColumnDefinitions>
-
-                <!-- Sidebar -->
-                <Border Background="White" CornerRadius="12" Effect="{StaticResource CardShadow}" Padding="15" VerticalAlignment="Top">
-                    <StackPanel>
-                        <TextBlock Text="DANH MỤC SẢN PHẨM" FontWeight="Bold" Margin="0,0,0,15" Foreground="{StaticResource BrandPrimaryBrush}"/>
-                        <ItemsControl ItemsSource="{Binding Categories}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button Style="{StaticResource MaterialDesignFlatButton}" 
-                                            Command="{Binding DataContext.CategoryClickCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                            CommandParameter="{Binding}"
-                                            HorizontalContentAlignment="Left" 
-                                            Padding="5,10"
-                                            Foreground="{StaticResource TextBrush}">
-                                        <Grid Width="230">
-                                            <StackPanel Orientation="Horizontal">
-                                                <materialDesign:PackIcon Kind="ChevronRight" Margin="0,0,10,0" Width="18" Height="18" VerticalAlignment="Center"/>
-                                                <TextBlock Text="{Binding CategoryName}" VerticalAlignment="Center"/>
-                                            </StackPanel>
-                                            <materialDesign:PackIcon Kind="ChevronRight" HorizontalAlignment="Right" VerticalAlignment="Center" Width="16" Height="16"/>
-                                        </Grid>
-                                    </Button>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="0,0,0,40">
+            <!-- 1. Hero Banner Area (Full Width Centered Content) -->
+            <Grid Margin="40,32,40,24">
+                <Border CornerRadius="24" Height="420" ClipToBounds="True">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#8B6EFF" Offset="0"/>
+                            <GradientStop Color="#4225A6" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Grid>
+                        <!-- Real Banner Image (Fallback if URL exists) -->
+                        <Image Source="{Binding CurrentBanner.ImageUrl}" Stretch="UniformToFill" 
+                               Visibility="{Binding CurrentBanner, Converter={StaticResource NullToVisibilityConverter}}" Opacity="0.9"/>
                         
-                        <!-- Promo Banner in Sidebar -->
-                        <Border Margin="0,20,0,0" CornerRadius="12" Background="{StaticResource HeroGradient}" Height="150">
-                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10">
-                                <TextBlock Text="GIẢM 10%" Foreground="White" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
-                                <TextBlock Text="Cho đơn hàng đầu tiên" Foreground="White" HorizontalAlignment="Center" Margin="0,5"/>
-                                <Button Content="NHẬN NGAY" Background="White" Foreground="{StaticResource BrandPrimaryBrush}" 
-                                        Style="{StaticResource ModernButtonStyle}" Height="30" Padding="10,0"/>
-                            </StackPanel>
+                        <!-- Gradient Overlay -->
+                        <Border>
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#E61A1B22" Offset="0"/>
+                                    <GradientStop Color="#001A1B22" Offset="0.8"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
                         </Border>
-                    </StackPanel>
-                </Border>
 
-                <!-- Main Area -->
-                <StackPanel Grid.Column="1" Margin="20,0,0,0">
-                    <!-- Hero Banner -->
-                    <Border CornerRadius="20" Height="400" Background="{StaticResource HeroGradient}" ClipToBounds="True">
-                        <Grid>
-                            <!-- Real Banner Image -->
-                            <Image Source="{Binding CurrentBanner.ImageUrl}" Stretch="UniformToFill" 
-                                   Visibility="{Binding CurrentBanner, Converter={StaticResource NullToVisibilityConverter}}" />
-                                   
-                            <StackPanel VerticalAlignment="Center" Margin="60,0"
-                                        Visibility="{Binding CurrentBanner, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}">
-                                <Border Background="#FFD700" HorizontalAlignment="Left" Padding="15,5" CornerRadius="15" Margin="0,0,0,20">
-                                    <TextBlock Text="SIÊU SALE HÈ 2025" Foreground="Black" FontWeight="Bold"/>
-                                </Border>
-                                <TextBlock Text="RỰC RỠ MÙA HÈ" Foreground="White" FontSize="48" FontWeight="Bold"/>
-                                <TextBlock Text="SALE ĐẾN 50%" Foreground="White" FontSize="72" FontWeight="Black" Margin="0,-10,0,10"/>
-                                <TextBlock Text="Hàng ngàn sản phẩm chính hãng" Foreground="White" FontSize="18"/>
-                                <TextBlock Text="Giá tốt - Giao nhanh - Bảo hành uy tín" Foreground="White" FontSize="18" Opacity="0.8"/>
-                                <Button Style="{StaticResource ModernButtonStyle}" 
-                                        Content="MUA NGAY →" Background="White" Foreground="{StaticResource BrandPrimaryBrush}"
-                                        Width="180" Height="50" Margin="0,30,0,0" FontSize="18"/>
-                            </StackPanel>
+                        <StackPanel VerticalAlignment="Center" Margin="80,0"
+                                    Visibility="{Binding CurrentBanner, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}">
+                            <Border Background="#FFFFFF" HorizontalAlignment="Left" Padding="16,6" CornerRadius="16" Margin="0,0,0,24">
+                                <TextBlock Text="BỘ SƯU TẬP MỚI NHẤT" Foreground="{StaticResource Primary}" FontWeight="Bold" FontSize="12"/>
+                            </Border>
+                            <TextBlock Text="ĐỊNH HÌNH" Foreground="White" FontSize="36" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                            <TextBlock Text="PHONG CÁCH CỦA BẠN" Foreground="White" FontSize="64" FontWeight="Black" Margin="0,0,0,16"/>
+                            <TextBlock Text="Mua sắm các mặt hàng chính hãng với ưu đãi đặc biệt." Foreground="White" FontSize="18" Opacity="0.9" Margin="0,0,0,8"/>
+                            <TextBlock Text="Độc quyền tại Volox." Foreground="White" FontSize="18" Opacity="0.7"/>
                             
-                            <!-- Arrow Buttons -->
-                            <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}" 
-                                    Command="{Binding PrevBannerCommand}"
-                                    HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20"
-                                    Background="#33000000" BorderThickness="0">
-                                <materialDesign:PackIcon Kind="ChevronLeft" Foreground="White"/>
+                            <Button Height="52" Padding="32,0" Margin="0,40,0,0" HorizontalAlignment="Left" BorderThickness="0" Cursor="Hand">
+                                <Button.Background>
+                                    <SolidColorBrush Color="#FFFFFF"/>
+                                </Button.Background>
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="26" x:Name="bgBorder">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="bgBorder" Property="Opacity" Value="0.9"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <TextBlock Text="KHÁM PHÁ NGAY" FontSize="16" FontWeight="Bold" Foreground="{StaticResource Primary}"/>
                             </Button>
-                            <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}" 
-                                    Command="{Binding NextBannerCommand}"
-                                    HorizontalAlignment="Right" VerticalAlignment="Center" Margin="20"
-                                    Background="#33000000" BorderThickness="0">
-                                <materialDesign:PackIcon Kind="ChevronRight" Foreground="White"/>
-                            </Button>
-                        </Grid>
-                    </Border>
+                        </StackPanel>
 
-                    <!-- Featured Products Section -->
-                    <Grid Margin="0,40,0,20">
-                        <TextBlock Text="✧ SẢN PHẨM NỔI BẬT" FontSize="20" FontWeight="Bold" Foreground="{StaticResource BrandPrimaryBrush}"/>
-                        <Button Style="{StaticResource MaterialDesignFlatButton}" Content="Xem tất cả →" 
-                                Command="{Binding ShowAllCommand}"
-                                HorizontalAlignment="Right" Foreground="{StaticResource BrandSecondaryBrush}"/>
+                        <!-- Arrow Buttons -->
+                        <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}" 
+                                Command="{Binding PrevBannerCommand}"
+                                HorizontalAlignment="Left" VerticalAlignment="Center" Margin="24"
+                                Background="#33FFFFFF" BorderThickness="0" Cursor="Hand">
+                            <materialDesign:PackIcon Kind="ChevronLeft" Foreground="White"/>
+                        </Button>
+                        <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}" 
+                                Command="{Binding NextBannerCommand}"
+                                HorizontalAlignment="Right" VerticalAlignment="Center" Margin="24"
+                                Background="#33FFFFFF" BorderThickness="0" Cursor="Hand">
+                            <materialDesign:PackIcon Kind="ChevronRight" Foreground="White"/>
+                        </Button>
                     </Grid>
+                </Border>
+            </Grid>
 
-                    <ItemsControl ItemsSource="{Binding FeaturedProducts}">
+            <!-- 2. Horizontal Categories -->
+            <StackPanel Margin="40,24,40,48">
+                <TextBlock Text="Khám phá danh mục" FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextMain}" Margin="0,0,0,24"/>
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding Categories}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <UniformGrid Columns="5"/>
+                                <StackPanel Orientation="Horizontal"/>
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
+                                <Button Background="{StaticResource Surface}" BorderThickness="0" Margin="0,0,16,0" Cursor="Hand" Height="120" Width="120"
+                                        Command="{Binding DataContext.CategoryClickCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding}">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="16" x:Name="border">
+                                                <Border.Effect>
+                                                    <DropShadowEffect Color="#000000" Opacity="0.03" BlurRadius="10" ShadowDepth="2"/>
+                                                </Border.Effect>
+                                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                    <!-- Category Icon placeholder -->
+                                                    <Border Width="56" Height="56" CornerRadius="28" Background="#F4F5F7" Margin="0,0,0,12">
+                                                        <materialDesign:PackIcon Kind="Category" Width="24" Height="24" Foreground="{StaticResource Primary}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <TextBlock Text="{Binding CategoryName}" FontWeight="SemiBold" FontSize="13" Foreground="{StaticResource TextMain}" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="border" Property="Effect">
+                                                        <Setter.Value>
+                                                            <DropShadowEffect Color="#000000" Opacity="0.08" BlurRadius="20" ShadowDepth="4"/>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Setter TargetName="border" Property="Background" Value="#FBF8FF"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
+
+            <!-- 3. Featured Products -->
+            <Grid Margin="40,0,40,48">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Section Header -->
+                <Grid Grid.Row="0" Margin="0,0,0,24">
+                    <TextBlock Text="Sản phẩm nổi bật" FontSize="28" FontWeight="Bold" Foreground="{StaticResource TextMain}" VerticalAlignment="Center"/>
+                    <Button HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Cursor="Hand" Command="{Binding ShowAllCommand}" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Xem tất cả" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource Primary}" VerticalAlignment="Center"/>
+                            <materialDesign:PackIcon Kind="ArrowRight" Foreground="{StaticResource Primary}" Width="16" Height="16" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <!-- Products Grid -->
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding FeaturedProducts}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <!-- Use WrapPanel or UniformGrid -->
+                            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <!-- Add a little margin around each card so DropShadow has room -->
+                            <Border Margin="8">
                                 <components:ProductCard
                                     ClickCommand="{Binding DataContext.ProductClickCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                     ClickCommandParameter="{Binding}"
                                     WishlistCommand="{Binding DataContext.ToggleWishlistCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                     WishlistCommandParameter="{Binding}"
-                                    IsWishlisted="{Binding IsWishlisted, Mode=TwoWay}"/>
+                                    IsWishlisted="{Binding IsWishlisted, Mode=TwoWay}"
+                                    CompareCommand="{Binding DataContext.ToggleComparisonCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    CompareCommandParameter="{Binding}"
+                                    IsCompared="{Binding IsCompared, Mode=TwoWay}"/>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+
+            <!-- 3.5. Recently Viewed Products -->
+            <Grid Margin="40,0,40,40" Visibility="{Binding RecentlyViewedProducts.Count, Converter={StaticResource ItemsVis}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Section Header -->
+                <Grid Grid.Row="0" Margin="0,0,0,24">
+                    <TextBlock Text="Sản phẩm đã xem gần đây" FontSize="28" FontWeight="Bold" Foreground="{StaticResource TextMain}" VerticalAlignment="Center"/>
+                </Grid>
+
+                <!-- Products ScrollViewer -->
+                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Padding="0,0,0,16">
+                    <ItemsControl ItemsSource="{Binding RecentlyViewedProducts}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="8">
+                                    <components:ProductCard
+                                        ClickCommand="{Binding DataContext.ProductClickCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        ClickCommandParameter="{Binding}"
+                                        WishlistCommand="{Binding DataContext.ToggleWishlistCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        WishlistCommandParameter="{Binding}"
+                                        IsWishlisted="{Binding IsWishlisted, Mode=TwoWay}"
+                                        CompareCommand="{Binding DataContext.ToggleComparisonCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CompareCommandParameter="{Binding}"
+                                        IsCompared="{Binding IsCompared, Mode=TwoWay}"/>
+                                </Border>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-
-                    <!-- Trust Badges Footer -->
-                    <Border Background="White" CornerRadius="12" Margin="0,40,0,20" Padding="30" Effect="{StaticResource CardShadow}">
-                        <UniformGrid Columns="5">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <materialDesign:PackIcon Kind="TruckFastOutline" Foreground="{StaticResource BrandPrimaryBrush}" Width="40" Height="40"/>
-                                <StackPanel Margin="10,0">
-                                    <TextBlock Text="Giao hàng nhanh" FontWeight="Bold"/>
-                                    <TextBlock Text="Toàn quốc, nhanh chóng" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
-                                </StackPanel>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <materialDesign:PackIcon Kind="ShieldCheckOutline" Foreground="{StaticResource BrandPrimaryBrush}" Width="40" Height="40"/>
-                                <StackPanel Margin="10,0">
-                                    <TextBlock Text="Hàng chính hãng" FontWeight="Bold"/>
-                                    <TextBlock Text="Cam kết 100% chính hãng" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
-                                </StackPanel>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <materialDesign:PackIcon Kind="Cached" Foreground="{StaticResource BrandPrimaryBrush}" Width="40" Height="40"/>
-                                <StackPanel Margin="10,0">
-                                    <TextBlock Text="Đổi trả dễ dàng" FontWeight="Bold"/>
-                                    <TextBlock Text="Đổi trả trong 7 ngày" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
-                                </StackPanel>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <materialDesign:PackIcon Kind="LockOutline" Foreground="{StaticResource BrandPrimaryBrush}" Width="40" Height="40"/>
-                                <StackPanel Margin="10,0">
-                                    <TextBlock Text="Thanh toán an toàn" FontWeight="Bold"/>
-                                    <TextBlock Text="Nhiều phương thức" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
-                                </StackPanel>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <materialDesign:PackIcon Kind="Headset" Foreground="{StaticResource BrandPrimaryBrush}" Width="40" Height="40"/>
-                                <StackPanel Margin="10,0">
-                                    <TextBlock Text="Hỗ trợ 24/7" FontWeight="Bold"/>
-                                    <TextBlock Text="Tư vấn tận tình" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </UniformGrid>
-                    </Border>
-                </StackPanel>
+                </ScrollViewer>
             </Grid>
+
+            <!-- 4. Trust Badges (Redesigned) -->
+            <Border Background="{StaticResource Surface}" CornerRadius="20" Margin="40,0,40,24" Padding="48,32">
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" Opacity="0.04" BlurRadius="20" ShadowDepth="4"/>
+                </Border.Effect>
+                <UniformGrid Columns="4">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Border Width="64" Height="64" CornerRadius="16" Background="#F4F5F7">
+                            <materialDesign:PackIcon Kind="TruckFastOutline" Foreground="{StaticResource Primary}" Width="32" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Giao hàng nhanh" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextMain}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Miễn phí cho đơn từ 500k" FontSize="13" Foreground="{StaticResource TextMuted}"/>
+                        </StackPanel>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Border Width="64" Height="64" CornerRadius="16" Background="#F4F5F7">
+                            <materialDesign:PackIcon Kind="ShieldCheckOutline" Foreground="{StaticResource Primary}" Width="32" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Hàng chính hãng" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextMain}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Bảo hành 12 tháng" FontSize="13" Foreground="{StaticResource TextMuted}"/>
+                        </StackPanel>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Border Width="64" Height="64" CornerRadius="16" Background="#F4F5F7">
+                            <materialDesign:PackIcon Kind="Cached" Foreground="{StaticResource Primary}" Width="32" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Đổi trả dễ dàng" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextMain}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Đổi trả miễn phí 7 ngày" FontSize="13" Foreground="{StaticResource TextMuted}"/>
+                        </StackPanel>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Border Width="64" Height="64" CornerRadius="16" Background="#F4F5F7">
+                            <materialDesign:PackIcon Kind="Headset" Foreground="{StaticResource Primary}" Width="32" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Hỗ trợ 24/7" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextMain}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Hotline tư vấn tận tình" FontSize="13" Foreground="{StaticResource TextMuted}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </UniformGrid>
+            </Border>
+            
             <components:BuyerFooterView />
         </StackPanel>
     </ScrollViewer>

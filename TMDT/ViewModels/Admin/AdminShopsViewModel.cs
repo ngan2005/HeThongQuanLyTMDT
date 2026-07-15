@@ -174,6 +174,18 @@ namespace TMDT.ViewModels.Admin
                 if (dbShop != null)
                 {
                     dbShop.IsActive = false;
+                    
+                    // Hạ cấp Role từ Seller xuống Buyer
+                    var user = await context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.UserId == dbShop.UserId);
+                    if (user != null && user.Role?.RoleName != SessionManager.RoleAdmin) // Không hạ cấp Admin nếu Admin test shop
+                    {
+                        var buyerRole = await context.Roles.FirstOrDefaultAsync(r => r.RoleName == SessionManager.RoleBuyer);
+                        if (buyerRole != null && user.RoleId != buyerRole.RoleId)
+                        {
+                            user.RoleId = buyerRole.RoleId;
+                        }
+                    }
+
                     await context.SaveChangesAsync();
                 }
             }
@@ -204,6 +216,18 @@ namespace TMDT.ViewModels.Admin
                 if (dbShop != null)
                 {
                     dbShop.IsActive = true;
+                    
+                    // Khôi phục Role lên Seller
+                    var user = await context.Users.FirstOrDefaultAsync(u => u.UserId == dbShop.UserId);
+                    if (user != null)
+                    {
+                        var sellerRole = await context.Roles.FirstOrDefaultAsync(r => r.RoleName == SessionManager.RoleSeller);
+                        if (sellerRole != null && user.RoleId != sellerRole.RoleId)
+                        {
+                            user.RoleId = sellerRole.RoleId;
+                        }
+                    }
+
                     await context.SaveChangesAsync();
                 }
             }

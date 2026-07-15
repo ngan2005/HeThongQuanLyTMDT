@@ -9,8 +9,8 @@ namespace TMDT.ViewModels.Seller
 {
     public class SellerMainViewModel : ViewModelBase
     {
-        private ViewModelBase _currentView;
-        public ViewModelBase CurrentView
+        private ViewModelBase? _currentView;
+        public ViewModelBase? CurrentView
         {
             get => _currentView;
             set { _currentView = value; OnPropertyChanged(); }

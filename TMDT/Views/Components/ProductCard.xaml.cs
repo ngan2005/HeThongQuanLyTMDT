@@ -24,6 +24,16 @@ namespace TMDT.Views.Components
             DependencyProperty.Register(nameof(IsWishlisted), typeof(bool), typeof(ProductCard),
                 new PropertyMetadata(false));
 
+        public static readonly DependencyProperty CompareCommandProperty =
+            DependencyProperty.Register(nameof(CompareCommand), typeof(ICommand), typeof(ProductCard));
+
+        public static readonly DependencyProperty CompareCommandParameterProperty =
+            DependencyProperty.Register(nameof(CompareCommandParameter), typeof(object), typeof(ProductCard));
+
+        public static readonly DependencyProperty IsComparedProperty =
+            DependencyProperty.Register(nameof(IsCompared), typeof(bool), typeof(ProductCard),
+                new PropertyMetadata(false));
+
         public static readonly RoutedEvent WishlistToggledEvent =
             EventManager.RegisterRoutedEvent(nameof(WishlistToggled), RoutingStrategy.Bubble,
                 typeof(RoutedEventHandler), typeof(ProductCard));
@@ -58,6 +68,24 @@ namespace TMDT.Views.Components
             set => SetValue(IsWishlistedProperty, value);
         }
 
+        public ICommand CompareCommand
+        {
+            get => (ICommand)GetValue(CompareCommandProperty);
+            set => SetValue(CompareCommandProperty, value);
+        }
+
+        public object CompareCommandParameter
+        {
+            get => GetValue(CompareCommandParameterProperty);
+            set => SetValue(CompareCommandParameterProperty, value);
+        }
+
+        public bool IsCompared
+        {
+            get => (bool)GetValue(IsComparedProperty);
+            set => SetValue(IsComparedProperty, value);
+        }
+
         public event RoutedEventHandler WishlistToggled
         {
             add => AddHandler(WishlistToggledEvent, value);
@@ -82,6 +110,12 @@ namespace TMDT.Views.Components
             else if (!SessionManager.IsLoggedIn)
                 MessageBox.Show("Vui lòng đăng nhập để thêm sản phẩm yêu thích.",
                     "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void CompareToggle_Click(object sender, RoutedEventArgs e)
+        {
+            if (CompareCommand?.CanExecute(CompareCommandParameter) == true)
+                CompareCommand.Execute(CompareCommandParameter);
         }
     }
 }

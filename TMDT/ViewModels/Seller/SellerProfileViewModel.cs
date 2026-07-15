@@ -11,30 +11,30 @@ namespace TMDT.ViewModels.Seller
 {
     public class SellerProfileViewModel : ViewModelBase
     {
-        private readonly TmdtContext _context;
-        private Shop _shop;
+        private readonly TmdtContext? _context;
+        private Shop? _shop;
 
-        private string _shopNameInput;
-        private string _logoInput;
-        private string _warehouseAddressInput;
+        private string _shopNameInput = "";
+        private string _logoInput = "";
+        private string _warehouseAddressInput = "";
         private decimal _commissionRate;
         private bool _vacationMode;
-        private string _openedAtDisplay;
+        private string _openedAtDisplay = "";
 
-        private System.Collections.ObjectModel.ObservableCollection<Province> _provinces;
-        private System.Collections.ObjectModel.ObservableCollection<District> _districts;
-        private System.Collections.ObjectModel.ObservableCollection<Ward> _wards;
-        private Province _selectedProvince;
-        private District _selectedDistrict;
-        private Ward _selectedWard;
-        private string _houseNumberInput;
+        private System.Collections.ObjectModel.ObservableCollection<Province> _provinces = new();
+        private System.Collections.ObjectModel.ObservableCollection<District> _districts = new();
+        private System.Collections.ObjectModel.ObservableCollection<Ward> _wards = new();
+        private Province? _selectedProvince;
+        private District? _selectedDistrict;
+        private Ward? _selectedWard;
+        private string _houseNumberInput = "";
 
         private int _totalProducts;
         private int _totalOrders;
         private decimal _walletBalance;
         private decimal _shopRating;
 
-        public Shop Shop
+        public Shop? Shop
         {
             get => _shop;
             set { _shop = value; OnPropertyChanged(); }
@@ -75,7 +75,7 @@ namespace TMDT.ViewModels.Seller
             set { _wards = value; OnPropertyChanged(); }
         }
 
-        public Province SelectedProvince
+        public Province? SelectedProvince
         {
             get => _selectedProvince;
             set
@@ -87,7 +87,7 @@ namespace TMDT.ViewModels.Seller
             }
         }
 
-        public District SelectedDistrict
+        public District? SelectedDistrict
         {
             get => _selectedDistrict;
             set
@@ -99,7 +99,7 @@ namespace TMDT.ViewModels.Seller
             }
         }
 
-        public Ward SelectedWard
+        public Ward? SelectedWard
         {
             get => _selectedWard;
             set
@@ -217,8 +217,8 @@ namespace TMDT.ViewModels.Seller
         #endregion
 
         #region Events
-        public event Action OpenProfileRequest;
-        public event Action CloseProfileRequest;
+        public event Action? OpenProfileRequest;
+        public event Action? CloseProfileRequest;
         #endregion
 
         #region Commands
@@ -337,11 +337,11 @@ namespace TMDT.ViewModels.Seller
         private void ExecuteToggleVacation()
         {
             VacationMode = !VacationMode;
-            Shop.VacationMode = VacationMode;
+            if (Shop != null) Shop.VacationMode = VacationMode;
 
             try
             {
-                var dbShop = _context?.Shops.Find(Shop.ShopId);
+                var dbShop = _context?.Shops.Find(Shop?.ShopId);
                 if (dbShop != null)
                 {
                     dbShop.VacationMode = VacationMode;
@@ -356,7 +356,7 @@ namespace TMDT.ViewModels.Seller
                 "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private async void ExecuteSaveProfile(object obj)
+        private async void ExecuteSaveProfile(object? obj)
         {
             if (string.IsNullOrWhiteSpace(ShopNameInput))
             {
@@ -369,10 +369,13 @@ namespace TMDT.ViewModels.Seller
                 return;
             }
 
-            Shop.ShopName = ShopNameInput;
-            Shop.Logo = LogoInput;
-            Shop.WarehouseAddress = WarehouseAddressInput;
-            Shop.VacationMode = VacationMode;
+            if (Shop != null)
+            {
+                Shop.ShopName = ShopNameInput;
+                Shop.Logo = LogoInput;
+                Shop.WarehouseAddress = WarehouseAddressInput;
+                Shop.VacationMode = VacationMode;
+            }
 
             try
             {

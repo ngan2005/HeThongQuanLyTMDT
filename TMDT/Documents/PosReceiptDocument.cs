@@ -151,6 +151,7 @@ namespace TMDT.Documents
         {
             container.AlignCenter().Column(column =>
             {
+                column.Item().PaddingTop(8).AlignCenter().Text($"Thu ngân: {_cashierName}").FontSize(9).SemiBold();
                 column.Item().AlignCenter().Text("CẢM ƠN QUÝ KHÁCH").SemiBold();
                 column.Item().AlignCenter().Text("HẸN GẶP LẠI!").FontSize(9);
                 // Bạn có thể thêm Barcode ở đây nếu có font hỗ trợ hoặc image:

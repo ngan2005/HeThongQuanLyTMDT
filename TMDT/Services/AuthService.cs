@@ -47,7 +47,7 @@ namespace TMDT.Services
                 shopId = shop.ShopId;
                 shopName = shop.ShopName;
                 
-                // Self-healing: Nếu user có shop Đã Duyệt (IsActive=true) nhưng role vẫn là Buyer -> Nâng cấp role
+                // Self-healing Role
                 if (shop.IsActive == true && user.Role?.RoleName == SessionManager.RoleBuyer)
                 {
                     var sellerRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == SessionManager.RoleSeller);
@@ -55,6 +55,16 @@ namespace TMDT.Services
                     {
                         user.RoleId = sellerRole.RoleId;
                         user.Role = sellerRole;
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                else if (shop.IsActive == false && user.Role?.RoleName == SessionManager.RoleSeller)
+                {
+                    var buyerRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == SessionManager.RoleBuyer);
+                    if (buyerRole != null)
+                    {
+                        user.RoleId = buyerRole.RoleId;
+                        user.Role = buyerRole;
                         await _context.SaveChangesAsync();
                     }
                 }
@@ -103,6 +113,7 @@ namespace TMDT.Services
                 shopId = shop.ShopId;
                 shopName = shop.ShopName;
 
+                // Self-healing Role
                 if (shop.IsActive == true && user.Role?.RoleName == SessionManager.RoleBuyer)
                 {
                     var sellerRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == SessionManager.RoleSeller);
@@ -110,6 +121,16 @@ namespace TMDT.Services
                     {
                         user.RoleId = sellerRole.RoleId;
                         user.Role = sellerRole;
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                else if (shop.IsActive == false && user.Role?.RoleName == SessionManager.RoleSeller)
+                {
+                    var buyerRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == SessionManager.RoleBuyer);
+                    if (buyerRole != null)
+                    {
+                        user.RoleId = buyerRole.RoleId;
+                        user.Role = buyerRole;
                         await _context.SaveChangesAsync();
                     }
                 }

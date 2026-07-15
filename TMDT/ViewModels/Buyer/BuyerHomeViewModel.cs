@@ -19,6 +19,7 @@ namespace TMDT.ViewModels.Buyer
         public ObservableCollection<ProductWrapper> FeaturedProducts => _mainVm.FeaturedProducts;
         public ObservableCollection<Banner> Banners => _mainVm.Banners;
         public Banner? CurrentBanner => _mainVm.CurrentBanner;
+        public ObservableCollection<ProductWrapper> RecentlyViewedProducts { get; } = new();
 
         public ICommand SearchCommand { get; }
         public ICommand ProductClickCommand { get; }
@@ -65,6 +66,26 @@ namespace TMDT.ViewModels.Buyer
             PrevBannerCommand = new RelayCommand(_ => { _mainVm.PrevBanner(); OnPropertyChanged(nameof(CurrentBanner)); });
 
             CartService.Instance.CartChanged += () => OnPropertyChanged(nameof(CartBadgeCount));
+
+            if (SessionManager.IsLoggedIn && SessionManager.CurrentUser != null)
+            {
+                _ = LoadRecentlyViewedProductsAsync();
+            }
+        }
+
+        private async System.Threading.Tasks.Task LoadRecentlyViewedProductsAsync()
+        {
+            if (!SessionManager.IsLoggedIn || SessionManager.CurrentUser == null) return;
+            var products = await ViewHistoryService.Instance.GetRecentViewsAsync(SessionManager.CurrentUser.UserId, 10);
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                RecentlyViewedProducts.Clear();
+                foreach (var p in products)
+                {
+                    RecentlyViewedProducts.Add(new ProductWrapper(p));
+                }
+                OnPropertyChanged(nameof(RecentlyViewedProducts));
+            });
         }
 
         private void ExecuteSearch()
@@ -80,6 +101,10 @@ namespace TMDT.ViewModels.Buyer
             OnPropertyChanged(nameof(IsBuyer));
             OnPropertyChanged(nameof(IsSeller));
             OnPropertyChanged(nameof(UserName));
+            if (SessionManager.IsLoggedIn)
+            {
+                _ = LoadRecentlyViewedProductsAsync();
+            }
         }
 
         private void ExecuteLogout()
@@ -90,6 +115,7 @@ namespace TMDT.ViewModels.Buyer
             OnPropertyChanged(nameof(IsBuyer));
             OnPropertyChanged(nameof(IsSeller));
             OnPropertyChanged(nameof(UserName));
+            RecentlyViewedProducts.Clear();
         }
 
         private void ExecuteBecomeSeller()

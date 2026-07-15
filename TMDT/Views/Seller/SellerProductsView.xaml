@@ -657,7 +657,7 @@
                                     <DataGrid ItemsSource="{Binding ProductVariantsPreview}" AutoGenerateColumns="False" 
                                               CanUserAddRows="False" CanUserDeleteRows="False" HeadersVisibility="Column" 
                                               GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E2E8F0" 
-                                              Background="#FFFFFF" RowHeight="36" IsReadOnly="True" MaxHeight="150">
+                                              Background="#FFFFFF" RowHeight="36" IsReadOnly="False" MaxHeight="150">
                                         <DataGrid.Style>
                                             <Style TargetType="DataGrid">
                                                 <Style.Triggers>
@@ -696,10 +696,10 @@
                                             </Style>
                                         </DataGrid.Resources>
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="Phân loại" Binding="{Binding VariantName}" Width="2*"/>
-                                            <DataGridTextColumn Header="Giá cộng" Binding="{Binding ExtraPrice, StringFormat={}{0:N0} đ}" Width="1.5*"/>
-                                            <DataGridTextColumn Header="Kho" Binding="{Binding Quantity}" Width="1*"/>
-                                            <DataGridTextColumn Header="SKU" Binding="{Binding Sku}" Width="1.5*"/>
+                                            <DataGridTextColumn Header="Phân loại" Binding="{Binding VariantName, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
+                                            <DataGridTextColumn Header="Giá cộng" Binding="{Binding ExtraPrice, UpdateSourceTrigger=PropertyChanged}" Width="1.5*"/>
+                                            <DataGridTextColumn Header="Kho" Binding="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Width="1*"/>
+                                            <DataGridTextColumn Header="SKU" Binding="{Binding Sku, UpdateSourceTrigger=PropertyChanged}" Width="1.5*"/>
                                             <DataGridTemplateColumn Width="40">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>

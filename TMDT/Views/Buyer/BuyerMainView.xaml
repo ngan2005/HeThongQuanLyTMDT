@@ -8,12 +8,15 @@
              xmlns:converters="clr-namespace:TMDT.Converters"
              mc:Ignorable="d"
              d:DesignHeight="1080" d:DesignWidth="1920"
-             Background="{StaticResource BackgroundBrush}">
+             Background="#F4F5F7"
+             TextElement.FontFamily="Segoe UI, sans-serif">
 
     <UserControl.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <converters:InverseBooleanToVisibilityConverter x:Key="BoolToVisInverse"/>
+        <converters:GreaterThanZeroToVisibilityConverter x:Key="GreaterThanZeroToVis"/>
 
+        <!-- Templates -->
         <DataTemplate DataType="{x:Type vmBuyer:BuyerHomeViewModel}" xmlns:vmBuyer="clr-namespace:TMDT.ViewModels.Buyer">
             <buyerViews:BuyerHomeView/>
         </DataTemplate>
@@ -47,6 +50,18 @@
         <DataTemplate DataType="{x:Type vmBuyer:BuyerShopViewModel}" xmlns:vmBuyer="clr-namespace:TMDT.ViewModels.Buyer">
             <buyerViews:BuyerShopView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vmBuyer:BuyerComparisonViewModel}" xmlns:vmBuyer="clr-namespace:TMDT.ViewModels.Buyer">
+            <buyerViews:BuyerComparisonView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vmBuyer:BuyerNotificationViewModel}" xmlns:vmBuyer="clr-namespace:TMDT.ViewModels.Buyer">
+            <buyerViews:BuyerNotificationView/>
+        </DataTemplate>
+
+        <SolidColorBrush x:Key="Primary" Color="#5221E7"/>
+        <SolidColorBrush x:Key="Surface" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="SurfaceVariant" Color="#F4F5F7"/>
+        <SolidColorBrush x:Key="TextMain" Color="#1A1B22"/>
+        <SolidColorBrush x:Key="TextMuted" Color="#797588"/>
     </UserControl.Resources>
 
     <Grid>
@@ -56,32 +71,44 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- 1. Header Section -->
-        <Border Grid.Row="0" Background="White" Effect="{StaticResource CardShadow}" Panel.ZIndex="10">
+        <!-- 1. Top Header Section (Logo, Search, Actions) -->
+        <Border Grid.Row="0" Background="{StaticResource Surface}" Panel.ZIndex="10">
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" Opacity="0.05" BlurRadius="10" ShadowDepth="2"/>
+            </Border.Effect>
+            
             <StackPanel>
-                <!-- Top Nav Bar (Small) -->
-                <Border Background="#F8F9FA" Padding="20,4" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                <!-- Top Utility Bar (Small) -->
+                <Border Background="{StaticResource SurfaceVariant}" Padding="24,6">
                     <Grid>
-                        <!-- Right side user actions -->
+                        <!-- Left Info -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <materialDesign:PackIcon Kind="Phone" Width="14" Height="14" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                            <TextBlock Text="Hỗ trợ: 1900 1234" FontSize="12" Foreground="{StaticResource TextMuted}" Margin="4,0,16,0" VerticalAlignment="Center"/>
+                            <materialDesign:PackIcon Kind="Email" Width="14" Height="14" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                            <TextBlock Text="support@volox.vn" FontSize="12" Foreground="{StaticResource TextMuted}" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Right Actions -->
                         <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" VerticalAlignment="Center">
                             <!-- Chua dang nhap -->
                             <StackPanel Orientation="Horizontal" Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisInverse}}">
-                                <Button Style="{StaticResource MaterialDesignFlatButton}" Foreground="{StaticResource TextBrush}" Command="{Binding LoginCommand}" Padding="8,2" Height="26">
-                                    <TextBlock Text="Đăng nhập / Đăng ký" FontSize="12"/>
+                                <Button Style="{StaticResource MaterialDesignFlatButton}" Foreground="{StaticResource Primary}" Command="{Binding LoginCommand}" Padding="8,0" Height="24">
+                                    <TextBlock Text="Đăng nhập / Đăng ký" FontSize="12" FontWeight="SemiBold"/>
                                 </Button>
                             </StackPanel>
 
-                            <!-- Da dang nhap: User Name -->
+                            <!-- Da dang nhap -->
                             <StackPanel Orientation="Horizontal" Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="{Binding UserName, StringFormat='Xin chào, {0}'}" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                                <TextBlock Text="{Binding UserName, StringFormat='Xin chào, {0}'}" VerticalAlignment="Center" Margin="0,0,16,0" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextMain}"/>
                                 
-                                <Button Style="{StaticResource MaterialDesignFlatButton}" Foreground="{StaticResource TextBrush}" Command="{Binding GoProfileCommand}" Padding="8,2" Height="26">
+                                <Button Style="{StaticResource MaterialDesignFlatButton}" Foreground="{StaticResource TextMuted}" Command="{Binding GoProfileCommand}" Padding="8,0" Height="24" Cursor="Hand">
                                     <TextBlock Text="Tài khoản" FontSize="12"/>
                                 </Button>
-                                <Button Style="{StaticResource MaterialDesignFlatButton}" Foreground="{StaticResource TextBrush}" Command="{Binding GoOrdersCommand}" Padding="8,2" Height="26">
+                                <Button Style="{StaticResource MaterialDesignFlatButton}" Foreground="{StaticResource TextMuted}" Command="{Binding GoOrdersCommand}" Padding="8,0" Height="24" Cursor="Hand">
                                     <TextBlock Text="Đơn mua" FontSize="12"/>
                                 </Button>
-                                <Button Style="{StaticResource MaterialDesignFlatButton}" Foreground="{StaticResource TextBrush}" Command="{Binding LogoutCommand}" Padding="8,2" Height="26">
+                                <Button Style="{StaticResource MaterialDesignFlatButton}" Foreground="#BA1A1A" Command="{Binding LogoutCommand}" Padding="8,0" Height="24" Cursor="Hand">
                                     <TextBlock Text="Đăng xuất" FontSize="12"/>
                                 </Button>
                             </StackPanel>
@@ -89,8 +116,8 @@
                     </Grid>
                 </Border>
 
-                <!-- Main Header Bar -->
-                <Grid Margin="20,15">
+                <!-- Main Header Area -->
+                <Grid Margin="24,16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/> <!-- Logo -->
                         <ColumnDefinition Width="*"/>    <!-- Search -->
@@ -98,68 +125,104 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Logo -->
-                    <Button Style="{StaticResource MaterialDesignFlatButton}" Command="{Binding GoHomeCommand}" Padding="0" Height="Auto" Margin="0,0,20,0">
+                    <Button Style="{StaticResource MaterialDesignFlatButton}" Command="{Binding GoHomeCommand}" Padding="0" Height="Auto" Margin="0,0,32,0" Cursor="Hand" Background="Transparent" BorderThickness="0">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <materialDesign:PackIcon Kind="Shopping" Foreground="{StaticResource BrandPrimaryBrush}" Width="45" Height="45"/>
-                            <StackPanel Margin="10,0">
-                                <TextBlock Text="Volox" FontSize="26" FontWeight="Bold" Foreground="{StaticResource BrandPrimaryBrush}"/>
-                                <TextBlock Text="Mua sắm thông minh" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
-                            </StackPanel>
+                            <!-- Gradient Text Logo -->
+                            <TextBlock Text="Volox" FontSize="36" FontWeight="Bold" VerticalAlignment="Center">
+                                <TextBlock.Foreground>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#8B6EFF" Offset="0"/>
+                                        <GradientStop Color="#5221E7" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </TextBlock.Foreground>
+                            </TextBlock>
                         </StackPanel>
                     </Button>
 
                     <!-- Search Box -->
-                    <Grid Grid.Column="1" MaxWidth="700" MinWidth="200" HorizontalAlignment="Stretch" Margin="20,0">
-                        <TextBox Style="{StaticResource SearchBoxStyle}" HorizontalAlignment="Stretch" Padding="15,0,45,0"
-                                 Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" FontSize="14"/>
-                        <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                                HorizontalAlignment="Right" Margin="0,0,5,0"
-                                Background="{StaticResource BrandSecondaryBrush}" BorderThickness="0"
-                                Width="36" Height="36"
-                                Command="{Binding SearchCommand}">
-                            <materialDesign:PackIcon Kind="Search" Width="20" Height="20"/>
-                        </Button>
+                    <Grid Grid.Column="1" MaxWidth="800" MinWidth="300" HorizontalAlignment="Stretch" Margin="32,0">
+                        <Border Background="{StaticResource SurfaceVariant}" CornerRadius="24" BorderThickness="1" BorderBrush="#E3E1EC">
+                            <Grid>
+                                <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" 
+                                         Background="Transparent" BorderThickness="0"
+                                         FontSize="14" Foreground="{StaticResource TextMain}"
+                                         Padding="24,0,56,0" VerticalContentAlignment="Center"
+                                         materialDesign:HintAssist.Hint="Tìm kiếm sản phẩm, thương hiệu..."
+                                         materialDesign:TextFieldAssist.DecorationVisibility="Hidden"/>
+                                <Button HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6"
+                                        Background="{StaticResource Primary}" BorderThickness="0"
+                                        Width="36" Height="36" Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                        Command="{Binding SearchCommand}" Cursor="Hand">
+                                    <materialDesign:PackIcon Kind="Search" Width="20" Height="20" Foreground="White"/>
+                                </Button>
+                            </Grid>
+                        </Border>
                     </Grid>
 
                     <!-- Header Actions -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
-                        
-                        <!-- Seller Portal (Only if Seller) -->
-                        <Button Style="{StaticResource MaterialDesignOutlinedButton}" Foreground="{StaticResource BrandSecondaryBrush}" BorderBrush="{StaticResource BrandSecondaryBrush}"
-                                FontWeight="SemiBold" Command="{Binding OpenSellerPortalCommand}" Margin="0,0,15,0" Padding="15,5" Height="Auto"
-                                Visibility="{Binding IsSeller, Converter={StaticResource BoolToVis}}">
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="32,0,0,0">
+                        <!-- Seller Portal / Become Seller Buttons -->
+                        <Button Style="{StaticResource MaterialDesignOutlinedButton}" Foreground="#6B46FF" BorderBrush="#6B46FF"
+                                FontWeight="SemiBold" Command="{Binding OpenSellerPortalCommand}" Margin="0,0,24,0" Padding="16,8" Height="Auto"
+                                Visibility="{Binding IsSeller, Converter={StaticResource BoolToVis}}" Cursor="Hand">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Store" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                <materialDesign:PackIcon Kind="Store" Margin="0,0,8,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="Kênh Người bán" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
 
-                        <!-- Become Seller (Only if Buyer) -->
-                        <Button Style="{StaticResource MaterialDesignOutlinedButton}" Foreground="{StaticResource BrandPrimaryBrush}" BorderBrush="{StaticResource BrandPrimaryBrush}"
-                                FontWeight="SemiBold" Command="{Binding BecomeSellerCommand}" Margin="0,0,15,0" Padding="15,5" Height="Auto"
-                                Visibility="{Binding IsBuyer, Converter={StaticResource BoolToVis}}">
+                        <Button Style="{StaticResource MaterialDesignOutlinedButton}" Foreground="#6B46FF" BorderBrush="#6B46FF"
+                                FontWeight="SemiBold" Command="{Binding BecomeSellerCommand}" Margin="0,0,24,0" Padding="16,8" Height="Auto"
+                                Visibility="{Binding IsBuyer, Converter={StaticResource BoolToVis}}" Cursor="Hand">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="StorePlusOutline" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                <materialDesign:PackIcon Kind="StorePlusOutline" Margin="0,0,8,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="Trở thành Người bán" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
 
-                        <!-- Yeu thich -->
-                        <Button Style="{StaticResource MaterialDesignIconButton}" Foreground="{StaticResource TextBrush}" Margin="5,0"
+                        <!-- Comparison -->
+                        <Grid Margin="8,0" Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVis}}">
+                            <Button Style="{StaticResource MaterialDesignIconButton}" Foreground="{StaticResource TextMain}"
+                                    Command="{Binding GoComparisonCommand}" ToolTip="So sánh" Cursor="Hand" Width="48" Height="48">
+                                <materialDesign:PackIcon Kind="ScaleBalance" Width="24" Height="24"/>
+                            </Button>
+                            <Border Background="#BA1A1A" CornerRadius="10" MinWidth="20" Height="20" Padding="4,0"
+                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,4,0"
+                                    Visibility="{Binding ComparisonBadgeCount, Converter={StaticResource GreaterThanZeroToVis}}">
+                                <TextBlock Text="{Binding ComparisonBadgeCount}" Foreground="White" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- Notification -->
+                        <Grid Margin="8,0" Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVis}}">
+                            <Button Style="{StaticResource MaterialDesignIconButton}" Foreground="{StaticResource TextMain}"
+                                    Command="{Binding GoNotificationCommand}" ToolTip="Thông báo" Cursor="Hand" Width="48" Height="48">
+                                <materialDesign:PackIcon Kind="BellOutline" Width="24" Height="24"/>
+                            </Button>
+                            <Border Background="#BA1A1A" CornerRadius="10" MinWidth="20" Height="20" Padding="4,0"
+                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,4,0"
+                                    Visibility="{Binding UnreadNotificationCount, Converter={StaticResource GreaterThanZeroToVis}}">
+                                <TextBlock Text="{Binding UnreadNotificationCount}" Foreground="White" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- Wishlist -->
+                        <Button Style="{StaticResource MaterialDesignIconButton}" Foreground="{StaticResource TextMain}" Margin="8,0"
                                 Command="{Binding GoWishlistCommand}" Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVis}}"
-                                ToolTip="Yêu thích">
-                            <materialDesign:PackIcon Kind="HeartOutline" Width="28" Height="28"/>
+                                ToolTip="Yêu thích" Cursor="Hand" Width="48" Height="48">
+                            <materialDesign:PackIcon Kind="HeartOutline" Width="24" Height="24"/>
                         </Button>
 
-                        <!-- Gio hang -->
-                        <Grid Margin="10,0,0,0" x:Name="CartIconArea">
-                            <Button Style="{StaticResource MaterialDesignIconButton}" Foreground="{StaticResource BrandPrimaryBrush}"
-                                    Command="{Binding GoCartCommand}" ToolTip="Giỏ hàng">
-                                <materialDesign:PackIcon Kind="CartOutline" Width="30" Height="30"/>
+                        <!-- Cart -->
+                        <Grid Margin="8,0,0,0" x:Name="CartIconArea">
+                            <Button Style="{StaticResource MaterialDesignIconButton}" Foreground="{StaticResource TextMain}"
+                                    Command="{Binding GoCartCommand}" ToolTip="Giỏ hàng" Cursor="Hand" Width="48" Height="48">
+                                <materialDesign:PackIcon Kind="CartOutline" Width="24" Height="24"/>
                             </Button>
-                            <Border Background="#FF3B30" CornerRadius="10" MinWidth="18" Height="18" Padding="3,0"
-                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,-5,0">
-                                <TextBlock Text="{Binding CartBadgeCount}" Foreground="White" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <!-- Badge -->
+                            <Border Background="#BA1A1A" CornerRadius="10" MinWidth="20" Height="20" Padding="4,0"
+                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,4,0">
+                                <TextBlock Text="{Binding CartBadgeCount}" Foreground="White" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                         </Grid>
                     </StackPanel>
@@ -168,31 +231,26 @@
         </Border>
 
         <!-- 2. Navigation Menu -->
-        <Border Grid.Row="1" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,1" Padding="20,5" Panel.ZIndex="9">
-            <StackPanel Orientation="Horizontal">
-                <Button Style="{StaticResource MaterialDesignFlatButton}"
-                        Content="Trang chủ"
-                        Command="{Binding GoHomeCommand}"
+        <Border Grid.Row="1" Background="{StaticResource Surface}" BorderBrush="#E3E1EC" BorderThickness="0,0,0,1" Panel.ZIndex="9">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4">
+                <Button Style="{StaticResource MaterialDesignFlatButton}" Height="40" Padding="24,0"
+                        Content="Trang chủ" Command="{Binding GoHomeCommand}"
                         Foreground="{Binding CurrentPage, Converter={StaticResource PageToNavForeground}, ConverterParameter=Home}"
                         FontWeight="{Binding CurrentPage, Converter={StaticResource PageToNavFontWeight}, ConverterParameter=Home}"/>
-                <Button Style="{StaticResource MaterialDesignFlatButton}"
-                        Content="Sản phẩm"
-                        Command="{Binding GoProductsCommand}"
+                <Button Style="{StaticResource MaterialDesignFlatButton}" Height="40" Padding="24,0"
+                        Content="Sản phẩm" Command="{Binding GoProductsCommand}"
                         Foreground="{Binding CurrentPage, Converter={StaticResource PageToNavForeground}, ConverterParameter=Products}"
                         FontWeight="{Binding CurrentPage, Converter={StaticResource PageToNavFontWeight}, ConverterParameter=Products}"/>
-                <Button Style="{StaticResource MaterialDesignFlatButton}"
-                        Content="Khuyến mãi"
-                        Command="{Binding GoPromotionsCommand}"
+                <Button Style="{StaticResource MaterialDesignFlatButton}" Height="40" Padding="24,0"
+                        Content="Khuyến mãi" Command="{Binding GoPromotionsCommand}"
                         Foreground="{Binding CurrentPage, Converter={StaticResource PageToNavForeground}, ConverterParameter=Promotions}"
                         FontWeight="{Binding CurrentPage, Converter={StaticResource PageToNavFontWeight}, ConverterParameter=Promotions}"/>
-                <Button Style="{StaticResource MaterialDesignFlatButton}"
-                        Content="Hướng dẫn"
-                        Command="{Binding GoGuideCommand}"
+                <Button Style="{StaticResource MaterialDesignFlatButton}" Height="40" Padding="24,0"
+                        Content="Hướng dẫn" Command="{Binding GoGuideCommand}"
                         Foreground="{Binding CurrentPage, Converter={StaticResource PageToNavForeground}, ConverterParameter=Guide}"
                         FontWeight="{Binding CurrentPage, Converter={StaticResource PageToNavFontWeight}, ConverterParameter=Guide}"/>
-                <Button Style="{StaticResource MaterialDesignFlatButton}"
-                        Content="Liên hệ"
-                        Command="{Binding GoContactCommand}"
+                <Button Style="{StaticResource MaterialDesignFlatButton}" Height="40" Padding="24,0"
+                        Content="Liên hệ" Command="{Binding GoContactCommand}"
                         Foreground="{Binding CurrentPage, Converter={StaticResource PageToNavForeground}, ConverterParameter=Contact}"
                         FontWeight="{Binding CurrentPage, Converter={StaticResource PageToNavFontWeight}, ConverterParameter=Contact}"/>
             </StackPanel>

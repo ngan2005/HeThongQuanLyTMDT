@@ -252,14 +252,6 @@ public class OrderService : IOrderService
                     payment.TransactionCode = GenerateTransactionCode("Wallet");
                     payment.Status = "Paid";
                     payment.PaidAt = DateTime.Now;
-                    
-                    // Cộng tiền vào ví Shop luôn vì đây là thanh toán trước
-                    var shopWallet = await context.Shops.FindAsync(shopId);
-                    if (shopWallet != null)
-                    {
-                        var shopRevenue = totalAmount - platformFee;
-                        shopWallet.WalletBalance = (shopWallet.WalletBalance ?? 0) + shopRevenue;
-                    }
                     break;
 
                 default:
@@ -278,7 +270,7 @@ public class OrderService : IOrderService
         }
     }
 
-    public async Task<Order?> CreatePosOrderAsync(int? buyerId, int shopId, int? voucherId, string paymentMethod, List<CartOrderItem> items, int pointsUsed = 0, decimal manualDiscount = 0)
+    public async Task<Order?> CreatePosOrderAsync(int? buyerId, int shopId, int? voucherId, string paymentMethod, List<CartOrderItem> items, int pointsUsed = 0, decimal manualDiscount = 0, string orderStatus = "Completed")
     {
         using var context = new TmdtContext();
         await using var transaction = await context.Database.BeginTransactionAsync();
@@ -306,7 +298,7 @@ public class OrderService : IOrderService
                     {
                         UserId = actualBuyer.UserId,
                         Points = -pointsUsed,
-                        TransactionType = "Earn", // Chỗ này đang dùng Earn cho cả 2, kệ đi
+                        TransactionType = "Redeem",
                         Description = $"Dùng điểm mua hàng tại quầy",
                         CreatedAt = DateTime.Now
                     });
@@ -377,37 +369,42 @@ public class OrderService : IOrderService
                 TotalAmount = totalAmount,
                 PlatformFee = platformFee,
                 PaymentMethod = paymentMethod,
-                OrderStatus = "Completed", // POS thì hoàn thành luôn
+                OrderStatus = orderStatus,
                 OrderDate = DateTime.Now
             };
 
             context.Orders.Add(order);
             await context.SaveChangesAsync();
 
+            // Chỉ trừ tồn kho khi thanh toán Cash (Completed) — MoMo/VNPay (AwaitingPayment) sẽ trừ khi ConfirmPosOrderAsync
+            if (orderStatus == "Completed")
+            {
+                foreach (var item in items)
+                {
+                    if (item.VariantId.HasValue)
+                    {
+                        // 🟢 Dùng raw SQL UPDATE có WHERE Quantity >= @qty để chống race condition
+                        // Nếu bị 0 rows affected → tồn đã bị người khác trừ mất → rollback
+                        var rows = await context.Database.ExecuteSqlInterpolatedAsync(
+                            $"UPDATE ProductVariants SET Quantity = Quantity - {item.Quantity} WHERE VariantId = {item.VariantId.Value} AND Quantity >= {item.Quantity}");
+                        if (rows == 0)
+                            throw new InvalidOperationException($"Sản phẩm '{item.ProductName} ({item.VariantName})' không đủ tồn kho (đã có người khác mua trước).");
+                    }
+                    else
+                    {
+                        var rows = await context.Database.ExecuteSqlInterpolatedAsync(
+                            $"UPDATE Product SET StockQuantity = StockQuantity - {item.Quantity} WHERE ProductId = {item.ProductId} AND StockQuantity >= {item.Quantity}");
+                        if (rows == 0)
+                            throw new InvalidOperationException($"Sản phẩm '{item.ProductName}' không đủ tồn kho (đã có người khác mua trước).");
+                    }
+                }
+            }
+
             foreach (var item in items)
             {
                 var product = await context.Products.FindAsync(item.ProductId);
                 if (product == null)
                     throw new InvalidOperationException($"Không tìm thấy sản phẩm '{item.ProductName}'.");
-
-                if (item.VariantId.HasValue)
-                {
-                    var variant = await context.ProductVariants.FindAsync(item.VariantId.Value);
-                    if (variant == null)
-                        throw new InvalidOperationException($"Không tìm thấy biến thể của sản phẩm '{item.ProductName}'.");
-                    if ((variant.Quantity ?? 0) < item.Quantity)
-                        throw new InvalidOperationException($"Sản phẩm '{item.ProductName} ({item.VariantName})' không đủ tồn kho.");
-                    
-                    variant.Quantity = (variant.Quantity ?? 0) - item.Quantity;
-                }
-                else
-                {
-                    if ((product.StockQuantity ?? 0) < item.Quantity)
-                        throw new InvalidOperationException(
-                            $"Sản phẩm '{product.ProductName}' không đủ tồn kho. (Còn: {product.StockQuantity ?? 0}, yêu cầu: {item.Quantity}).");
-
-                    product.StockQuantity = (product.StockQuantity ?? 0) - item.Quantity;
-                }
 
                 context.OrderDetails.Add(new OrderDetail
                 {
@@ -429,8 +426,8 @@ public class OrderService : IOrderService
                 OrderId = order.OrderId,
                 Method = paymentMethod,
                 Amount = totalAmount,
-                Status = "Paid", // Đã thanh toán luôn
-                PaidAt = DateTime.Now
+                Status = orderStatus == "Completed" ? "Paid" : "Pending",
+                PaidAt = orderStatus == "Completed" ? DateTime.Now : null
             };
             
             if (paymentMethod == "MoMo" || paymentMethod == "VNPay" || paymentMethod == "POS_Transfer")
@@ -439,36 +436,43 @@ public class OrderService : IOrderService
             }
             context.Payments.Add(payment);
 
-            // Cập nhật doanh thu cho Shop (ghi vào Shop.WalletBalance để ví Seller hiển thị đúng)
-            var shop = await context.Shops.FindAsync(shopId);
-            if (shop != null)
+            // Cập nhật doanh thu cho Shop (chỉ khi thanh toán Cash — MoMo/VNPay sẽ cộng ở ConfirmPosOrderAsync)
+            if (paymentMethod == "Cash")
             {
-                var shopRevenue = totalAmount - platformFee;
-                shop.WalletBalance = (shop.WalletBalance ?? 0) + shopRevenue;
-            }
-
-            // TÍCH ĐIỂM CHO KHÁCH HÀNG TẠI QUẦY (1 điểm = 10,000 VNĐ)
-            if (buyerId.HasValue && actualBuyer != null && actualBuyer.Email != "guest@pos.local")
-            {
-                int earnedPoints = (int)(totalAmount / 10000);
-                if (earnedPoints > 0)
+                var shop = await context.Shops.FindAsync(shopId);
+                if (shop != null)
                 {
-                    actualBuyer.LoyaltyPoints = (actualBuyer.LoyaltyPoints ?? 0) + earnedPoints;
-                    context.PointHistories.Add(new PointHistory
+                    var shopRevenue = totalAmount - platformFee;
+                    shop.WalletBalance = (shop.WalletBalance ?? 0) + shopRevenue;
+                }
+
+                // Tích điểm cho khách hàng khi thanh toán Cash (1 điểm = 10,000đ)
+                if (actualBuyer.Email != "guest@pos.local")
+                {
+                    int earnedPoints = (int)(totalAmount / 10000);
+                    if (earnedPoints > 0)
                     {
-                        UserId = actualBuyer.UserId,
-                        Points = earnedPoints,
-                        TransactionType = "Earn",
-                        OrderId = order.OrderId,
-                        Description = $"Tích điểm từ đơn hàng POS {order.OrderCode}",
-                        CreatedAt = DateTime.Now
-                    });
+                        actualBuyer.LoyaltyPoints = (actualBuyer.LoyaltyPoints ?? 0) + earnedPoints;
+                        context.PointHistories.Add(new PointHistory
+                        {
+                            UserId = actualBuyer.UserId,
+                            Points = earnedPoints,
+                            TransactionType = "Earn",
+                            OrderId = order.OrderId,
+                            Description = $"Tích điểm từ đơn hàng POS {order.OrderCode}",
+                            CreatedAt = DateTime.Now
+                        });
+                    }
                 }
             }
-
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
-            return order;
+
+            // Reload order kèm OrderDetails để trả về đầy đủ cho hóa đơn
+            using var readCtx = new TmdtContext();
+            return await readCtx.Orders
+                .Include(o => o.OrderDetails)
+                .FirstOrDefaultAsync(o => o.OrderId == order.OrderId);
         }
         catch
         {
@@ -515,6 +519,28 @@ public class OrderService : IOrderService
                 NewStatus = "Cancelled",
                 ChangedAt = DateTime.Now
             });
+
+            // Hoàn tiền cho Buyer nếu đã thanh toán trước (Ví, VNPay, MoMo)
+            var payment = await context.Payments.FirstOrDefaultAsync(p => p.OrderId == orderId);
+            if (payment != null && payment.Status == "Paid" && order.PaymentMethod != "COD")
+            {
+                if (order.BuyerId.HasValue)
+                {
+                    var buyer = await context.Users.FindAsync(order.BuyerId.Value);
+                    if (buyer != null)
+                    {
+                        buyer.WalletBalance = (buyer.WalletBalance ?? 0) + (order.TotalAmount ?? 0);
+                    }
+                }
+                payment.Status = "Refunded";
+                context.OrderStatusHistories.Add(new OrderStatusHistory
+                {
+                    OrderId = orderId,
+                    NewStatus = "Hoàn tiền",
+                    Note = "Tự động hoàn tiền vào Ví Volox do Hủy đơn",
+                    ChangedAt = DateTime.Now
+                });
+            }
 
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
@@ -572,7 +598,7 @@ public class OrderService : IOrderService
             order.OrderStatus = "Completed";
             order.CompletedAt = DateTime.Now;
 
-            if (order.ShopId.HasValue && order.PaymentMethod == "COD")
+            if (order.ShopId.HasValue)
             {
                 var shop = await context.Shops.FindAsync(order.ShopId.Value);
                 if (shop != null)
@@ -627,6 +653,18 @@ public class OrderService : IOrderService
 
     public async Task<bool> RefundOrderAsync(int orderId)
     {
+        // 🟢 Refund cho Seller POS: chỉ đơn POS (AddressId == null) + đang Completed/CompletedOffline.
+        return await RefundOrderInternalAsync(orderId, requirePosOnly: true);
+    }
+
+    public async Task<bool> AdminRefundOrderAsync(int orderId)
+    {
+        // 🟢 Refund cho Admin: cho phép mọi đơn (kể cả ship) — admin đã qua xét duyệt.
+        return await RefundOrderInternalAsync(orderId, requirePosOnly: false);
+    }
+
+    private async Task<bool> RefundOrderInternalAsync(int orderId, bool requirePosOnly)
+    {
         using var context = new TmdtContext();
         await using var transaction = await context.Database.BeginTransactionAsync();
 
@@ -638,6 +676,14 @@ public class OrderService : IOrderService
 
             if (order == null || order.BuyerId == null)
                 return false;
+
+            // 🟢 Phân quyền: Seller (POS) chỉ refund đơn POS tại quầy (AddressId == null).
+            if (requirePosOnly && order.AddressId.HasValue)
+                throw new InvalidOperationException("Đơn hàng online có vận chuyển không thể hoàn trả tại POS. Vui lòng liên hệ Admin để được xử lý.");
+
+            // 🟢 Chỉ refund khi đơn đang Completed hoặc CompletedOffline (sau sync).
+            if (order.OrderStatus != "Completed" && order.OrderStatus != "CompletedOffline")
+                throw new InvalidOperationException($"Đơn ở trạng thái '{order.OrderStatus}' không thể hoàn trả. Chỉ chấp nhận đơn đã hoàn thành.");
 
             if (order.OrderStatus == "Completed" && order.ShopId.HasValue)
             {
@@ -691,6 +737,419 @@ public class OrderService : IOrderService
         }
     }
 
+    public async Task<Order?> UpdatePosOrderAsync(int orderId, List<CartOrderItem> items, decimal manualDiscount, int? voucherId, int pointsUsed)
+    {
+        using var context = new TmdtContext();
+        await using var transaction = await context.Database.BeginTransactionAsync();
+
+        try
+        {
+            var order = await context.Orders
+                .Include(o => o.OrderDetails)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+            if (order == null)
+                throw new InvalidOperationException("Không tìm thấy đơn hàng.");
+
+            // 🔴 Chỉ cho phép sửa khi đơn chờ thanh toán — tránh sửa đơn đã Completed/Cancelled
+            if (order.OrderStatus != "AwaitingPayment")
+                throw new InvalidOperationException($"Không thể sửa đơn đang ở trạng thái '{order.OrderStatus}'.");
+
+            if (items == null || items.Count == 0)
+                throw new InvalidOperationException("Đơn hàng phải có ít nhất 1 sản phẩm.");
+
+            // Xoá OrderDetails cũ (AwaitingPayment chưa trừ kho, không cần hoàn kho)
+            context.OrderDetails.RemoveRange(order.OrderDetails);
+
+            // Tính lại SubTotal + Discount từ danh sách items mới
+            var subTotal = items.Sum(i => i.TotalPrice);
+            decimal voucherDiscount = 0;
+            decimal platformFee = 0m;
+
+            if (voucherId.HasValue)
+            {
+                var voucher = await context.Vouchers.FindAsync(voucherId.Value);
+                if (voucher != null && voucher.IsActive == true)
+                {
+                    voucherDiscount = voucher.DiscountType == "Percentage"
+                        ? subTotal * ((voucher.DiscountValue ?? 0) / 100m)
+                        : (voucher.DiscountValue ?? 0);
+
+                    if (voucher.MaxDiscount.HasValue)
+                        voucherDiscount = Math.Min(voucherDiscount, voucher.MaxDiscount.Value);
+                }
+            }
+
+            decimal pointsDiscount = pointsUsed * 1000m;
+            decimal totalDiscount = voucherDiscount + manualDiscount + pointsDiscount;
+            decimal totalAmount = Math.Max(0, subTotal - totalDiscount);
+
+            // Tính platform fee (giữ cùng tỉ lệ với CreatePosOrderAsync — giả định 5%)
+            platformFee = totalAmount * 0.05m;
+            if (platformFee < 1000m) platformFee = 0m;
+
+            // Tạo OrderDetails mới
+            foreach (var item in items)
+            {
+                var detail = new OrderDetail
+                {
+                    OrderId = orderId,
+                    ProductId = item.ProductId,
+                    VariantId = item.VariantId,
+                    ProductNameSnapshot = item.ProductName,
+                    Quantity = item.Quantity,
+                    UnitPrice = item.UnitPrice,
+                    TotalPrice = item.TotalPrice
+                };
+                context.OrderDetails.Add(detail);
+            }
+
+            // Cập nhật các trường trên Order
+            order.SubTotal = subTotal;
+            order.Discount = voucherDiscount + pointsDiscount;
+            order.ManualDiscount = manualDiscount;
+            order.TotalAmount = totalAmount;
+            order.PlatformFee = platformFee;
+            order.VoucherId = voucherId;
+            order.OrderDate = DateTime.Now; // cập nhật thời điểm sửa
+
+            // Thêm lịch sử trạng thái
+            context.OrderStatusHistories.Add(new OrderStatusHistory
+            {
+                OrderId = orderId,
+                NewStatus = "AwaitingPayment",
+                ChangedAt = DateTime.Now,
+                Note = $"Đơn được chỉnh sửa lúc {DateTime.Now:HH:mm dd/MM/yyyy} — tổng mới: {totalAmount:N0}đ"
+            });
+
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            // Trả về order với OrderDetails mới
+            return await GetOrderByIdAsync(orderId);
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    public async Task<bool> ConfirmPosOrderAsync(int orderId, string transactionCode)
+    {
+        using var context = new TmdtContext();
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            var order = await context.Orders
+                .Include(o => o.Buyer)
+                .Include(o => o.OrderDetails)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+            if (order == null) return false;
+            if (order.OrderStatus != "AwaitingPayment")
+                throw new InvalidOperationException("Đơn hàng không ở trạng thái chờ thanh toán.");
+
+            // Cập nhật Payment
+            var payment = await context.Payments.FirstOrDefaultAsync(p => p.OrderId == orderId);
+            if (payment != null)
+            {
+                payment.Status = "Paid";
+                payment.TransactionCode = transactionCode;
+                payment.PaidAt = DateTime.Now;
+            }
+
+            // Trừ tồn kho khi xác nhận thanh toán MoMo/VNPay thành công — dùng raw SQL chống race
+            foreach (var detail in order.OrderDetails)
+            {
+                if (detail.VariantId.HasValue && detail.Quantity.HasValue)
+                {
+                    var rows = await context.Database.ExecuteSqlInterpolatedAsync(
+                        $"UPDATE ProductVariants SET Quantity = Quantity - {detail.Quantity.Value} WHERE VariantId = {detail.VariantId.Value} AND Quantity >= {detail.Quantity.Value}");
+                    if (rows == 0)
+                        throw new InvalidOperationException($"Sản phẩm '{detail.ProductNameSnapshot}' không đủ tồn kho khi xác nhận thanh toán (đã có người mua trước).");
+                }
+                else if (detail.ProductId.HasValue && detail.Quantity.HasValue)
+                {
+                    var rows = await context.Database.ExecuteSqlInterpolatedAsync(
+                        $"UPDATE Product SET StockQuantity = StockQuantity - {detail.Quantity.Value} WHERE ProductId = {detail.ProductId.Value} AND StockQuantity >= {detail.Quantity.Value}");
+                    if (rows == 0)
+                        throw new InvalidOperationException($"Sản phẩm '{detail.ProductNameSnapshot}' không đủ tồn kho khi xác nhận thanh toán (đã có người mua trước).");
+                }
+            }
+
+            // Cộng tiền vào ví Shop
+            var shop = await context.Shops.FindAsync(order.ShopId);
+            if (shop != null)
+            {
+                var shopRevenue = (order.TotalAmount ?? 0) - (order.PlatformFee ?? 0);
+                shop.WalletBalance = (shop.WalletBalance ?? 0) + shopRevenue;
+            }
+
+            order.OrderStatus = "Completed";
+            order.CompletedAt = DateTime.Now;
+            context.OrderStatusHistories.Add(new OrderStatusHistory
+            {
+                OrderId = orderId,
+                NewStatus = "Completed",
+                Note = "Thanh toán POS thành công",
+                ChangedAt = DateTime.Now
+            });
+
+            // Tích điểm cho khách hàng
+            if (order.Buyer != null && order.Buyer.Email != "guest@pos.local")
+            {
+                int earnedPoints = (int)((order.TotalAmount ?? 0) / 10000);
+                if (earnedPoints > 0)
+                {
+                    order.Buyer.LoyaltyPoints = (order.Buyer.LoyaltyPoints ?? 0) + earnedPoints;
+                    context.PointHistories.Add(new PointHistory
+                    {
+                        UserId = order.Buyer.UserId,
+                        Points = earnedPoints,
+                        TransactionType = "Earn",
+                        OrderId = order.OrderId,
+                        Description = $"Tích điểm từ đơn hàng POS {order.OrderCode}",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+            }
+
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return true;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// 🟢 Xác nhận thanh toán QR khi offline (mất mạng / server down).
+    /// - Set OrderStatus = Completed, Payment.Status = "PaidOffline", ghi TransactionCode dạng OFFLINE_{ticks}.
+    /// - KHÔNG gọi wallet cộng tiền ở đây — sẽ đồng bộ khi có mạng.
+    /// - Trừ tồn kho ngay để cashier in được bill chính xác.
+    /// </summary>
+    public async Task<bool> ConfirmPosOrderOfflineAsync(int orderId, string transactionCode)
+    {
+        using var context = new TmdtContext();
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            var order = await context.Orders
+                .Include(o => o.Buyer)
+                .Include(o => o.OrderDetails)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+            if (order == null) return false;
+            if (order.OrderStatus != "AwaitingPayment")
+                throw new InvalidOperationException("Đơn hàng không ở trạng thái chờ thanh toán.");
+
+            var payment = await context.Payments.FirstOrDefaultAsync(p => p.OrderId == orderId);
+            if (payment != null)
+            {
+                payment.Status = "PaidOffline";
+                payment.TransactionCode = transactionCode;
+                payment.PaidAt = DateTime.Now;
+            }
+
+            // Trừ tồn kho ngay — cashier in bill cần số liệu khớp
+            foreach (var detail in order.OrderDetails)
+            {
+                if (detail.VariantId.HasValue && detail.Quantity.HasValue)
+                {
+                    var rows = await context.Database.ExecuteSqlInterpolatedAsync(
+                        $"UPDATE ProductVariants SET Quantity = Quantity - {detail.Quantity.Value} WHERE VariantId = {detail.VariantId.Value} AND Quantity >= {detail.Quantity.Value}");
+                    if (rows == 0)
+                        throw new InvalidOperationException($"Sản phẩm '{detail.ProductNameSnapshot}' không đủ tồn kho.");
+                }
+                else if (detail.ProductId.HasValue && detail.Quantity.HasValue)
+                {
+                    var rows = await context.Database.ExecuteSqlInterpolatedAsync(
+                        $"UPDATE Product SET StockQuantity = StockQuantity - {detail.Quantity.Value} WHERE ProductId = {detail.ProductId.Value} AND StockQuantity >= {detail.Quantity.Value}");
+                    if (rows == 0)
+                        throw new InvalidOperationException($"Sản phẩm '{detail.ProductNameSnapshot}' không đủ tồn kho.");
+                }
+            }
+
+            order.OrderStatus = "CompletedOffline";
+            order.CompletedAt = DateTime.Now;
+            context.OrderStatusHistories.Add(new OrderStatusHistory
+            {
+                OrderId = orderId,
+                NewStatus = "CompletedOffline",
+                Note = $"Thanh toán offline (mạng lỗi) — TX: {transactionCode}. Chờ sync.",
+                ChangedAt = DateTime.Now
+            });
+
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return true;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// 🟢 Sync 1 đơn offline đã online: cộng tiền vào ví shop, tích điểm, set OrderStatus = Completed.
+    /// </summary>
+    public async Task<bool> SyncOfflinePosOrderAsync(int orderId)
+    {
+        using var context = new TmdtContext();
+        try
+        {
+            var order = await context.Orders
+                .Include(o => o.Buyer)
+                .Include(o => o.OrderDetails)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+            if (order == null) return false;
+            if (order.OrderStatus != "CompletedOffline") return true; // đã sync rồi
+
+            var shop = await context.Shops.FindAsync(order.ShopId);
+            if (shop != null)
+            {
+                var shopRevenue = (order.TotalAmount ?? 0) - (order.PlatformFee ?? 0);
+                shop.WalletBalance = (shop.WalletBalance ?? 0) + shopRevenue;
+            }
+
+            order.OrderStatus = "Completed";
+            context.OrderStatusHistories.Add(new OrderStatusHistory
+            {
+                OrderId = orderId,
+                NewStatus = "Completed",
+                Note = "Sync offline thành công — đã cộng tiền vào ví shop.",
+                ChangedAt = DateTime.Now
+            });
+
+            if (order.Buyer != null && order.Buyer.Email != "guest@pos.local")
+            {
+                int earnedPoints = (int)((order.TotalAmount ?? 0) / 10000);
+                if (earnedPoints > 0)
+                {
+                    order.Buyer.LoyaltyPoints = (order.Buyer.LoyaltyPoints ?? 0) + earnedPoints;
+                    context.PointHistories.Add(new PointHistory
+                    {
+                        UserId = order.Buyer.UserId,
+                        Points = earnedPoints,
+                        TransactionType = "Earn",
+                        OrderId = order.OrderId,
+                        Description = $"Tích điểm (sync offline) từ đơn POS {order.OrderCode}",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+            }
+
+            await context.SaveChangesAsync();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public async Task<bool> CancelPosOrderAsync(int orderId)
+    {
+        using var context = new TmdtContext();
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            var order = await context.Orders
+                .Include(o => o.OrderDetails)
+                .Include(o => o.Buyer)
+                .Include(o => o.Voucher)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+            if (order == null) return false;
+            if (order.OrderStatus != "AwaitingPayment")
+                throw new InvalidOperationException("Chỉ có thể hủy đơn ở trạng thái chờ thanh toán.");
+
+            // Hoàn voucher
+            if (order.VoucherId.HasValue && order.Voucher != null)
+                order.Voucher.UsedCount = Math.Max(0, (order.Voucher.UsedCount ?? 1) - 1);
+
+            // Hoàn điểm đã dùng
+            if (order.Buyer != null)
+            {
+                var pointsUsed = (int)((order.Discount ?? 0) / 1000);
+                if (pointsUsed > 0)
+                {
+                    order.Buyer.LoyaltyPoints = (order.Buyer.LoyaltyPoints ?? 0) + pointsUsed;
+                    context.PointHistories.Add(new PointHistory
+                    {
+                        UserId = order.Buyer.UserId,
+                        Points = pointsUsed,
+                        TransactionType = "Refund",
+                        Description = $"Hoàn điểm từ đơn hủy {order.OrderCode}",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+            }
+
+            // Trừ điểm đã cộng cho khách (loyalty points earned) — kiểm tra theo PointHistory để tránh trừ nhầm
+            if (order.Buyer != null && order.OrderId > 0)
+            {
+                var earnedHistory = await context.PointHistories.FirstOrDefaultAsync(ph =>
+                    ph.UserId == order.Buyer.UserId &&
+                    ph.TransactionType == "Earn" &&
+                    ph.Description != null && ph.Description.Contains(order.OrderCode));
+                if (earnedHistory != null && earnedHistory.Points > 0)
+                {
+                    order.Buyer.LoyaltyPoints = Math.Max(0, (order.Buyer.LoyaltyPoints ?? 0) - earnedHistory.Points.Value);
+                    context.PointHistories.Add(new PointHistory
+                    {
+                        UserId = order.Buyer.UserId,
+                        Points = -earnedHistory.Points.Value,
+                        TransactionType = "Refund",
+                        Description = $"Thu hồi điểm thưởng từ đơn hủy {order.OrderCode}",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+            }
+
+            // Hoàn lại tồn kho
+            foreach (var detail in order.OrderDetails)
+            {
+                if (detail.VariantId.HasValue && detail.Quantity.HasValue)
+                {
+                    var variant = await context.ProductVariants.FindAsync(detail.VariantId.Value);
+                    if (variant != null)
+                        variant.Quantity = (variant.Quantity ?? 0) + detail.Quantity.Value;
+                }
+                else if (detail.ProductId.HasValue && detail.Quantity.HasValue)
+                {
+                    var product = await context.Products.FindAsync(detail.ProductId.Value);
+                    if (product != null)
+                        product.StockQuantity = (product.StockQuantity ?? 0) + detail.Quantity.Value;
+                }
+            }
+
+            order.OrderStatus = "Cancelled";
+            context.OrderStatusHistories.Add(new OrderStatusHistory
+            {
+                OrderId = orderId,
+                NewStatus = "Cancelled",
+                Note = "Hủy đơn chờ thanh toán MoMo/VNPay",
+                ChangedAt = DateTime.Now
+            });
+
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return true;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
     public async Task<bool> UpdatePaymentSuccessAsync(int orderId, string transactionCode)
     {
         using var context = new TmdtContext();
@@ -706,17 +1165,6 @@ public class OrderService : IOrderService
                 payment.TransactionCode = transactionCode;
                 payment.PaidAt = DateTime.Now;
 
-                // Cộng tiền vào ví Shop luôn vì đây là thanh toán trước online thành công
-                var order = await context.Orders.FindAsync(orderId);
-                if (order != null && order.ShopId.HasValue)
-                {
-                    var shop = await context.Shops.FindAsync(order.ShopId.Value);
-                    if (shop != null)
-                    {
-                        var revenue = (order.TotalAmount ?? 0) - (order.PlatformFee ?? 0);
-                        shop.WalletBalance = (shop.WalletBalance ?? 0) + revenue;
-                    }
-                }
             }
 
             await context.SaveChangesAsync();

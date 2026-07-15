@@ -95,6 +95,9 @@ public static class GoogleAuthService
     {
         try
         {
+            // Luôn xóa cache để cho phép chọn tài khoản khác nhau mỗi lần đăng nhập
+            Logout();
+
             GoogleAuthConfig.Validate();
 
             var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(

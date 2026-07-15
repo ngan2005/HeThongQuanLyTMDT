@@ -92,6 +92,7 @@ namespace TMDT.ViewModels.Auth
                     if (user.RoleName == SessionManager.RoleBuyer)
                     {
                         CartService.Instance.LoadFromDatabase(user.UserId);
+                        ComparisonService.Instance.LoadFromDb();
                     }
 
                     Window targetWindow = null;
@@ -187,6 +188,7 @@ namespace TMDT.ViewModels.Auth
                 if (user.RoleName == SessionManager.RoleBuyer)
                 {
                     CartService.Instance.LoadFromDatabase(user.UserId);
+                    ComparisonService.Instance.LoadFromDb();
                 }
 
                 Window targetWindow = null;

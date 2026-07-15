@@ -13,10 +13,33 @@ namespace TMDT.Views.Seller
     {
         public string RegisteredPhone { get; private set; } = string.Empty;
 
-        public AddCustomerWindow()
+        /// <summary>Có truyền sẵn SĐT (prefill) khi mở từ POS hay không.</summary>
+        public bool HasPrefilledPhone => !string.IsNullOrWhiteSpace(InitialPhone);
+
+        private readonly string InitialPhone;
+
+        public AddCustomerWindow() : this(string.Empty) { }
+
+        /// <summary>
+        /// Mở form tạo KH mới với tuỳ chọn prefill SĐT (dùng khi gọi từ POS khi SĐT không tồn tại).
+        /// </summary>
+        public AddCustomerWindow(string prefilledPhone)
         {
             InitializeComponent();
-            txtPhone.Focus();
+            InitialPhone = prefilledPhone?.Trim() ?? string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(InitialPhone))
+            {
+                txtPhone.Text = InitialPhone;
+                txtPhone.IsEnabled = false; // Khoá ô SĐT để tránh nhập SĐT khác
+                txtPhone.ToolTip = "SĐT tự động từ POS";
+                txtFullName.Focus();
+                txtFullName.SelectAll();
+            }
+            else
+            {
+                txtPhone.Focus();
+            }
         }
 
         private void Header_MouseDown(object sender, MouseButtonEventArgs e)
@@ -38,7 +61,8 @@ namespace TMDT.Views.Seller
 
         private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            string phone = txtPhone.Text.Trim();
+            // Nếu đã prefill, lấy từ InitialPhone; nếu không, lấy từ ô nhập
+            string phone = !string.IsNullOrWhiteSpace(InitialPhone) ? InitialPhone : txtPhone.Text.Trim();
             string fullName = txtFullName.Text.Trim();
 
             // Validate dữ liệu
@@ -68,8 +92,8 @@ namespace TMDT.Views.Seller
             try
             {
                 using var context = new TmdtContext();
-                
-                // Kiểm tra trùng số điện thoại
+
+                // Kiểm tra trùng số điện thoại (race-condition safe)
                 var existingUser = await context.Users.AnyAsync(u => u.Phone == phone);
                 if (existingUser)
                 {
@@ -97,7 +121,11 @@ namespace TMDT.Views.Seller
 
                 RegisteredPhone = phone;
                 DialogResult = true;
-                MessageBox.Show("Đăng ký thành viên mới thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                // Không show MessageBox khi prefill (đã hiển thị hint ở POS rồi) — tránh thừa tương tác
+                if (string.IsNullOrWhiteSpace(InitialPhone))
+                {
+                    MessageBox.Show("Đăng ký thành viên mới thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
                 Close();
             }
             catch (Exception ex)

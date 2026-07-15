@@ -74,7 +74,13 @@ namespace TMDT.ViewModels.Buyer
         public decimal WalletBalance
         {
             get => _walletBalance;
-            set { SetProperty(ref _walletBalance, value); }
+            set 
+            { 
+                if (SetProperty(ref _walletBalance, value))
+                {
+                    OnPropertyChanged(nameof(WalletBalanceText));
+                }
+            }
         }
 
         public string WalletBalanceText => WalletBalance >= 1000000
@@ -414,7 +420,7 @@ namespace TMDT.ViewModels.Buyer
             }
         }
 
-        private void ExecuteChangePassword(object _)
+        private void ExecuteChangePassword(object? _)
         {
             if (string.IsNullOrWhiteSpace(CurrentPassword) ||
                 string.IsNullOrWhiteSpace(NewPassword) ||

@@ -1,0 +1,125 @@
+<UserControl x:Class="TMDT.Views.Buyer.BuyerComparisonView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:converters="clr-namespace:TMDT.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1000"
+             Background="#F4F5F7">
+    <UserControl.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="BoolToVisInverse"/>
+        <converters:ProductCountToEmptyVisibilityConverter x:Key="EmptyVis"/>
+        <converters:ProductCountToItemsVisibilityConverter x:Key="ItemsVis"/>
+    </UserControl.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Text="SO SÁNH SẢN PHẨM" FontSize="24" FontWeight="Bold" Foreground="#1A1B22" Margin="0,0,0,24"/>
+
+        <!-- Empty State -->
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Visibility="{Binding ComparedProducts.Count, Converter={StaticResource EmptyVis}}">
+            <materialDesign:PackIcon Kind="ScaleBalance" Width="100" Height="100" Foreground="#E3E1EC" HorizontalAlignment="Center"/>
+            <TextBlock Text="Chưa có sản phẩm nào để so sánh" FontSize="18" Foreground="#797588" Margin="0,16,0,0" HorizontalAlignment="Center"/>
+        </StackPanel>
+
+        <!-- Loading State -->
+        <ProgressBar Grid.Row="1" Style="{StaticResource MaterialDesignCircularProgressBar}" 
+                     Value="0" IsIndeterminate="True" 
+                     Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" 
+                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+        <!-- Comparison Table -->
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                      Visibility="{Binding ComparedProducts.Count, Converter={StaticResource ItemsVis}}">
+            <ItemsControl ItemsSource="{Binding ComparedProducts}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Rows="1" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Width="300" Background="White" CornerRadius="16" Margin="0,0,24,24" Padding="20" VerticalAlignment="Top">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000000" Opacity="0.05" BlurRadius="10" ShadowDepth="2"/>
+                            </Border.Effect>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Top Right Remove Button -->
+                                <Button HorizontalAlignment="Right" VerticalAlignment="Top" 
+                                        Style="{StaticResource MaterialDesignIconButton}" 
+                                        Command="{Binding DataContext.RemoveProductCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding ProductId}"
+                                        ToolTip="Xóa khỏi so sánh" Width="32" Height="32" Margin="0,-12,-12,0" Panel.ZIndex="1">
+                                    <materialDesign:PackIcon Kind="Close" Width="20" Height="20" Foreground="#BA1A1A"/>
+                                </Button>
+
+                                <StackPanel Grid.Row="1">
+                                    <!-- Image -->
+                                    <Border CornerRadius="8" ClipToBounds="True" Height="260" Background="#F4F5F7" Margin="0,0,0,16">
+                                        <Grid>
+                                            <materialDesign:PackIcon Kind="ImageOutline" Width="40" Height="40" 
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                 Foreground="#797588"/>
+                                            <Image Source="{Binding MainImageUrl}" Stretch="UniformToFill"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Name -->
+                                    <TextBlock Text="{Binding ProductName}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,16" Height="44" TextTrimming="CharacterEllipsis" Foreground="#1A1B22"/>
+
+                                    <!-- Price -->
+                                    <TextBlock Text="Giá bán" FontSize="12" Foreground="#797588" Margin="0,0,0,4"/>
+                                    <TextBlock Text="{Binding Price, StringFormat={}{0:N0}đ}" FontSize="20" FontWeight="Bold" Foreground="#5221E7" Margin="0,0,0,16"/>
+
+                                    <!-- Rating -->
+                                    <TextBlock Text="Đánh giá" FontSize="12" Foreground="#797588" Margin="0,0,0,4"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                        <materialDesign:PackIcon Kind="Star" Foreground="#FFB300" Width="18" Height="18" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <TextBlock Text="{Binding Rating, TargetNullValue=0.0, StringFormat={}{0:F1}}" FontSize="14" FontWeight="SemiBold" Foreground="#1A1B22"/>
+                                    </StackPanel>
+
+                                    <!-- Sold Count -->
+                                    <TextBlock Text="Đã bán" FontSize="12" Foreground="#797588" Margin="0,0,0,4"/>
+                                    <TextBlock Text="{Binding SoldCount, TargetNullValue=0}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,16" Foreground="#1A1B22"/>
+
+                                    <!-- Stock -->
+                                    <TextBlock Text="Kho hàng" FontSize="12" Foreground="#797588" Margin="0,0,0,4"/>
+                                    <TextBlock Text="{Binding StockQuantity, TargetNullValue=0}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,16" Foreground="#1A1B22"/>
+
+                                    <!-- Shop -->
+                                    <TextBlock Text="Cửa hàng" FontSize="12" Foreground="#797588" Margin="0,0,0,4"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,24">
+                                        <materialDesign:PackIcon Kind="StorefrontOutline" Width="16" Height="16" Foreground="#797588" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <TextBlock Text="{Binding Shop.ShopName, TargetNullValue='Chính hãng'}" FontSize="14" FontWeight="SemiBold" Foreground="#1A1B22"/>
+                                    </StackPanel>
+
+                                    <!-- Actions -->
+                                    <Button Style="{StaticResource MaterialDesignFlatButton}" Content="XEM CHI TIẾT" 
+                                            Command="{Binding DataContext.ViewProductCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}" Margin="0,0,0,8" Foreground="#5221E7" FontWeight="Bold"/>
+                                    <Button Style="{StaticResource MaterialDesignRaisedButton}" Content="THÊM VÀO GIỎ" 
+                                            Command="{Binding DataContext.AddToCartCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}" Background="#5221E7" BorderThickness="0" Foreground="White" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

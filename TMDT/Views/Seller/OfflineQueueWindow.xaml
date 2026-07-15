@@ -1,0 +1,142 @@
+<Window x:Class="TMDT.Views.Seller.OfflineQueueWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Đơn hàng offline - đang chờ sync" Height="520" Width="780"
+        WindowStartupLocation="CenterOwner" Background="#F8FAFC" ResizeMode="CanResizeWithGrip">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="White" CornerRadius="8" Padding="16,12" Effect="{StaticResource CardShadow}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="🔌 Đơn hàng đang chờ đồng bộ" FontSize="18" FontWeight="Bold" Foreground="#0F172A"/>
+                    <TextBlock x:Name="txtSubtitle" Text="" FontSize="12" Foreground="#64748B" Margin="0,4,0,0"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="btnRefresh" Content="⟳ Làm mới" Padding="12,6" Margin="0,0,8,0"
+                            Background="#0D9488" Foreground="White" BorderThickness="0" Cursor="Hand"
+                            Click="BtnRefresh_Click" FontWeight="SemiBold"/>
+                    <Button x:Name="btnSyncAll" Content="⚡ Sync ngay tất cả" Padding="12,6"
+                            Background="#F59E0B" Foreground="White" BorderThickness="0" Cursor="Hand"
+                            Click="BtnSyncAll_Click" FontWeight="SemiBold"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Stats -->
+        <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="14,10" Margin="0,12,0,0"
+                Effect="{StaticResource CardShadow}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Đang chờ" FontSize="11" Foreground="#64748B"/>
+                    <TextBlock x:Name="txtPendingCount" Text="0" FontSize="22" FontWeight="Bold" Foreground="#DC2626"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="Đã sync" FontSize="11" Foreground="#64748B"/>
+                    <TextBlock x:Name="txtSyncedCount" Text="0" FontSize="22" FontWeight="Bold" Foreground="#059669"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Tổng cộng" FontSize="11" Foreground="#64748B"/>
+                    <TextBlock x:Name="txtTotalCount" Text="0" FontSize="22" FontWeight="Bold" Foreground="#0F172A"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- List -->
+        <Border Grid.Row="2" Background="White" CornerRadius="8" Margin="0,12,0,0" Effect="{StaticResource CardShadow}">
+            <DataGrid x:Name="dgEntries" AutoGenerateColumns="False" IsReadOnly="True"
+                      HeadersVisibility="Column" GridLinesVisibility="Horizontal" CanUserAddRows="False"
+                      RowHeight="42" AlternationCount="2" Background="White" BorderThickness="0"
+                      HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Mã đơn" Binding="{Binding OrderCode}" Width="160" FontWeight="SemiBold"/>
+                    <DataGridTextColumn Header="PTTT" Binding="{Binding PaymentMethod}" Width="80"/>
+                    <DataGridTextColumn Header="Số tiền" Binding="{Binding Amount, StringFormat={}{0:N0} đ}" Width="120">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#EF4444"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Margin" Value="0,0,8,0"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="TX Code" Binding="{Binding TransactionCode}" Width="160"/>
+                    <DataGridTextColumn Header="Tạo lúc" Binding="{Binding CreatedAt, StringFormat='HH:mm:ss dd/MM'}" Width="130"/>
+                    <DataGridTemplateColumn Header="Retry sau" Width="110">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock VerticalAlignment="Center" Margin="8,0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="—"/>
+                                            <Setter Property="Foreground" Value="#94A3B8"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding StatusText}" Value="Đã sync">
+                                                    <Setter Property="Text" Value="Đã sync"/>
+                                                    <Setter Property="Foreground" Value="#059669"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding StatusText}" Value="Đang chờ">
+                                                    <Setter Property="Text" Value="{Binding RetryCountdownText}"/>
+                                                    <Setter Property="Foreground" Value="#DC2626"/>
+                                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="" Width="90">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Sync" Padding="10,4" Margin="0"
+                                        Background="#0D9488" Foreground="White" BorderThickness="0"
+                                        Cursor="Hand" FontWeight="SemiBold"
+                                        Click="BtnSyncOne_Click" Tag="{Binding}">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSynced}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- Footer -->
+        <Border Grid.Row="3" Margin="0,12,0,0">
+            <StackPanel>
+                <TextBlock TextWrapping="Wrap" FontSize="11.5" Foreground="#64748B">
+                    <Run FontWeight="SemiBold" Text="Lưu ý:"/>
+                    <Run Text="Mỗi đơn sẽ tự retry theo backoff 1s → 2s → 4s → … → 60s. Khi mạng OK, hệ thống sẽ cộng tiền vào ví shop và tích điểm cho khách. Khi sync thành công, đơn sẽ tự ẩn khỏi danh sách."/>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

@@ -172,13 +172,19 @@ namespace TMDT.ViewModels.Admin
                 try
                 {
                     var dbReq = await context.WithdrawRequests.Include(r => r.Shop).FirstOrDefaultAsync(r => r.WithdrawId == SelectedRequest.WithdrawId);
-                    if (dbReq != null)
+                    if (dbReq != null && (dbReq.Status == "Pending" || string.IsNullOrEmpty(dbReq.Status)))
                     {
                         dbReq.Status = "Approved";
                         dbReq.ProcessedAt = DateTime.Now;
                         // Tiền đã được trừ ở bước tạo Request, Admin duyệt thì không trừ nữa
                         await context.SaveChangesAsync();
                         await transaction.CommitAsync();
+                    }
+                    else
+                    {
+                        await transaction.RollbackAsync();
+                        MessageBox.Show("Yêu cầu này đã được xử lý trước đó!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
                     }
                 }
                 catch
@@ -221,7 +227,7 @@ namespace TMDT.ViewModels.Admin
                 try
                 {
                     var dbReq = await context.WithdrawRequests.Include(r => r.Shop).FirstOrDefaultAsync(r => r.WithdrawId == SelectedRequest.WithdrawId);
-                    if (dbReq != null)
+                    if (dbReq != null && (dbReq.Status == "Pending" || string.IsNullOrEmpty(dbReq.Status)))
                     {
                         dbReq.Status = "Rejected";
                         dbReq.ProcessedAt = DateTime.Now;
@@ -234,6 +240,12 @@ namespace TMDT.ViewModels.Admin
                         
                         await context.SaveChangesAsync();
                         await transaction.CommitAsync();
+                    }
+                    else
+                    {
+                        await transaction.RollbackAsync();
+                        MessageBox.Show("Yêu cầu này đã được xử lý trước đó!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
                     }
                 }
                 catch

@@ -37,17 +37,23 @@
             <Border x:Name="ReceiptPrintArea" Width="320" HorizontalAlignment="Center" Padding="16" Background="White">
                 <StackPanel>
                     <!-- Header -->
-                    <TextBlock Text="CỬA HÀNG TMĐT" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Đ/c: 123 ABC, TP.HCM" FontSize="12" HorizontalAlignment="Center" Margin="0,4,0,0"/>
-                    <TextBlock Text="SĐT: 0123 456 789" FontSize="12" HorizontalAlignment="Center"/>
+                    <TextBlock Text="HỆ THỐNG TMĐT" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="--- HÓA ĐƠN BÁN LẺ ---" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
                     
                     <Line X1="0" Y1="0" X2="300" Y2="0" Stroke="Black" StrokeDashArray="2,2" StrokeThickness="1" Margin="0,12"/>
                     
-                    <TextBlock Text="HÓA ĐƠN BÁN LẺ" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <Grid Margin="0,8,0,0">
-                        <TextBlock Text="{Binding OrderCode, StringFormat=Số HĐ: {0}}" FontSize="11"/>
-                        <TextBlock Text="{Binding OrderDate, StringFormat={}{0:dd/MM/yyyy HH:mm}}" FontSize="11" HorizontalAlignment="Right"/>
-                    </Grid>
+                    <TextBlock FontSize="11" Margin="0,2">
+                        <Run Text="Số phiếu: "/>
+                        <Run Text="{Binding OrderCode}" FontWeight="SemiBold"/>
+                    </TextBlock>
+                    <TextBlock FontSize="11" Margin="0,2">
+                        <Run Text="Ngày: "/>
+                        <Run Text="{Binding OrderDate}"/>
+                    </TextBlock>
+                    <TextBlock FontSize="11" Margin="0,2">
+                        <Run Text="Thu ngân: "/>
+                        <Run Text="{Binding StaffName}" FontWeight="SemiBold"/>
+                    </TextBlock>
                     
                     <Line X1="0" Y1="0" X2="300" Y2="0" Stroke="Black" StrokeDashArray="2,2" StrokeThickness="1" Margin="0,12"/>
                     
@@ -113,9 +119,15 @@
                         </Grid>
                     </StackPanel>
                     
+                    <!-- Điểm tích lũy -->
+                    <Grid Margin="0,2" Visibility="{Binding EarnedPointsVisibility}">
+                        <TextBlock Text="Điểm tích lũy được:" FontSize="12" Foreground="#0D9488"/>
+                        <TextBlock Text="{Binding EarnedPoints, StringFormat=+{0} điểm}" FontSize="12" FontWeight="Bold" Foreground="#0D9488" HorizontalAlignment="Right"/>
+                    </Grid>
+                    
                     <Line X1="0" Y1="0" X2="300" Y2="0" Stroke="Black" StrokeDashArray="2,2" StrokeThickness="1" Margin="0,12"/>
                     
-                    <TextBlock Text="Cảm ơn quý khách và hẹn gặp lại!" FontSize="12" HorizontalAlignment="Center" FontStyle="Italic"/>
+                    <TextBlock Text="Cảm ơn quý khách và hẹn gặp lại!" FontSize="12" HorizontalAlignment="Center" FontStyle="Italic" Margin="0,4,0,0"/>
                     
                     <!-- Barcode Mockup (just a font representation) -->
                     <TextBlock Text="*123456789*" FontFamily="Code39, Consolas" FontSize="24" HorizontalAlignment="Center" Margin="0,12,0,0"/>

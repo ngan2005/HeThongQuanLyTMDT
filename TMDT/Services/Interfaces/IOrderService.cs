@@ -10,11 +10,17 @@ public interface IOrderService
     Task<List<Order>> GetShopOrdersAsync(int shopId, string? statusFilter = null);
     Task<List<Order>> GetAllOrdersAsync(string? statusFilter = null, string? keyword = null);
     Task<Order?> CreateOrderFromCartAsync(int buyerId, int shopId, int? addressId, int? voucherId, string paymentMethod, decimal shippingFee, List<CartOrderItem> items, int pointsUsed = 0);
-    Task<Order?> CreatePosOrderAsync(int? buyerId, int shopId, int? voucherId, string paymentMethod, List<CartOrderItem> items, int pointsUsed = 0, decimal manualDiscount = 0);
+    Task<Order?> CreatePosOrderAsync(int? buyerId, int shopId, int? voucherId, string paymentMethod, List<CartOrderItem> items, int pointsUsed = 0, decimal manualDiscount = 0, string orderStatus = "Completed");
+    Task<Order?> UpdatePosOrderAsync(int orderId, List<CartOrderItem> items, decimal manualDiscount, int? voucherId, int pointsUsed);
+    Task<bool> ConfirmPosOrderAsync(int orderId, string transactionCode);
+    Task<bool> ConfirmPosOrderOfflineAsync(int orderId, string transactionCode);
+    Task<bool> SyncOfflinePosOrderAsync(int orderId);
+    Task<bool> CancelPosOrderAsync(int orderId);
     Task<bool> CancelOrderAsync(int orderId);
     Task<bool> ShipOrderAsync(int orderId, string shippingProvider);
     Task<bool> ReceiveOrderAsync(int orderId);
     Task<bool> RefundOrderAsync(int orderId);
+    Task<bool> AdminRefundOrderAsync(int orderId);
     Task<bool> UpdatePaymentSuccessAsync(int orderId, string transactionCode);
     Task<OrderStats> GetBuyerStatsAsync(int buyerId);
     Task<OrderStats> GetShopStatsAsync(int shopId);

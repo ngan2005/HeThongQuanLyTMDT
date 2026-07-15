@@ -107,7 +107,10 @@
                                     ClickCommandParameter="{Binding}"
                                     WishlistCommand="{Binding DataContext.ToggleWishlistCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                     WishlistCommandParameter="{Binding}"
-                                    IsWishlisted="{Binding IsWishlisted, Mode=TwoWay}"/>
+                                    IsWishlisted="{Binding IsWishlisted, Mode=TwoWay}"
+                                    CompareCommand="{Binding DataContext.ToggleComparisonCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    CompareCommandParameter="{Binding}"
+                                    IsCompared="{Binding IsCompared, Mode=TwoWay}"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

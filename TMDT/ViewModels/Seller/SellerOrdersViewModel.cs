@@ -13,8 +13,8 @@ namespace TMDT.ViewModels.Seller
     public class SellerOrdersViewModel : ViewModelBase
     {
         // Removed long-lived _context for async safety
-        private ObservableCollection<Order> _orders;
-        private Order _selectedOrder;
+        private ObservableCollection<Order> _orders = new();
+        private Order? _selectedOrder;
         private string _statusFilter = "All"; // All, Pending, Shipping, Completed, Cancelled
 
         public ObservableCollection<Order> Orders
@@ -39,7 +39,7 @@ namespace TMDT.ViewModels.Seller
             set { _selectedShippingProvider = value; OnPropertyChanged(); }
         }
 
-        public Order SelectedOrder
+        public Order? SelectedOrder
         {
             get => _selectedOrder;
             set { _selectedOrder = value; OnPropertyChanged(); }
@@ -62,7 +62,7 @@ namespace TMDT.ViewModels.Seller
             Orders = new ObservableCollection<Order>();
 
             ShipOrderCommand = new RelayCommand(ExecuteShipOrder, o => SelectedOrder != null && SelectedOrder.OrderStatus == "Pending");
-            CancelOrderCommand = new RelayCommand(ExecuteCancelOrder, o => SelectedOrder != null && (SelectedOrder.OrderStatus == "Pending" || SelectedOrder.OrderStatus == "Shipping"));
+            CancelOrderCommand = new RelayCommand(ExecuteCancelOrder, o => SelectedOrder != null && (SelectedOrder.OrderStatus == "Pending" || SelectedOrder.OrderStatus == "Chờ duyệt"));
             SetFilterCommand = new RelayCommand(o => StatusFilter = o?.ToString() ?? "All");
 
             _ = LoadOrdersAsync();
@@ -86,7 +86,7 @@ namespace TMDT.ViewModels.Seller
             }
         }
 
-        private async void ExecuteShipOrder(object obj)
+        private async void ExecuteShipOrder(object? obj)
         {
             if (SelectedOrder == null) return;
 
@@ -103,6 +103,16 @@ namespace TMDT.ViewModels.Seller
                     return;
                 }
 
+                if (SelectedOrder.BuyerId.HasValue)
+                {
+                    _ = NotificationService.Instance.CreateNotificationAsync(
+                        SelectedOrder.BuyerId.Value,
+                        "Đơn hàng đang giao",
+                        $"Đơn hàng {SelectedOrder.OrderCode} của bạn đã được giao cho đơn vị vận chuyển {SelectedShippingProvider}.",
+                        "Order",
+                        SelectedOrder.OrderId);
+                }
+
                 MessageBox.Show($"Đã xác nhận đơn hàng thành công! Mã vận đơn là: {SelectedOrder.TrackingCode}", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 _ = LoadOrdersAsync();
             }
@@ -112,7 +122,7 @@ namespace TMDT.ViewModels.Seller
             }
         }
 
-        private async void ExecuteCancelOrder(object obj)
+        private async void ExecuteCancelOrder(object? obj)
         {
             if (SelectedOrder == null) return;
 
@@ -124,6 +134,17 @@ namespace TMDT.ViewModels.Seller
             {
                 await OrderService.Instance.CancelOrderAsync(SelectedOrder.OrderId);
                 SelectedOrder.OrderStatus = "Cancelled";
+
+                if (SelectedOrder.BuyerId.HasValue)
+                {
+                    _ = NotificationService.Instance.CreateNotificationAsync(
+                        SelectedOrder.BuyerId.Value,
+                        "Đơn hàng đã bị hủy",
+                        $"Đơn hàng {SelectedOrder.OrderCode} của bạn đã bị hủy bởi người bán.",
+                        "Order",
+                        SelectedOrder.OrderId);
+                }
+
                 MessageBox.Show("Đơn hàng đã được hủy thành công.", "Đã hủy", MessageBoxButton.OK, MessageBoxImage.Information);
                 _ = LoadOrdersAsync();
             }

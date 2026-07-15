@@ -104,8 +104,54 @@
 
                         <!-- Price -->
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,30">
-                            <TextBlock Text="{Binding Price, StringFormat={}{0:N0}đ}" FontSize="34" FontWeight="Bold" Foreground="{StaticResource BrandPrimaryBrush}"/>
+                            <TextBlock Text="{Binding DisplayPrice, StringFormat={}{0:N0}đ}" FontSize="34" FontWeight="Bold" Foreground="{StaticResource BrandPrimaryBrush}"/>
                             <TextBlock Text="{Binding OriginalPrice, StringFormat={}{0:N0}đ}" FontSize="18" Foreground="{StaticResource TextMutedBrush}" TextDecorations="Strikethrough" VerticalAlignment="Bottom" Margin="12,0,0,6"/>
+                        </StackPanel>
+
+                        <!-- Variants -->
+                        <StackPanel Margin="0,0,0,20" Visibility="{Binding Variants.Count, Converter={StaticResource GreaterThanZeroToVis}}">
+                            <TextBlock Text="PHÂN LOẠI" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,10"/>
+                            <ListBox ItemsSource="{Binding Variants}" SelectedItem="{Binding SelectedVariant}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Background" Value="White"/>
+                                        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                                        <Setter Property="BorderThickness" Value="1"/>
+                                        <Setter Property="Margin" Value="0,0,10,10"/>
+                                        <Setter Property="Padding" Value="15,8"/>
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter Property="BorderBrush" Value="{StaticResource BrandPrimaryBrush}"/>
+                                                            <Setter Property="Background" Value="#F0FDF4"/>
+                                                            <Setter Property="Foreground" Value="{StaticResource BrandPrimaryBrush}"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderBrush" Value="{StaticResource BrandPrimaryBrush}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding VariantName}" FontSize="14" FontWeight="SemiBold"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
                         </StackPanel>
 
                         <!-- Stock Info instead of Colors -->
@@ -136,11 +182,23 @@
                                 <TextBlock Grid.Column="1" Text="{Binding ShopName}" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" Margin="10,0,0,0"/>
                                 
                                 <!-- Xem Shop Button -->
-                                <Button Grid.Column="2" Style="{StaticResource MaterialDesignOutlinedButton}" 
-                                        Content="XEM SHOP" Height="32" 
-                                        BorderBrush="{StaticResource BrandPrimaryBrush}" 
-                                        Foreground="{StaticResource BrandPrimaryBrush}" 
-                                        Command="{Binding ViewShopCommand}"/>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                    <Button Style="{StaticResource MaterialDesignOutlinedButton}" 
+                                            Height="32" Margin="0,0,10,0"
+                                            BorderBrush="{StaticResource BrandPrimaryBrush}" 
+                                            Foreground="{StaticResource BrandPrimaryBrush}" 
+                                            Command="{Binding ChatWithSellerCommand}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <materialDesign:PackIcon Kind="ChatOutline" Width="16" Height="16" Margin="-5,0,5,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="CHAT NGAY" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Style="{StaticResource MaterialDesignOutlinedButton}" 
+                                            Content="XEM SHOP" Height="32" 
+                                            BorderBrush="{StaticResource BrandPrimaryBrush}" 
+                                            Foreground="{StaticResource BrandPrimaryBrush}" 
+                                            Command="{Binding ViewShopCommand}"/>
+                                </StackPanel>
                             </Grid>
                         </StackPanel>
 
@@ -156,8 +214,37 @@
                             </Border>
                         </StackPanel>
 
-                        <!-- Yeu thich & Share & Barcode -->
+                        <!-- Yeu thich & Share & Barcode & So Sanh -->
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,30">
+                            <!-- So sanh -->
+                            <Button Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding ToggleComparisonCommand}" Height="40" Background="Transparent" BorderBrush="{StaticResource BorderBrush}" Margin="0,0,12,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <Grid Margin="0,0,8,0">
+                                        <materialDesign:PackIcon Kind="ScaleBalance" Width="20" Height="20" Foreground="{StaticResource BrandPrimaryBrush}"
+                                                                 Visibility="{Binding IsCompared, Converter={StaticResource BoolToVis}}"/>
+                                        <materialDesign:PackIcon Kind="ScaleBalance" Width="20" Height="20" Foreground="{StaticResource TextMutedBrush}"
+                                                                 Visibility="{Binding IsCompared, Converter={StaticResource BoolToVisInverse}}"/>
+                                    </Grid>
+                                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="SO SÁNH"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsCompared}" Value="True">
+                                                        <Setter Property="Text" Value="ĐÃ THÊM SO SÁNH"/>
+                                                        <Setter Property="Foreground" Value="{StaticResource BrandPrimaryBrush}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsCompared}" Value="False">
+                                                        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Yeu thich -->
                             <Button Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding ToggleWishlistCommand}" Height="40" Background="Transparent" BorderBrush="{StaticResource BorderBrush}" Margin="0,0,12,0">
                                 <StackPanel Orientation="Horizontal">
                                     <Grid Margin="0,0,8,0">
@@ -311,6 +398,41 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+                    <!-- Related Products Section -->
+                    <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Margin="0,0,0,30"
+                            Visibility="{Binding RelatedProducts.Count, Converter={StaticResource GreaterThanZeroToVis}}">
+                        <StackPanel Orientation="Horizontal">
+                            <Border BorderBrush="{StaticResource BrandPrimaryBrush}" BorderThickness="0,0,0,2" Padding="0,0,0,10" Margin="0,0,40,0">
+                                <TextBlock Text="SẢN PHẨM TƯƠNG TỰ" FontSize="16" FontWeight="Bold" Foreground="{StaticResource BrandPrimaryBrush}"/>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Related Products List -->
+                    <ItemsControl ItemsSource="{Binding RelatedProducts}" Margin="0,0,0,40"
+                                  Visibility="{Binding RelatedProducts.Count, Converter={StaticResource GreaterThanZeroToVis}}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="8">
+                                    <components:ProductCard 
+                                        ClickCommand="{Binding DataContext.ProductClickCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        ClickCommandParameter="{Binding}"
+                                        WishlistCommand="{Binding DataContext.ToggleWishlistCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        WishlistCommandParameter="{Binding}"
+                                        IsWishlisted="{Binding IsWishlisted, Mode=TwoWay}"
+                                        CompareCommand="{Binding DataContext.ToggleComparisonCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CompareCommandParameter="{Binding}"
+                                        IsCompared="{Binding IsCompared, Mode=TwoWay}"/>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
                 </StackPanel>
             </Grid>
 

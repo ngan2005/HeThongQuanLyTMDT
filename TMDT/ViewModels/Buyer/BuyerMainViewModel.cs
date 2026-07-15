@@ -6,6 +6,7 @@ using System.Windows.Input;
 using TMDT.Models;
 using TMDT.Services;
 using TMDT.Utilities;
+using TMDT.Messages;
 using Microsoft.EntityFrameworkCore;
 
 namespace TMDT.ViewModels.Buyer
@@ -15,6 +16,8 @@ namespace TMDT.ViewModels.Buyer
         private ViewModelBase _currentViewModel;
         private Product? _selectedProduct;
         private int _cartBadgeCount;
+        private int _comparisonBadgeCount;
+        private int _unreadNotificationCount;
         private string _pageTitle = "Trang chủ";
         private string _searchQuery = "";
         private string _currentPage = "Home";
@@ -39,6 +42,18 @@ namespace TMDT.ViewModels.Buyer
         {
             get => _cartBadgeCount;
             set { SetProperty(ref _cartBadgeCount, value); }
+        }
+
+        public int ComparisonBadgeCount
+        {
+            get => _comparisonBadgeCount;
+            set { SetProperty(ref _comparisonBadgeCount, value); }
+        }
+
+        public int UnreadNotificationCount
+        {
+            get => _unreadNotificationCount;
+            set { SetProperty(ref _unreadNotificationCount, value); }
         }
 
         public string PageTitle
@@ -73,6 +88,8 @@ namespace TMDT.ViewModels.Buyer
         public ICommand GoOrdersCommand { get; }
         public ICommand GoProfileCommand { get; }
         public ICommand GoWishlistCommand { get; }
+        public ICommand GoComparisonCommand { get; }
+        public ICommand GoNotificationCommand { get; }
         public ICommand OpenProductCommand { get; }
         public ICommand LogoutCommand { get; }
         public ICommand OpenSellerPortalCommand { get; }
@@ -80,6 +97,7 @@ namespace TMDT.ViewModels.Buyer
         public ICommand BecomeSellerCommand { get; }
         public ICommand SearchCommand { get; }
         public ICommand ToggleWishlistCommand { get; }
+        public ICommand ToggleComparisonCommand { get; }
 
         public ObservableCollection<Category> Categories { get; } = new();
         public ObservableCollection<ProductWrapper> FeaturedProducts { get; } = new();
@@ -98,6 +116,8 @@ namespace TMDT.ViewModels.Buyer
             _currentViewModel = new BuyerHomeViewModel(this);
 
             CartService.Instance.CartChanged += UpdateCartBadge;
+            ComparisonService.Instance.ComparisonChanged += UpdateComparisonBadge;
+            NotificationService.Instance.NotificationChanged += UpdateNotificationBadge;
 
             GoHomeCommand = new RelayCommand(_ => NavigateHome());
             GoProductsCommand = new RelayCommand(_ => NavigateProducts());
@@ -108,6 +128,8 @@ namespace TMDT.ViewModels.Buyer
             GoOrdersCommand = new RelayCommand(_ => NavigateOrders());
             GoProfileCommand = new RelayCommand(_ => NavigateProfile());
             GoWishlistCommand = new RelayCommand(_ => NavigateWishlist());
+            GoComparisonCommand = new RelayCommand(_ => NavigateComparison());
+            GoNotificationCommand = new RelayCommand(_ => NavigateNotification());
             OpenProductCommand = new RelayCommand(p => NavigateProductDetail(p is ProductWrapper w ? w.Product : p as Product));
             LogoutCommand = new RelayCommand(_ => ExecuteLogout());
             OpenSellerPortalCommand = new RelayCommand(_ => ExecuteOpenSellerPortal(), _ => IsLoggedIn && IsSeller);
@@ -115,11 +137,14 @@ namespace TMDT.ViewModels.Buyer
             BecomeSellerCommand = new RelayCommand(_ => ExecuteBecomeSeller(), _ => IsLoggedIn && IsBuyer);
             SearchCommand = new RelayCommand(_ => SearchProducts(SearchQuery));
             ToggleWishlistCommand = new RelayCommand(p => ExecuteToggleWishlist(p as ProductWrapper));
+            ToggleComparisonCommand = new RelayCommand(p => ExecuteToggleComparison(p as ProductWrapper));
 
             _ = LoadCategoriesAsync();
             _ = LoadFeaturedProductsAsync();
             _ = LoadBannersAsync();
             UpdateCartBadge();
+            UpdateComparisonBadge();
+            UpdateNotificationBadge();
         }
 
         public void NavigateHome()
@@ -175,6 +200,42 @@ namespace TMDT.ViewModels.Buyer
             CurrentViewModel = new WishlistViewModel(this);
         }
 
+        public void NavigateComparison()
+        {
+            PageTitle = "So sánh sản phẩm";
+            CurrentPage = "Comparison";
+            CurrentViewModel = new BuyerComparisonViewModel(this);
+        }
+
+        public void NavigateNotification()
+        {
+            if (!SessionManager.IsLoggedIn)
+            {
+                ExecuteLogin();
+                if (!SessionManager.IsLoggedIn) return;
+            }
+            PageTitle = "Thông báo";
+            CurrentPage = "Notification";
+            CurrentViewModel = new BuyerNotificationViewModel(this);
+        }
+
+        public void NavigateChat(int? targetShopId = null)
+        {
+            if (!SessionManager.IsLoggedIn)
+            {
+                ExecuteLogin();
+                if (!SessionManager.IsLoggedIn) return;
+            }
+            PageTitle = "Tin nhắn";
+            CurrentPage = "Chat";
+            CurrentViewModel = ChatViewModel;
+            
+            if (targetShopId.HasValue)
+            {
+                _ = ChatViewModel.OpenChatWithShopAsync(targetShopId.Value);
+            }
+        }
+
         public void NavigateProducts(string initialSearchQuery = "", int? shopId = null)
         {
             PageTitle = "Sản phẩm";
@@ -217,6 +278,11 @@ namespace TMDT.ViewModels.Buyer
             PageTitle = "Chi tiết sản phẩm";
             CurrentPage = "Product";
             CurrentViewModel = new ProductDetailViewModel(product, this);
+
+            if (SessionManager.IsLoggedIn && SessionManager.CurrentUser != null)
+            {
+                _ = ViewHistoryService.Instance.LogProductViewAsync(SessionManager.CurrentUser.UserId, product.ProductId);
+            }
         }
 
         public void SearchProducts(string term)
@@ -252,7 +318,8 @@ namespace TMDT.ViewModels.Buyer
                     {
                         bool inWishlist = SessionManager.IsLoggedIn
                             && context.Wishlists.Any(w => w.UserId == SessionManager.CurrentUser!.UserId && w.ProductId == p.ProductId);
-                        FeaturedProducts.Add(new ProductWrapper(p, inWishlist));
+                        bool isCompared = ComparisonService.Instance.ComparedProductIds.Contains(p.ProductId);
+                        FeaturedProducts.Add(new ProductWrapper(p, inWishlist, isCompared));
                     }
                 });
             }
@@ -301,7 +368,8 @@ namespace TMDT.ViewModels.Buyer
                     {
                         bool inWishlist = SessionManager.IsLoggedIn
                             && context.Wishlists.Any(w => w.UserId == SessionManager.CurrentUser!.UserId && w.ProductId == p.ProductId);
-                        FeaturedProducts.Add(new ProductWrapper(p, inWishlist));
+                        bool isCompared = ComparisonService.Instance.ComparedProductIds.Contains(p.ProductId);
+                        FeaturedProducts.Add(new ProductWrapper(p, inWishlist, isCompared));
                     }
                 });
             }
@@ -356,7 +424,8 @@ namespace TMDT.ViewModels.Buyer
                     {
                         bool inWishlist = SessionManager.IsLoggedIn
                             && context.Wishlists.Any(w => w.UserId == SessionManager.CurrentUser!.UserId && w.ProductId == p.ProductId);
-                        FeaturedProducts.Add(new ProductWrapper(p, inWishlist));
+                        bool isCompared = ComparisonService.Instance.ComparedProductIds.Contains(p.ProductId);
+                        FeaturedProducts.Add(new ProductWrapper(p, inWishlist, isCompared));
                     }
                 });
             }
@@ -402,10 +471,43 @@ namespace TMDT.ViewModels.Buyer
             });
         }
 
+        private void UpdateComparisonBadge()
+        {
+            Application.Current?.Dispatcher.Invoke(() =>
+            {
+                ComparisonBadgeCount = ComparisonService.Instance.ComparedProductIds.Count;
+                foreach (var p in FeaturedProducts)
+                {
+                    p.IsCompared = ComparisonService.Instance.ComparedProductIds.Contains(p.Product.ProductId);
+                }
+            });
+        }
+
+        private async void UpdateNotificationBadge()
+        {
+            if (SessionManager.IsLoggedIn && SessionManager.CurrentUser != null)
+            {
+                var count = await NotificationService.Instance.GetUnreadCountAsync(SessionManager.CurrentUser.UserId);
+                Application.Current?.Dispatcher.Invoke(() =>
+                {
+                    UnreadNotificationCount = count;
+                });
+            }
+            else
+            {
+                Application.Current?.Dispatcher.Invoke(() =>
+                {
+                    UnreadNotificationCount = 0;
+                });
+            }
+        }
+
         private void ExecuteLogout()
         {
             SessionManager.Clear();
             CartService.Instance.Clear();
+            ComparisonService.Instance.ClearLocal();
+            UpdateNotificationBadge();
             GoogleAuthService.Logout(); // Xóa bộ nhớ đệm của Google
             OnPropertyChanged(nameof(IsLoggedIn));
             OnPropertyChanged(nameof(UserName));
@@ -461,6 +563,20 @@ namespace TMDT.ViewModels.Buyer
             }
         }
 
+        private void ExecuteToggleComparison(ProductWrapper? wrapper)
+        {
+            if (wrapper == null) return;
+            var result = ComparisonService.Instance.ToggleComparison(wrapper.Product);
+            if (!result.Success)
+            {
+                MessageBox.Show(result.Message, "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            else
+            {
+                MessageBus.SendToast(result.Message);
+            }
+        }
+
         private void ExecuteLogin()
         {
             var loginView = new Views.Auth.LoginView();
@@ -495,6 +611,7 @@ namespace TMDT.ViewModels.Buyer
             if (disposing)
             {
                 CartService.Instance.CartChanged -= UpdateCartBadge;
+                ComparisonService.Instance.ComparisonChanged -= UpdateComparisonBadge;
             }
             base.Dispose(disposing);
         }

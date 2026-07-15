@@ -314,4 +314,118 @@ namespace TMDT.Converters
             throw new NotImplementedException();
         }
     }
+
+    public class StockToEnabledConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int stock) return stock > 0;
+            return true;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
+    public class StockToTooltipConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int stock && stock <= 0)
+                return "Sản phẩm đã hết hàng";
+            return null;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
+    public class StockToBorderBrushConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int stock && stock <= 0)
+                return new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(254, 202, 202));
+            return new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(226, 232, 240));
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
+    public class ProductCountToEmptyVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var count = value as int? ?? 0;
+            return count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
+    public class ProductCountToItemsVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var count = value as int? ?? 0;
+            return count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Hiển thị overlay "Hết hàng" khi StockQuantity = 0
+    /// </summary>
+    public class StockVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            int stock = value is int i ? i : 0;
+            return stock == 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Hiển thị overlay đen mờ khi StockQuantity = 0 (cho image)
+    /// </summary>
+    public class OutOfStockOverlayConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            int stock = value is int i ? i : 0;
+            return stock == 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Tính số cột cho UniformGrid dựa trên chiều rộng container.
+    /// Khoảng cách giữa các card là ~140px mỗi cột, tối thiểu 2, tối đa 6.
+    /// </summary>
+    public class WindowSizeToCardWidthConverter : IValueConverter
+    {
+        public double MinCardWidth { get; set; } = 140;
+        public int MinColumns { get; set; } = 2;
+        public int MaxColumns { get; set; } = 6;
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is double width && width > 0)
+            {
+                int cols = (int)(width / MinCardWidth);
+                return Math.Max(MinColumns, Math.Min(MaxColumns, cols));
+            }
+            return MinColumns;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
 }

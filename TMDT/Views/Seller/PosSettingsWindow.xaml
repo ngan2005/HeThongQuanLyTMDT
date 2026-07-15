@@ -1,0 +1,127 @@
+<Window x:Class="TMDT.Views.Seller.PosSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Cài đặt POS" Height="420" Width="500"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="#F8FAFC" FontFamily="Segoe UI">
+    <Border Background="White" CornerRadius="10" Margin="16" Effect="{StaticResource CardShadow}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0" Background="#0F766E" CornerRadius="10,10,0,0" Padding="20,14">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="Cog" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <StackPanel>
+                        <TextBlock Text="Cài đặt POS" FontSize="18" FontWeight="Bold" Foreground="White"/>
+                        <TextBlock Text="Cấu hình tài khoản nhận tiền MoMo, in bill, ..." FontSize="12" Foreground="#CCFBF1"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Body -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="20,16">
+                <StackPanel>
+                    <!-- MoMo Section -->
+                    <TextBlock Text="📱 MoMo - SĐT nhận tiền &amp; QR Tĩnh" FontWeight="Bold" FontSize="14" Foreground="#0F172A" Margin="0,0,0,8"/>
+                    <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#64748B" Margin="0,0,0,8">
+                        Nhập SĐT để tự tạo QR, hoặc TẢI LÊN ẢNH QR CÓ SẴN (từ app MoMo/Ngân hàng) để đảm bảo quét chuẩn 100%.
+                    </TextBlock>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="txtMoMoPhone" Grid.Column="0"
+                                 materialDesign:HintAssist.Hint="VD: 0367196252"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 Height="44" FontSize="14" Padding="12,0"
+                                 PreviewTextInput="Phone_PreviewTextInput"
+                                 MaxLength="11"/>
+                        <Button Grid.Column="1" Margin="8,0,0,0" Padding="12,0" Height="44"
+                                Background="#0D9488" Foreground="White" BorderThickness="0"
+                                Click="BtnTestMoMo_Click" ToolTip="Mở QR test với SĐT vừa nhập" Cursor="Hand">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="QrcodeScan" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Text="Test QR" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                    
+                    <!-- Static QR Upload Area -->
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Width="70" Height="70" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Background="#F1F5F9" Margin="0,0,12,0">
+                            <Grid>
+                                <Image x:Name="imgQrPreview" Stretch="Uniform" Margin="2"/>
+                                <materialDesign:PackIcon x:Name="iconNoQr" Kind="ImageOutline" Width="28" Height="28" Foreground="#CBD5E1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <Button Content="Tải ảnh QR có sẵn" Style="{StaticResource MaterialDesignOutlinedButton}" Height="32" Click="BtnUploadQr_Click" HorizontalAlignment="Left" Margin="0,0,0,6"/>
+                            <Button x:Name="btnRemoveQr" Content="Xóa ảnh QR tĩnh" Style="{StaticResource MaterialDesignFlatButton}" Foreground="#EF4444" Height="24" Click="BtnRemoveQr_Click" HorizontalAlignment="Left" Padding="0,0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock x:Name="txtMoMoHint" Text="" FontSize="11" Foreground="#94A3B8" Margin="2,8,0,0"/>
+
+                    <!-- VNPay Section -->
+                    <TextBlock Text="🏦 VNPay - Tài khoản nhận" FontWeight="Bold" FontSize="14" Foreground="#0F172A" Margin="0,20,0,8"/>
+                    <ComboBox x:Name="cboBank" Height="44" FontSize="13" Padding="10,0"
+                              Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                              materialDesign:HintAssist.Hint="Ngân hàng">
+                        <ComboBoxItem Content="Vietcombank"/>
+                        <ComboBoxItem Content="Techcombank"/>
+                        <ComboBoxItem Content="MBBank"/>
+                        <ComboBoxItem Content="ACB"/>
+                        <ComboBoxItem Content="VPBank"/>
+                        <ComboBoxItem Content="BIDV"/>
+                        <ComboBoxItem Content="Agribank"/>
+                        <ComboBoxItem Content="Sacombank"/>
+                        <ComboBoxItem Content="TPBank"/>
+                        <ComboBoxItem Content="HDBank"/>
+                    </ComboBox>
+                    <TextBox x:Name="txtVnpayAccount" Margin="0,8,0,0"
+                             materialDesign:HintAssist.Hint="Số tài khoản / SĐT liên kết VNPay"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                             Height="44" FontSize="14" Padding="12,0"
+                             PreviewTextInput="Phone_PreviewTextInput" MaxLength="20"/>
+
+                    <!-- Receipt Section -->
+                    <TextBlock Text="🖨️ In hóa đơn" FontWeight="Bold" FontSize="14" Foreground="#0F172A" Margin="0,20,0,8"/>
+                    <CheckBox x:Name="chkAutoReprint" Content="Tự in lại bill cho đơn vừa thanh toán" 
+                              FontSize="13" Foreground="#0F172A"/>
+                    <CheckBox x:Name="chkPrintAfterSync" Content="In bill khi đơn offline sync xong" 
+                              FontSize="13" Foreground="#0F172A" Margin="0,4,0,0"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Footer -->
+            <Border Grid.Row="2" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="20,12" Background="#F8FAFC" CornerRadius="0,0,10,10">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Hủy" Width="90" Height="40" Margin="0,0,10,0"
+                            Style="{StaticResource MaterialDesignOutlinedButton}" Click="BtnCancel_Click"/>
+                    <Button Content="💾  Lưu cài đặt" Height="40" Padding="16,0"
+                            Background="#0D9488" Foreground="White" FontWeight="SemiBold"
+                            BorderBrush="Transparent" Click="BtnSave_Click" Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="16,8">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>
