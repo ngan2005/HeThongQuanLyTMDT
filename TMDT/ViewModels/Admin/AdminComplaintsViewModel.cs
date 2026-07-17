@@ -62,7 +62,7 @@ namespace TMDT.ViewModels.Admin
             { 
                 _searchText = value; 
                 OnPropertyChanged(); 
-                LoadComplaints(); 
+                _ = LoadComplaintsAsync(); 
             }
         }
 
@@ -73,7 +73,7 @@ namespace TMDT.ViewModels.Admin
             {
                 _statusFilter = value;
                 OnPropertyChanged();
-                LoadComplaints();
+                _ = LoadComplaintsAsync();
             }
         }
 
@@ -123,7 +123,7 @@ namespace TMDT.ViewModels.Admin
 
             _aiService = new AiService();
 
-            LoadComplaints();
+            _ = LoadComplaintsAsync();
         }
 
         private async void ExecuteSummarizeComplaints(object? obj)
@@ -148,63 +148,72 @@ namespace TMDT.ViewModels.Admin
             }
         }
 
-        private void LoadComplaints()
+        private async System.Threading.Tasks.Task LoadComplaintsAsync()
         {
-            Complaints.Clear();
-
             try
             {
-                if (_context != null)
-                {
-                    TotalComplaints = _context.Complaints.Count();
-                    PendingComplaints = _context.Complaints.Count(c => c.Status == "Pending" || string.IsNullOrEmpty(c.Status));
-                    ResolvedComplaints = _context.Complaints.Count(c => c.Status == "Resolved");
-                    DismissedComplaints = _context.Complaints.Count(c => c.Status == "Dismissed");
+                if (_context == null) return;
 
-                    var query = _context.Complaints
+                // Capture filter values on UI thread
+                string searchText = SearchText;
+                string statusFilter = StatusFilter;
+
+                // Run DB queries on background thread to avoid freezing UI
+                var result = await System.Threading.Tasks.Task.Run(() =>
+                {
+                    using var ctx = new TmdtContext();
+
+                    int total = ctx.Complaints.Count();
+                    int pending = ctx.Complaints.Count(c => c.Status == "Open" || string.IsNullOrEmpty(c.Status));
+                    int resolved = ctx.Complaints.Count(c => c.Status == "Resolved");
+                    int dismissed = ctx.Complaints.Count(c => c.Status == "Dismissed");
+
+                    var query = ctx.Complaints
                         .Include(c => c.Buyer)
                         .Include(c => c.Order)
                         .AsQueryable();
 
-                    // Apply Search
-                    if (!string.IsNullOrEmpty(SearchText))
+                    if (!string.IsNullOrEmpty(searchText))
                     {
-                        string term = SearchText.Trim().ToLower();
+                        string term = searchText.Trim().ToLower();
                         query = query.Where(c =>
                             (c.Content != null && EF.Functions.Like(c.Content, $"%{term}%")) ||
-                            (c.Buyer != null && c.Buyer.FullName != null && EF.Functions.Like(c.Buyer.FullName, $"%{SearchText}%")));
+                            (c.Buyer != null && c.Buyer.FullName != null && EF.Functions.Like(c.Buyer.FullName, $"%{searchText}%")));
                     }
 
-                    // Apply Filter
-                    if (StatusFilter == "Pending")
-                    {
-                        query = query.Where(c => c.Status == "Pending" || string.IsNullOrEmpty(c.Status));
-                    }
-                    else if (StatusFilter == "Resolved")
-                    {
+                    if (statusFilter == "Pending")
+                        query = query.Where(c => c.Status == "Open" || string.IsNullOrEmpty(c.Status));
+                    else if (statusFilter == "Resolved")
                         query = query.Where(c => c.Status == "Resolved");
-                    }
-                    else if (StatusFilter == "Dismissed")
-                    {
+                    else if (statusFilter == "Dismissed")
                         query = query.Where(c => c.Status == "Dismissed");
-                    }
 
-                    var dbComplaints = query.ToList();
-                    foreach (var comp in dbComplaints)
+                    return new
                     {
-                        Complaints.Add(comp);
-                    }
-                }
+                        Total = total, Pending = pending, Resolved = resolved, Dismissed = dismissed,
+                        Items = query.ToList()
+                    };
+                });
+
+                // Update UI on main thread
+                TotalComplaints = result.Total;
+                PendingComplaints = result.Pending;
+                ResolvedComplaints = result.Resolved;
+                DismissedComplaints = result.Dismissed;
+
+                Complaints.Clear();
+                foreach (var comp in result.Items)
+                    Complaints.Add(comp);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("EF query for Complaints failed: " + ex.Message);
+                System.Diagnostics.Debug.WriteLine("LoadComplaintsAsync error: " + ex.Message);
             }
         }
 
         // --- Commands Implementation ---
 
-        private bool CanExecuteResolveComplaint(object obj) => SelectedComplaint != null && (SelectedComplaint.Status == "Pending" || string.IsNullOrEmpty(SelectedComplaint.Status));
+        private bool CanExecuteResolveComplaint(object obj) => SelectedComplaint != null && (SelectedComplaint.Status == "Open" || string.IsNullOrEmpty(SelectedComplaint.Status));
         private async void ExecuteResolveComplaint(object obj)
         {
             if (SelectedComplaint == null) return;
@@ -247,10 +256,10 @@ namespace TMDT.ViewModels.Admin
                             "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             
             HideDetailRequest?.Invoke();
-            LoadComplaints();
+            _ = LoadComplaintsAsync();
         }
 
-        private bool CanExecuteDismissComplaint(object obj) => SelectedComplaint != null && (SelectedComplaint.Status == "Pending" || string.IsNullOrEmpty(SelectedComplaint.Status));
+        private bool CanExecuteDismissComplaint(object obj) => SelectedComplaint != null && (SelectedComplaint.Status == "Open" || string.IsNullOrEmpty(SelectedComplaint.Status));
         private async void ExecuteDismissComplaint(object obj)
         {
             if (SelectedComplaint == null) return;
@@ -293,7 +302,7 @@ namespace TMDT.ViewModels.Admin
                             "Đã thực hiện", MessageBoxButton.OK, MessageBoxImage.Information);
 
             HideDetailRequest?.Invoke();
-            LoadComplaints();
+            _ = LoadComplaintsAsync();
         }
 
         protected override void Dispose(bool disposing)

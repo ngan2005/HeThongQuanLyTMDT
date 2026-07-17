@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TMDT.Views.Seller"
              xmlns:vm="clr-namespace:TMDT.ViewModels.Seller"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1000" Background="#F4F7F6">
 
@@ -382,6 +383,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 
                                 <!-- Attachments & Image icons -->
@@ -419,8 +421,27 @@
                                 </TextBox>
                             </Border>
 
+                            <!-- AI Draft Assistant Button -->
+                            <Button Grid.Column="3" Command="{Binding AutoDraftMessageWithAICommand}" Background="Transparent" BorderThickness="0" Cursor="Hand" Margin="12,0,0,0" ToolTip="Trợ lý AI tự soạn câu trả lời">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsAiDrafting}" Value="True">
+                                                <Setter Property="IsEnabled" Value="False"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <Border Width="48" Height="48" CornerRadius="24" Background="#F5F3FF" BorderThickness="1" BorderBrush="#DDD6FE">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#8B5CF6" BlurRadius="8" ShadowDepth="2" Opacity="0.2"/>
+                                    </Border.Effect>
+                                    <materialDesign:PackIcon Kind="Robot" Width="22" Height="22" Foreground="#8B5CF6" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </Button>
+
                             <!-- Send Button -->
-                            <Button Grid.Column="3" Command="{Binding SendMessageCommand}" Background="Transparent" BorderThickness="0" Cursor="Hand" Margin="16,0,0,0">
+                            <Button Grid.Column="4" Command="{Binding SendMessageCommand}" Background="Transparent" BorderThickness="0" Cursor="Hand" Margin="12,0,0,0">
                                 <Border Background="{StaticResource SendButtonGradient}" Width="48" Height="48" CornerRadius="24">
                                     <Border.Effect>
                                         <DropShadowEffect Color="#0D9488" BlurRadius="12" ShadowDepth="3" Opacity="0.4"/>

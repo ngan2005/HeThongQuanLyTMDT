@@ -64,6 +64,11 @@
             <views:SellerCustomersView/>
         </DataTemplate>
 
+        <!-- 🟢 Quản lý kho (Inventory) -->
+        <DataTemplate DataType="{x:Type vm:SellerInventoryViewModel}">
+            <views:SellerInventoryView/>
+        </DataTemplate>
+
         <!-- Design System Colors — Seller Teal & Indigo Theme -->
         <SolidColorBrush x:Key="SidebarBg" Color="#1E1B4B"/> <!-- Very dark Indigo -->
         <SolidColorBrush x:Key="BrandTeal" Color="#0D9488"/> <!-- Modern Teal -->
@@ -372,6 +377,45 @@
                                 </StackPanel>
                             </RadioButton>
 
+                            <!-- 🟢 Quản lý kho (Inventory) -->
+                            <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowInventoryCommand}" 
+                                         IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Inventory, Mode=OneWay}"
+                                         Visibility="{Binding IsOwner, Converter={StaticResource BoolToVisibility}}"
+                                         ToolTip="Quản lý kho hàng">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <materialDesign:PackIcon Kind="Warehouse" Width="18" Height="18" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                                    <Grid Grid.Column="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Quản lý kho" FontSize="12.5" FontWeight="Medium" FontFamily="Segoe UI" VerticalAlignment="Center" Margin="10,0,0,0">
+                                            <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                        </TextBlock>
+                                        <!-- 🟢 Badge đỏ cảnh báo sắp hết hàng -->
+                                        <Border Grid.Column="1" Background="#EF4444" CornerRadius="8" Padding="6,1"
+                                                Margin="6,0,0,0" VerticalAlignment="Center"
+                                                Visibility="{Binding DataContext.LowStockCount, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource GreaterThanZeroToVisibilityConverter}}">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="{Binding DataContext.LowStockCount, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                       Foreground="White" FontSize="10" FontWeight="Bold"/>
+                                        </Border>
+                                    </Grid>
+                                </Grid>
+                            </RadioButton>
+
                             <!-- Lịch sử bán hàng -->
                             <RadioButton Style="{StaticResource SidebarButton}" Command="{Binding ShowSalesHistoryCommand}" 
                                          IsChecked="{Binding ActiveMenu, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=SalesHistory, Mode=OneWay}"
@@ -484,39 +528,64 @@
                             </Grid.ColumnDefinitions>
                             
                             <!-- Clickable Profile Area -->
-                            <Button Grid.Column="0" Command="{Binding ShowProfileCommand}" Background="Transparent" BorderThickness="0">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="Transparent" Cursor="Hand" ToolTip="Xem thông tin Shop">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <!-- Avatar Circle (S for Seller) -->
-                                                <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16" Background="{StaticResource BrandTeal}">
-                                                    <TextBlock Text="S" Foreground="#FFFFFF" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe UI"/>
-                                                </Border>
+                             <Grid Grid.Column="0">
+                                 <Grid.ColumnDefinitions>
+                                     <ColumnDefinition Width="Auto"/>
+                                     <ColumnDefinition Width="*"/>
+                                 </Grid.ColumnDefinitions>
+                                 
+                                 <!-- Avatar Circle (S for Seller) -->
+                                 <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16" Background="{StaticResource BrandTeal}" ClipToBounds="True">
+                                     <Grid>
+                                         <!-- Chữ mặc định nếu chưa có ảnh -->
+                                         <TextBlock Text="S" Foreground="#FFFFFF" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe UI"/>
+                                         
+                                         <!-- Ảnh Logo của Shop (Binding trực tiếp) -->
+                                         <Image Source="{Binding ShopLogo}" Stretch="UniformToFill">
+                                             <Image.Style>
+                                                 <Style TargetType="Image">
+                                                     <Setter Property="Visibility" Value="Collapsed"/>
+                                                     <Style.Triggers>
+                                                         <DataTrigger Binding="{Binding ShopLogo, Converter={StaticResource StringNullOrEmptyToBool}}" Value="False">
+                                                             <Setter Property="Visibility" Value="Visible"/>
+                                                         </DataTrigger>
+                                                     </Style.Triggers>
+                                                 </Style>
+                                             </Image.Style>
+                                         </Image>
+                                     </Grid>
+                                 </Border>
 
-                                                <!-- Details (hidden when collapsed) -->
-                                                <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
-                                                    <StackPanel.Style>
-                                                        <Style TargetType="StackPanel">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding DataContext.IsSidebarExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False">
-                                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </StackPanel.Style>
-                                                    <TextBlock Text="{Binding ShopName}" TextTrimming="CharacterEllipsis" FontSize="11.5" FontWeight="SemiBold" Foreground="#FFFFFF" FontFamily="Segoe UI"/>
-                                                    <TextBlock Text="Kênh Người Bán" FontSize="9.5" Foreground="#94A3B8" FontFamily="Segoe UI"/>
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
+                                 <!-- Details (hidden when collapsed) -->
+                                 <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                                     <StackPanel.Style>
+                                         <Style TargetType="StackPanel">
+                                             <Style.Triggers>
+                                                 <DataTrigger Binding="{Binding IsSidebarExpanded}" Value="False">
+                                                     <Setter Property="Visibility" Value="Collapsed"/>
+                                                 </DataTrigger>
+                                             </Style.Triggers>
+                                         </Style>
+                                     </StackPanel.Style>
+                                     <TextBlock Text="{Binding ShopName}" TextTrimming="CharacterEllipsis" FontSize="11.5" FontWeight="SemiBold" Foreground="#FFFFFF" FontFamily="Segoe UI"/>
+                                     <TextBlock Text="Kênh Người Bán" FontSize="9.5" Foreground="#94A3B8" FontFamily="Segoe UI"/>
+                                 </StackPanel>
+
+                                 <!-- Transparent Overlay Button for Click action -->
+                                 <Button Grid.Column="0" Grid.ColumnSpan="2" Command="{Binding ShowProfileCommand}" Background="Transparent" BorderThickness="0" Cursor="Hand" ToolTip="Xem thông tin Shop">
+                                     <Button.Style>
+                                         <Style TargetType="Button">
+                                             <Setter Property="Template">
+                                                 <Setter.Value>
+                                                     <ControlTemplate TargetType="Button">
+                                                         <Border Background="Transparent"/>
+                                                     </ControlTemplate>
+                                                 </Setter.Value>
+                                             </Setter>
+                                         </Style>
+                                     </Button.Style>
+                                 </Button>
+                             </Grid>
 
                             <!-- Logout button -->
                             <Button Grid.Column="1" Background="Transparent" BorderThickness="0" Cursor="Hand" Click="Logout_Click" ToolTip="Đăng xuất" Margin="8,0,0,0">

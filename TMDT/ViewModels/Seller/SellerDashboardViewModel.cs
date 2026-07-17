@@ -102,8 +102,7 @@ namespace TMDT.ViewModels.Seller
                     if (SessionManager.CurrentUser == null) return;
 
                     var shop = await ctx.Shops.AsNoTracking()
-                        .FirstOrDefaultAsync(s => s.UserId == SessionManager.CurrentUser.UserId)
-                        ?? await ctx.Shops.AsNoTracking().FirstOrDefaultAsync();
+                        .FirstOrDefaultAsync(s => s.UserId == SessionManager.CurrentUser.UserId);
 
                     if (shop != null)
                     {

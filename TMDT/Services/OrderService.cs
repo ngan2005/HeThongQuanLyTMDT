@@ -80,6 +80,67 @@ public class OrderService : IOrderService
         return await query.OrderByDescending(o => o.OrderDate).ToListAsync();
     }
 
+    /// <summary>
+    /// 🟢 Lấy tỉ lệ hoa hồng áp dụng cho 1 shop: ưu tiên Shop.CommissionRate (admin set riêng), fallback về SystemSettings.PlatformCommissionRate (global).
+    /// Trả về (rate phần trăm, nguồn "Shop"/"Global") — dùng để snapshot vào Order.AppliedCommissionRate + Order.CommissionRateSource.
+    /// </summary>
+    private static async Task<(decimal Rate, string Source)> GetEffectiveCommissionRateAsync(TmdtContext context, int? shopId)
+    {
+        if (shopId.HasValue)
+        {
+            var shop = await context.Shops.FindAsync(shopId.Value);
+            if (shop?.CommissionRate.HasValue == true && shop.CommissionRate.Value >= 0)
+                return (shop.CommissionRate.Value, "Shop");
+        }
+        return (SystemSettingsHelper.Current.PlatformCommissionRate, "Global");
+    }
+
+    /// <summary>
+    /// 🟢 Phiên bản sync (chỉ dùng khi đã có shop trong context hoặc không có shopId).
+    /// Trả về % hoa hồng áp dụng — dùng SystemSettings global khi không xác định được shop.
+    /// </summary>
+    private static decimal GetEffectiveCommissionRate(decimal? shopRate)
+    {
+        if (shopRate.HasValue && shopRate.Value >= 0) return shopRate.Value;
+        return SystemSettingsHelper.Current.PlatformCommissionRate;
+    }
+
+    /// <summary>
+    /// 🟢 Ghi log InventoryTransaction cho mỗi biến động tồn kho trong OrderService.
+    /// Gọi sau khi trừ/hoàn kho thành công, trước SaveChangesAsync.
+    /// Phải truyền đầy đủ orderCode, reason, referenceType.
+    /// </summary>
+    private static void LogInventoryChange(
+        TmdtContext context,
+        int shopId,
+        int? productId,
+        int? variantId,
+        string type,
+        int before,
+        int after,
+        int qtyChange,
+        string orderCode,
+        string reason,
+        string referenceType)
+    {
+        if (shopId <= 0) return; // không có shop → không log
+        context.InventoryTransactions.Add(new InventoryTransaction
+        {
+            ProductId = productId,
+            VariantId = variantId,
+            ShopId = shopId,
+            Type = type,
+            QuantityBefore = before,
+            QuantityChange = qtyChange,
+            QuantityAfter = after,
+            Reason = reason,
+            ReferenceOrderCode = orderCode,
+            ReferenceType = referenceType,
+            PerformedBy = null,
+            CreatedAt = DateTime.Now
+        });
+    }
+
     public async Task<Order?> CreateOrderFromCartAsync(
         int buyerId, int shopId, int? addressId, int? voucherId,
         string paymentMethod, decimal shippingFee,
@@ -154,8 +215,10 @@ public class OrderService : IOrderService
 
             var totalAmount = subTotal + shippingFee - discountFromPoints - discountFromVoucher;
             if (totalAmount < 0) totalAmount = 0;
-            
-            var platformFee = totalAmount * (SystemSettingsHelper.Current.PlatformCommissionRate / 100m);
+
+            // 🟢 Tính phí sàn theo Shop.CommissionRate (admin set riêng), fallback global rate
+            var (commissionRate, rateSource) = await GetEffectiveCommissionRateAsync(context, shopId);
+            var platformFee = totalAmount * (commissionRate / 100m);
 
             var order = new Order
             {
@@ -169,6 +232,9 @@ public class OrderService : IOrderService
                 Discount = discountFromPoints + discountFromVoucher, // Lưu tổng số tiền được giảm
                 TotalAmount = totalAmount,
                 PlatformFee = platformFee,
+                // 🟢 Snapshot rate đã áp dụng để audit khi admin thay đổi sau
+                AppliedCommissionRate = commissionRate,
+                CommissionRateSource = rateSource,
                 PaymentMethod = paymentMethod,
                 OrderStatus = "Pending",
                 OrderDate = DateTime.Now
@@ -190,8 +256,12 @@ public class OrderService : IOrderService
                         throw new InvalidOperationException($"Không tìm thấy biến thể của sản phẩm '{item.ProductName}'.");
                     if ((variant.Quantity ?? 0) < item.Quantity)
                         throw new InvalidOperationException($"Sản phẩm '{item.ProductName} ({item.VariantName})' không đủ tồn kho.");
-                    
+
+                    int variantBefore = variant.Quantity ?? 0;
                     variant.Quantity = (variant.Quantity ?? 0) - item.Quantity;
+                    LogInventoryChange(context, shopId, product.ProductId, variant.VariantId,
+                        "Order", variantBefore, variant.Quantity.Value, -item.Quantity,
+                        order.OrderCode, "Bán online (buyer đặt)", "Order");
                 }
                 else
                 {
@@ -199,7 +269,11 @@ public class OrderService : IOrderService
                         throw new InvalidOperationException(
                             $"Sản phẩm '{product.ProductName}' không đủ tồn kho. (Còn: {product.StockQuantity ?? 0}, yêu cầu: {item.Quantity}).");
 
+                    int productBefore = product.StockQuantity ?? 0;
                     product.StockQuantity = (product.StockQuantity ?? 0) - item.Quantity;
+                    LogInventoryChange(context, shopId, product.ProductId, null,
+                        "Order", productBefore, product.StockQuantity.Value, -item.Quantity,
+                        order.OrderCode, "Bán online (buyer đặt)", "Order");
                 }
 
                 context.OrderDetails.Add(new OrderDetail
@@ -353,8 +427,11 @@ public class OrderService : IOrderService
 
             var totalAmount = subTotal - discountFromPoints - discountFromVoucher - manualDiscount;
             if (totalAmount < 0) totalAmount = 0;
-            
-            var platformFee = totalAmount * (SystemSettingsHelper.Current.PlatformCommissionRate / 100m);
+
+            // 🟢 POS offline sales at counter are FREE of platform commission (0%)
+            var commissionRate = 0m;
+            var rateSource = "POS";
+            var platformFee = 0m;
 
             var order = new Order
             {
@@ -368,6 +445,8 @@ public class OrderService : IOrderService
                 ManualDiscount = manualDiscount > 0 ? manualDiscount : null,
                 TotalAmount = totalAmount,
                 PlatformFee = platformFee,
+                AppliedCommissionRate = commissionRate,
+                CommissionRateSource = rateSource,
                 PaymentMethod = paymentMethod,
                 OrderStatus = orderStatus,
                 OrderDate = DateTime.Now
@@ -385,17 +464,32 @@ public class OrderService : IOrderService
                     {
                         // 🟢 Dùng raw SQL UPDATE có WHERE Quantity >= @qty để chống race condition
                         // Nếu bị 0 rows affected → tồn đã bị người khác trừ mất → rollback
+                        // 🟢 Audit: đọc tồn trước để log change (sau khi UPDATE thành công)
+                        var beforeVariant = await context.ProductVariants.FindAsync(item.VariantId.Value);
+                        int beforeQty = beforeVariant?.Quantity ?? 0;
+
                         var rows = await context.Database.ExecuteSqlInterpolatedAsync(
-                            $"UPDATE ProductVariants SET Quantity = Quantity - {item.Quantity} WHERE VariantId = {item.VariantId.Value} AND Quantity >= {item.Quantity}");
+                            $"UPDATE ProductVariant SET Quantity = Quantity - {item.Quantity} WHERE VariantId = {item.VariantId.Value} AND Quantity >= {item.Quantity}");
                         if (rows == 0)
                             throw new InvalidOperationException($"Sản phẩm '{item.ProductName} ({item.VariantName})' không đủ tồn kho (đã có người khác mua trước).");
+
+                        LogInventoryChange(context, shopId, item.ProductId, item.VariantId,
+                            "Order", beforeQty, beforeQty - item.Quantity, -item.Quantity,
+                            order.OrderCode, "Bán tại quầy (POS)", "Order");
                     }
                     else
                     {
+                        var beforeProduct = await context.Products.FindAsync(item.ProductId);
+                        int beforeQty = beforeProduct?.StockQuantity ?? 0;
+
                         var rows = await context.Database.ExecuteSqlInterpolatedAsync(
                             $"UPDATE Product SET StockQuantity = StockQuantity - {item.Quantity} WHERE ProductId = {item.ProductId} AND StockQuantity >= {item.Quantity}");
                         if (rows == 0)
                             throw new InvalidOperationException($"Sản phẩm '{item.ProductName}' không đủ tồn kho (đã có người khác mua trước).");
+
+                        LogInventoryChange(context, shopId, item.ProductId, null,
+                            "Order", beforeQty, beforeQty - item.Quantity, -item.Quantity,
+                            order.OrderCode, "Bán tại quầy (POS)", "Order");
                     }
                 }
             }
@@ -445,6 +539,9 @@ public class OrderService : IOrderService
                     var shopRevenue = totalAmount - platformFee;
                     shop.WalletBalance = (shop.WalletBalance ?? 0) + shopRevenue;
                 }
+
+                // 🟢 FIX: cộng phí sàn vào ví hệ thống (trước đây thiếu — tiền commission của POS cash bị "mất")
+                SystemSettingsHelper.AddSystemWalletBalance(platformFee);
 
                 // Tích điểm cho khách hàng khi thanh toán Cash (1 điểm = 10,000đ)
                 if (actualBuyer.Email != "guest@pos.local")
@@ -502,13 +599,25 @@ public class OrderService : IOrderService
                 {
                     var variant = await context.ProductVariants.FindAsync(detail.VariantId.Value);
                     if (variant != null)
+                    {
+                        int before = variant.Quantity ?? 0;
                         variant.Quantity = (variant.Quantity ?? 0) + detail.Quantity.Value;
+                        LogInventoryChange(context, order.ShopId ?? 0, detail.ProductId, detail.VariantId,
+                            "Cancel", before, variant.Quantity.Value, detail.Quantity.Value,
+                            order.OrderCode ?? "", "Hoàn kho do hủy đơn online", "Order");
+                    }
                 }
                 else if (detail.ProductId.HasValue && detail.Quantity.HasValue)
                 {
                     var product = await context.Products.FindAsync(detail.ProductId.Value);
                     if (product != null)
+                    {
+                        int before = product.StockQuantity ?? 0;
                         product.StockQuantity = (product.StockQuantity ?? 0) + detail.Quantity.Value;
+                        LogInventoryChange(context, order.ShopId ?? 0, detail.ProductId, null,
+                            "Cancel", before, product.StockQuantity.Value, detail.Quantity.Value,
+                            order.OrderCode ?? "", "Hoàn kho do hủy đơn online", "Order");
+                    }
                 }
             }
 
@@ -702,13 +811,25 @@ public class OrderService : IOrderService
                 {
                     var variant = await context.ProductVariants.FindAsync(detail.VariantId.Value);
                     if (variant != null)
+                    {
+                        int before = variant.Quantity ?? 0;
                         variant.Quantity = (variant.Quantity ?? 0) + detail.Quantity.Value;
+                        LogInventoryChange(context, order.ShopId ?? 0, detail.ProductId, detail.VariantId,
+                            "Refund", before, variant.Quantity.Value, detail.Quantity.Value,
+                            order.OrderCode ?? "", "Hoàn kho do refund", "Order");
+                    }
                 }
                 else if (detail.ProductId.HasValue && detail.Quantity.HasValue)
                 {
                     var product = await context.Products.FindAsync(detail.ProductId.Value);
                     if (product != null)
+                    {
+                        int before = product.StockQuantity ?? 0;
                         product.StockQuantity = (product.StockQuantity ?? 0) + detail.Quantity.Value;
+                        LogInventoryChange(context, order.ShopId ?? 0, detail.ProductId, null,
+                            "Refund", before, product.StockQuantity.Value, detail.Quantity.Value,
+                            order.OrderCode ?? "", "Hoàn kho do refund", "Order");
+                    }
                 }
             }
 
@@ -784,9 +905,12 @@ public class OrderService : IOrderService
             decimal totalDiscount = voucherDiscount + manualDiscount + pointsDiscount;
             decimal totalAmount = Math.Max(0, subTotal - totalDiscount);
 
-            // Tính platform fee (giữ cùng tỉ lệ với CreatePosOrderAsync — giả định 5%)
-            platformFee = totalAmount * 0.05m;
-            if (platformFee < 1000m) platformFee = 0m;
+            // 🟢 Tính phí sàn theo Shop.CommissionRate (admin set riêng), fallback global rate
+            var (commissionRate, rateSource) = await GetEffectiveCommissionRateAsync(context, order.ShopId);
+            platformFee = totalAmount * (commissionRate / 100m);
+            // 🟢 Snapshot rate đã áp dụng để audit khi admin thay đổi sau
+            order.AppliedCommissionRate = commissionRate;
+            order.CommissionRateSource = rateSource;
 
             // Tạo OrderDetails mới
             foreach (var item in items)
@@ -864,17 +988,31 @@ public class OrderService : IOrderService
             {
                 if (detail.VariantId.HasValue && detail.Quantity.HasValue)
                 {
+                    var beforeVariant = await context.ProductVariants.FindAsync(detail.VariantId.Value);
+                    int beforeQty = beforeVariant?.Quantity ?? 0;
+
                     var rows = await context.Database.ExecuteSqlInterpolatedAsync(
-                        $"UPDATE ProductVariants SET Quantity = Quantity - {detail.Quantity.Value} WHERE VariantId = {detail.VariantId.Value} AND Quantity >= {detail.Quantity.Value}");
+                        $"UPDATE ProductVariant SET Quantity = Quantity - {detail.Quantity.Value} WHERE VariantId = {detail.VariantId.Value} AND Quantity >= {detail.Quantity.Value}");
                     if (rows == 0)
                         throw new InvalidOperationException($"Sản phẩm '{detail.ProductNameSnapshot}' không đủ tồn kho khi xác nhận thanh toán (đã có người mua trước).");
+
+                    LogInventoryChange(context, order.ShopId ?? 0, detail.ProductId, detail.VariantId,
+                        "Order", beforeQty, beforeQty - detail.Quantity.Value, -detail.Quantity.Value,
+                        order.OrderCode ?? "", "Xác nhận thanh toán MoMo/VNPay (POS)", "Order");
                 }
                 else if (detail.ProductId.HasValue && detail.Quantity.HasValue)
                 {
+                    var beforeProduct = await context.Products.FindAsync(detail.ProductId.Value);
+                    int beforeQty = beforeProduct?.StockQuantity ?? 0;
+
                     var rows = await context.Database.ExecuteSqlInterpolatedAsync(
                         $"UPDATE Product SET StockQuantity = StockQuantity - {detail.Quantity.Value} WHERE ProductId = {detail.ProductId.Value} AND StockQuantity >= {detail.Quantity.Value}");
                     if (rows == 0)
                         throw new InvalidOperationException($"Sản phẩm '{detail.ProductNameSnapshot}' không đủ tồn kho khi xác nhận thanh toán (đã có người mua trước).");
+
+                    LogInventoryChange(context, order.ShopId ?? 0, detail.ProductId, null,
+                        "Order", beforeQty, beforeQty - detail.Quantity.Value, -detail.Quantity.Value,
+                        order.OrderCode ?? "", "Xác nhận thanh toán MoMo/VNPay (POS)", "Order");
                 }
             }
 
@@ -885,6 +1023,9 @@ public class OrderService : IOrderService
                 var shopRevenue = (order.TotalAmount ?? 0) - (order.PlatformFee ?? 0);
                 shop.WalletBalance = (shop.WalletBalance ?? 0) + shopRevenue;
             }
+
+            // 🟢 FIX: cộng phí sàn vào ví hệ thống (trước đây thiếu — tiền commission của POS MoMo/VNPay bị "mất")
+            SystemSettingsHelper.AddSystemWalletBalance(order.PlatformFee ?? 0);
 
             order.OrderStatus = "Completed";
             order.CompletedAt = DateTime.Now;
@@ -960,17 +1101,31 @@ public class OrderService : IOrderService
             {
                 if (detail.VariantId.HasValue && detail.Quantity.HasValue)
                 {
+                    var beforeVariant = await context.ProductVariants.FindAsync(detail.VariantId.Value);
+                    int beforeQty = beforeVariant?.Quantity ?? 0;
+
                     var rows = await context.Database.ExecuteSqlInterpolatedAsync(
-                        $"UPDATE ProductVariants SET Quantity = Quantity - {detail.Quantity.Value} WHERE VariantId = {detail.VariantId.Value} AND Quantity >= {detail.Quantity.Value}");
+                        $"UPDATE ProductVariant SET Quantity = Quantity - {detail.Quantity.Value} WHERE VariantId = {detail.VariantId.Value} AND Quantity >= {detail.Quantity.Value}");
                     if (rows == 0)
                         throw new InvalidOperationException($"Sản phẩm '{detail.ProductNameSnapshot}' không đủ tồn kho.");
+
+                    LogInventoryChange(context, order.ShopId ?? 0, detail.ProductId, detail.VariantId,
+                        "Order", beforeQty, beforeQty - detail.Quantity.Value, -detail.Quantity.Value,
+                        order.OrderCode ?? "", "Thanh toán POS offline (mạng lỗi)", "Order");
                 }
                 else if (detail.ProductId.HasValue && detail.Quantity.HasValue)
                 {
+                    var beforeProduct = await context.Products.FindAsync(detail.ProductId.Value);
+                    int beforeQty = beforeProduct?.StockQuantity ?? 0;
+
                     var rows = await context.Database.ExecuteSqlInterpolatedAsync(
                         $"UPDATE Product SET StockQuantity = StockQuantity - {detail.Quantity.Value} WHERE ProductId = {detail.ProductId.Value} AND StockQuantity >= {detail.Quantity.Value}");
                     if (rows == 0)
                         throw new InvalidOperationException($"Sản phẩm '{detail.ProductNameSnapshot}' không đủ tồn kho.");
+
+                    LogInventoryChange(context, order.ShopId ?? 0, detail.ProductId, null,
+                        "Order", beforeQty, beforeQty - detail.Quantity.Value, -detail.Quantity.Value,
+                        order.OrderCode ?? "", "Thanh toán POS offline (mạng lỗi)", "Order");
                 }
             }
 
@@ -1017,6 +1172,9 @@ public class OrderService : IOrderService
                 var shopRevenue = (order.TotalAmount ?? 0) - (order.PlatformFee ?? 0);
                 shop.WalletBalance = (shop.WalletBalance ?? 0) + shopRevenue;
             }
+
+            // 🟢 FIX: cộng phí sàn vào ví hệ thống (trước đây thiếu — đơn POS offline sync không tính commission sàn)
+            SystemSettingsHelper.AddSystemWalletBalance(order.PlatformFee ?? 0);
 
             order.OrderStatus = "Completed";
             context.OrderStatusHistories.Add(new OrderStatusHistory
@@ -1120,13 +1278,25 @@ public class OrderService : IOrderService
                 {
                     var variant = await context.ProductVariants.FindAsync(detail.VariantId.Value);
                     if (variant != null)
+                    {
+                        int before = variant.Quantity ?? 0;
                         variant.Quantity = (variant.Quantity ?? 0) + detail.Quantity.Value;
+                        LogInventoryChange(context, order.ShopId ?? 0, detail.ProductId, detail.VariantId,
+                            "Cancel", before, variant.Quantity.Value, detail.Quantity.Value,
+                            order.OrderCode ?? "", "Hoàn kho do hủy POS chờ thanh toán", "Order");
+                    }
                 }
                 else if (detail.ProductId.HasValue && detail.Quantity.HasValue)
                 {
                     var product = await context.Products.FindAsync(detail.ProductId.Value);
                     if (product != null)
+                    {
+                        int before = product.StockQuantity ?? 0;
                         product.StockQuantity = (product.StockQuantity ?? 0) + detail.Quantity.Value;
+                        LogInventoryChange(context, order.ShopId ?? 0, detail.ProductId, null,
+                            "Cancel", before, product.StockQuantity.Value, detail.Quantity.Value,
+                            order.OrderCode ?? "", "Hoàn kho do hủy POS chờ thanh toán", "Order");
+                    }
                 }
             }
 

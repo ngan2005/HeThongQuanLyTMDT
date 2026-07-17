@@ -15,5 +15,11 @@
     <conv:InitialLetterConverter x:Key="InitialLetterConverter"/>
     <conv:PageToNavForegroundConverter x:Key="PageToNavForeground"/>
     <conv:PageToNavFontWeightConverter x:Key="PageToNavFontWeight"/>
+
+    <!-- 🟢 Inventory status converters (cho module Quản lý kho) -->
+    <conv:InventoryStatusToBrushConverter x:Key="InvStatusToBrush"/>
+    <conv:InventoryStatusToVietnameseConverter x:Key="InvStatusToVN"/>
+    <conv:InventoryTypeToBrushConverter x:Key="InvTypeToBrush"/>
+    <conv:InventoryTypeToSignConverter x:Key="InvTypeToSign"/>
     
 </ResourceDictionary>

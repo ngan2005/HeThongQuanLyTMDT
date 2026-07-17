@@ -226,9 +226,10 @@ namespace TMDT.ViewModels.Buyer
                 ExecuteLogin();
                 if (!SessionManager.IsLoggedIn) return;
             }
-            PageTitle = "Tin nhắn";
-            CurrentPage = "Chat";
-            CurrentViewModel = ChatViewModel;
+            
+            // Mở Widget chat bong bóng ở góc phải
+            ChatViewModel.IsOpen = true;
+            _ = ChatViewModel.LoadContactsAsync();
             
             if (targetShopId.HasValue)
             {

@@ -67,12 +67,14 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <!-- Product Image Placeholder -->
-                                        <Border Background="#F1F5F9" CornerRadius="8"
-                                                Width="80" Height="80" VerticalAlignment="Top">
-                                            <materialDesign:PackIcon Kind="ImageOutline" Width="36" Height="36"
-                                                                     HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                                     Foreground="{StaticResource TextMutedBrush}"/>
+                                        <!-- Product Image -->
+                                        <Border Width="80" Height="80" CornerRadius="8" Background="#F1F5F9" ClipToBounds="True" VerticalAlignment="Top">
+                                            <Grid>
+                                                <materialDesign:PackIcon Kind="ImageOutline" Width="36" Height="36"
+                                                                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                         Foreground="{StaticResource TextMutedBrush}"/>
+                                                <Image Source="{Binding ImageUrl}" Stretch="UniformToFill"/>
+                                            </Grid>
                                         </Border>
 
                                         <!-- Info -->

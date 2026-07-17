@@ -12,6 +12,8 @@
     <UserControl.Resources>
         <converters:EqualityToBooleanConverter x:Key="EqualityToBooleanConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <!-- 🟢 Converter cho badge phí sàn (Shop/Global) -->
+        <converters:StringEqualsToVisibilityConverter x:Key="StringEqualsToVisibilityConverter"/>
         <DropShadowEffect x:Key="CardShadow" BlurRadius="16" ShadowDepth="2" Opacity="0.07" Color="#000" Direction="270"/>
 
         <Style x:Key="FilterPill" TargetType="RadioButton">
@@ -247,6 +249,21 @@
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
 
+                                <!-- 🟢 Phí sàn + % đã áp dụng cho audit -->
+                                <DataGridTextColumn Header="PHÍ SÀN" Width="120">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="ToolTip" Value="{Binding CommissionRateSource}"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                    <DataGridTextColumn.Binding>
+                                        <MultiBinding StringFormat="{}{0:N0} đ ({1:N1}%)">
+                                            <Binding Path="PlatformFee" TargetNullValue="0"/>
+                                            <Binding Path="AppliedCommissionRate" TargetNullValue="0"/>
+                                        </MultiBinding>
+                                    </DataGridTextColumn.Binding>
+                                </DataGridTextColumn>
                                 <DataGridTemplateColumn Header="TRẠNG THÁI" Width="130">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -635,6 +652,26 @@
                                         <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource DangerRed}" HorizontalAlignment="Right" FontFamily="Segoe UI">
                                             <Run Text="-"/><Run Text="{Binding SelectedOrder.Discount, Mode=OneWay, StringFormat={}{0:N0} đ, TargetNullValue='0 đ'}"/>
                                         </TextBlock>
+                                    </Grid>
+                                    <!-- 🟢 Audit: hiển thị phí sàn + rate đã áp dụng cho đơn này -->
+                                    <Grid Margin="0,0,0,6">
+                                        <TextBlock Text="Phí sàn" FontSize="12" Foreground="{DynamicResource TextSecondary}" FontFamily="Segoe UI"/>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" FontFamily="Segoe UI"
+                                                       Text="{Binding SelectedOrder.PlatformFee, StringFormat={}{0:N0} đ, Mode=OneWay, TargetNullValue='0 đ'}"/>
+                                            <TextBlock Text=" · " FontSize="12" Foreground="{DynamicResource TextMuted}"/>
+                                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource BrandPurple}" FontFamily="Segoe UI"
+                                                       Text="{Binding SelectedOrder.AppliedCommissionRate, StringFormat={}{0:N1}%, Mode=OneWay, TargetNullValue='0%'}"/>
+                                            <!-- Badge phân biệt nguồn rate -->
+                                            <Border Background="{DynamicResource SurfaceLow}" CornerRadius="4" Padding="4,1" Margin="6,0,0,0"
+                                                    Visibility="{Binding SelectedOrder.CommissionRateSource, Converter={StaticResource StringEqualsToVisibilityConverter}, ConverterParameter=Shop}">
+                                                <TextBlock Text="Shop" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource SuccessGreen}"/>
+                                            </Border>
+                                            <Border Background="{DynamicResource SurfaceLow}" CornerRadius="4" Padding="4,1" Margin="6,0,0,0"
+                                                    Visibility="{Binding SelectedOrder.CommissionRateSource, Converter={StaticResource StringEqualsToVisibilityConverter}, ConverterParameter=Global}">
+                                                <TextBlock Text="Global" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource TextMuted}"/>
+                                            </Border>
+                                        </StackPanel>
                                     </Grid>
                                     <Border Background="{DynamicResource BrandActiveBg}" CornerRadius="8" Padding="10" Margin="0,4,0,0">
                                         <Grid>

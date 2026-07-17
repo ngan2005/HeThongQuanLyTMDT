@@ -41,10 +41,14 @@ namespace TMDT.Services
             lock (_lock)
             {
                 var existing = Items.FirstOrDefault(i => i.ProductId == product.ProductId && i.VariantId == variant?.VariantId);
+                if (quantity <= 0) return;
+
+                int maxStock = variant != null ? (variant.Quantity ?? 0) : (product.StockQuantity ?? 0);
+                int finalQuantity = Math.Min(quantity, maxStock);
+
                 if (existing != null)
                 {
-                    int newQuantity = existing.Quantity + quantity;
-                    int maxStock = variant != null ? (variant.Quantity ?? 0) : (product.StockQuantity ?? 0);
+                    int newQuantity = existing.Quantity + finalQuantity;
                     if (newQuantity > maxStock)
                         newQuantity = maxStock;
                     
@@ -61,9 +65,9 @@ namespace TMDT.Services
                         VariantName = variant?.VariantName,
                         Price = price,
                         OriginalPrice = product.OriginalPrice,
-                        ImageUrl = null,
-                        StockQuantity = variant != null ? (variant.Quantity ?? 0) : (product.StockQuantity ?? 0),
-                        Quantity = quantity,
+                        ImageUrl = product.MainImageUrl,
+                        StockQuantity = maxStock,
+                        Quantity = finalQuantity,
                         ShopId = product.ShopId ?? 0
                     });
                 }
@@ -125,6 +129,7 @@ namespace TMDT.Services
                     var cart = context.Carts
                         .Include(c => c.CartItems)
                         .ThenInclude(ci => ci.Product)
+                        .ThenInclude(p => p.ProductImages)
                         .FirstOrDefault(c => c.UserId == userId);
 
                     if (cart != null)
@@ -141,7 +146,7 @@ namespace TMDT.Services
                                     VariantName = ci.Variant?.VariantName,
                                     Price = ci.Product.Price + (ci.Variant?.ExtraPrice ?? 0),
                                     OriginalPrice = ci.Product.OriginalPrice,
-                                    ImageUrl = null,
+                                    ImageUrl = ci.Product.MainImageUrl,
                                     StockQuantity = ci.VariantId.HasValue ? (ci.Variant?.Quantity ?? 0) : (ci.Product.StockQuantity ?? 0),
                                     Quantity = ci.Quantity ?? 1,
                                     ShopId = ci.Product.ShopId ?? 0

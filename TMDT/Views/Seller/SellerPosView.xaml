@@ -145,15 +145,15 @@
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <!-- Dense Grid Layout -->
-                                <UniformGrid x:Name="productsGrid" Columns="{Binding ProductColumns, RelativeSource={RelativeSource AncestorType=UserControl}}" HorizontalAlignment="Stretch"/>
+                                <UniformGrid x:Name="productsGrid" Columns="{Binding ProductColumns, RelativeSource={RelativeSource AncestorType=UserControl}}" HorizontalAlignment="Stretch" VerticalAlignment="Top"/>
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Button Command="{Binding DataContext.AddToCartCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                         CommandParameter="{Binding}"
-                                        Margin="4" Padding="0" BorderThickness="0" Background="Transparent"
-                                        Cursor="Hand" Height="100" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                                        Margin="3" Padding="0" BorderThickness="0" Background="Transparent"
+                                        Cursor="Hand" Height="90" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
                                     <Border Background="White" CornerRadius="6" BorderThickness="1" BorderBrush="#CBD5E1">
                                         <Border.Style>
                                             <Style TargetType="Border">

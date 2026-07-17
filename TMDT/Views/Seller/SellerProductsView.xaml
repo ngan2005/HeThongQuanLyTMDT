@@ -637,7 +637,7 @@
                                                 <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
                                                     <StackPanel Orientation="Horizontal">
                                                         <TextBlock Text="&#xE109;" FontFamily="Segoe MDL2 Assets" FontSize="11" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                                        <TextBlock Text="Thêm phân loại" FontFamily="Segoe UI" FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding VariantButtonLabel}" FontFamily="Segoe UI" FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                                     </StackPanel>
                                                 </Border>
                                             </ControlTemplate>
@@ -654,10 +654,13 @@
                                     </Button>
 
                                     <!-- Variants DataGrid -->
-                                    <DataGrid ItemsSource="{Binding ProductVariantsPreview}" AutoGenerateColumns="False" 
+                                    <DataGrid ItemsSource="{Binding ProductVariantsPreview}"
+                                              SelectedItem="{Binding SelectedVariant, Mode=TwoWay}"
+                                              AutoGenerateColumns="False" 
                                               CanUserAddRows="False" CanUserDeleteRows="False" HeadersVisibility="Column" 
                                               GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E2E8F0" 
-                                              Background="#FFFFFF" RowHeight="36" IsReadOnly="False" MaxHeight="150">
+                                              Background="#FFFFFF" RowHeight="36" IsReadOnly="True" MaxHeight="150"
+                                              SelectionMode="Single">
                                         <DataGrid.Style>
                                             <Style TargetType="DataGrid">
                                                 <Style.Triggers>
@@ -717,10 +720,57 @@
                             </Border>
 
                             <!-- Description -->
-                            <TextBlock Style="{StaticResource InputLabel}" Text="MÔ TẢ SẢN PHẨM"/>
-                            <Border BorderThickness="1" BorderBrush="#E2E8F0" CornerRadius="6" Background="#F8FAFC" Height="80">
-                                <TextBox Style="{StaticResource FormInput}" Text="{Binding DescriptionInput, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Height="78" TextWrapping="Wrap" AcceptsReturn="True" VerticalContentAlignment="Top"/>
-                            </Border>
+                            <StackPanel Margin="0,0,0,12">
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Style="{StaticResource InputLabel}" Text="MÔ TẢ SẢN PHẨM *" VerticalAlignment="Center" Margin="0"/>
+                                    
+                                    <!-- AI Assistant Panel -->
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <TextBox Width="180" Height="24" Padding="6,2" FontSize="11" 
+                                                 Text="{Binding AiKeywordsInput, UpdateSourceTrigger=PropertyChanged}" 
+                                                 materialDesign:HintAssist.Hint="Gợi ý từ khóa AI (màu sắc, chất liệu...)" 
+                                                 Margin="0,0,6,0" VerticalContentAlignment="Center"/>
+                                        <Button Command="{Binding GenerateDescriptionCommand}" 
+                                                Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" Height="24">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsAiGeneratingDescription}" Value="True">
+                                                            <Setter Property="IsEnabled" Value="False"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                            <Border CornerRadius="4" Padding="8,2" Background="#F5F3FF" BorderThickness="1" BorderBrush="#DDD6FE">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <!-- Show rotating star icon or regular AI icon -->
+                                                    <materialDesign:PackIcon Kind="AutoFix" Width="12" Height="12" Foreground="#8B5CF6" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                                    <TextBlock FontSize="10" FontWeight="SemiBold" Foreground="#8B5CF6" VerticalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Text" Value="AI Viết Mô Tả"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsAiGeneratingDescription}" Value="True">
+                                                                        <Setter Property="Text" Value="Đang tạo..."/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                            </Border>
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                                
+                                <Border BorderThickness="1" BorderBrush="#E2E8F0" CornerRadius="6" Background="#F8FAFC" Height="110">
+                                    <TextBox Style="{StaticResource FormInput}" Text="{Binding DescriptionInput, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Height="108" TextWrapping="Wrap" AcceptsReturn="True" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto"/>
+                                </Border>
+                            </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
 

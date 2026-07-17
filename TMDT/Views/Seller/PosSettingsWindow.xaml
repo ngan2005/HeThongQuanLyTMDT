@@ -95,7 +95,39 @@
                              Height="44" FontSize="14" Padding="12,0"
                              PreviewTextInput="Phone_PreviewTextInput" MaxLength="20"/>
 
+                    <!-- VNPay QR Upload Area -->
+                    <TextBlock Text="📷 Ảnh QR chuyển khoản VNPay" FontSize="12" FontWeight="SemiBold"
+                               Foreground="#334155" Margin="0,10,0,4"/>
+                    <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#64748B" Margin="0,0,0,8">
+                        Tải lên ảnh QR từ app ngân hàng — khi khách thanh toán VNPay tại POS, hệ thống hiển thị đúng QR này.
+                    </TextBlock>
+                    <Grid Margin="0,0,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Width="70" Height="70" BorderBrush="#E2E8F0" BorderThickness="1"
+                                CornerRadius="6" Background="#F1F5F9" Margin="0,0,12,0">
+                            <Grid>
+                                <Image x:Name="imgVnpayQrPreview" Stretch="Uniform" Margin="2"/>
+                                <materialDesign:PackIcon x:Name="iconNoVnpayQr" Kind="QrcodeRemove"
+                                                         Width="28" Height="28" Foreground="#CBD5E1"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <Button Content="Tải ảnh QR VNPay" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    Height="32" Click="BtnUploadVnpayQr_Click" HorizontalAlignment="Left" Margin="0,0,0,6"/>
+                            <Button x:Name="btnRemoveVnpayQr" Content="Xóa ảnh QR VNPay"
+                                    Style="{StaticResource MaterialDesignFlatButton}" Foreground="#EF4444"
+                                    Height="24" Click="BtnRemoveVnpayQr_Click" HorizontalAlignment="Left" Padding="0,0"
+                                    Visibility="Collapsed"/>
+                        </StackPanel>
+                    </Grid>
+                    <TextBlock x:Name="txtVnpayHint" Text="" FontSize="11" Foreground="#94A3B8" Margin="2,6,0,0"/>
+
                     <!-- Receipt Section -->
+
                     <TextBlock Text="🖨️ In hóa đơn" FontWeight="Bold" FontSize="14" Foreground="#0F172A" Margin="0,20,0,8"/>
                     <CheckBox x:Name="chkAutoReprint" Content="Tự in lại bill cho đơn vừa thanh toán" 
                               FontSize="13" Foreground="#0F172A"/>

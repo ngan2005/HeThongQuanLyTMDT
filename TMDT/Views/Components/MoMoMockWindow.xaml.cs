@@ -1,10 +1,7 @@
 using System;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Windows;
 using System.Windows.Media.Imaging;
-using QRCoder;
 
 namespace TMDT.Views.Components
 {
@@ -41,7 +38,7 @@ namespace TMDT.Views.Components
                 txtOrderCode.Visibility = Visibility.Visible;
             }
 
-            // Hiển thị SĐT nhận tiền + cảnh báo nếu chưa cấu hình
+            // 🟢 Hiển thị SĐT nhận tiền + cảnh báo nếu chưa cấu hình
             if (!string.IsNullOrEmpty(_phone))
                 txtPhoneInfo.Text = $"Nhận tiền: {_phone}";
             else
@@ -50,7 +47,24 @@ namespace TMDT.Views.Components
                 txtPhoneInfo.Foreground = System.Windows.Media.Brushes.DarkOrange;
             }
 
-            GenerateQRCode(amount);
+            // 🟢 Nếu có QR upload ảnh → ưu tiên, KHÔNG cần SĐT
+            var settings = TMDT.Services.PosSettingsHelper.Current;
+            bool hasUploadedQr = !string.IsNullOrEmpty(settings.MoMoQrImagePath)
+                                  && File.Exists(settings.MoMoQrImagePath);
+            bool hasPhone = !string.IsNullOrEmpty(_phone);
+
+            if (hasUploadedQr)
+            {
+                GenerateQRCode(amount); // dùng upload
+            }
+            else if (hasPhone)
+            {
+                GenerateQRCode(amount); // fallback QR từ SĐT (vẫn cho phép theo yêu cầu)
+            }
+            else
+            {
+                GenerateQRCode(amount); // không có gì → show cảnh báo, khóa confirm
+            }
         }
 
         private void GenerateQRCode(decimal amount)
@@ -58,9 +72,13 @@ namespace TMDT.Views.Components
             try
             {
                 var settings = TMDT.Services.PosSettingsHelper.Current;
+
+                // 🟢 Nút Confirm mặc định = disabled (chỉ bật khi có QR upload)
+                BtnConfirm.IsEnabled = false;
+
                 if (!string.IsNullOrEmpty(settings.MoMoQrImagePath) && File.Exists(settings.MoMoQrImagePath))
                 {
-                    // 🟢 Sử dụng ảnh QR tĩnh được cấu hình trong POS Settings
+                    // ✅ TRƯỜNG HỢP 1: Có ảnh QR upload — AN TOÀN nhất, dùng luôn
                     var staticBitmap = new BitmapImage();
                     staticBitmap.BeginInit();
                     staticBitmap.CacheOption = BitmapCacheOption.OnLoad;
@@ -68,28 +86,54 @@ namespace TMDT.Views.Components
                     staticBitmap.EndInit();
                     staticBitmap.Freeze();
                     imgQR.Source = staticBitmap;
-                    return; // Bỏ qua việc tự sinh mã QR
+                    txtNoQrPlaceholder.Visibility = Visibility.Collapsed;
+                    BtnConfirm.IsEnabled = true; // 🟢 QR thật từ app MoMo seller → confirm OK
+                    return;
                 }
 
-                // 🟢 Không có QR tĩnh → Sinh mã QR tự động từ SĐT
-                string momoLink = !string.IsNullOrEmpty(_phone)
-                    ? $"https://nhantien.momo.vn/{_phone}?amount={amount:0}&description=TMDT"
-                    : "https://momo.vn";
+                if (!string.IsNullOrEmpty(_phone))
+                {
+                    // ⚠️ TRƯỜNG HỢP 2: Fallback QR từ SĐT — KHÔNG KHUYẾN NGHỊ
+                    string momoLink = $"https://nhantien.momo.vn/{_phone}?amount={amount:0}&description=TMDT";
 
-                using var qrGenerator = new QRCodeGenerator();
-                using var qrCodeData = qrGenerator.CreateQrCode(momoLink, QRCodeGenerator.ECCLevel.M);
-                using var qrCode = new PngByteQRCode(qrCodeData);
-                byte[] pngBytes = qrCode.GetGraphic(10, new byte[] { 174, 32, 112 }, new byte[] { 255, 255, 255 });
+                    // 🟢 Generate QR (giữ lại QRCoder tạm thời vì user chọn keep-both)
+                    using var qrGenerator = new QRCoder.QRCodeGenerator();
+                    using var qrCodeData = qrGenerator.CreateQrCode(momoLink, QRCoder.QRCodeGenerator.ECCLevel.M);
+                    using var qrCode = new QRCoder.PngByteQRCode(qrCodeData);
+                    byte[] pngBytes = qrCode.GetGraphic(10, new byte[] { 174, 32, 112 }, new byte[] { 255, 255, 255 });
 
-                using var ms = new MemoryStream(pngBytes);
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.StreamSource = ms;
-                bitmap.EndInit();
-                bitmap.Freeze();
+                    using var ms = new MemoryStream(pngBytes);
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.StreamSource = ms;
+                    bitmap.EndInit();
+                    bitmap.Freeze();
+                    imgQR.Source = bitmap;
+                    txtNoQrPlaceholder.Visibility = Visibility.Collapsed;
 
-                imgQR.Source = bitmap;
+                    // 🟢 Cảnh báo rõ rủi ro QR tự sinh từ SĐT
+                    txtWarningText.Text =
+                        $"⚠ QR TỰ SINH TỪ SĐT {_phone}\n\n" +
+                        "Rủi ro: QR này chỉ hoạt động nếu SĐT đúng và đã liên kết MoMo.\n" +
+                        "Nếu khách quét mà app MoMo báo lỗi → bạn mất đơn.\n\n" +
+                        "Khuyến nghị: Vào POS > Cài đặt > MoMo > upload ảnh QR cá nhân (lấy từ app MoMo của bạn) để an toàn 100%.";
+                    txtWarning.Visibility = Visibility.Visible;
+
+                    BtnConfirm.IsEnabled = true; // Vẫn cho cashier confirm, đã có cảnh báo
+                    return;
+                }
+
+                // 🟢 TRƯỜNG HỢP 3: Không có QR upload, không có SĐT → khóa confirm
+                txtNoQrPlaceholder.Visibility = Visibility.Visible;
+                imgQR.Source = null;
+                BtnConfirm.IsEnabled = false;
+                txtWarningText.Text =
+                    "CHƯA CÀI ĐẶT MOMO.\n\n" +
+                    "Vào POS > Cài đặt > MoMo:\n" +
+                    "  • Upload ảnh QR cá nhân (khuyến nghị), HOẶC\n" +
+                    "  • Nhập SĐT MoMo đã liên kết ngân hàng";
+                txtWarning.Visibility = Visibility.Visible;
             }
             catch (Exception ex)
             {

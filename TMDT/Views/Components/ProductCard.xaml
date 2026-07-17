@@ -9,21 +9,40 @@
              TextElement.FontFamily="Segoe UI, sans-serif">
     
     <UserControl.Resources>
-        <SolidColorBrush x:Key="Primary" Color="#5221E7"/>
-        <SolidColorBrush x:Key="Surface" Color="#FFFFFF"/>
-        <SolidColorBrush x:Key="TextMain" Color="#1A1B22"/>
-        <SolidColorBrush x:Key="TextMuted" Color="#797588"/>
-        <SolidColorBrush x:Key="Error" Color="#BA1A1A"/>
-        <SolidColorBrush x:Key="Warning" Color="#FFB300"/>
-    </UserControl.Resources>
+    <!-- Color Brushes -->
+    <SolidColorBrush x:Key="Primary" Color="#5221E7"/>
+    <SolidColorBrush x:Key="Surface" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="TextMain" Color="#1A1B22"/>
+    <SolidColorBrush x:Key="TextMuted" Color="#797588"/>
+    <SolidColorBrush x:Key="Error" Color="#BA1A1A"/>
+    <SolidColorBrush x:Key="Warning" Color="#FFB300"/>
 
-    <Border Background="{StaticResource Surface}" 
-            CornerRadius="16" 
-            Margin="8"
-            RenderTransformOrigin="0.5,0.5"
-            MouseLeftButtonUp="CardBorder_MouseLeftButtonUp"
-            Cursor="Hand"
-            x:Name="CardBorder">
+    <!-- Image style: keep max size, uniform stretch, subtle shadow -->
+    <Style x:Key="ProductImageStyle" TargetType="Image">
+        <Setter Property="MaxWidth" Value="180"/>
+        <Setter Property="MaxHeight" Value="180"/>
+        <Setter Property="Stretch" Value="Uniform"/>
+        <Setter Property="Margin" Value="0,0,0,8"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect BlurRadius="6" Opacity="0.2" ShadowDepth="2"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Card container style -->
+    <Style x:Key="CardContainer" TargetType="Border">
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="BorderBrush" Value="{StaticResource TextMuted}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Background" Value="{StaticResource Surface}"/>
+        <Setter Property="Padding" Value="12"/>
+        <Setter Property="Margin" Value="0"/>
+    </Style>
+</UserControl.Resources>
+
+    <Border Style="{StaticResource CardContainer}" CornerRadius="16" RenderTransformOrigin="0.5,0.5" MouseLeftButtonUp="CardBorder_MouseLeftButtonUp" Cursor="Hand" x:Name="CardBorder">
         <Border.Effect>
             <DropShadowEffect Color="#000000" Opacity="0.04" BlurRadius="12" ShadowDepth="2"/>
         </Border.Effect>
@@ -61,7 +80,7 @@
         
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="200"/>
+                <RowDefinition Height="150"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
@@ -72,7 +91,7 @@
                                              HorizontalAlignment="Center" VerticalAlignment="Center"
                                              Foreground="{StaticResource TextMuted}"
                                              Visibility="{Binding Product.MainImageUrl, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/>
-                    <Image Source="{Binding Product.MainImageUrl}" Stretch="UniformToFill"/>
+                    <Image Source="{Binding Product.MainImageUrl}" Style="{StaticResource ProductImageStyle}"/>
                     
                     <!-- Sale Tag overlay if needed -->
                     <Border Background="{StaticResource Error}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="12" Padding="8,4" CornerRadius="6"

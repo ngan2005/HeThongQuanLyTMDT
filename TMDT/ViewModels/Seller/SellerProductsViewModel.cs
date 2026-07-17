@@ -59,6 +59,21 @@ namespace TMDT.ViewModels.Seller
             get => _variantNameInput;
             set { _variantNameInput = value; OnPropertyChanged(); }
         }
+
+        // AI properties
+        private string _aiKeywordsInput = "";
+        public string AiKeywordsInput
+        {
+            get => _aiKeywordsInput;
+            set { _aiKeywordsInput = value; OnPropertyChanged(); }
+        }
+
+        private bool _isAiGeneratingDescription;
+        public bool IsAiGeneratingDescription
+        {
+            get => _isAiGeneratingDescription;
+            set { _isAiGeneratingDescription = value; OnPropertyChanged(); }
+        }
         public decimal VariantExtraPriceInput
         {
             get => _variantExtraPriceInput;
@@ -74,6 +89,35 @@ namespace TMDT.ViewModels.Seller
             get => _variantSkuInput;
             set { _variantSkuInput = value; OnPropertyChanged(); }
         }
+
+        // Selected variant for editing
+        private ProductVariant? _selectedVariant;
+        public ProductVariant? SelectedVariant
+        {
+            get => _selectedVariant;
+            set
+            {
+                _selectedVariant = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(VariantButtonLabel));
+                if (value != null)
+                {
+                    VariantNameInput = value.VariantName ?? "";
+                    VariantExtraPriceInput = value.ExtraPrice ?? 0m;
+                    VariantQuantityInput = value.Quantity ?? 0;
+                    VariantSkuInput = value.Sku ?? "";
+                }
+                else
+                {
+                    VariantNameInput = "";
+                    VariantExtraPriceInput = 0;
+                    VariantQuantityInput = 0;
+                    VariantSkuInput = "";
+                }
+            }
+        }
+
+        public string VariantButtonLabel => _selectedVariant != null ? "Cập nhật phân loại" : "+ Thêm phân loại";
 
         private List<string> _selectedLocalImagePaths = new();
         public List<string> SelectedLocalImagePaths
@@ -217,7 +261,10 @@ namespace TMDT.ViewModels.Seller
         public ICommand ClearImagesCommand { get; } = null!;
         public ICommand AddVariantCommand { get; } = null!;
         public ICommand RemoveVariantCommand { get; } = null!;
+        public ICommand SelectVariantCommand { get; } = null!;
+        public ICommand ClearVariantSelectionCommand { get; } = null!;
         public ICommand ShowBarcodeCommand { get; } = null!;
+        public ICommand GenerateDescriptionCommand { get; } = null!;
 
         public SellerProductsViewModel()
         {
@@ -234,8 +281,11 @@ namespace TMDT.ViewModels.Seller
             ClearImagesCommand = new RelayCommand(_ => ExecuteClearImages());
             AddVariantCommand = new RelayCommand(_ => ExecuteAddVariant());
             RemoveVariantCommand = new RelayCommand(o => ExecuteRemoveVariant(o as ProductVariant));
+            SelectVariantCommand = new RelayCommand(o => SelectedVariant = o as ProductVariant);
+            ClearVariantSelectionCommand = new RelayCommand(_ => SelectedVariant = null);
             ShowBarcodeCommand = new RelayCommand(o => ExecuteShowBarcode(o as Product));
-
+            GenerateDescriptionCommand = new RelayCommand(async _ => await ExecuteGenerateDescription());
+            
             _ = LoadCategoriesAsync();
             _ = LoadProductsAsync();
             ResetInspector();
@@ -292,6 +342,29 @@ namespace TMDT.ViewModels.Seller
                 return;
             }
 
+            // UPDATE existing variant if one is selected
+            if (_selectedVariant != null)
+            {
+                _selectedVariant.VariantName = VariantNameInput.Trim();
+                _selectedVariant.ExtraPrice = VariantExtraPriceInput;
+                _selectedVariant.Quantity = VariantQuantityInput;
+                _selectedVariant.Sku = string.IsNullOrWhiteSpace(VariantSkuInput)
+                    ? _selectedVariant.Sku
+                    : VariantSkuInput.Trim();
+
+                // Force UI refresh
+                var idx = ProductVariantsPreview.IndexOf(_selectedVariant);
+                if (idx >= 0)
+                {
+                    ProductVariantsPreview.RemoveAt(idx);
+                    ProductVariantsPreview.Insert(idx, _selectedVariant);
+                }
+
+                SelectedVariant = null; // clear selection & reset inputs
+                return;
+            }
+
+            // ADD new variant
             ProductVariantsPreview.Add(new ProductVariant
             {
                 VariantName = VariantNameInput.Trim(),
@@ -305,6 +378,37 @@ namespace TMDT.ViewModels.Seller
             VariantExtraPriceInput = 0;
             VariantQuantityInput = 0;
             VariantSkuInput = "";
+        }
+
+        private async Task ExecuteGenerateDescription()
+        {
+            if (string.IsNullOrWhiteSpace(ProductNameInput))
+            {
+                MessageBox.Show("Vui lòng điền tên sản phẩm trước khi yêu cầu AI viết mô tả!", "Thiếu thông tin", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            IsAiGeneratingDescription = true;
+            try
+            {
+                var aiService = new AiService();
+                string catName = SelectedCategoryInput?.CategoryName ?? "Chung";
+                string desc = await aiService.GenerateProductDescriptionAsync(
+                    ProductNameInput.Trim(),
+                    catName,
+                    AiKeywordsInput.Trim()
+                );
+
+                DescriptionInput = desc;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi gọi AI: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsAiGeneratingDescription = false;
+            }
         }
 
         private void ExecuteRemoveVariant(ProductVariant? variant)
@@ -461,6 +565,8 @@ namespace TMDT.ViewModels.Seller
             LengthInput = null;
             WidthInput = null;
             HeightInput = null;
+            AiKeywordsInput = "";
+            IsAiGeneratingDescription = false;
             IsEditMode = false;
             OnPropertyChanged(nameof(FormTitle));
             OnPropertyChanged(nameof(FormStatusBadge));
@@ -587,28 +693,50 @@ namespace TMDT.ViewModels.Seller
                     await ctx.SaveChangesAsync();
                 }
 
-                // Cập nhật ProductVariants
+                // Smart Update / Sync ProductVariants to prevent foreign key errors with OrderDetails
                 var oldVariants = await ctx.ProductVariants.Where(v => v.ProductId == targetProd.ProductId).ToListAsync();
-                ctx.ProductVariants.RemoveRange(oldVariants);
+                var currentSkus = ProductVariantsPreview.Select(v => v.Sku?.Trim()).Where(s => !string.IsNullOrEmpty(s)).ToList();
 
-                var finalVariants = new List<ProductVariant>();
+                // 1. DELETE variants that are no longer in the UI list, but ONLY if they are not referenced in OrderDetails
+                var variantsToRemove = oldVariants.Where(ov => !currentSkus.Contains(ov.Sku?.Trim())).ToList();
+                foreach (var ov in variantsToRemove)
+                {
+                    bool isReferenced = await ctx.OrderDetails.AnyAsync(od => od.VariantId == ov.VariantId);
+                    if (!isReferenced)
+                    {
+                        ctx.ProductVariants.Remove(ov);
+                    }
+                    // If referenced, we keep it in DB so existing orders don't break, but it won't be shown or available anymore.
+                }
+
+                // 2. UPDATE existing or INSERT new variants
                 foreach (var variant in ProductVariantsPreview)
                 {
-                    finalVariants.Add(new ProductVariant
+                    string sku = variant.Sku?.Trim() ?? "";
+                    var existing = oldVariants.FirstOrDefault(ov => ov.Sku?.Trim() == sku);
+
+                    if (existing != null)
                     {
-                        ProductId = targetProd.ProductId,
-                        VariantName = variant.VariantName,
-                        ExtraPrice = variant.ExtraPrice,
-                        Quantity = variant.Quantity,
-                        Sku = variant.Sku
-                    });
+                        // Update existing variant fields
+                        existing.VariantName = variant.VariantName;
+                        existing.ExtraPrice = variant.ExtraPrice;
+                        existing.Quantity = variant.Quantity;
+                    }
+                    else
+                    {
+                        // Add new variant
+                        ctx.ProductVariants.Add(new ProductVariant
+                        {
+                            ProductId = targetProd.ProductId,
+                            VariantName = variant.VariantName,
+                            ExtraPrice = variant.ExtraPrice,
+                            Quantity = variant.Quantity,
+                            Sku = string.IsNullOrWhiteSpace(sku) ? $"VAR-{Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper()}" : sku
+                        });
+                    }
                 }
 
-                if (finalVariants.Any())
-                {
-                    ctx.ProductVariants.AddRange(finalVariants);
-                    await ctx.SaveChangesAsync();
-                }
+                await ctx.SaveChangesAsync();
 
                 if (IsEditMode)
                 {
@@ -626,8 +754,13 @@ namespace TMDT.ViewModels.Seller
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Save product failed: " + ex.Message);
-                MessageBox.Show("Lỗi khi lưu sản phẩm: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                string errMsg = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    errMsg += "\nChi tiết: " + ex.InnerException.Message;
+                }
+                System.Diagnostics.Debug.WriteLine("Save product failed: " + errMsg);
+                MessageBox.Show("Lỗi khi lưu sản phẩm: " + errMsg, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

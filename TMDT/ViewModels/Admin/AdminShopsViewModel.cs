@@ -32,7 +32,14 @@ namespace TMDT.ViewModels.Admin
         public Shop SelectedShop
         {
             get => _selectedShop;
-            set { _selectedShop = value; OnPropertyChanged(); }
+            set
+            {
+                if (_selectedShop == value) return;
+                _selectedShop = value;
+                OnPropertyChanged();
+                // 🟢 UpdateCommissionCommand phụ thuộc SelectedShop
+                CommandManager.InvalidateRequerySuggested();
+            }
         }
 
         public string SearchText
@@ -62,6 +69,7 @@ namespace TMDT.ViewModels.Admin
         public ICommand ActivateShopCommand { get; }
         public ICommand FilterCommand { get; }
         public ICommand ViewDetailCommand { get; }
+        public ICommand UpdateCommissionCommand { get; }
 
         public AdminShopsViewModel(string initialStatus = "All")
         {
@@ -74,6 +82,7 @@ namespace TMDT.ViewModels.Admin
             ActivateShopCommand = new RelayCommand(ExecuteActivateShop, _ => SelectedShop != null && SelectedShop.IsActive == false);
             FilterCommand = new RelayCommand(o => StatusFilter = o?.ToString() ?? "All");
             ViewDetailCommand = new RelayCommand(o => ShowDetailRequest?.Invoke());
+            UpdateCommissionCommand = new RelayCommand(o => ExecuteUpdateCommission(o), _ => CanUpdateCommission());
 
             _ = LoadShopsAsync();
         }
@@ -240,6 +249,94 @@ namespace TMDT.ViewModels.Admin
             MessageBox.Show($"Đã kích hoạt '{SelectedShop.ShopName}'.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             HideDetailRequest?.Invoke();
             _ = LoadShopsAsync();
+        }
+
+        // 🟢 Cập nhật CommissionRate riêng cho shop — admin có thể set khác global rate.
+        private bool CanUpdateCommission()
+        {
+            // Đơn giản: cho phép nếu đã chọn shop (validation rate thực hiện trong Execute)
+            return SelectedShop != null;
+        }
+
+        private async void ExecuteUpdateCommission(object? obj)
+        {
+            if (SelectedShop == null) return;
+            if (obj == null) return;
+
+            decimal newRate;
+            try
+            {
+                newRate = Convert.ToDecimal(obj);
+            }
+            catch
+            {
+                MessageBox.Show("Giá trị tỉ lệ chiết khấu không hợp lệ.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (newRate < 0 || newRate > 100)
+            {
+                MessageBox.Show("Tỉ lệ chiết khấu phải nằm trong khoảng 0% - 100%.", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var confirm = MessageBox.Show(
+                $"Đặt tỉ lệ chiết khấu cho shop '{SelectedShop.ShopName}' = {newRate:N1}%?\n" +
+                $"(Global: {SystemSettingsHelper.Current.PlatformCommissionRate:N1}%)\n" +
+                $"Đơn mới của shop sẽ tính theo rate này.",
+                "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (confirm != MessageBoxResult.Yes) return;
+
+            // 🟢 Audit: snapshot rate cũ
+            var oldRate = SelectedShop.CommissionRate;
+
+            // 🟢 Cảnh báo nếu đổi lớn (>1% delta) hoặc rate mới rất khác global
+            if (oldRate != newRate)
+            {
+                var globalRate = SystemSettingsHelper.Current.PlatformCommissionRate;
+                var diffFromGlobal = Math.Abs(newRate - globalRate);
+                if (diffFromGlobal >= 2.0m)
+                {
+                    var sub = MessageBox.Show(
+                        $"⚠️ Rate riêng của shop lệch Global {diffFromGlobal:N1}%.\n" +
+                        $"Đơn mới của shop sẽ chịu {newRate:N1}% (Global: {globalRate:N1}%).\n\n" +
+                        $"Tiếp tục?",
+                        "Cảnh báo", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    if (sub != MessageBoxResult.Yes) return;
+                }
+            }
+
+            try
+            {
+                using var context = new TmdtContext();
+                var dbShop = await context.Shops.FindAsync(SelectedShop.ShopId);
+                if (dbShop == null)
+                {
+                    MessageBox.Show("Không tìm thấy shop.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                dbShop.CommissionRate = newRate;
+                await context.SaveChangesAsync();
+
+                // Cập nhật lại VM để hiển thị
+                SelectedShop.CommissionRate = newRate;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi cập nhật: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            AuditLogHelper.Log("UPDATE_COMMISSION",
+                $"Shop '{SelectedShop.ShopName}' (ID:{SelectedShop.ShopId}): {oldRate ?? 0:N1}% → {newRate:N1}%",
+                "Shop", "Normal");
+
+            // 🟢 Ghi log DB vào ConfigChangeLog (để audit lâu dài)
+            var adminName = SessionManager.CurrentUser?.FullName ?? SessionManager.CurrentUser?.Email ?? "Admin";
+            ConfigChangeLogger.LogShopRateChange(SelectedShop.ShopId, oldRate, newRate, adminName, $"Shop update via AdminShopsView");
+
+            MessageBox.Show($"Đã cập nhật tỉ lệ chiết khấu cho '{SelectedShop.ShopName}'.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         protected override void Dispose(bool disposing)

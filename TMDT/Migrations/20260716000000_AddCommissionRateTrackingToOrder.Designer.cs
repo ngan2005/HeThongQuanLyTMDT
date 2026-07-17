@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TMDT.Models;
 
@@ -11,9 +12,11 @@ using TMDT.Models;
 namespace TMDT.Migrations
 {
     [DbContext(typeof(TmdtContext))]
-    partial class TmdtContextModelSnapshot : ModelSnapshot
+    [Migration("20260716000000_AddCommissionRateTrackingToOrder")]
+    partial class AddCommissionRateTrackingToOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -453,20 +456,11 @@ namespace TMDT.Migrations
                     b.Property<int?>("AddressId")
                         .HasColumnType("int");
 
-                    // 🟢 Audit phí sàn: rate đã áp dụng + nguồn (Shop/Global)
-                    b.Property<decimal?>("AppliedCommissionRate")
-                        .HasColumnType("decimal(5, 2)");
-
                     b.Property<int?>("BuyerId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("datetime");
-
-                    b.Property<string>("CommissionRateSource")
-                        .HasMaxLength(20)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(20)");
 
                     b.Property<decimal?>("Discount")
                         .ValueGeneratedOnAdd()
@@ -752,11 +746,6 @@ namespace TMDT.Migrations
 
                     b.Property<int?>("ShopId")
                         .HasColumnType("int");
-
-                    b.Property<int>("LowStockThreshold")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(10);
 
                     b.Property<int?>("SoldCount")
                         .ValueGeneratedOnAdd()
@@ -1406,73 +1395,6 @@ namespace TMDT.Migrations
                     b.ToTable("WithdrawRequest", (string)null);
                 });
 
-            // 🟢 Bảng InventoryTransaction — lịch sử biến động tồn kho
-            modelBuilder.Entity("TMDT.Models.InventoryTransaction", b =>
-            {
-                b.Property<int>("TransactionId")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
-
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransactionId"));
-
-                b.Property<DateTime?>("CreatedAt")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
-
-                b.Property<int?>("ProductId")
-                    .HasColumnType("int");
-
-                b.Property<int>("QuantityAfter")
-                    .HasColumnType("int");
-
-                b.Property<int>("QuantityBefore")
-                    .HasColumnType("int");
-
-                b.Property<int>("QuantityChange")
-                    .HasColumnType("int");
-
-                b.Property<string>("PerformedBy")
-                    .HasMaxLength(100)
-                    .HasColumnType("nvarchar(100)");
-
-                b.Property<string>("Reason")
-                    .IsRequired()
-                    .HasMaxLength(300)
-                    .HasColumnType("nvarchar(300)");
-
-                b.Property<string>("ReferenceOrderCode")
-                    .HasMaxLength(20)
-                    .IsUnicode(false)
-                    .HasColumnType("varchar(20)");
-
-                b.Property<string>("ReferenceType")
-                    .HasMaxLength(20)
-                    .IsUnicode(false)
-                    .HasColumnType("varchar(20)");
-
-                b.Property<int>("ShopId")
-                    .HasColumnType("int");
-
-                b.Property<string>("Type")
-                    .IsRequired()
-                    .HasMaxLength(20)
-                    .IsUnicode(false)
-                    .HasColumnType("varchar(20)");
-
-                b.Property<int?>("VariantId")
-                    .HasColumnType("int");
-
-                b.HasKey("TransactionId")
-                    .HasName("PK_InventoryTransaction");
-
-                b.HasIndex(new[] { "ShopId", "CreatedAt" }, "IX_InventoryTransaction_Shop_CreatedAt");
-
-                b.HasIndex(new[] { "ProductId", "VariantId", "CreatedAt" }, "IX_InventoryTransaction_Product_Variant_CreatedAt");
-
-                b.ToTable("InventoryTransaction", (string)null);
-            });
-
             modelBuilder.Entity("TMDT.Models.Address", b =>
                 {
                     b.HasOne("TMDT.Models.User", "User")
@@ -1517,94 +1439,15 @@ namespace TMDT.Migrations
                     b.Navigation("Variant");
                 });
 
-modelBuilder.Entity("TMDT.Models.Category", b =>
-            {
-                b.HasOne("TMDT.Models.Category", "ParentCategory")
-                    .WithMany("InverseParentCategory")
-                    .HasForeignKey("ParentCategoryId")
-                    .HasConstraintName("FK__Category__Parent__60A75C0F");
+            modelBuilder.Entity("TMDT.Models.Category", b =>
+                {
+                    b.HasOne("TMDT.Models.Category", "ParentCategory")
+                        .WithMany("InverseParentCategory")
+                        .HasForeignKey("ParentCategoryId")
+                        .HasConstraintName("FK__Category__Parent__60A75C0F");
 
-                b.Navigation("ParentCategory");
-            });
-
-            // 🟢 ConfigChangeLog: không có FK — chỉ là bảng log
-            modelBuilder.Entity("TMDT.Models.ConfigChangeLog", b =>
-            {
-                b.Property<int>("LogId")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
-
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LogId"));
-
-                b.Property<string>("ConfigKey")
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .IsUnicode(false)
-                    .HasColumnType("varchar(100)");
-
-                b.Property<string>("ConfigType")
-                    .IsRequired()
-                    .HasMaxLength(20)
-                    .IsUnicode(false)
-                    .HasColumnType("varchar(20)");
-
-                b.Property<DateTime?>("ChangedAt")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
-
-                b.Property<string>("ChangedBy")
-                    .HasMaxLength(100)
-                    .IsUnicode(false)
-                    .HasColumnType("varchar(100)");
-
-                b.Property<decimal?>("NewValue")
-                    .HasColumnType("decimal(5, 2)");
-
-                b.Property<decimal?>("OldValue")
-                    .HasColumnType("decimal(5, 2)");
-
-                b.Property<int?>("TargetId")
-                    .HasColumnType("int");
-
-                b.Property<string>("Note")
-                    .HasMaxLength(300)
-                    .HasColumnType("nvarchar(300)");
-
-                b.HasKey("LogId")
-                    .HasName("PK_ConfigChangeLog");
-
-                b.HasIndex(new[] { "ConfigType", "TargetId", "ConfigKey", "ChangedAt" }, "IX_ConfigChangeLog_Type_Target_Key_At");
-
-                b.ToTable("ConfigChangeLog", (string)null);
-            });
-
-            // 🟢 InventoryTransaction FKs
-            modelBuilder.Entity("TMDT.Models.InventoryTransaction", b =>
-            {
-                b.HasOne("TMDT.Models.Product", "Product")
-                    .WithMany()
-                    .HasForeignKey("ProductId")
-                    .HasConstraintName("FK_InventoryTransaction_Product");
-
-                b.HasOne("TMDT.Models.Shop", "Shop")
-                    .WithMany()
-                    .HasForeignKey("ShopId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired()
-                    .HasConstraintName("FK_InventoryTransaction_Shop");
-
-                b.HasOne("TMDT.Models.ProductVariant", "Variant")
-                    .WithMany()
-                    .HasForeignKey("VariantId")
-                    .HasConstraintName("FK_InventoryTransaction_Variant");
-
-                b.Navigation("Product");
-
-                b.Navigation("Shop");
-
-                b.Navigation("Variant");
-            });
+                    b.Navigation("ParentCategory");
+                });
 
             modelBuilder.Entity("TMDT.Models.Complaint", b =>
                 {

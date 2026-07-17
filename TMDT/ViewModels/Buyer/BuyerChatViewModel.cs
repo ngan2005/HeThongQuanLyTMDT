@@ -145,7 +145,7 @@ namespace TMDT.ViewModels.Buyer
             }
         }
 
-        private async Task LoadContactsAsync()
+        public async Task LoadContactsAsync()
         {
             if (!SessionManager.IsLoggedIn) return;
 

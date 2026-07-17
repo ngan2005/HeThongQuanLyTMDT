@@ -24,6 +24,9 @@ public partial class Product
 
     public int? StockQuantity { get; set; }
 
+    /// <summary>Ngưỡng cảnh báo sắp hết hàng (per-product). Mặc định 10.</summary>
+    public int LowStockThreshold { get; set; } = 10;
+
     public int? SoldCount { get; set; }
 
     public decimal? Rating { get; set; }

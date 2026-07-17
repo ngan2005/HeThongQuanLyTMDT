@@ -8,6 +8,8 @@ namespace TMDT.Views.Admin
 {
     public partial class AdminComplaintsView : UserControl
     {
+        private bool _isHiding = false; // Guard flag to prevent re-entrant HideLightbox calls
+
         public AdminComplaintsView()
         {
             InitializeComponent();
@@ -28,15 +30,20 @@ namespace TMDT.Views.Admin
             if (sender is DataGrid dg && dg.SelectedItem is Complaint complaint && DataContext is AdminComplaintsViewModel vm)
             {
                 vm.SelectedComplaint = complaint;
+                ShowLightbox();
             }
-            ShowLightbox();
         }
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // Only update the ViewModel selection; do NOT open the lightbox here.
+            // Opening is done via double-click or the "Chi tiết" button.
             if (sender is DataGrid dg && dg.SelectedItem is Complaint complaint && DataContext is AdminComplaintsViewModel vm)
             {
+                // Suppress HideDetailRequest side-effect when just changing selection
+                _isHiding = true;
                 vm.SelectedComplaint = complaint;
+                _isHiding = false;
             }
         }
 
@@ -45,8 +52,8 @@ namespace TMDT.Views.Admin
             if (sender is FrameworkElement fe && fe.DataContext is Complaint complaint && DataContext is AdminComplaintsViewModel vm)
             {
                 vm.SelectedComplaint = complaint;
+                ShowLightbox();
             }
-            ShowLightbox();
         }
 
         private void ShowLightbox()
@@ -56,10 +63,19 @@ namespace TMDT.Views.Admin
 
         private void HideLightbox()
         {
-            LightboxOverlay.Visibility = Visibility.Collapsed;
-            if (DataContext is AdminComplaintsViewModel vm)
+            if (_isHiding) return; // Prevent infinite recursion
+            _isHiding = true;
+            try
             {
-                vm.SelectedComplaint = null;
+                LightboxOverlay.Visibility = Visibility.Collapsed;
+                if (DataContext is AdminComplaintsViewModel vm)
+                {
+                    vm.SelectedComplaint = null;
+                }
+            }
+            finally
+            {
+                _isHiding = false;
             }
         }
 

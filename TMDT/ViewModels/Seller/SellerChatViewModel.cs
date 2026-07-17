@@ -85,6 +85,13 @@ namespace TMDT.ViewModels.Seller
             set { _isAILoading = value; OnPropertyChanged(); }
         }
 
+        private bool _isAiDrafting;
+        public bool IsAiDrafting
+        {
+            get => _isAiDrafting;
+            set { _isAiDrafting = value; OnPropertyChanged(); }
+        }
+
         private ObservableCollection<ConversationItem> _conversations = new();
         public ObservableCollection<ConversationItem> Conversations
         {
@@ -127,6 +134,7 @@ namespace TMDT.ViewModels.Seller
         public ICommand RefreshCommand { get; }
         public ICommand GenerateAISuggestionsCommand { get; }
         public ICommand UseAISuggestionCommand { get; }
+        public ICommand AutoDraftMessageWithAICommand { get; }
 
         public SellerChatViewModel()
         {
@@ -136,6 +144,7 @@ namespace TMDT.ViewModels.Seller
             RefreshCommand = new RelayCommand(async _ => await LoadConversationsAsync());
             GenerateAISuggestionsCommand = new RelayCommand(async _ => await ExecuteGenerateAISuggestionsAsync());
             UseAISuggestionCommand = new RelayCommand(ExecuteUseAISuggestion!);
+            AutoDraftMessageWithAICommand = new RelayCommand(async _ => await ExecuteAutoDraftMessageWithAIAsync());
 
             _ = LoadConversationsAsync();
         }
@@ -292,6 +301,50 @@ namespace TMDT.ViewModels.Seller
                 }
                 IsAILoading = false;
             });
+        }
+
+        private async Task ExecuteAutoDraftMessageWithAIAsync()
+        {
+            if (SelectedConversation == null || IsAiDrafting) return;
+
+            IsAiDrafting = true;
+            MessageInput = "AI đang suy nghĩ và soạn câu trả lời...";
+
+            try
+            {
+                // Lấy 8 tin nhắn gần nhất để làm ngữ cảnh hội thoại cho AI
+                var recentMsgs = Messages.TakeLast(8).ToList();
+                var historyBuilder = new System.Text.StringBuilder();
+
+                foreach (var msg in recentMsgs)
+                {
+                    string senderName = msg.IsMyMessage ? "Chủ Shop (Bạn)" : "Khách hàng";
+                    historyBuilder.AppendLine($"{senderName}: {msg.Content}");
+                }
+
+                string chatHistory = historyBuilder.ToString();
+                
+                // Gọi API Gemini soạn câu trả lời đầy đủ
+                string aiDraft = await _aiService.GenerateReplyAsync(chatHistory);
+
+                if (!string.IsNullOrWhiteSpace(aiDraft))
+                {
+                    MessageInput = aiDraft;
+                }
+                else
+                {
+                    MessageInput = "";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageInput = "";
+                MessageBox.Show($"Lỗi gọi trợ lý AI: {ex.Message}", "Lỗi AI", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            finally
+            {
+                IsAiDrafting = false;
+            }
         }
     }
 }

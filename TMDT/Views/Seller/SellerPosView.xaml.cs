@@ -37,8 +37,8 @@ namespace TMDT.Views.Seller
             double availableWidth = ActualWidth - 380 - 6 - 16;
             if (availableWidth < 280) availableWidth = ActualWidth * 0.55;
 
-            // Card hiện tại nằm ngang, cần ít nhất 220px
-            int cols = Math.Max(1, Math.Min(5, (int)(availableWidth / 220)));
+            // Card hiện tại nằm ngang, cần ít nhất 180px
+            int cols = Math.Max(2, Math.Min(5, (int)(availableWidth / 180)));
             if (cols != ProductColumns) ProductColumns = cols;
         }
 

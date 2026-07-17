@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Media;
 
 namespace TMDT.Converters
 {
@@ -345,8 +346,8 @@ namespace TMDT.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is int stock && stock <= 0)
-                return new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(254, 202, 202));
-            return new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(226, 232, 240));
+                return new SolidColorBrush(Color.FromRgb(254, 202, 202));
+            return new SolidColorBrush(Color.FromRgb(226, 232, 240));
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -423,6 +424,112 @@ namespace TMDT.Converters
                 return Math.Max(MinColumns, Math.Min(MaxColumns, cols));
             }
             return MinColumns;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 🟢 So sánh string với parameter — Visible nếu khớp, Collapsed nếu không.
+    /// Dùng cho badge "(Shop)" / "(Global)" trong phí sàn.
+    /// </summary>
+    public class StringEqualsToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null || parameter == null) return Visibility.Collapsed;
+            return value.ToString()!.Equals(parameter.ToString(), StringComparison.OrdinalIgnoreCase)
+                ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 🟢 Nhận "OK" | "Low" | "OutOfStock" → trả về Brush màu tương ứng (xanh lá / vàng / đỏ).
+    /// Dùng cho badge trạng thái tồn kho.
+    /// </summary>
+    public class InventoryStatusToBrushConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string status = value?.ToString() ?? "OK";
+            return status switch
+            {
+                "OutOfStock" => new SolidColorBrush(Color.FromRgb(239, 68, 68)),   // red-500
+                "Low" => new SolidColorBrush(Color.FromRgb(245, 158, 11)),           // amber-500
+                _ => new SolidColorBrush(Color.FromRgb(16, 185, 129))                // emerald-500
+            };
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 🟢 Nhận "OK" | "Low" | "OutOfStock" → trả về text tiếng Việt.
+    /// </summary>
+    public class InventoryStatusToVietnameseConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string status = value?.ToString() ?? "OK";
+            return status switch
+            {
+                "OutOfStock" => "Hết hàng",
+                "Low" => "Sắp hết",
+                _ => "Bình thường"
+            };
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 🟢 Nhận "Import" | "Export" | "Adjust" | "Order" | "Refund" | "Cancel" → trả về Brush màu.
+    /// </summary>
+    public class InventoryTypeToBrushConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string type = value?.ToString() ?? "";
+            return type switch
+            {
+                "Import" => new SolidColorBrush(Color.FromRgb(16, 185, 129)),   // emerald-500
+                "Export" => new SolidColorBrush(Color.FromRgb(245, 158, 11)),   // amber-500
+                "Order" => new SolidColorBrush(Color.FromRgb(59, 130, 246)),    // blue-500
+                "Refund" => new SolidColorBrush(Color.FromRgb(168, 85, 247)),         // purple-500
+                "Cancel" => new SolidColorBrush(Color.FromRgb(107, 114, 128)),  // gray-500
+                "Adjust" => new SolidColorBrush(Color.FromRgb(20, 184, 166)),   // teal-500
+                _ => new SolidColorBrush(Color.FromRgb(100, 116, 139))          // slate-500
+            };
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 🟢 Nhận "Import" | "Export" | "Adjust" | ... → trả về dấu + / − / =.
+    /// </summary>
+    public class InventoryTypeToSignConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string type = value?.ToString() ?? "";
+            return type switch
+            {
+                "Import" => "+",
+                "Export" => "−",
+                "Order" => "−",
+                "Refund" => "+",
+                "Cancel" => "+",
+                "Adjust" => "↔",
+                _ => ""
+            };
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

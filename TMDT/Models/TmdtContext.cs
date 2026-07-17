@@ -75,6 +75,11 @@ public partial class TmdtContext : DbContext
 
     public virtual DbSet<SystemConfig> SystemConfigs { get; set; }
 
+    public virtual DbSet<InventoryTransaction> InventoryTransactions { get; set; }
+
+    /// <summary>🟢 Lịch sử thay đổi config (phí sàn + các setting khác) — để audit.</summary>
+    public virtual DbSet<ConfigChangeLog> ConfigChangeLogs { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -328,6 +333,12 @@ public partial class TmdtContext : DbContext
             entity.Property(e => e.PlatformFee)
                 .HasDefaultValue(0m)
                 .HasColumnType("decimal(18, 2)");
+            // 🟢 Audit phí sàn: lưu % đã áp dụng + nguồn rate (Shop/Global)
+            entity.Property(e => e.AppliedCommissionRate)
+                .HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.CommissionRateSource)
+                .HasMaxLength(20)
+                .IsUnicode(false);
             entity.Property(e => e.ShippingFee)
                 .HasDefaultValue(0m)
                 .HasColumnType("decimal(18, 2)");
@@ -464,6 +475,7 @@ public partial class TmdtContext : DbContext
             entity.Property(e => e.Rating)
                 .HasDefaultValue(0m)
                 .HasColumnType("decimal(3, 2)");
+            entity.Property(e => e.LowStockThreshold).HasDefaultValue(10);
             entity.Property(e => e.SoldCount).HasDefaultValue(0);
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
@@ -813,6 +825,68 @@ public partial class TmdtContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
+        });
+
+        // 🟢 Bảng lịch sử biến động tồn kho (nhập/xuất/kiểm kê/order/refund/cancel)
+        modelBuilder.Entity<InventoryTransaction>(entity =>
+        {
+            entity.HasKey(e => e.TransactionId);
+            entity.ToTable("InventoryTransaction");
+            entity.Property(e => e.Type)
+                .IsRequired()
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.Reason).HasMaxLength(300);
+            entity.Property(e => e.ReferenceOrderCode)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.ReferenceType)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.PerformedBy)
+                .HasMaxLength(100);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            // Index chính: query theo shop + thời gian cho báo cáo
+            entity.HasIndex(e => new { e.ShopId, e.CreatedAt });
+            // Index phụ: query theo sản phẩm/variant
+            entity.HasIndex(e => new { e.ProductId, e.VariantId, e.CreatedAt });
+
+            entity.HasOne(d => d.Product).WithMany()
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+            entity.HasOne(d => d.Variant).WithMany()
+                .HasForeignKey(d => d.VariantId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+            entity.HasOne(d => d.Shop).WithMany()
+                .HasForeignKey(d => d.ShopId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        // 🟢 Bảng log thay đổi config (phí sàn + setting khác)
+        modelBuilder.Entity<ConfigChangeLog>(entity =>
+        {
+            entity.HasKey(e => e.LogId);
+            entity.ToTable("ConfigChangeLog");
+            entity.Property(e => e.ConfigType)
+                .IsRequired()
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.ConfigKey)
+                .IsRequired()
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.OldValue).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.NewValue).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.ChangedBy)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Note).HasMaxLength(300);
+            entity.Property(e => e.ChangedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.HasIndex(e => new { e.ConfigType, e.TargetId, e.ConfigKey, e.ChangedAt });
         });
 
         OnModelCreatingPartial(modelBuilder);

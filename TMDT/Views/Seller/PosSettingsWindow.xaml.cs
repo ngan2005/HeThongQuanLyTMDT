@@ -12,7 +12,8 @@ namespace TMDT.Views.Seller
 {
     public partial class PosSettingsWindow : Window
     {
-        private string? _qrImagePath;
+        private string? _qrImagePath;        // MoMo QR path
+        private string? _vnpayQrImagePath;   // VNPay QR path
 
         public PosSettingsWindow()
         {
@@ -41,6 +42,10 @@ namespace TMDT.Views.Seller
                 }
             }
             txtVnpayAccount.Text = s.VnpayBankAccount ?? "";
+
+            // Load VNPay QR
+            _vnpayQrImagePath = s.VnpayQrImagePath;
+            UpdateVnpayQrPreview();
 
             chkAutoReprint.IsChecked = s.AutoReprintReceipt;
             chkPrintAfterSync.IsChecked = s.PrintAfterSync;
@@ -87,6 +92,43 @@ namespace TMDT.Views.Seller
                 : $"SĐT hiện tại: {txtMoMoPhone.Text}";
         }
 
+        private void UpdateVnpayQrPreview()
+        {
+            if (!string.IsNullOrEmpty(_vnpayQrImagePath) && File.Exists(_vnpayQrImagePath))
+            {
+                try
+                {
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.UriSource = new Uri(_vnpayQrImagePath, UriKind.Absolute);
+                    bitmap.EndInit();
+
+                    imgVnpayQrPreview.Source = bitmap;
+                    iconNoVnpayQr.Visibility = Visibility.Collapsed;
+                    btnRemoveVnpayQr.Visibility = Visibility.Visible;
+                    txtVnpayHint.Text = "✅ Đang dùng QR tĩnh của bạn — khách quét QR này khi thanh toán VNPay.";
+                }
+                catch
+                {
+                    ClearVnpayQrPreview();
+                }
+            }
+            else
+            {
+                ClearVnpayQrPreview();
+            }
+        }
+
+        private void ClearVnpayQrPreview()
+        {
+            _vnpayQrImagePath = null;
+            imgVnpayQrPreview.Source = null;
+            iconNoVnpayQr.Visibility = Visibility.Visible;
+            btnRemoveVnpayQr.Visibility = Visibility.Collapsed;
+            txtVnpayHint.Text = "Chưa có QR — hệ thống sẽ tự tạo QR mô phỏng khi thanh toán.";
+        }
+
         private void BtnUploadQr_Click(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new OpenFileDialog
@@ -124,6 +166,43 @@ namespace TMDT.Views.Seller
             ClearQrPreview();
         }
 
+        private void BtnUploadVnpayQr_Click(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Title = "Chọn ảnh QR chuyển khoản VNPay",
+                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.webp",
+                Multiselect = false
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    string sourceFile = openFileDialog.FileName;
+                    string ext = Path.GetExtension(sourceFile);
+
+                    string posDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TMDT_POS");
+                    Directory.CreateDirectory(posDir);
+
+                    string targetFile = Path.Combine(posDir, $"vnpay_qr_{DateTime.Now.Ticks}{ext}");
+                    File.Copy(sourceFile, targetFile, true);
+
+                    _vnpayQrImagePath = targetFile;
+                    UpdateVnpayQrPreview();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Lỗi khi tải ảnh: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void BtnRemoveVnpayQr_Click(object sender, RoutedEventArgs e)
+        {
+            ClearVnpayQrPreview();
+        }
+
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             var phone = txtMoMoPhone.Text.Trim();
@@ -144,6 +223,7 @@ namespace TMDT.Views.Seller
                 MoMoQrImagePath = _qrImagePath,
                 VnpayBankName = (cboBank.SelectedItem as ComboBoxItem)?.Content as string,
                 VnpayBankAccount = string.IsNullOrWhiteSpace(txtVnpayAccount.Text) ? null : txtVnpayAccount.Text.Trim(),
+                VnpayQrImagePath = _vnpayQrImagePath,
                 AutoReprintReceipt = chkAutoReprint.IsChecked == true,
                 PrintAfterSync = chkPrintAfterSync.IsChecked == true,
             };

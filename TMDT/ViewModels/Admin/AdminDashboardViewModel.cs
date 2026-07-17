@@ -111,7 +111,7 @@ namespace TMDT.ViewModels.Admin
                     .Where(o => o.OrderDate.HasValue
                              && o.OrderDate.Value.Month == currentMonth
                              && o.OrderDate.Value.Year  == currentYear
-                             && (o.OrderStatus == "Hoàn thành" || o.OrderStatus == "Đã giao hàng"))
+                             && (o.OrderStatus == "Completed" || o.OrderStatus == "CompletedOffline" || o.OrderStatus == "Shipping"))
                     .ToListAsync();
 
                 MonthlyRevenue    = monthlyOrders.Sum(o => o.TotalAmount ?? 0);
@@ -166,7 +166,7 @@ namespace TMDT.ViewModels.Admin
                 var since     = DateTime.Now.Date.AddDays(-6);
                 // Lấy tất cả đơn trong 7 ngày, group bên C# (tránh Date() trên SQL Server)
                 var weekOrders = await ctx.Orders.AsNoTracking()
-                    .Where(o => o.OrderDate.HasValue && o.OrderDate.Value >= since && o.OrderStatus == "Hoàn thành")
+                    .Where(o => o.OrderDate.HasValue && o.OrderDate.Value >= since && (o.OrderStatus == "Completed" || o.OrderStatus == "CompletedOffline"))
                     .Select(o => new { o.OrderDate, o.TotalAmount, o.PlatformFee })
                     .ToListAsync();
 

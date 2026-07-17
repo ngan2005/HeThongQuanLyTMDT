@@ -555,5 +555,54 @@ Tin nhắn của khách hàng:
                 }
             }
         }
+
+        public async Task<string> GenerateProductDescriptionAsync(string productName, string categoryName, string keywords)
+        {
+            if (ApiKey == "YOUR_API_KEY")
+            {
+                return "Vui lòng nhập API Key trong file cấu hình để sử dụng chức năng AI.";
+            }
+
+            string systemPrompt = @"Bạn là chuyên gia Content Creator & Copywriter chuyên viết mô tả sản phẩm bán hàng trên sàn thương mại điện tử.
+Hãy viết một mô tả sản phẩm thật chi tiết, thu hút khách hàng, chuẩn SEO và trình bày đẹp mắt bằng Tiếng Việt.
+Bố cục mô tả nên có:
+1. 🎉 Giới thiệu tổng quan & Điểm nổi bật ấn tượng của sản phẩm.
+2. 💎 Thông số kỹ thuật / Chi tiết sản phẩm (dạng danh sách gạch đầu dòng rõ ràng).
+3. 🛠️ Hướng dẫn sử dụng & Bảo quản.
+4. 🛡️ Cam kết của cửa hàng (Hàng chính hãng, Đổi trả 7 ngày, Bảo hành chu đáo).
+
+Thông tin sản phẩm:
+";
+            string promptText = $"- Tên sản phẩm: {productName}\n- Danh mục ngành hàng: {categoryName}\n- Các đặc tính / từ khóa nổi bật của sản phẩm: {keywords}";
+            string fullPrompt = systemPrompt + promptText;
+
+            using (var client = new HttpClient())
+            {
+                var requestBody = new
+                {
+                    contents = new[] { new { parts = new[] { new { text = fullPrompt } } } }
+                };
+
+                string jsonContent = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                try
+                {
+                    var response = await client.PostAsync($"{ApiUrl}?key={ApiKey}", content);
+                    response.EnsureSuccessStatusCode();
+
+                    string responseString = await response.Content.ReadAsStringAsync();
+                    var responseObject = JObject.Parse(responseString);
+                    var generatedText = responseObject["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.ToString();
+
+                    return generatedText?.Trim() ?? "Không thể tạo mô tả sản phẩm từ AI.";
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("AI Product Description Generation Error: " + ex.Message);
+                    return $"Lỗi kết nối máy chủ AI: {ex.Message}";
+                }
+            }
+        }
     }
 }

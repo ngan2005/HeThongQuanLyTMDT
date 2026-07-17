@@ -172,7 +172,7 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <!-- Add a little margin around each card so DropShadow has room -->
-                            <Border Margin="8">
+                            <Border Margin="4">
                                 <components:ProductCard
                                     ClickCommand="{Binding DataContext.ProductClickCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                     ClickCommandParameter="{Binding}"

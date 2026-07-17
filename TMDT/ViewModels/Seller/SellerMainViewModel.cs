@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using TMDT.Utilities;
@@ -30,11 +32,26 @@ namespace TMDT.ViewModels.Seller
             set { _shopName = value; OnPropertyChanged(); }
         }
 
+        private string _shopLogo = "";
+        public string ShopLogo
+        {
+            get => _shopLogo;
+            set { _shopLogo = value; OnPropertyChanged(); }
+        }
+
         private string _activeMenu = "Dashboard";
         public string ActiveMenu
         {
             get => _activeMenu;
             set { _activeMenu = value; OnPropertyChanged(); }
+        }
+
+        /// <summary>🟢 Số SKU sắp hết hàng của shop — bind cho badge sidebar.</summary>
+        private int _lowStockCount;
+        public int LowStockCount
+        {
+            get => _lowStockCount;
+            set { _lowStockCount = value; OnPropertyChanged(); }
         }
 
         private bool _isSidebarExpanded = true;
@@ -65,6 +82,7 @@ namespace TMDT.ViewModels.Seller
         public ICommand ShowProfileCommand { get; }
         public ICommand ShowSalesHistoryCommand { get; }
         public ICommand ShowCustomersCommand { get; }
+        public ICommand ShowInventoryCommand { get; }
         public ICommand RegisterShopCommand { get; }
         public ICommand LogoutCommand { get; }
 
@@ -83,6 +101,7 @@ namespace TMDT.ViewModels.Seller
                 SellerName = SessionManager.CurrentUser.FullName ?? (SessionManager.IsStaff ? "Nhân viên" : "Seller");
                 ShopName = SessionManager.CurrentUser.ShopName ?? "";
                 HasShop = SessionManager.CurrentUser.ShopId.HasValue;
+                LoadShopLogoFromDb();
             }
 
             // Nếu seller chưa có shop, tạo dashboard placeholder
@@ -101,11 +120,37 @@ namespace TMDT.ViewModels.Seller
             ShowReviewsCommand = new RelayCommand(o => { CurrentView = new SellerReviewsViewModel(); ActiveMenu = "Reviews"; }, _ => HasShop);
             ShowChatCommand = new RelayCommand(o => { CurrentView = new SellerChatViewModel(); ActiveMenu = "Chat"; }, _ => HasShop);
             ShowWalletCommand = new RelayCommand(o => { CurrentView = new SellerWalletViewModel(); ActiveMenu = "Wallet"; }, _ => HasShop);
-            ShowProfileCommand = new RelayCommand(o => { CurrentView = new SellerProfileViewModel(); ActiveMenu = "Profile"; });
+            ShowProfileCommand = new RelayCommand(o => { 
+                var vm = new SellerProfileViewModel();
+                vm.RequestNavigateToWallet += () => {
+                    CurrentView = new SellerWalletViewModel();
+                    ActiveMenu = "Wallet";
+                };
+                vm.CloseProfileRequest += () => {
+                    LoadShopLogoFromDb();
+                    // Cập nhật lại tên shop nếu bị đổi
+                    if (SessionManager.CurrentUser != null && vm.Shop != null)
+                    {
+                        ShopName = vm.ShopNameInput;
+                    }
+                };
+                CurrentView = vm; 
+                ActiveMenu = "Profile"; 
+            });
             ShowSalesHistoryCommand = new RelayCommand(o => { CurrentView = new SellerSalesHistoryViewModel(); ActiveMenu = "SalesHistory"; }, _ => HasShop);
             ShowCustomersCommand = new RelayCommand(o => { CurrentView = new SellerCustomersViewModel(); ActiveMenu = "Customers"; }, _ => HasShop);
+            // 🟢 Inventory: cần cập nhật badge low-stock mỗi lần mở trang
+            ShowInventoryCommand = new RelayCommand(o =>
+            {
+                CurrentView = new SellerInventoryViewModel();
+                ActiveMenu = "Inventory";
+                _ = RefreshLowStockCountAsync();
+            }, _ => HasShop);
             RegisterShopCommand = new RelayCommand(_ => ExecuteRegisterShop());
             LogoutCommand = new RelayCommand(_ => ExecuteLogout());
+
+            // 🟢 Refresh badge low-stock lúc khởi tạo
+            _ = RefreshLowStockCountAsync();
 
             if (IsOwner)
             {
@@ -116,6 +161,54 @@ namespace TMDT.ViewModels.Seller
             {
                 CurrentView = new SellerPosViewModel();
                 ActiveMenu = "POS";
+            }
+        }
+
+        private void LoadShopLogoFromDb()
+        {
+            try
+            {
+                int currentShopId = SessionManager.CurrentUser?.ShopId ?? 0;
+                if (currentShopId <= 0) return;
+
+                using var ctx = new Models.TmdtContext();
+                var shop = ctx.Shops.Find(currentShopId);
+                if (shop != null)
+                {
+                    ShopLogo = shop.Logo ?? "";
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("LoadShopLogoFromDb error: " + ex.Message);
+            }
+        }
+
+        /// <summary>🟢 Cập nhật badge LowStockCount ở sidebar — chạy async, fire-and-forget.</summary>
+        private async Task RefreshLowStockCountAsync()
+        {
+            try
+            {
+                int shopId = SessionManager.CurrentUser?.ShopId ?? 0;
+                if (shopId <= 0)
+                {
+                    var user = SessionManager.CurrentUser;
+                    if (user != null)
+                    {
+                        using var ctx = new Models.TmdtContext();
+                        shopId = ctx.Shops.Where(s => s.UserId == user.UserId).Select(s => s.ShopId).FirstOrDefault();
+                    }
+                }
+                if (shopId <= 0)
+                {
+                    LowStockCount = 0;
+                    return;
+                }
+                LowStockCount = await InventoryService.Instance.GetLowStockCountAsync(shopId);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("RefreshLowStockCountAsync error: " + ex.Message);
             }
         }
 

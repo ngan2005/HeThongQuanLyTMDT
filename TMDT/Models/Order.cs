@@ -29,6 +29,13 @@ public partial class Order
 
     public decimal? PlatformFee { get; set; }
 
+    /// <summary>🟢 % hoa hồng ĐÃ áp dụng cho đơn này (đã snapshot tại thời điểm tạo/sửa).
+    /// Giá trị 5.0 = 5%. Lưu lại để audit khi admin thay đổi rate sau đó.</summary>
+    public decimal? AppliedCommissionRate { get; set; }
+
+    /// <summary>🟢 Nguồn rate: "Shop" (lấy từ Shop.CommissionRate) hoặc "Global" (fallback SystemSettings.PlatformCommissionRate).</summary>
+    public string? CommissionRateSource { get; set; }
+
     public string? PaymentMethod { get; set; }
 
     public string? OrderStatus { get; set; }

@@ -90,7 +90,9 @@ namespace TMDT.ViewModels.Admin
                 var completedOrders = await ctx.Orders.AsNoTracking().Where(o => o.OrderStatus == "Hoàn thành").ToListAsync();
                 TotalOrdersProcessed = completedOrders.Count;
                 TotalSystemRevenue = completedOrders.Sum(o => o.TotalAmount ?? 0);
-                TotalCommissionEarned = TotalSystemRevenue * 0.05m; // 5% fee sàn
+                // 🟢 FIX: dùng PlatformFee đã lưu trong từng đơn (theo Shop.CommissionRate / global rate)
+                // thay vì nhân lại 0.05m cứng — sẽ sai khi admin đổi rate hoặc shop có rate riêng
+                TotalCommissionEarned = completedOrders.Sum(o => o.PlatformFee ?? 0);
             }
             catch
             {

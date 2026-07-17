@@ -51,6 +51,7 @@ namespace TMDT.ViewModels.Buyer
         public ICommand ReceiveOrderCommand { get; }
         public ICommand BackCommand { get; }
         public ICommand SetFilterCommand { get; }
+        public ICommand FileComplaintCommand { get; }
 
         public BuyerOrdersViewModel(BuyerMainViewModel mainVm)
         {
@@ -62,6 +63,7 @@ namespace TMDT.ViewModels.Buyer
             BackCommand = new RelayCommand(_ => _mainVm.NavigateHome());
             SetFilterCommand = new RelayCommand(o => StatusFilter = o?.ToString() ?? "Tất cả");
             ReviewProductCommand = new RelayCommand(o => ExecuteReviewProduct(o as OrderDetail));
+            FileComplaintCommand = new RelayCommand(o => ExecuteFileComplaint(o as Order));
 
             _ = LoadOrdersAsync();
         }
@@ -269,6 +271,46 @@ namespace TMDT.ViewModels.Buyer
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi khi cập nhật đơn hàng: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ExecuteFileComplaint(Order? order)
+        {
+            if (order == null) return;
+
+            // Dùng Microsoft.VisualBasic.Interaction để tạo InputBox nhanh và gọn gàng cho demo
+            string reason = Microsoft.VisualBasic.Interaction.InputBox(
+                $"Nhập nội dung khiếu nại cho đơn hàng {order.OrderCode}:",
+                "Gửi Khiếu Nại Đơn Hàng",
+                "Hàng lỗi, hỏng / không đúng mô tả..."
+            );
+
+            if (string.IsNullOrWhiteSpace(reason) || reason == "Hàng lỗi, hỏng / không đúng mô tả...")
+            {
+                return; // User hủy hoặc không nhập gì mới
+            }
+
+            try
+            {
+                using var ctx = new TmdtContext();
+                var complaint = new Complaint
+                {
+                    BuyerId = SessionManager.CurrentUser!.UserId,
+                    OrderId = order.OrderId,
+                    Content = reason.Trim(),
+                    Status = "Open",
+                    SubmittedAt = DateTime.Now
+                };
+
+                ctx.Complaints.Add(complaint);
+                ctx.SaveChanges();
+
+                MessageBox.Show($"Đã gửi khiếu nại thành công cho đơn hàng {order.OrderCode}. Ban quản trị sẽ sớm xử lý và phản hồi!",
+                    "Gửi khiếu nại thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi gửi khiếu nại: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

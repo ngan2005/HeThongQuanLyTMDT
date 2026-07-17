@@ -6,13 +6,16 @@ using System.Windows.Media;
 using Microsoft.EntityFrameworkCore;
 using TMDT.Models;
 using TMDT.Utilities;
+using TMDT.Services;
 
 namespace TMDT.ViewModels.Seller
 {
     public class SellerProfileViewModel : ViewModelBase
     {
         private readonly TmdtContext? _context;
+        private readonly CloudinaryService _imageUploadService = new CloudinaryService();
         private Shop? _shop;
+        private bool _isUploadingImage;
 
         private string _shopNameInput = "";
         private string _logoInput = "";
@@ -55,6 +58,11 @@ namespace TMDT.ViewModels.Seller
         {
             get => _warehouseAddressInput;
             set { _warehouseAddressInput = value; OnPropertyChanged(); }
+        }
+        public bool IsUploadingImage
+        {
+            get => _isUploadingImage;
+            set { _isUploadingImage = value; OnPropertyChanged(); }
         }
 
         public System.Collections.ObjectModel.ObservableCollection<Province> Provinces
@@ -219,6 +227,7 @@ namespace TMDT.ViewModels.Seller
         #region Events
         public event Action? OpenProfileRequest;
         public event Action? CloseProfileRequest;
+        public event Action? RequestNavigateToWallet;
         #endregion
 
         #region Commands
@@ -226,6 +235,7 @@ namespace TMDT.ViewModels.Seller
         public ICommand OpenProfileCommand { get; }
         public ICommand ToggleVacationCommand { get; }
         public ICommand WithdrawCommand { get; }
+        public ICommand UploadLogoCommand { get; }
         #endregion
 
         public SellerProfileViewModel()
@@ -235,10 +245,50 @@ namespace TMDT.ViewModels.Seller
             SaveProfileCommand = new RelayCommand(ExecuteSaveProfile);
             OpenProfileCommand = new RelayCommand(_ => OpenProfileRequest?.Invoke());
             ToggleVacationCommand = new RelayCommand(_ => ExecuteToggleVacation());
-            WithdrawCommand = new RelayCommand(_ => MessageBox.Show("Tính năng rút tiền đang được phát triển.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information));
-
+            WithdrawCommand = new RelayCommand(_ => RequestNavigateToWallet?.Invoke());
+            UploadLogoCommand = new RelayCommand(async _ => await ExecuteUploadLogo());
+ 
             LoadShopProfile();
             _ = LoadProvincesAsync();
+        }
+
+        private async System.Threading.Tasks.Task ExecuteUploadLogo()
+        {
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "Image files (*.png;*.jpeg;*.jpg)|*.png;*.jpeg;*.jpg|All files (*.*)|*.*",
+                Title = "Chọn ảnh Logo cho Shop"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                IsUploadingImage = true;
+                string oldLogo = LogoInput;
+                LogoInput = "Đang tải ảnh lên...";
+
+                try
+                {
+                    string uploadedUrl = await _imageUploadService.UploadImageAsync(openFileDialog.FileName);
+                    if (!string.IsNullOrEmpty(uploadedUrl))
+                    {
+                        LogoInput = uploadedUrl;
+                    }
+                    else
+                    {
+                        LogoInput = oldLogo;
+                        MessageBox.Show("Tải ảnh lên thất bại, vui lòng thử lại!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogoInput = oldLogo;
+                    MessageBox.Show("Có lỗi xảy ra khi tải ảnh lên: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    IsUploadingImage = false;
+                }
+            }
         }
 
         private void LoadShopProfile()

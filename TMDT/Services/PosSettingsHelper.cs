@@ -16,6 +16,7 @@ namespace TMDT.Services
         public string? MoMoQrImagePath { get; set; }
         public string? VnpayBankAccount { get; set; }
         public string? VnpayBankName { get; set; }
+        public string? VnpayQrImagePath { get; set; }  // 🟢 Ảnh QR chuyển khoản VNPay của seller
         public bool AutoReprintReceipt { get; set; }
         public bool PrintAfterSync { get; set; }
     }

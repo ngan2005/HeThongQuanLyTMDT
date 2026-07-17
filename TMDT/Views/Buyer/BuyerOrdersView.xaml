@@ -213,8 +213,29 @@
                                                         Command="{Binding DataContext.ReceiveOrderCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                         CommandParameter="{Binding}"
                                                         Background="#059669" Foreground="White"
-                                                        FontSize="12" FontWeight="Bold" Height="32"
+                                                        FontSize="12" FontWeight="Bold" Height="32" Margin="0,0,8,0"
                                                         Visibility="{Binding OrderStatus, Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter=Shipping}"/>
+
+                                                <!-- Nút Khiếu nại (Chỉ hiện khi Đang giao hoặc Đã hoàn thành) -->
+                                                <Button Content="Khiếu nại"
+                                                        Command="{Binding DataContext.FileComplaintCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        Foreground="#F59E0B" BorderBrush="#F59E0B"
+                                                        FontSize="12" Height="32">
+                                                    <Button.Style>
+                                                        <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Completed">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding OrderStatus}" Value="Shipping">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Button.Style>
+                                                </Button>
                                             </StackPanel>
                                         </Grid>
                                     </Border>

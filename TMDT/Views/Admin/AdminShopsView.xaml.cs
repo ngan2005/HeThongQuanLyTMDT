@@ -47,5 +47,37 @@ namespace TMDT.Views.Admin
             if (e.OriginalSource == LightboxOverlay)
                 HideLightbox();
         }
+
+        /// <summary>
+        /// 🟢 Click "Lưu" trong card "TỶ LỆ CHIẾT KHẤU" — cập nhật CommissionRate riêng cho shop.
+        /// </summary>
+        private void BtnUpdateCommission_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is AdminShopsViewModel vm && vm.SelectedShop != null)
+            {
+                if (!decimal.TryParse(txtCommissionRate.Text, out var rate))
+                {
+                    MessageBox.Show("Vui lòng nhập số hợp lệ (0-100).", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    txtCommissionRate.Focus();
+                    txtCommissionRate.SelectAll();
+                    return;
+                }
+                vm.UpdateCommissionCommand.Execute(rate);
+            }
+        }
+
+        /// <summary>Chỉ cho phép nhập số + dấu thập phân.</summary>
+        private void CommissionRate_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Chấp nhận 0-9 và dấu chấm thập phân (cho phép 2.5%)
+            foreach (char c in e.Text)
+            {
+                if (!char.IsDigit(c) && c != '.')
+                {
+                    e.Handled = true;
+                    return;
+                }
+            }
+        }
     }
 }
